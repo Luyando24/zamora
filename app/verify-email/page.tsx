@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useSearchParams } from 'next/navigation';
 import { Mail, ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const [email, setEmail] = useState<string>('');
   const [resending, setResending] = useState(false);
@@ -102,5 +102,17 @@ export default function VerifyEmailPage() {
         )}
       </motion.div>
     </div>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#030712] text-white flex items-center justify-center p-4">
+        <Loader2 className="w-8 h-8 animate-spin text-zambia-green" />
+      </div>
+    }>
+      <VerifyEmailContent />
+    </Suspense>
   );
 }
