@@ -163,6 +163,7 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
           <ImageUpload
             value={formData.image_url}
             onChange={(url) => setFormData({ ...formData, image_url: url })}
+            bucket="room-images"
           />
         </div>
       </div>
@@ -173,6 +174,7 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
         <MultiImageUpload
           values={formData.gallery_urls}
           onChange={(urls) => setFormData({ ...formData, gallery_urls: urls })}
+          bucket="room-images"
         />
       </div>
     </div>

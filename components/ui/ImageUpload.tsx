@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
-interface ImageUploadProps {
+export interface ImageUploadProps {
   value: string;
   onChange: (url: string) => void;
   bucket?: string;

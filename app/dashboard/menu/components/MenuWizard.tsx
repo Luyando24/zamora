@@ -153,6 +153,7 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
           <ImageUpload
             value={formData.image_url}
             onChange={(url) => setFormData({ ...formData, image_url: url })}
+            bucket="menu-images"
           />
         </div>
       </div>
@@ -163,6 +164,7 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
         <MultiImageUpload
           values={formData.gallery_urls}
           onChange={(urls) => setFormData({ ...formData, gallery_urls: urls })}
+          bucket="menu-images"
         />
       </div>
     </div>

@@ -119,6 +119,7 @@ export default function SettingsPage() {
               <ImageUpload
                 value={hotel.logo_url}
                 onChange={(url) => setHotel({ ...hotel, logo_url: url })}
+                bucket="property-images"
               />
             </div>
             <p className="mt-1 text-xs text-gray-500">Upload your hotel logo (PNG/JPG).</p>
