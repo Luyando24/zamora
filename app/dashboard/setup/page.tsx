@@ -39,21 +39,39 @@ const PROPERTY_TYPES = [
   { id: 'campsite', label: 'Campsite', icon: Tent, description: 'Outdoor lodging' },
 ];
 
-const POPULAR_AMENITIES = [
-  'Free Wi-Fi',
-  'Swimming Pool',
-  'Gym / Fitness Center',
-  'Restaurant',
-  'Bar / Lounge',
-  'Room Service',
-  'Free Parking',
-  'Airport Shuttle',
-  'Spa',
-  'Conference Rooms',
-  '24-hour Front Desk',
-  'Air Conditioning',
-  'Laundry Service'
-];
+const AMENITIES_BY_TYPE: Record<string, string[]> = {
+  hotel: [
+    'Free Wi-Fi', 'Swimming Pool', 'Gym / Fitness Center', 'Restaurant', 'Bar / Lounge',
+    'Room Service', 'Free Parking', 'Airport Shuttle', 'Spa', 'Conference Rooms',
+    '24-hour Front Desk', 'Air Conditioning', 'Laundry Service', 'Concierge'
+  ],
+  lodge: [
+    'Game Drives', 'Guided Walks', 'Swimming Pool', 'Outdoor Fireplace', 'Bar / Lounge',
+    'Restaurant', 'Mosquito Nets', 'Airport Shuttle', 'Free Parking', 'Viewing Deck',
+    'Sundowners', 'Laundry Service', 'Solar Power'
+  ],
+  guest_house: [
+    'Free Wi-Fi', 'Breakfast Included', 'Shared Kitchen', 'Garden', 'Free Parking',
+    'TV Room', 'Daily Housekeeping', 'Laundry Service', 'Non-smoking Rooms', 'BBQ Facilities'
+  ],
+  apartment: [
+    'Free Wi-Fi', 'Full Kitchen', 'Washing Machine', 'Balcony / Terrace', 'Free Parking',
+    'Air Conditioning', 'Heating', 'Elevator', 'Pet Friendly', 'Workspace'
+  ],
+  resort: [
+    'Private Beach', 'Swimming Pool', 'Spa & Wellness', 'Kids Club', 'Water Sports',
+    'All-inclusive', 'Multiple Restaurants', 'Bar / Lounge', 'Entertainment Staff',
+    'Tennis Court', 'Golf Course', 'Gym', 'Free Wi-Fi'
+  ],
+  motel: [
+    'Free Parking', '24-hour Front Desk', 'Free Wi-Fi', 'Air Conditioning', 'Vending Machine',
+    'Breakfast Included', 'Non-smoking Rooms', 'Pet Friendly'
+  ],
+  campsite: [
+    'Shared Bathroom', 'Hot Showers', 'Fire Pit', 'BBQ Area', 'Water Hookup',
+    'Electricity Hookup', 'Pet Friendly', 'Dishwashing Area', 'Playground', 'Small Shop'
+  ]
+};
 
 export default function PropertySetupPage() {
   const router = useRouter();
@@ -363,7 +381,7 @@ export default function PropertySetupPage() {
                     <p className="text-gray-500 mb-6">Select features available at your property.</p>
                     
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-                      {POPULAR_AMENITIES.map((amenity) => {
+                      {(AMENITIES_BY_TYPE[formData.type] || AMENITIES_BY_TYPE.hotel).map((amenity) => {
                         const isSelected = formData.amenities.includes(amenity);
                         return (
                           <div
@@ -418,7 +436,7 @@ export default function PropertySetupPage() {
 
                       {/* Selected Custom Amenities (that aren't in popular list) */}
                       <div className="flex flex-wrap gap-2 mt-4">
-                        {formData.amenities.filter(a => !POPULAR_AMENITIES.includes(a)).map((amenity) => (
+                        {formData.amenities.filter(a => !(AMENITIES_BY_TYPE[formData.type] || AMENITIES_BY_TYPE.hotel).includes(a)).map((amenity) => (
                           <div key={amenity} className="inline-flex items-center px-3 py-1 rounded-full bg-zambia-green/10 text-zambia-green text-sm font-medium border border-zambia-green/20">
                             {amenity}
                             <button
