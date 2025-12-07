@@ -31,17 +31,29 @@ export default function MultiImageUpload({ values = [], onChange, bucket = 'menu
         const fileName = `${uuidv4()}.${fileExt}`;
         const filePath = `${fileName}`;
 
-        const { error: uploadError } = await supabase.storage
-          .from(bucket)
-          .upload(filePath, file);
+        // Use our API route to upload (bypasses RLS issues)
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('bucket', bucket);
+        formData.append('path', filePath);
 
-        if (uploadError) {
-          console.error('Error uploading file:', uploadError);
-          continue; 
+        try {
+          const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (!response.ok) {
+             const errorData = await response.json();
+             console.error('Error uploading file:', errorData.error);
+             continue;
+          }
+
+          const data = await response.json();
+          newUrls.push(data.publicUrl);
+        } catch (err) {
+          console.error('Upload request failed:', err);
         }
-
-        const { data } = supabase.storage.from(bucket).getPublicUrl(filePath);
-        newUrls.push(data.publicUrl);
       }
 
       onChange([...values, ...newUrls]);

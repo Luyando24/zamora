@@ -28,16 +28,23 @@ export default function ImageUpload({ value, onChange, bucket = 'menu-images' }:
       const fileName = `${uuidv4()}.${fileExt}`;
       const filePath = `${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from(bucket)
-        .upload(filePath, file);
+      // Use our API route to upload (bypasses RLS issues)
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('bucket', bucket);
+      formData.append('path', filePath);
 
-      if (uploadError) {
-        throw uploadError;
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Upload failed');
       }
 
-      // Get Public URL
-      const { data } = supabase.storage.from(bucket).getPublicUrl(filePath);
+      const data = await response.json();
       
       onChange(data.publicUrl);
     } catch (error: any) {
