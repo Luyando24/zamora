@@ -7,6 +7,7 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Match nothing
+    // Match a dummy route to ensure valid config but zero execution impact
+    '/api/non-existent-placeholder-route',
   ],
 };
