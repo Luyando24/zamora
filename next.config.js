@@ -6,6 +6,8 @@ const nextConfig = {
         __dirname: JSON.stringify('.'),
       })
     );
+    // Disable cache to avoid serialization errors during build
+    config.cache = false;
     return config;
   },
 };
