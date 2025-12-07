@@ -7,6 +7,27 @@ import { Plus, Edit, Trash2, BedDouble, Image as ImageIcon, AlertTriangle, Arrow
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
+interface RoomType {
+  id: string;
+  name: string;
+  base_price: number;
+  description: string | null;
+  image_url: string | null;
+  capacity: number;
+}
+
+interface Room {
+  id: string;
+  room_number: string;
+  room_type_id: string;
+  status: string;
+  notes: string | null;
+  room_types?: {
+    name: string;
+  };
+  hotel_id: string;
+}
+
 export default function RoomsPage() {
   const [activeTab, setActiveTab] = useState<'rooms' | 'types'>('types');
   const supabase = createClient();
@@ -15,13 +36,13 @@ export default function RoomsPage() {
   const router = useRouter();
   
   // Data State
-  const [rooms, setRooms] = useState<any[]>([]);
-  const [roomTypes, setRoomTypes] = useState<any[]>([]);
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [roomTypes, setRoomTypes] = useState<RoomType[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Modal State (Only for adding physical rooms now)
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editItem, setEditItem] = useState<any>(null);
+  const [editItem, setEditItem] = useState<Room | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -235,11 +256,17 @@ export default function RoomsPage() {
 
 // --- Sub-Components ---
 
-function RoomsTable({ rooms, onEdit, onDelete }: any) {
+interface RoomsTableProps {
+  rooms: Room[];
+  onEdit: (room: Room) => void;
+  onDelete: (id: string) => void;
+}
+
+function RoomsTable({ rooms, onEdit, onDelete }: RoomsTableProps) {
   return (
     <div className="bg-white shadow overflow-hidden sm:rounded-md border border-gray-200">
       <ul className="divide-y divide-gray-200">
-        {rooms.map((room: any) => (
+        {rooms.map((room) => (
           <li key={room.id} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50">
             <div>
               <p className="text-sm font-medium text-gray-900">Room {room.room_number}</p>
@@ -257,7 +284,13 @@ function RoomsTable({ rooms, onEdit, onDelete }: any) {
   );
 }
 
-function RoomForm({ initialData, roomTypes, onSuccess }: any) {
+interface RoomFormProps {
+  initialData: Room | null;
+  roomTypes: RoomType[];
+  onSuccess: () => void;
+}
+
+function RoomForm({ initialData, roomTypes, onSuccess }: RoomFormProps) {
   const supabase = createClient();
   const [formData, setFormData] = useState({
     room_number: initialData?.room_number || '',
@@ -308,7 +341,7 @@ function RoomForm({ initialData, roomTypes, onSuccess }: any) {
           onChange={e => setFormData({ ...formData, room_type_id: e.target.value })}
         >
           <option value="">Select Type</option>
-          {roomTypes.map((t: any) => (
+          {roomTypes.map((t) => (
             <option key={t.id} value={t.id}>{t.name} (K{t.base_price})</option>
           ))}
         </select>
