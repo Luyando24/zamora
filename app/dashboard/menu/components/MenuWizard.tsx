@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/client';
 import { useMenuCategories } from '@/hooks/useMenuCategories';
 import ImageUpload from '@/components/ui/ImageUpload';
 import MultiImageUpload from '@/components/ui/MultiImageUpload';
@@ -23,9 +23,48 @@ const STEPS = [
 
 export default function MenuWizard({ initialData }: MenuWizardProps) {
   const router = useRouter();
+  const supabase = createClient();
   const { categories: dbCategories } = useMenuCategories();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [properties, setProperties] = useState<any[]>([]);
+  const [selectedPropertyIds, setSelectedPropertyIds] = useState<string[]>([]);
+
+  // Fetch properties and initial assignments
+  useState(() => {
+    const init = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // 1. Fetch User's Properties
+        const { data: userProperties } = await supabase
+            .from('properties')
+            .select('id, name')
+            .eq('created_by', user.id);
+        
+        if (userProperties) {
+            setProperties(userProperties);
+            
+            // If new item, default to ALL properties
+            if (!initialData?.id) {
+                setSelectedPropertyIds(userProperties.map(p => p.id));
+            }
+        }
+
+        // 2. If editing, fetch existing assignments
+        if (initialData?.id) {
+            const { data: assignments } = await supabase
+                .from('menu_item_properties')
+                .select('property_id')
+                .eq('menu_item_id', initialData.id);
+            
+            if (assignments) {
+                setSelectedPropertyIds(assignments.map(a => a.property_id));
+            }
+        }
+    };
+    init();
+  });
   
   const [formData, setFormData] = useState({
     name: initialData?.name || '',
@@ -35,7 +74,12 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
     image_url: initialData?.image_url || '',
     gallery_urls: initialData?.gallery_urls || [],
     customization_options: initialData?.customization_options || [],
-    is_available: initialData?.is_available ?? true
+    is_available: initialData?.is_available ?? true,
+    weight: initialData?.weight || '',
+    ingredients: initialData?.ingredients || '',
+    original_price: initialData?.original_price || '',
+    discount_badge: initialData?.discount_badge || '',
+    dietary_info: initialData?.dietary_info || ''
   });
 
   const handleNext = () => {
@@ -60,23 +104,49 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      const hotel_id = user?.user_metadata?.hotel_id;
-
-      if (!hotel_id) throw new Error('Hotel ID not found');
-
-      const payload = { ...formData, hotel_id };
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
       
+      if (authError || !user) {
+          throw new Error('You must be logged in to save menu items.');
+      }
+
+      if (selectedPropertyIds.length === 0) {
+          throw new Error('Please select at least one property for this item.');
+      }
+
+      // Independent menu items - RLS handles ownership via created_by default
+      // We explicitly set created_by on creation to ensure RLS checks pass reliably
+      const payload: any = { ...formData };
+      
+      let itemId;
       let error;
       if (initialData?.id) {
         const { error: err } = await supabase.from('menu_items').update(payload).eq('id', initialData.id);
         error = err;
+        itemId = initialData.id;
       } else {
-        const { error: err } = await supabase.from('menu_items').insert(payload);
+        // Strictly set created_by for new items
+        payload.created_by = user.id;
+        
+        const { data: newItem, error: err } = await supabase.from('menu_items').insert(payload).select().single();
         error = err;
+        itemId = newItem?.id;
       }
 
       if (error) throw error;
+
+      // Update Property Assignments
+      // 1. Delete existing
+      await supabase.from('menu_item_properties').delete().eq('menu_item_id', itemId);
+
+      // 2. Insert new
+      const assignments = selectedPropertyIds.map(propId => ({
+          menu_item_id: itemId,
+          property_id: propId
+      }));
+
+      const { error: assignError } = await supabase.from('menu_item_properties').insert(assignments);
+      if (assignError) throw assignError;
 
       router.push('/dashboard/menu');
       router.refresh();
@@ -87,10 +157,79 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
     }
   };
 
+  const toggleProperty = (id: string) => {
+    setSelectedPropertyIds(prev => 
+      prev.includes(id) 
+        ? prev.filter(p => p !== id)
+        : [...prev, id]
+    );
+  };
+
   // --- Step Content Renderers ---
 
   const renderStep1 = () => (
     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+      {/* Property Selection */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm mb-8">
+        <div className="flex justify-between items-center mb-4">
+            <div>
+                <label className="block text-base font-black text-slate-900">Select properties where this food is available</label>
+                <p className="text-sm text-slate-500 mt-1">Select which locations will offer this item.</p>
+            </div>
+            {properties.length > 0 && (
+                <div className="flex gap-2">
+                    <button 
+                        type="button"
+                        onClick={() => setSelectedPropertyIds(properties.map(p => p.id))}
+                        className="text-xs font-bold text-zambia-green hover:underline px-2 py-1"
+                    >
+                        Select All
+                    </button>
+                    <button 
+                        type="button"
+                        onClick={() => setSelectedPropertyIds([])}
+                        className="text-xs font-bold text-slate-400 hover:text-slate-600 hover:underline px-2 py-1"
+                    >
+                        Clear
+                    </button>
+                </div>
+            )}
+        </div>
+
+        {properties.length === 0 ? (
+            <div className="text-sm text-slate-500 italic bg-slate-50 p-4 rounded-lg text-center">No properties found. Please create a property first.</div>
+        ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                {properties.map(prop => {
+                    const isSelected = selectedPropertyIds.includes(prop.id);
+                    return (
+                        <button
+                            key={prop.id}
+                            type="button"
+                            onClick={() => toggleProperty(prop.id)}
+                            className={`relative flex items-center p-3 rounded-xl border-2 transition-all duration-200 group text-left ${
+                                isSelected
+                                ? 'border-zambia-green bg-green-50/50'
+                                : 'border-slate-100 bg-white hover:border-slate-300'
+                            }`}
+                        >
+                            <div className={`w-5 h-5 rounded border flex items-center justify-center mr-3 transition-colors ${
+                                isSelected 
+                                ? 'bg-zambia-green border-zambia-green' 
+                                : 'bg-white border-slate-300 group-hover:border-slate-400'
+                            }`}>
+                                {isSelected && <Check size={12} className="text-white stroke-[3]" />}
+                            </div>
+                            <span className={`font-bold text-sm ${isSelected ? 'text-zambia-green' : 'text-slate-700'}`}>
+                                {prop.name}
+                            </span>
+                        </button>
+                    );
+                })}
+            </div>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-1">Item Name <span className="text-red-500">*</span></label>
@@ -129,6 +268,61 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
               onChange={e => setFormData({ ...formData, price: e.target.value })}
             />
           </div>
+        </div>
+
+        <div>
+           <label className="block text-sm font-medium text-gray-700 mb-1">Original Price (Optional)</label>
+           <div className="relative">
+            <span className="absolute left-4 top-3.5 text-gray-500 font-medium">K</span>
+            <input
+              type="number"
+              className="block w-full rounded-lg border border-gray-300 pl-8 pr-4 py-3 text-gray-900 bg-white focus:ring-2 focus:ring-zambia-green focus:border-transparent"
+              placeholder="e.g. 250"
+              value={formData.original_price}
+              onChange={e => setFormData({ ...formData, original_price: e.target.value })}
+            />
+          </div>
+        </div>
+
+        <div>
+           <label className="block text-sm font-medium text-gray-700 mb-1">Weight / Size</label>
+           <input
+              className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 bg-white focus:ring-2 focus:ring-zambia-green focus:border-transparent"
+              placeholder="e.g. 1.2 kg, 500ml"
+              value={formData.weight}
+              onChange={e => setFormData({ ...formData, weight: e.target.value })}
+            />
+        </div>
+
+        <div>
+           <label className="block text-sm font-medium text-gray-700 mb-1">Discount Badge</label>
+           <input
+              className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 bg-white focus:ring-2 focus:ring-zambia-green focus:border-transparent"
+              placeholder="e.g. -12K, PROMO"
+              value={formData.discount_badge}
+              onChange={e => setFormData({ ...formData, discount_badge: e.target.value })}
+            />
+        </div>
+
+        <div>
+           <label className="block text-sm font-medium text-gray-700 mb-1">Dietary Info</label>
+           <input
+              className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 bg-white focus:ring-2 focus:ring-zambia-green focus:border-transparent"
+              placeholder="e.g. Fried, Vegetarian, Spicy"
+              value={formData.dietary_info}
+              onChange={e => setFormData({ ...formData, dietary_info: e.target.value })}
+            />
+        </div>
+
+        <div className="col-span-2">
+           <label className="block text-sm font-medium text-gray-700 mb-1">Ingredients</label>
+           <textarea
+              className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 bg-white focus:ring-2 focus:ring-zambia-green focus:border-transparent"
+              rows={2}
+              placeholder="List main ingredients..."
+              value={formData.ingredients}
+              onChange={e => setFormData({ ...formData, ingredients: e.target.value })}
+            />
         </div>
 
         <div className="col-span-2">
@@ -292,7 +486,7 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
                 >
                   {isCompleted ? <Check size={20} /> : <step.icon size={20} />}
                 </div>
-                <span className={`text-xs font-medium ${isCurrent ? 'text-zambia-green' : 'text-gray-500'}`}>
+                <span className={`text-xs font-medium ${isCompleted || isCurrent ? 'text-gray-900' : 'text-gray-400'}`}>
                   {step.name}
                 </span>
               </div>
@@ -301,41 +495,42 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
         </div>
       </div>
 
-      {/* Form Content */}
-      <div className="bg-white shadow-lg rounded-2xl border border-gray-100 p-8 min-h-[400px]">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 min-h-[500px] flex flex-col">
         {currentStep === 1 && renderStep1()}
         {currentStep === 2 && renderStep2()}
         {currentStep === 3 && renderStep3()}
-      </div>
 
-      {/* Footer Actions */}
-      <div className="mt-8 flex justify-between items-center">
-        <button
-          onClick={() => currentStep === 1 ? router.back() : handleBack()}
-          className="px-6 py-2.5 rounded-lg font-medium text-gray-600 hover:bg-gray-100 transition-colors"
-        >
-          {currentStep === 1 ? 'Cancel' : 'Back'}
-        </button>
+        <div className="flex justify-between mt-auto pt-8">
+          <button
+            onClick={handleBack}
+            disabled={currentStep === 1}
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium transition-colors ${
+              currentStep === 1 
+                ? 'text-gray-300 cursor-not-allowed' 
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <ChevronLeft size={20} /> Back
+          </button>
 
-        <button
-          onClick={() => currentStep === STEPS.length ? handleSubmit() : handleNext()}
-          disabled={loading}
-          className={`
-            flex items-center gap-2 px-8 py-2.5 rounded-lg font-bold text-white shadow-lg transition-all
-            ${loading 
-              ? 'bg-gray-400 cursor-not-allowed' 
-              : 'bg-zambia-green hover:bg-zambia-green/90 hover:shadow-xl active:scale-95'
-            }
-          `}
-        >
-          {loading ? (
-            <Loader2 className="animate-spin" size={20} />
-          ) : currentStep === STEPS.length ? (
-            <>Save Item <Check size={20} /></>
+          {currentStep < STEPS.length ? (
+            <button
+              onClick={handleNext}
+              className="flex items-center gap-2 px-6 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 font-medium transition-all hover:pr-4"
+            >
+              Next <ChevronRight size={20} />
+            </button>
           ) : (
-            <>Next Step <ChevronRight size={20} /></>
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              className="flex items-center gap-2 px-8 py-2.5 bg-zambia-green text-white rounded-lg hover:bg-zambia-green/90 font-medium shadow-lg hover:shadow-xl transition-all"
+            >
+              {loading ? <Loader2 size={20} className="animate-spin" /> : <Check size={20} />}
+              Save Item
+            </button>
           )}
-        </button>
+        </div>
       </div>
     </div>
   );

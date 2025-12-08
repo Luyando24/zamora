@@ -1,10 +1,12 @@
 # Database Migration Guide
 
-Since I cannot execute commands directly against your production Supabase database (for security), you need to apply the schema changes manually.
+Since you are connected to a remote Supabase project and the `supabase` CLI is not available in your environment, you cannot run `supabase db reset`.
 
-## Option 1: Supabase Dashboard (Recommended)
+Instead, follow these steps to apply the latest fixes and schema changes.
 
-1.  Open the file `supabase/FULL_DB_SETUP.sql` in this editor.
+## Step 1: Apply the Consolidated Fix
+
+1.  Open the file `supabase/migrations/20251207_CONSOLIDATED_FIX.sql` in this editor.
 2.  Copy the entire content of the file.
 3.  Go to your **Supabase Dashboard** (https://supabase.com/dashboard).
 4.  Select your project.
@@ -13,26 +15,12 @@ Since I cannot execute commands directly against your production Supabase databa
 7.  Paste the code you copied.
 8.  Click **Run** (bottom right).
 
-## Option 2: Supabase CLI (If configured)
-
-If you have the Supabase CLI installed and linked to your project, you can run:
-
-```bash
-supabase db reset
-```
-
-*Note: This will wipe your local database and re-apply migrations. For production, use `supabase db push`.*
+## What this script does
+*   Renames the `hotels` table to `properties`.
+*   Renames all `hotel_id` columns to `property_id`.
+*   Updates all database functions (including the one used by the Admin Dashboard).
+*   Updates RLS policies to allow property creation and viewing.
+*   Fixes the "column does not exist" errors.
 
 ## Verification
-
-After running the SQL, check the **Table Editor** in Supabase. You should see the following tables:
-*   `hotels`
-*   `profiles`
-*   `room_types`
-*   `rooms`
-*   `menu_items`
-*   `orders`
-*   `bookings`
-*   ...and others.
-
-If you see these, your database is ready!
+After running the script, your "Onboard New Property" flow and "Admin Users Dashboard" should work correctly.

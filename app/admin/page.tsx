@@ -16,7 +16,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       // Mocking some data for the SaaS dashboard as we don't have full billing infrastructure yet
-      const { count: hotelCount } = await supabase.from('hotels').select('*', { count: 'exact', head: true });
+      const { count: hotelCount } = await supabase.from('properties').select('*', { count: 'exact', head: true });
       
       setStats({
         totalHotels: hotelCount || 0,

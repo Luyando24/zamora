@@ -58,27 +58,27 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      let hotel_id = user?.user_metadata?.hotel_id;
+      let property_id = user?.user_metadata?.property_id || user?.user_metadata?.hotel_id;
 
-      if (!hotel_id) {
-         // Fallback: Check if user profile has hotel_id (better source of truth)
-         const { data: profile } = await supabase.from('profiles').select('hotel_id').eq('id', user?.id).single();
-         hotel_id = profile?.hotel_id;
+      if (!property_id) {
+         // Fallback: Check if user profile has property_id (better source of truth)
+         const { data: profile } = await supabase.from('profiles').select('property_id').eq('id', user?.id).single();
+         property_id = profile?.property_id;
       }
 
-      if (!hotel_id) {
-          // Fallback 2: For demo/dev purposes, if user is super_admin, let them pick the first hotel or use a default
+      if (!property_id) {
+          // Fallback 2: For demo/dev purposes, if user is super_admin, let them pick the first property or use a default
           // In a real multi-tenant app, this should force a selection UI. 
-          // For now, we'll try to find ANY hotel to attach to.
-          const { data: anyHotel } = await supabase.from('hotels').select('id').limit(1).single();
-          hotel_id = anyHotel?.id;
+          // For now, we'll try to find ANY property to attach to.
+          const { data: anyProperty } = await supabase.from('properties').select('id').limit(1).single();
+          property_id = anyProperty?.id;
           
-          if (!hotel_id) {
-             throw new Error('No Hotel ID associated with your account. Please contact support.');
+          if (!property_id) {
+             throw new Error('No Property ID associated with your account. Please contact support.');
           }
       }
 
-      const payload = { ...formData, hotel_id };
+      const payload = { ...formData, property_id };
       
       let error;
       if (initialData?.id) {

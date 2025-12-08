@@ -35,29 +35,29 @@ export default function DashboardLayout({
 
       setUser(user);
 
-      // Check if user has a hotel_id
+      // Check if user has a property_id
       // First check metadata (fast)
-      let hotelId = user.user_metadata?.hotel_id;
+      let propertyId = user.user_metadata?.property_id || user.user_metadata?.hotel_id;
 
       // If not in metadata, check profile (source of truth)
-      if (!hotelId) {
+      if (!propertyId) {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('hotel_id, role')
+          .select('property_id, role')
           .eq('id', user.id)
           .single();
         
-        hotelId = profile?.hotel_id;
+        propertyId = profile?.property_id;
         
         // Update metadata if found in profile but not metadata
-        if (hotelId) {
+        if (propertyId) {
           await supabase.auth.updateUser({
-            data: { hotel_id: hotelId }
+            data: { property_id: propertyId }
           });
         }
       }
 
-      setHasHotel(!!hotelId);
+      setHasHotel(!!propertyId);
 
     } catch (error) {
       console.error('Error checking user:', error);

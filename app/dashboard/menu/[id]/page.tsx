@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/client';
 import MenuWizard from '../components/MenuWizard';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
@@ -9,6 +9,7 @@ import Link from 'next/link';
 export default function EditMenuItemPage({ params }: { params: { id: string } }) {
   const [item, setItem] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const supabase = createClient();
 
   useEffect(() => {
     const fetchItem = async () => {

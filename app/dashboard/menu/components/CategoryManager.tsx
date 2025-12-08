@@ -7,6 +7,7 @@ import { Plus, Trash2, Settings, Loader2 } from 'lucide-react';
 
 export default function CategoryManager() {
   const [isOpen, setIsOpen] = useState(false);
+  // Independent categories
   const { categories, loading, addCategory, deleteCategory } = useMenuCategories();
   const [newCategory, setNewCategory] = useState('');
   const [submitting, setSubmitting] = useState(false);

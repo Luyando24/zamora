@@ -29,14 +29,14 @@ export default function NewHotelPage() {
     setLoading(true);
 
     try {
-      const { error } = await supabase.from('hotels').insert([formData]);
+      const { error } = await supabase.from('properties').insert([formData]);
 
       if (error) throw error;
 
       router.push('/admin/hotels');
       router.refresh();
     } catch (error: any) {
-      alert('Error creating hotel: ' + error.message);
+      alert('Error creating property: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -47,10 +47,10 @@ export default function NewHotelPage() {
       <div className="mb-6">
         <Link href="/admin/hotels" className="inline-flex items-center text-slate-500 hover:text-blue-600 mb-4 transition-colors">
           <ChevronLeft size={20} className="mr-1" />
-          Back to Hotels
+          Back to Properties
         </Link>
-        <h1 className="text-2xl font-bold text-slate-900">Onboard New Hotel</h1>
-        <p className="text-slate-500">Enter the details below to register a new hotel property.</p>
+        <h1 className="text-2xl font-bold text-slate-900">Onboard New Property</h1>
+        <p className="text-slate-500">Enter the details below to register a new property.</p>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -64,7 +64,7 @@ export default function NewHotelPage() {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1">Hotel Name *</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Property Name *</label>
                 <input
                   required
                   name="name"

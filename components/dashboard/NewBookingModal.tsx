@@ -44,17 +44,17 @@ export default function NewBookingModal({ isOpen, onClose, onSuccess }: NewBooki
     const bookingId = uuidv4();
     
     try {
-      // Get Hotel ID (Assume user is logged in)
+      // Get Property ID (Assume user is logged in)
       const { data: { user } } = await supabase.auth.getUser();
       // Fallback for dev/demo without auth
-      const hotelId = user?.user_metadata?.hotel_id || '00000000-0000-0000-0000-000000000000'; 
+      const propertyId = user?.user_metadata?.property_id || user?.user_metadata?.hotel_id || '00000000-0000-0000-0000-000000000000'; 
 
       const guestPayload = {
         id: guestId,
         first_name: formData.firstName,
         last_name: formData.lastName,
         phone: formData.phone,
-        hotel_id: hotelId
+        property_id: propertyId
       };
 
       const bookingPayload = {
@@ -63,7 +63,7 @@ export default function NewBookingModal({ isOpen, onClose, onSuccess }: NewBooki
         room_id: formData.roomId,
         check_in_date: formData.checkIn,
         check_out_date: formData.checkOut,
-        hotel_id: hotelId,
+        property_id: propertyId,
         status: 'confirmed'
       };
 

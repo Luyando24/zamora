@@ -9,7 +9,7 @@ import {
 
 const navigation = [
   { name: 'Overview', href: '/admin', icon: LayoutDashboard },
-  { name: 'Hotels', href: '/admin/hotels', icon: Building2 },
+  { name: 'Properties', href: '/admin/hotels', icon: Building2 },
   { name: 'Users', href: '/admin/users', icon: Users },
   { name: 'Revenue', href: '/admin/revenue', icon: CreditCard },
   { name: 'System Health', href: '/admin/health', icon: BarChart3 },

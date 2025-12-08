@@ -27,18 +27,18 @@ export default function SettingsPage() {
   }, []);
 
   const fetchProfile = async () => {
-    // In a real app, we get the hotel_id from the logged-in user's profile
+    // In a real app, we get the property_id from the logged-in user's profile
     const { data: { user } } = await supabase.auth.getUser();
-    const hotelId = user?.user_metadata?.hotel_id || '00000000-0000-0000-0000-000000000000';
+    const propertyId = user?.user_metadata?.property_id || user?.user_metadata?.hotel_id || '00000000-0000-0000-0000-000000000000';
 
-    // Since we are using a dummy ID for the demo, let's try to fetch ANY hotel if the specific one fails, 
+    // Since we are using a dummy ID for the demo, let's try to fetch ANY property if the specific one fails, 
     // or just handle the create case.
-    let { data, error } = await supabase.from('hotels').select('*').eq('id', hotelId).single();
+    let { data, error } = await supabase.from('properties').select('*').eq('id', propertyId).single();
 
     if (!data) {
-      // If no hotel found (e.g., first run), let's see if there's ANY hotel to bind to for the demo
-      const { data: anyHotel } = await supabase.from('hotels').select('*').limit(1).single();
-      if (anyHotel) data = anyHotel;
+      // If no property found (e.g., first run), let's see if there's ANY property to bind to for the demo
+      const { data: anyProperty } = await supabase.from('properties').select('*').limit(1).single();
+      if (anyProperty) data = anyProperty;
     }
 
     if (data) {
@@ -53,21 +53,21 @@ export default function SettingsPage() {
 
     const { data: { user } } = await supabase.auth.getUser();
     // Fallback logic for demo
-    let hotelId = hotel.id;
+    let propertyId = hotel.id;
     
-    if (!hotelId) {
-        // Create new hotel if none exists
-        const { data: newHotel, error } = await supabase.from('hotels').insert(hotel).select().single();
+    if (!propertyId) {
+        // Create new property if none exists
+        const { data: newProperty, error } = await supabase.from('properties').insert(hotel).select().single();
         if (error) {
-            alert('Error creating hotel: ' + error.message);
+            alert('Error creating property: ' + error.message);
             setSaving(false);
             return;
         }
-        hotelId = newHotel.id;
-        setHotel(newHotel);
+        propertyId = newProperty.id;
+        setHotel(newProperty);
     } else {
         // Update existing
-        const { error } = await supabase.from('hotels').update(hotel).eq('id', hotelId);
+        const { error } = await supabase.from('properties').update(hotel).eq('id', propertyId);
         if (error) alert('Error updating profile: ' + error.message);
         else alert('Settings saved successfully!');
     }

@@ -25,7 +25,7 @@ interface Room {
   room_types?: {
     name: string;
   };
-  hotel_id: string;
+  property_id: string;
 }
 
 export default function RoomsPage() {
@@ -54,12 +54,12 @@ export default function RoomsPage() {
     // Check for property
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
-       let hotelId = user.user_metadata?.hotel_id;
-       if (!hotelId) {
-          const { data: profile } = await supabase.from('profiles').select('hotel_id').eq('id', user.id).single();
-          hotelId = profile?.hotel_id;
+       let propertyId = user.user_metadata?.property_id || user.user_metadata?.hotel_id;
+       if (!propertyId) {
+          const { data: profile } = await supabase.from('profiles').select('property_id').eq('id', user.id).single();
+          propertyId = profile?.property_id;
        }
-       setHasProperty(!!hotelId);
+       setHasProperty(!!propertyId);
     }
 
     const { data: rData } = await supabase.from('rooms').select('*, room_types(name)').order('room_number');

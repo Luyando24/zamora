@@ -166,30 +166,42 @@ export default function PropertySetupPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // 1. Create the Hotel
+      // 1. Create the Property
       const { data: hotel, error: hotelError } = await supabase
-        .from('hotels')
+        .from('properties')
         .insert([{
           ...formData,
           subscription_plan: 'trial',
           subscription_status: 'active'
         }])
-        .select()
+        .select('id') // Only select ID to avoid issues with potential stale column references
         .single();
 
       if (hotelError) throw hotelError;
 
-      // 2. Link User to Hotel
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({ hotel_id: hotel.id, role: 'manager' }) // First user is manager
-        .eq('id', user.id);
+      // 2. Link User to Property (using property_staff table for multi-property support)
+      // We also update profiles for backward compatibility if needed, but property_staff is the source of truth.
+      
+      const { error: staffError } = await supabase
+        .from('property_staff')
+        .insert({
+            property_id: hotel.id,
+            user_id: user.id,
+            role: 'admin' // Creator is admin of the property
+        });
 
-      if (profileError) throw profileError;
+      if (staffError) throw staffError;
+
+      // Optional: Update profile just in case some legacy code relies on it, but don't fail if it errors?
+      // Actually, let's keep it for now as a "primary" property pointer if needed.
+      await supabase
+        .from('profiles')
+        .update({ property_id: hotel.id, role: 'manager' })
+        .eq('id', user.id);
 
       // 3. Update User Metadata (for faster client-side checks)
       await supabase.auth.updateUser({
-        data: { hotel_id: hotel.id }
+        data: { property_id: hotel.id }
       });
 
       setStep(5);

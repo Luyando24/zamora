@@ -3,10 +3,11 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
-import { LayoutDashboard, CalendarDays, BedDouble, FileText, Settings, LogOut, DoorOpen, Utensils } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, BedDouble, FileText, Settings, LogOut, DoorOpen, Utensils, Building2 } from 'lucide-react';
 
 const navigation = [
   { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Properties', href: '/dashboard/properties', icon: Building2 },
   { name: 'Inventory Grid', href: '/dashboard/inventory', icon: CalendarDays },
   { name: 'Rooms Management', href: '/dashboard/rooms', icon: DoorOpen },
   { name: 'Food & Beverage', href: '/dashboard/menu', icon: Utensils },

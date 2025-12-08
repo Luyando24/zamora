@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/client';
 
 export interface MenuCategory {
   id: string;
   name: string;
+  property_id?: string | null;
+  created_by?: string;
 }
 
-const DEFAULT_CATEGORIES = ['Food', 'Drink', 'Alcohol', 'Dessert'];
-
-export function useMenuCategories() {
+export function useMenuCategories(propertyId?: string | null) {
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [loading, setLoading] = useState(true);
+  const supabase = createClient();
 
   useEffect(() => {
     fetchCategories();
@@ -19,23 +20,21 @@ export function useMenuCategories() {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      const hotel_id = user?.user_metadata?.hotel_id;
+      // Timeout race (5s)
+      const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Categories timeout')), 5000));
 
-      if (!hotel_id) return;
-
-      const { data, error } = await supabase
+      // Fetch categories. RLS will handle filtering (user's own + global public ones)
+      const fetch = supabase
         .from('menu_categories')
         .select('*')
         .order('name');
+      
+      const { data, error } = await Promise.race([fetch, timeout]) as any;
 
       if (error) throw error;
 
-      if (data && data.length > 0) {
+      if (data) {
         setCategories(data);
-      } else {
-        // Lazy init defaults
-        await initDefaults(hotel_id);
       }
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -44,35 +43,20 @@ export function useMenuCategories() {
     }
   };
 
-  const initDefaults = async (hotel_id: string) => {
-    try {
-      const inserts = DEFAULT_CATEGORIES.map(name => ({
-        hotel_id,
-        name
-      }));
-
-      const { data, error } = await supabase
-        .from('menu_categories')
-        .insert(inserts)
-        .select();
-
-      if (error) throw error;
-      if (data) setCategories(data);
-    } catch (error) {
-      console.error('Error initializing default categories:', error);
-      // Fallback to local defaults if DB write fails (e.g. permissions)
-      setCategories(DEFAULT_CATEGORIES.map(name => ({ id: name, name }))); 
-    }
-  };
-
   const addCategory = async (name: string) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      const hotel_id = user?.user_metadata?.hotel_id;
+      
+      // Independent categories - no property_id needed. 
+      // RLS assigns created_by automatically to the current user.
+      const payload: any = { name };
+      if (user) {
+          payload.created_by = user.id;
+      }
 
       const { data, error } = await supabase
         .from('menu_categories')
-        .insert({ hotel_id, name })
+        .insert(payload) 
         .select()
         .single();
 
@@ -103,7 +87,6 @@ export function useMenuCategories() {
     categories,
     loading,
     addCategory,
-    deleteCategory,
-    refreshCategories: fetchCategories
+    deleteCategory
   };
 }

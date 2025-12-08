@@ -17,7 +17,7 @@ export default function AdminHotelsPage() {
 
   const fetchHotels = async () => {
     const { data } = await supabase
-      .from('hotels')
+      .from('properties')
       .select('*')
       .order('created_at', { ascending: false });
     

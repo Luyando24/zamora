@@ -29,7 +29,7 @@ export default function AdminUsersPage() {
   const filteredUsers = users.filter(u => 
     (u.first_name + ' ' + u.last_name).toLowerCase().includes(search.toLowerCase()) ||
     u.email?.toLowerCase().includes(search.toLowerCase()) ||
-    u.hotel_name?.toLowerCase().includes(search.toLowerCase())
+    u.property_name?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -37,7 +37,7 @@ export default function AdminUsersPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">User Management</h1>
-          <p className="text-slate-500">View and manage all system users across hotels.</p>
+          <p className="text-slate-500">View and manage all system users across properties.</p>
         </div>
         <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm">
           Invite User
@@ -49,7 +49,7 @@ export default function AdminUsersPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
           <input 
-            placeholder="Search by name, email, or hotel..." 
+            placeholder="Search by name, email, or property..." 
             className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -70,7 +70,7 @@ export default function AdminUsersPage() {
             <tr>
               <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">User</th>
               <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Role</th>
-              <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Hotel</th>
+              <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Property</th>
               <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
               <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Joined</th>
               <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
@@ -102,7 +102,7 @@ export default function AdminUsersPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-sm font-medium text-slate-900">{user.hotel_name || 'N/A'}</span>
+                    <span className="text-sm font-medium text-slate-900">{user.property_name || 'N/A'}</span>
                   </td>
                   <td className="px-6 py-4">
                      {user.status === 'active' ? (
