@@ -4,10 +4,15 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { 
   Clock, CheckCircle2, ChefHat, Truck, AlertCircle, 
-  RefreshCw 
+  RefreshCw, Building2
 } from 'lucide-react';
 
 // Types
+interface Property {
+  id: string;
+  name: string;
+}
+
 interface OrderItem {
   id: string;
   quantity: number;
@@ -40,22 +45,43 @@ export default function OrdersPage() {
   const supabase = createClient();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string>('');
+
+  const fetchProperties = async () => {
+    try {
+      const { data: properties, error } = await supabase
+        .from('properties')
+        .select('id, name')
+        .order('name');
+
+      if (error) throw error;
+
+      if (properties && properties.length > 0) {
+        setProperties(properties);
+        const saved = localStorage.getItem('zamora_selected_property');
+        if (saved && properties.find(p => p.id === saved)) {
+          setSelectedPropertyId(saved);
+        } else {
+          setSelectedPropertyId(properties[0].id);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching properties:', error);
+    }
+  };
+
+  const handlePropertyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newId = e.target.value;
+    setSelectedPropertyId(newId);
+    localStorage.setItem('zamora_selected_property', newId);
+  };
 
   const fetchOrders = async () => {
+    if (!selectedPropertyId) return;
+    
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      // Get user's property_id
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('property_id')
-        .eq('id', user.id)
-        .single();
-
-      if (!profile?.property_id) return;
-
       const { data, error } = await supabase
         .from('orders')
         .select(`
@@ -69,13 +95,11 @@ export default function OrdersPage() {
             )
           )
         `)
-        .eq('property_id', profile.property_id)
+        .eq('property_id', selectedPropertyId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       
-      // Cast data to Order[] assuming Supabase returns compatible structure
-      // Real-world app would use strict type guards or Zod
       setOrders((data as any[]) || []);
     } catch (error) {
       console.error('Error fetching orders:', error);
@@ -85,24 +109,34 @@ export default function OrdersPage() {
   };
 
   useEffect(() => {
-    fetchOrders();
-
-    // Set up real-time subscription
-    const channel = supabase
-      .channel('orders-changes')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'orders' },
-        () => {
-          fetchOrders(); // Refresh on any change
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    fetchProperties();
   }, []);
+
+  useEffect(() => {
+    if (selectedPropertyId) {
+      fetchOrders();
+
+      const channel = supabase
+        .channel('orders-changes')
+        .on(
+          'postgres_changes',
+          { 
+            event: '*', 
+            schema: 'public', 
+            table: 'orders',
+            filter: `property_id=eq.${selectedPropertyId}`
+          },
+          () => {
+            fetchOrders();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [selectedPropertyId]);
 
   const updateStatus = async (orderId: string, newStatus: string) => {
     try {
@@ -150,6 +184,22 @@ export default function OrdersPage() {
           <p className="text-slate-500 text-sm">Manage incoming orders and kitchen workflow</p>
         </div>
         <div className="flex items-center gap-3">
+          {/* Property Selector */}
+          <div className="relative">
+            <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <select
+              value={selectedPropertyId}
+              onChange={handlePropertyChange}
+              className="pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all"
+            >
+              {properties.map(p => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <button 
             onClick={fetchOrders}
             className="p-2 hover:bg-slate-100 rounded-full text-slate-500 transition-colors"
