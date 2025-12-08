@@ -399,7 +399,7 @@ export default function EditPropertyPage({ params }: { params: Promise<{ id: str
 
         <div className="flex justify-end gap-4 pt-4">
           <Link 
-            href={`/dashboard/properties/${params.id}`}
+            href={`/dashboard/properties/${id}`}
             className="px-6 py-3 bg-white border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 font-bold"
           >
             Cancel

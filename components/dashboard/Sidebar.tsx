@@ -10,6 +10,7 @@ const navigation = [
   { name: 'Properties', href: '/dashboard/properties', icon: Building2 },
   { name: 'Inventory Grid', href: '/dashboard/inventory', icon: CalendarDays },
   { name: 'Rooms Management', href: '/dashboard/rooms', icon: DoorOpen },
+  { name: 'Kitchen Orders', href: '/dashboard/orders', icon: Utensils },
   { name: 'Food & Beverage', href: '/dashboard/menu', icon: Utensils },
   { name: 'Housekeeping', href: '/housekeeping', icon: BedDouble }, // Separate module, but linked here
   { name: 'ZRA Reports', href: '/dashboard/zra', icon: FileText },

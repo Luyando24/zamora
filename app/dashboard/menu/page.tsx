@@ -8,11 +8,17 @@ import ShareMenuModal from './components/ShareMenuModal';
 import { Plus, Edit, Trash2, UtensilsCrossed, QrCode, Building2 } from 'lucide-react';
 import Link from 'next/link';
 
+interface Property {
+  id: string;
+  name: string;
+  created_by?: string;
+}
+
 export default function MenuPage() {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('All');
-  const [properties, setProperties] = useState<any[]>([]);
+  const [properties, setProperties] = useState<Property[]>([]);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>('');
   const [isShareOpen, setIsShareOpen] = useState(false);
   const supabase = createClient();
@@ -26,20 +32,20 @@ export default function MenuPage() {
         const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Properties timeout')), 5000));
         const fetch = supabase.from('properties').select('id, name, created_by');
         
-        const { data: properties, error } = await Promise.race([fetch, timeout]) as any;
+        const { data: fetchedProperties, error } = await Promise.race([fetch, timeout]) as any;
 
       if (error) {
         console.error('Supabase error fetching properties:', error);
         return; 
       }
 
-      if (properties && properties.length > 0) {
-        setProperties(properties);
+      if (fetchedProperties && fetchedProperties.length > 0) {
+        setProperties(fetchedProperties);
         const saved = localStorage.getItem('zamora_selected_property');
-        if (saved && (saved === 'all' || properties.find(p => p.id === saved))) {
+        if (saved && (saved === 'all' || fetchedProperties.find((p: any) => p.id === saved))) {
             setSelectedPropertyId(saved);
         } else {
-            setSelectedPropertyId(properties.length > 1 ? 'all' : properties[0].id);
+            setSelectedPropertyId(fetchedProperties.length > 1 ? 'all' : fetchedProperties[0].id);
         }
       }
     } catch (error) {
