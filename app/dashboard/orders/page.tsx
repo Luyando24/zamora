@@ -18,10 +18,17 @@ interface OrderItem {
   id: string;
   quantity: number;
   notes?: string;
+  unit_price: number;
+  total_price: number;
   menu_items: {
     name: string;
+    description?: string;
     ingredients?: string;
-  };
+    image_url?: string;
+    category?: string;
+    weight?: string;
+    dietary_info?: string;
+  } | null;
 }
 
 interface Order {
@@ -189,9 +196,16 @@ export default function OrdersPage() {
             id,
             quantity,
             notes,
+            unit_price,
+            total_price,
             menu_items (
               name,
-              ingredients
+              description,
+              ingredients,
+              image_url,
+              category,
+              weight,
+              dietary_info
             )
           )
         `)
@@ -439,24 +453,62 @@ export default function OrdersPage() {
                  <div className="bg-white p-4 rounded-xl border border-slate-200/80">
                     <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Items</h3>
                     <div className="space-y-3">
-                        {selectedOrder.order_items.map((item, i) => (
-                            <div key={i} className="flex justify-between items-start pb-3 border-b border-slate-100 last:border-0 last:pb-0">
-                                <div className="flex gap-3 w-full">
-                                    <span className="bg-slate-100 text-slate-700 font-bold w-7 h-7 rounded-md flex items-center justify-center text-xs shrink-0 border border-slate-200">
-                                        {item.quantity}x
-                                    </span>
-                                    <div className="flex-1">
-                                        <p className="font-bold text-slate-800 text-sm">{item.menu_items?.name}</p>
-                                        
-                                        {item.notes && (
-                                            <div className="mt-1.5 text-slate-500 text-xs font-medium">
-                                                <span>{item.notes}</span>
-                                            </div>
+                        {selectedOrder.order_items.map((item, i) => {
+                            // Robust check for menu_items and its essential properties
+                            if (!item.menu_items || !item.menu_items.name) {
+                                return (
+                                    <div key={i} className="flex items-center gap-3 text-sm text-slate-400 p-2 bg-slate-50 rounded-md">
+                                        <span className="bg-slate-200 font-bold w-7 h-7 rounded-md flex items-center justify-center text-xs border border-slate-300">{item.quantity}x</span>
+                                        <div className="flex-1">
+                                            <p className="font-semibold text-slate-500">Menu item data is unavailable.</p>
+                                            {item.notes && (
+                                                <div className="mt-1 text-amber-600 text-xs">
+                                                    Note: {item.notes}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            }
+
+                            return (
+                                <div key={i} className="flex justify-between items-start pb-3 border-b border-slate-100 last:border-0 last:pb-0">
+                                    <div className="flex gap-3 w-full">
+                                        {/* Quantity Badge */}
+                                        <span className="bg-slate-100 text-slate-700 font-bold w-7 h-7 rounded-md flex items-center justify-center text-xs shrink-0 border border-slate-200 mt-1">
+                                            {item.quantity}x
+                                        </span>
+
+                                        {/* Image (if available) */}
+                                        {item.menu_items?.image_url && (
+                                        <div className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden shrink-0">
+                                            <img src={item.menu_items.image_url} alt={item.menu_items.name} className="w-full h-full object-cover" />
+                                        </div>
                                         )}
+
+                                        <div className="flex-1">
+                                            <div className="flex justify-between items-start">
+                                                <p className="font-bold text-slate-800 text-sm">{item.menu_items?.name}</p>
+                                                <p className="font-bold text-slate-900 text-sm">K{item.total_price?.toFixed(2) || '0.00'}</p>
+                                            </div>
+                                            
+                                            {/* Description/Ingredients */}
+                                            {(item.menu_items?.description || item.menu_items?.ingredients) && (
+                                                <p className="text-slate-500 text-xs mt-0.5 line-clamp-2">
+                                                    {item.menu_items.description || item.menu_items.ingredients}
+                                                </p>
+                                            )}
+
+                                            {item.notes && (
+                                                <div className="mt-1.5 text-amber-600 text-xs font-medium bg-amber-50 px-2 py-1 rounded border border-amber-100 inline-block">
+                                                    Note: {item.notes}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                  </div>
 
