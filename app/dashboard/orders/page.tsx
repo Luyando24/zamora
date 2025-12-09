@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { 
   Clock, CheckCircle2, ChefHat, Truck, AlertCircle, 
-  RefreshCw, Building2, Utensils, XCircle, Volume2, VolumeX
+  RefreshCw, Building2, Utensils, XCircle, Volume2, VolumeX, Eye, X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -32,6 +32,8 @@ interface Order {
   total_amount: number;
   notes?: string;
   order_items: OrderItem[];
+  guest_phone?: string;
+  payment_method?: string;
 }
 
 const STATUS_CONFIG = {
@@ -94,6 +96,7 @@ export default function OrdersPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>('');
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   // Sound Player using Web Audio API
   const playNotificationSound = () => {
@@ -345,6 +348,7 @@ export default function OrdersPage() {
             orders={groupedOrders.pending} 
             config={STATUS_CONFIG.pending}
             onStatusUpdate={updateStatus}
+            onViewDetails={setSelectedOrder}
             nextStatus="preparing"
             elapsedTime={getElapsedTime}
           />
@@ -354,6 +358,7 @@ export default function OrdersPage() {
             orders={groupedOrders.preparing} 
             config={STATUS_CONFIG.preparing}
             onStatusUpdate={updateStatus}
+            onViewDetails={setSelectedOrder}
             nextStatus="ready"
             elapsedTime={getElapsedTime}
           />
@@ -363,6 +368,7 @@ export default function OrdersPage() {
             orders={groupedOrders.ready} 
             config={STATUS_CONFIG.ready}
             onStatusUpdate={updateStatus}
+            onViewDetails={setSelectedOrder}
             nextStatus="delivered"
             elapsedTime={getElapsedTime}
           />
@@ -372,6 +378,7 @@ export default function OrdersPage() {
             orders={groupedOrders.completed} 
             config={STATUS_CONFIG.delivered}
             onStatusUpdate={updateStatus}
+            onViewDetails={setSelectedOrder}
             nextStatus="" // No next status
             elapsedTime={getElapsedTime}
             isCompletedColumn
@@ -379,6 +386,102 @@ export default function OrdersPage() {
 
         </div>
       </div>
+
+      {/* Order Details Modal */}
+      <AnimatePresence>
+        {selectedOrder && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]"
+            >
+              {/* Modal Header */}
+              <div className="p-6 border-b border-slate-100 flex justify-between items-start">
+                <div>
+                  <h2 className="text-2xl font-black text-slate-900">Order Details</h2>
+                  <p className="text-slate-500 text-sm">Room {selectedOrder.guest_room_number} • {new Date(selectedOrder.created_at).toLocaleTimeString()}</p>
+                </div>
+                <button 
+                  onClick={() => setSelectedOrder(null)}
+                  className="p-2 hover:bg-slate-100 rounded-full text-slate-500 transition-colors"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              {/* Modal Content */}
+              <div className="p-6 overflow-y-auto space-y-6">
+                 {/* Guest Info */}
+                 <div className="bg-slate-50 p-4 rounded-xl space-y-3">
+                    <div className="flex justify-between">
+                        <span className="text-slate-500 text-sm font-medium">Guest Name</span>
+                        <span className="text-slate-900 font-bold">{selectedOrder.guest_name}</span>
+                    </div>
+                    {selectedOrder.guest_phone && (
+                        <div className="flex justify-between">
+                            <span className="text-slate-500 text-sm font-medium">Phone</span>
+                            <span className="text-slate-900 font-bold">{selectedOrder.guest_phone}</span>
+                        </div>
+                    )}
+                    <div className="flex justify-between">
+                        <span className="text-slate-500 text-sm font-medium">Payment Method</span>
+                        <span className="text-slate-900 font-bold capitalize">{selectedOrder.payment_method?.replace('_', ' ') || 'Room Charge'}</span>
+                    </div>
+                 </div>
+
+                 {/* Order Items */}
+                 <div>
+                    <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Items</h3>
+                    <div className="space-y-3">
+                        {selectedOrder.order_items.map((item, i) => (
+                            <div key={i} className="flex justify-between items-start py-2 border-b border-slate-50 last:border-0">
+                                <div className="flex gap-3">
+                                    <span className="bg-slate-100 text-slate-900 font-bold w-6 h-6 rounded flex items-center justify-center text-sm shrink-0">
+                                        {item.quantity}
+                                    </span>
+                                    <div>
+                                        <p className="font-bold text-slate-900 text-sm">{item.menu_items?.name}</p>
+                                        {item.notes && <p className="text-xs text-amber-600 mt-1 italic">Note: {item.notes}</p>}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                 </div>
+
+                 {/* Notes */}
+                 {selectedOrder.notes && (
+                    <div className="bg-amber-50 border border-amber-100 p-4 rounded-xl">
+                        <h3 className="text-amber-800 font-bold text-sm mb-1 flex items-center gap-2">
+                            <AlertCircle size={16} /> Kitchen Notes
+                        </h3>
+                        <p className="text-amber-700 text-sm">{selectedOrder.notes}</p>
+                    </div>
+                 )}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-between items-center">
+                 <div>
+                    <p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Total Amount</p>
+                    <p className="text-2xl font-black text-slate-900">K{selectedOrder.total_amount}</p>
+                 </div>
+                 <div className="flex gap-3">
+                     {/* Action buttons could go here if needed, mirroring the card actions */}
+                     <button 
+                       onClick={() => setSelectedOrder(null)}
+                       className="px-6 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-colors"
+                     >
+                        Close
+                     </button>
+                 </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -388,12 +491,13 @@ interface ColumnProps {
   orders: Order[];
   config: any;
   onStatusUpdate: (id: string, status: string) => void;
+  onViewDetails: (order: Order) => void;
   nextStatus: string;
   elapsedTime: (date: string) => string;
   isCompletedColumn?: boolean;
 }
 
-function Column({ title, orders, config, onStatusUpdate, nextStatus, elapsedTime, isCompletedColumn }: ColumnProps) {
+function Column({ title, orders, config, onStatusUpdate, onViewDetails, nextStatus, elapsedTime, isCompletedColumn }: ColumnProps) {
   const Icon = config.icon;
 
   return (
@@ -446,9 +550,18 @@ function Column({ title, orders, config, onStatusUpdate, nextStatus, elapsedTime
                         </div>
                         <div className="text-sm font-medium text-slate-500">{order.guest_name || 'Guest'}</div>
                       </div>
-                      <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
-                        <Clock size={12} />
-                        {elapsedTime(order.created_at)}
+                      <div className="flex items-center gap-2">
+                          <button 
+                            onClick={() => onViewDetails(order)}
+                            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                            title="View Full Details"
+                          >
+                            <Eye size={18} />
+                          </button>
+                          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
+                            <Clock size={12} />
+                            {elapsedTime(order.created_at)}
+                          </div>
                       </div>
                     </div>
 
