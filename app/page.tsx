@@ -6,22 +6,31 @@ import { ArrowRight, CheckCircle2, BarChart3, ShieldCheck, Zap, Smartphone } fro
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#030712] text-white overflow-x-hidden selection:bg-zambia-green selection:text-white">
+    <div className="min-h-screen bg-[#030712] text-white overflow-x-hidden selection:bg-zambia-red selection:text-white">
       
       {/* Navigation */}
       <nav className="fixed w-full z-50 bg-[#030712]/80 backdrop-blur-md border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-zambia-green to-zambia-blue flex items-center justify-center font-bold text-xl shadow-lg shadow-zambia-green/20">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-zambia-red to-zambia-blue flex items-center justify-center font-bold text-xl shadow-lg shadow-zambia-red/20">
               Z
             </div>
             <span className="font-bold text-xl tracking-tight">ZAMORA</span>
           </div>
           
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-300">
-            <Link href="#features" className="hover:text-white transition-colors">Features</Link>
-            <Link href="#compliance" className="hover:text-white transition-colors">Compliance</Link>
-            <Link href="#pricing" className="hover:text-white transition-colors">Pricing</Link>
+            <Link href="#features" className="hover:text-white transition-colors relative group">
+              Features
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-zambia-red transition-all group-hover:w-full"></span>
+            </Link>
+            <Link href="#compliance" className="hover:text-white transition-colors relative group">
+              Compliance
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-zambia-red transition-all group-hover:w-full"></span>
+            </Link>
+            <Link href="#pricing" className="hover:text-white transition-colors relative group">
+              Pricing
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-zambia-red transition-all group-hover:w-full"></span>
+            </Link>
           </div>
 
           <div className="flex items-center gap-4">
@@ -46,7 +55,7 @@ export default function LandingPage() {
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
         {/* Background Elements */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-zambia-green/20 rounded-full blur-[100px] animate-pulse"></div>
+          <div className="absolute top-20 left-10 w-72 h-72 bg-zambia-red/20 rounded-full blur-[100px] animate-pulse"></div>
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-zambia-blue/20 rounded-full blur-[120px] animate-pulse delay-1000"></div>
         </div>
 
@@ -57,7 +66,7 @@ export default function LandingPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <span className="inline-block py-1 px-3 rounded-full bg-white/5 border border-white/10 text-zambia-green text-xs font-bold tracking-wider mb-6">
+              <span className="inline-block py-1 px-3 rounded-full bg-white/5 border border-white/10 text-zambia-red text-xs font-bold tracking-wider mb-6">
                 NEXT-GEN HOSPITALITY OS
               </span>
             </motion.div>
@@ -87,16 +96,23 @@ export default function LandingPage() {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="flex flex-col sm:flex-row items-center justify-center gap-4"
             >
-              <Link
-                href="/dashboard"
-                className="w-full sm:w-auto px-8 py-4 bg-zambia-green text-white rounded-full font-bold text-lg hover:bg-zambia-green/90 transition-all flex items-center justify-center gap-2 group"
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link
+                  href="/dashboard"
+                  className="w-full sm:w-auto px-8 py-4 bg-zambia-red text-white rounded-full font-bold text-lg hover:bg-zambia-red/90 transition-all flex items-center justify-center gap-2 group shadow-lg shadow-zambia-red/25"
+                >
+                  Start Free Trial
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </motion.div>
+              
+              <motion.button 
+                whileHover={{ scale: 1.05 }} 
+                whileTap={{ scale: 0.95 }}
+                className="w-full sm:w-auto px-8 py-4 bg-white/5 text-white border border-white/10 rounded-full font-bold text-lg hover:bg-white/10 transition-all backdrop-blur-sm"
               >
-                Start Free Trial
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <button className="w-full sm:w-auto px-8 py-4 bg-white/5 text-white border border-white/10 rounded-full font-bold text-lg hover:bg-white/10 transition-all backdrop-blur-sm">
                 Book Demo
-              </button>
+              </motion.button>
             </motion.div>
           </div>
 
@@ -104,10 +120,11 @@ export default function LandingPage() {
           <motion.div
             initial={{ opacity: 0, y: 40, rotateX: 10 }}
             animate={{ opacity: 1, y: 0, rotateX: 0 }}
+            whileHover={{ scale: 1.02, rotateX: 5, transition: { duration: 0.3 } }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="mt-20 relative mx-auto max-w-5xl"
+            className="mt-20 relative mx-auto max-w-5xl perspective-1000"
           >
-            <div className="absolute -inset-1 bg-gradient-to-r from-zambia-green to-zambia-blue rounded-2xl blur opacity-20"></div>
+            <div className="absolute -inset-1 bg-gradient-to-r from-zambia-red to-zambia-blue rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
             <div className="relative bg-[#0f1623] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
               <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-[#030712]">
                 <div className="w-3 h-3 rounded-full bg-red-500/50"></div>
@@ -142,7 +159,7 @@ export default function LandingPage() {
             />
             <FeatureCard 
               id="compliance"
-              icon={<ShieldCheck className="w-8 h-8 text-zambia-green" />}
+              icon={<ShieldCheck className="w-8 h-8 text-zambia-red" />}
               title="ZRA Compliance"
               description="Automated Smart Invoice fiscalization. Never worry about tax compliance again."
             />
@@ -156,35 +173,44 @@ export default function LandingPage() {
               title="Mobile First"
               description="Manage your property from anywhere. Fully responsive design for all devices."
             />
-            <div className="md:col-span-2 bg-gradient-to-br from-white/5 to-transparent p-8 rounded-3xl border border-white/10 hover:border-white/20 transition-colors group">
-              <h3 className="text-2xl font-bold mb-4 group-hover:text-zambia-green transition-colors">Integrated Food & Beverage</h3>
-              <p className="text-gray-400 mb-8 max-w-md">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              whileHover={{ scale: 1.02, borderColor: "rgba(255,255,255,0.2)" }}
+              transition={{ duration: 0.3 }}
+              className="md:col-span-2 bg-gradient-to-br from-white/5 to-transparent p-8 rounded-3xl border border-white/10 hover:bg-white/5 transition-colors group"
+            >
+              <h3 className="text-2xl font-bold mb-4 group-hover:text-zambia-red transition-colors">Integrated Food & Beverage</h3>
+              <p className="text-gray-400 mb-8 max-w-md group-hover:text-gray-300 transition-colors">
                 Seamlessly manage your restaurant and bar. Orders are automatically linked to guest folios for a unified billing experience.
               </p>
-              <div className="grid grid-cols-3 gap-4 opacity-50 group-hover:opacity-100 transition-opacity">
-                <div className="h-20 bg-white/5 rounded-xl"></div>
-                <div className="h-20 bg-white/5 rounded-xl"></div>
-                <div className="h-20 bg-white/5 rounded-xl"></div>
+              <div className="grid grid-cols-3 gap-4 opacity-50 group-hover:opacity-100 transition-opacity duration-500">
+                <motion.div whileHover={{ y: -5 }} className="h-20 bg-white/5 rounded-xl border border-white/5"></motion.div>
+                <motion.div whileHover={{ y: -5 }} className="h-20 bg-white/5 rounded-xl border border-white/5"></motion.div>
+                <motion.div whileHover={{ y: -5 }} className="h-20 bg-white/5 rounded-xl border border-white/5"></motion.div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
       <section id="pricing" className="py-32 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#030712] to-zambia-green/20"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#030712] to-zambia-red/20"></div>
         <div className="max-w-4xl mx-auto px-6 relative z-10 text-center">
           <h2 className="text-4xl lg:text-6xl font-bold mb-8">Ready to modernize?</h2>
           <p className="text-xl text-gray-300 mb-12">
             Join the forward-thinking hotels using Zamora to streamline operations and delight guests.
           </p>
-          <Link
-            href="/dashboard"
-            className="inline-flex items-center justify-center px-10 py-5 bg-white text-[#030712] rounded-full font-bold text-xl hover:scale-105 transition-transform"
-          >
-            Get Started Now
-          </Link>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center justify-center px-10 py-5 bg-white text-[#030712] rounded-full font-bold text-xl hover:bg-gray-100 transition-colors shadow-xl shadow-white/10"
+            >
+              Get Started Now
+            </Link>
+          </motion.div>
         </div>
       </section>
 
@@ -211,14 +237,22 @@ export default function LandingPage() {
 
 function FeatureCard({ icon, title, description, id }: { icon: React.ReactNode, title: string, description: string, id?: string }) {
   return (
-    <div id={id} className="bg-white/5 p-8 rounded-3xl border border-white/10 hover:bg-white/10 transition-all hover:-translate-y-1 group scroll-mt-24">
-      <div className="mb-6 p-3 bg-white/5 rounded-2xl w-fit group-hover:scale-110 transition-transform">
+    <motion.div 
+      id={id}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      whileHover={{ scale: 1.05, borderColor: "rgba(255,255,255,0.2)" }}
+      transition={{ duration: 0.3 }}
+      className="bg-white/5 p-8 rounded-3xl border border-white/10 hover:bg-white/10 transition-colors group scroll-mt-24"
+    >
+      <div className="mb-6 p-3 bg-white/5 rounded-2xl w-fit group-hover:scale-110 transition-transform duration-300">
         {icon}
       </div>
-      <h3 className="text-xl font-bold mb-3">{title}</h3>
-      <p className="text-gray-400 leading-relaxed">
+      <h3 className="text-xl font-bold mb-3 group-hover:text-white transition-colors">{title}</h3>
+      <p className="text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors">
         {description}
       </p>
-    </div>
+    </motion.div>
   );
 }

@@ -80,60 +80,72 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
-      {/* Sidebar - Hide on setup page */}
+    <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
       {!isSetupPage && (
-        <aside className="hidden md:flex md:flex-col z-20">
-          <Sidebar />
-        </aside>
-      )}
-
-      {/* Main Content */}
-      <div className="flex flex-1 flex-col overflow-hidden relative">
-        {!isSetupPage && (
-          <header className="flex h-16 items-center justify-between bg-white px-6 shadow-sm z-10 border-b border-gray-100">
-            
-            {/* Search Bar (Placeholder) */}
-            <div className="flex items-center flex-1 max-w-xl">
-               <div className="relative w-full max-w-md">
-                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                   <Search className="h-4 w-4 text-gray-400" />
-                 </div>
-                 <input
-                   type="text"
-                   className="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg leading-5 bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-1 focus:ring-zambia-blue focus:border-zambia-blue sm:text-sm transition duration-150 ease-in-out"
-                   placeholder="Search bookings, guests, or rooms..."
-                 />
-               </div>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <button className="p-2 text-gray-400 hover:text-gray-500 rounded-full hover:bg-gray-100">
-                 <Bell size={20} />
-              </button>
-              <button className="p-2 text-gray-400 hover:text-gray-500 rounded-full hover:bg-gray-100">
-                 <Moon size={20} />
-              </button>
-              <div className="h-8 w-1 border-r border-gray-200 mx-2"></div>
-              
-              <div className="flex items-center gap-3">
-                <div className="text-right hidden sm:block">
-                  <p className="text-sm font-medium text-gray-900">
-                    {user?.user_metadata?.first_name || 'User'}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {user?.email || 'Account'}
-                  </p>
-                </div>
-                <div className="h-9 w-9 rounded-full bg-zambia-blue flex items-center justify-center text-white font-bold shadow-sm uppercase">
-                  {user?.email?.charAt(0) || 'U'}
-                </div>
+        <header className="relative flex h-16 items-center justify-between bg-white/60 backdrop-blur-xl px-6 z-30 border-b border-slate-200 shrink-0">
+          <div className="flex items-center gap-12">
+            {/* Branding */}
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center text-white font-black shadow-lg shadow-slate-900/20">
+                Z
+              </div>
+              <div>
+                <h1 className="text-lg font-black tracking-tight text-slate-900 leading-none">ZAMORA</h1>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Hospitality OS</p>
               </div>
             </div>
-          </header>
+          </div>
+
+          {/* Search Bar - Centered */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md hidden md:block">
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-4 w-4 text-slate-400" />
+              </div>
+              <input
+                type="text"
+                className="block w-full pl-10 pr-3 py-2 border border-transparent rounded-lg leading-5 bg-slate-100 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors shadow-sm"
+                placeholder="Search..."
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors">
+               <Bell size={20} />
+            </button>
+            <button className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors">
+               <Moon size={20} />
+            </button>
+            <div className="h-8 w-px bg-slate-200 mx-3"></div>
+            
+            <button className="flex items-center gap-3 hover:bg-slate-100 rounded-lg p-2 transition-colors">
+              <div className="h-9 w-9 rounded-full bg-slate-800 flex items-center justify-center text-white font-bold shadow-sm uppercase">
+                {user?.email?.charAt(0) || 'U'}
+              </div>
+              <div className="text-right hidden sm:block">
+                <p className="text-sm font-semibold text-slate-800">
+                  {user?.user_metadata?.first_name || 'User'}
+                </p>
+                <p className="text-xs text-slate-500">
+                  {user?.email || 'Account'}
+                </p>
+              </div>
+            </button>
+          </div>
+        </header>
+      )}
+
+      <div className="flex flex-1 overflow-hidden relative">
+        {/* Sidebar - Hide on setup page */}
+        {!isSetupPage && (
+          <aside className="hidden md:flex md:flex-col z-20 h-full">
+            <Sidebar />
+          </aside>
         )}
 
-        <main className="flex-1 overflow-y-auto p-6 bg-gray-50">
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto p-6 bg-slate-100">
           {!hasHotel && !isSetupPage && (
             <div className="bg-orange-50 border-l-4 border-orange-500 p-4 mb-6 shadow-sm rounded-r-lg">
               <div className="flex items-center justify-between flex-wrap gap-4">

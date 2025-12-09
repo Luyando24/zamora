@@ -265,28 +265,77 @@ interface RoomsTableProps {
 }
 
 function RoomsTable({ rooms, onEdit, onDelete }: RoomsTableProps) {
+  const getStatusColor = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'clean': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      case 'dirty': return 'bg-rose-50 text-rose-700 border-rose-200';
+      case 'occupied': return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'maintenance': return 'bg-amber-50 text-amber-700 border-amber-200';
+      default: return 'bg-slate-50 text-slate-700 border-slate-200';
+    }
+  };
+
   return (
-    <div className="bg-white shadow-sm overflow-hidden sm:rounded-2xl border border-slate-200">
-      <ul className="divide-y divide-slate-100">
-        {rooms.map((room) => (
-          <li key={room.id} className="px-6 py-4 flex items-center justify-between hover:bg-slate-50 transition-colors group">
-            <div className="flex items-center gap-4">
-               <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 font-bold group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
-                 {room.room_number}
-               </div>
-               <div>
-                 <p className="text-sm font-bold text-slate-900">Room {room.room_number}</p>
-                 <p className="text-xs font-medium text-slate-500">{room.room_types?.name || 'No Type Assigned'}</p>
-               </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      {rooms.map((room) => (
+        <div 
+          key={room.id} 
+          className="group bg-white rounded-2xl p-5 border border-slate-300 shadow-md flex flex-col justify-between transition-all hover:-translate-y-1 hover:shadow-xl hover:border-slate-400"
+        >
+          <div>
+            <div className="flex justify-between items-start mb-4">
+              <div className="w-12 h-12 rounded-xl bg-slate-900 flex items-center justify-center text-white font-black text-lg border border-slate-900">
+                {room.room_number}
+              </div>
+              <span className={`px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wide border ${getStatusColor(room.status)}`}>
+                {room.status}
+              </span>
             </div>
-            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button onClick={() => onEdit(room)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"><Edit size={18} /></button>
-              <button onClick={() => onDelete(room.id)} className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"><Trash2 size={18} /></button>
+            
+            <div className="space-y-1">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Room Type</p>
+              <p className="font-bold text-slate-900 text-sm line-clamp-1">
+                {room.room_types?.name || 'Unassigned'}
+              </p>
             </div>
-          </li>
-        ))}
-        {rooms.length === 0 && <li className="px-6 py-12 text-center text-slate-400 text-sm">No rooms found. Add a room to get started.</li>}
-      </ul>
+
+            {room.notes && (
+              <div className="mt-4 pt-3 border-t border-slate-50">
+                <p className="text-xs text-slate-500 line-clamp-2 italic">
+                  "{room.notes}"
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-end gap-2 mt-5 pt-4 border-t border-slate-100">
+            <button 
+              onClick={() => onEdit(room)} 
+              className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              title="Edit Room"
+            >
+              <Edit size={16} />
+            </button>
+            <button 
+              onClick={() => onDelete(room.id)} 
+              className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+              title="Delete Room"
+            >
+              <Trash2 size={16} />
+            </button>
+          </div>
+        </div>
+      ))}
+      
+      {rooms.length === 0 && (
+        <div className="col-span-full py-16 text-center border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
+          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
+            <LayoutGrid size={24} />
+          </div>
+          <p className="text-slate-900 font-bold">No rooms found</p>
+          <p className="text-slate-500 text-sm mt-1">Add your first physical room to get started.</p>
+        </div>
+      )}
     </div>
   );
 }

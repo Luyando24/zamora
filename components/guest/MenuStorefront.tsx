@@ -9,6 +9,7 @@ import {
 import Image from 'next/image';
 import FoodDetailsPage from './FoodDetailsPage';
 import CheckoutPage from './CheckoutPage';
+import OrderHistoryPage from './OrderHistoryPage';
 
 interface MenuStorefrontProps {
   property: any;
@@ -22,6 +23,7 @@ export default function MenuStorefront({ property, menuItems, categories, roomNu
   const [cart, setCart] = useState<any[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -123,6 +125,14 @@ export default function MenuStorefront({ property, menuItems, categories, roomNu
 
             {/* Cart & Actions (Desktop only for Cart button since we have bottom nav) */}
             <div className="flex items-center gap-2 shrink-0 hidden md:flex">
+                <button 
+                    onClick={() => setIsHistoryOpen(true)}
+                    className="p-3 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-all duration-300 group"
+                    title="Order History"
+                >
+                    <Clock size={22} className="group-hover:scale-110 transition-transform" />
+                </button>
+
                 <button 
                     onClick={() => setIsCartOpen(true)}
                     className="relative p-3 text-slate-900 hover:bg-slate-100 rounded-full transition-all duration-300 group border border-transparent hover:border-slate-200"
@@ -310,6 +320,14 @@ export default function MenuStorefront({ property, menuItems, categories, roomNu
         </button>
         
         <button 
+            onClick={() => setIsHistoryOpen(true)}
+            className="flex flex-col items-center gap-1 text-slate-500 hover:text-black transition-colors"
+        >
+            <Clock size={24} />
+            <span className="text-[10px] font-bold">Orders</span>
+        </button>
+
+        <button 
             onClick={handleSearchClick}
             className="flex flex-col items-center gap-1 text-slate-500 hover:text-black transition-colors"
         >
@@ -449,6 +467,13 @@ export default function MenuStorefront({ property, menuItems, categories, roomNu
           setIsCheckoutOpen(false);
         }}
       />
+      {/* Order History Page */}
+      <OrderHistoryPage 
+        isOpen={isHistoryOpen} 
+        onClose={() => setIsHistoryOpen(false)} 
+        propertyId={property.id} 
+      />
+
     </div>
   );
 }

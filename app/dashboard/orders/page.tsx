@@ -41,12 +41,12 @@ const STATUS_CONFIG = {
   pending: { 
     label: 'New Orders', 
     icon: AlertCircle, 
-    color: 'text-rose-600', 
-    bg: 'bg-rose-50',
-    border: 'border-rose-200',
-    accent: 'border-l-rose-500',
-    badge: 'bg-rose-100 text-rose-700',
-    button: 'bg-rose-600 hover:bg-rose-700 text-white shadow-rose-200'
+    color: 'text-blue-600', 
+    bg: 'bg-blue-50',
+    border: 'border-blue-200',
+    accent: 'border-l-blue-500',
+    badge: 'bg-blue-100 text-blue-700',
+    button: 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200'
   },
   preparing: { 
     label: 'Preparing', 
@@ -59,7 +59,7 @@ const STATUS_CONFIG = {
     button: 'bg-amber-500 hover:bg-amber-600 text-white shadow-amber-200'
   },
   ready: { 
-    label: 'Ready to Serve', 
+    label: 'Ready for Pickup', 
     icon: CheckCircle2, 
     color: 'text-emerald-600', 
     bg: 'bg-emerald-50',
@@ -69,23 +69,23 @@ const STATUS_CONFIG = {
     button: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200'
   },
   delivered: { 
-    label: 'Delivered', 
+    label: 'Completed', 
     icon: Truck, 
     color: 'text-slate-600', 
-    bg: 'bg-slate-50',
+    bg: 'bg-slate-100',
     border: 'border-slate-200',
     accent: 'border-l-slate-400',
-    badge: 'bg-slate-100 text-slate-600',
+    badge: 'bg-slate-200 text-slate-600',
     button: 'bg-slate-800 hover:bg-slate-900 text-white'
   },
   cancelled: { 
     label: 'Cancelled', 
     icon: XCircle, 
-    color: 'text-slate-400', 
-    bg: 'bg-slate-50',
+    color: 'text-slate-500', 
+    bg: 'bg-slate-100',
     border: 'border-slate-200',
     accent: 'border-l-slate-300',
-    badge: 'bg-slate-100 text-slate-500',
+    badge: 'bg-slate-200 text-slate-500',
     button: ''
   },
 };
@@ -280,45 +280,45 @@ export default function OrdersPage() {
   };
 
   return (
-    <div className="h-[calc(100vh-4rem)] flex flex-col bg-slate-50/50">
+    <div className="h-screen flex flex-col bg-slate-50 font-sans antialiased">
       {/* Header */}
-      <div className="bg-white border-b border-slate-200 px-8 py-5 flex items-center justify-between shrink-0 shadow-sm z-10">
+      <header className="bg-white/60 backdrop-blur-xl border-b border-slate-100 px-6 py-4 flex items-center justify-between shrink-0 z-20">
         <div className="flex items-center gap-4">
-          <div className="p-2.5 bg-slate-900 rounded-xl text-white">
-            <Utensils size={24} />
+          <div className="p-3 bg-slate-900 rounded-lg text-white shadow-lg shadow-slate-900/10">
+            <Utensils size={22} />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-slate-900 tracking-tight">Kitchen Display</h1>
-            <p className="text-slate-500 text-sm font-medium">Live orders & workflow</p>
+            <h1 className="text-lg font-bold text-slate-800 tracking-tight">Kitchen Workflow</h1>
+            <p className="text-slate-500 text-xs font-medium">Real-time order management</p>
           </div>
         </div>
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           
           <button
             onClick={() => {
                 const newState = !soundEnabled;
                 setSoundEnabled(newState);
-                if (newState) playNotificationSound(); // Test sound when enabling
+                if (newState) playNotificationSound();
             }}
-            className={`p-2.5 rounded-lg transition-all active:scale-95 flex items-center gap-2 font-bold text-sm ${
+            className={`px-3 py-2 rounded-lg transition-all active:scale-95 flex items-center gap-2 font-semibold text-xs ${
                 soundEnabled 
-                ? 'bg-blue-50 text-blue-600 hover:bg-blue-100' 
+                ? 'bg-blue-100 text-blue-700 hover:bg-blue-200/70' 
                 : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
             }`}
             title={soundEnabled ? 'Mute Notifications' : 'Enable Notifications'}
           >
-            {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
+            {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
             <span className="hidden sm:inline">{soundEnabled ? 'Sound On' : 'Sound Off'}</span>
           </button>
 
           {/* Property Selector */}
           <div className="relative group">
-            <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-slate-600 transition-colors" size={16} />
+            <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <select
               value={selectedPropertyId}
               onChange={handlePropertyChange}
-              className="pl-9 pr-8 py-2.5 border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 bg-slate-50 hover:bg-white hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 transition-all cursor-pointer min-w-[200px] appearance-none"
+              className="pl-9 pr-8 py-2 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 bg-white hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-800/10 focus:border-slate-800 transition-all appearance-none"
             >
               {properties.map(p => (
                 <option key={p.id} value={p.id}>
@@ -327,7 +327,7 @@ export default function OrdersPage() {
               ))}
             </select>
             <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-              <div className="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[4px] border-t-slate-400"></div>
+              <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </div>
           </div>
 
@@ -336,14 +336,14 @@ export default function OrdersPage() {
             className="p-2.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-700 transition-all active:scale-95"
             title="Refresh Orders"
           >
-            <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
+            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
           </button>
         </div>
-      </div>
+      </header>
 
       {/* Kanban Board */}
-      <div className="flex-1 overflow-x-auto p-8">
-        <div className="flex gap-8 h-full min-w-[1400px]">
+      <main className="flex-1 overflow-x-auto overflow-y-hidden p-6">
+        <div className="flex gap-6 h-full min-w-[1400px]">
           
           <Column 
             title="New Orders" 
@@ -366,7 +366,7 @@ export default function OrdersPage() {
           />
 
           <Column 
-            title="Ready to Serve" 
+            title="Ready for Pickup" 
             orders={groupedOrders.ready} 
             config={STATUS_CONFIG.ready}
             onStatusUpdate={updateStatus}
@@ -387,76 +387,70 @@ export default function OrdersPage() {
           />
 
         </div>
-      </div>
+      </main>
 
       {/* Order Details Modal */}
       <AnimatePresence>
         {selectedOrder && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm" onClick={() => setSelectedOrder(null)}>
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]"
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] border border-slate-200/50"
+              onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
             >
               {/* Modal Header */}
               <div className="p-6 border-b border-slate-100 flex justify-between items-start">
                 <div>
-                  <h2 className="text-2xl font-black text-slate-900">Order Details</h2>
-                  <p className="text-slate-500 text-sm">Room {selectedOrder.guest_room_number} • {new Date(selectedOrder.created_at).toLocaleTimeString()}</p>
+                  <h2 className="text-xl font-bold text-slate-900">Order Details</h2>
+                  <p className="text-slate-500 text-sm font-medium">Room {selectedOrder.guest_room_number} • {new Date(selectedOrder.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                 </div>
                 <button 
                   onClick={() => setSelectedOrder(null)}
-                  className="p-2 hover:bg-slate-100 rounded-full text-slate-500 transition-colors"
+                  className="p-1.5 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors"
                 >
-                  <X size={24} />
+                  <X size={20} />
                 </button>
               </div>
 
               {/* Modal Content */}
-              <div className="p-6 overflow-y-auto space-y-6">
+              <div className="p-6 overflow-y-auto space-y-6 bg-slate-50/50">
                  {/* Guest Info */}
-                 <div className="bg-slate-50 p-4 rounded-xl space-y-3">
-                    <div className="flex justify-between">
+                 <div className="bg-white p-4 rounded-xl border border-slate-200/80 space-y-3">
+                    <div className="flex justify-between items-center">
                         <span className="text-slate-500 text-sm font-medium">Guest Name</span>
-                        <span className="text-slate-900 font-bold">{selectedOrder.guest_name}</span>
+                        <span className="text-slate-900 font-semibold">{selectedOrder.guest_name}</span>
                     </div>
                     {selectedOrder.guest_phone && (
-                        <div className="flex justify-between">
+                        <div className="flex justify-between items-center">
                             <span className="text-slate-500 text-sm font-medium">Phone</span>
-                            <span className="text-slate-900 font-bold">{selectedOrder.guest_phone}</span>
+                            <span className="text-slate-900 font-semibold">{selectedOrder.guest_phone}</span>
                         </div>
                     )}
-                    <div className="flex justify-between">
-                        <span className="text-slate-500 text-sm font-medium">Payment Method</span>
-                        <span className="text-slate-900 font-bold capitalize">{selectedOrder.payment_method?.replace('_', ' ') || 'Room Charge'}</span>
+                    <div className="flex justify-between items-center">
+                        <span className="text-slate-500 text-sm font-medium">Payment</span>
+                        <span className="text-slate-900 font-semibold capitalize">{selectedOrder.payment_method?.replace('_', ' ') || 'Room Charge'}</span>
                     </div>
                  </div>
 
                  {/* Order Items */}
-                 <div>
-                    <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">Items</h3>
+                 <div className="bg-white p-4 rounded-xl border border-slate-200/80">
+                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Items</h3>
                     <div className="space-y-3">
                         {selectedOrder.order_items.map((item, i) => (
-                            <div key={i} className="flex justify-between items-start py-3 border-b border-slate-50 last:border-0">
+                            <div key={i} className="flex justify-between items-start pb-3 border-b border-slate-100 last:border-0 last:pb-0">
                                 <div className="flex gap-3 w-full">
-                                    <span className="bg-slate-100 text-slate-900 font-bold w-6 h-6 rounded flex items-center justify-center text-sm shrink-0">
-                                        {item.quantity}
+                                    <span className="bg-slate-100 text-slate-700 font-bold w-7 h-7 rounded-md flex items-center justify-center text-xs shrink-0 border border-slate-200">
+                                        {item.quantity}x
                                     </span>
                                     <div className="flex-1">
-                                        <div className="flex justify-between">
-                                            <p className="font-bold text-slate-900 text-sm">{item.menu_items?.name}</p>
-                                        </div>
+                                        <p className="font-bold text-slate-800 text-sm">{item.menu_items?.name}</p>
                                         
-                                        {/* Item Ingredients */}
-                                        {item.menu_items?.ingredients && (
-                                            <p className="text-xs text-slate-400 mt-0.5">{item.menu_items.ingredients}</p>
-                                        )}
-                                        
-                                        {/* Item Notes / Options */}
                                         {item.notes && (
-                                            <div className="mt-2 bg-amber-50 text-amber-800 text-xs px-2 py-1.5 rounded-md border border-amber-100 font-medium">
-                                                <span className="font-bold text-amber-900">Options:</span> {item.notes}
+                                            <div className="mt-1.5 text-slate-500 text-xs font-medium">
+                                                <span>{item.notes}</span>
                                             </div>
                                         )}
                                     </div>
@@ -468,27 +462,27 @@ export default function OrdersPage() {
 
                  {/* Kitchen Notes (Order Level) */}
                  {selectedOrder.notes && (
-                    <div className="bg-rose-50 border border-rose-100 p-4 rounded-xl">
-                        <h3 className="text-rose-800 font-bold text-sm mb-2 flex items-center gap-2">
-                            <AlertCircle size={16} /> Kitchen Instructions
+                    <div className="bg-white border border-slate-200/80 p-4 rounded-xl">
+                        <h3 className="text-amber-600 font-bold text-sm mb-2 flex items-center gap-2">
+                            <AlertCircle size={16} /> Special Instructions
                         </h3>
-                        <p className="text-rose-900 font-medium text-sm leading-relaxed">{selectedOrder.notes}</p>
+                        <p className="text-slate-600 font-medium text-sm leading-relaxed">{selectedOrder.notes}</p>
                     </div>
                  )}
               </div>
 
               {/* Modal Footer */}
-              <div className="p-6 border-t border-slate-100 bg-slate-50 flex justify-between items-center">
+              <div className="p-5 border-t border-slate-100 bg-white flex justify-between items-center">
                  <div>
-                    <p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Total Amount</p>
-                    <p className="text-2xl font-black text-slate-900">K{selectedOrder.total_amount}</p>
+                    <p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Total</p>
+                    <p className="text-2xl font-black text-slate-900">K{selectedOrder.total_amount.toFixed(2)}</p>
                  </div>
                  <div className="flex gap-3">
                      <button 
                        onClick={() => setSelectedOrder(null)}
-                       className="px-6 py-2 bg-white border border-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-50 transition-colors"
+                       className="px-5 py-2.5 bg-slate-800 border border-slate-800 text-white font-bold rounded-xl hover:bg-slate-700 transition-colors text-sm active:scale-95 shadow-lg shadow-slate-800/10"
                      >
-                        Close
+                        Done
                      </button>
                  </div>
               </div>
@@ -504,7 +498,7 @@ interface ColumnProps {
   title: string;
   orders: Order[];
   config: any;
-  onStatusUpdate: (id: string, status: string) => void;
+  onStatusUpdate: (orderId: string, newStatus: string) => void;
   onViewDetails: (order: Order) => void;
   nextStatus: string;
   elapsedTime: (date: string) => string;
@@ -512,147 +506,103 @@ interface ColumnProps {
 }
 
 function Column({ title, orders, config, onStatusUpdate, onViewDetails, nextStatus, elapsedTime, isCompletedColumn }: ColumnProps) {
-  const Icon = config.icon;
-
   return (
-    <div className="flex-1 min-w-[320px] flex flex-col h-full">
-      {/* Column Header */}
-      <div className="flex items-center justify-between mb-6 px-1">
+    <div className="flex flex-col w-1/4 h-full">
+      <div className={`flex items-center justify-between px-4 py-3 rounded-t-xl ${config.bg} border-x border-t ${config.border}`}>
         <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-lg ${config.bg} ${config.color}`}>
-            <Icon size={18} strokeWidth={2.5} />
-          </div>
-          <h3 className="font-bold text-slate-800 text-lg tracking-tight">{title}</h3>
-          <span className="bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full text-xs font-bold border border-slate-200">
-            {orders.length}
-          </span>
+          <config.icon className={`${config.color}`} size={20} />
+          <h2 className={`text-sm font-bold ${config.color}`}>{title}</h2>
+        </div>
+        <span className={`text-sm font-extrabold px-2.5 py-0.5 rounded-full ${config.badge}`}>
+          {orders.length}
+        </span>
+      </div>
+      <div className={`flex-1 overflow-y-auto bg-white border-x border-b rounded-b-xl ${config.border} shadow-sm`}>
+        <div className="p-4 space-y-4">
+          {orders.map(order => (
+            <OrderCard 
+              key={order.id} 
+              order={order} 
+              config={config}
+              onStatusUpdate={onStatusUpdate}
+              onViewDetails={onViewDetails}
+              nextStatus={nextStatus}
+              elapsedTime={elapsedTime}
+              isCompleted={isCompletedColumn}
+            />
+          ))}
         </div>
       </div>
+    </div>
+  );
+}
 
-      {/* Orders List */}
-      <div className="flex-1 overflow-y-auto pr-2 pb-4 space-y-4 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
-        <AnimatePresence mode="popLayout">
-          {orders.map((order) => (
-            <motion.div
-              key={order.id}
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.2 }}
-            >
-              <div className={`
-                bg-white border rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group
-                ${isCompletedColumn ? 'opacity-75 hover:opacity-100 border-slate-200' : 'border-slate-200 hover:border-slate-300'}
-              `}>
-                <div className="flex">
-                  {/* Status Strip */}
-                  <div className={`w-1.5 ${config.accent.replace('border-l-', 'bg-')}`}></div>
-                  
-                  <div className="flex-1 p-5">
-                    {/* Card Header */}
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-bold text-xl text-slate-900">Room {order.guest_room_number || 'N/A'}</span>
-                          {isCompletedColumn && (
-                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
-                              order.status === 'delivered' ? 'bg-slate-100 text-slate-600' : 'bg-rose-50 text-rose-600'
-                            }`}>
-                              {order.status}
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-sm font-medium text-slate-500">{order.guest_name || 'Guest'}</div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                          <button 
-                            onClick={() => onViewDetails(order)}
-                            className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-                            title="View Full Details"
-                          >
-                            <Eye size={18} />
-                          </button>
-                          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
-                            <Clock size={12} />
-                            {elapsedTime(order.created_at)}
-                          </div>
-                      </div>
-                    </div>
+interface OrderCardProps {
+  order: Order;
+  config: any;
+  onStatusUpdate: (orderId: string, newStatus: string) => void;
+  onViewDetails: (order: Order) => void;
+  nextStatus: string;
+  elapsedTime: (date: string) => string;
+  isCompleted?: boolean;
+}
 
-                    {/* Order Items */}
-                    <div className="space-y-3 mb-5">
-                      {order.order_items.map((item, i) => (
-                        <div key={i} className="flex justify-between items-start text-sm group/item">
-                          <div className="flex gap-3">
-                            <span className="font-bold text-slate-900 min-w-[20px] text-center bg-slate-100 rounded px-1 h-fit">
-                              {item.quantity}
-                            </span>
-                            <span className="text-slate-600 font-medium leading-snug">{item.menu_items?.name || 'Unknown Item'}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+function OrderCard({ order, config, onStatusUpdate, onViewDetails, nextStatus, elapsedTime, isCompleted }: OrderCardProps) {
+  const totalItems = order.order_items.reduce((sum, item) => sum + item.quantity, 0);
 
-                    {/* Notes */}
-                    {order.notes && (
-                      <div className="mb-5 text-xs bg-amber-50 text-amber-700 p-3 rounded-lg border border-amber-100 flex gap-2">
-                        <AlertCircle size={14} className="shrink-0 mt-0.5" />
-                        <span className="font-medium">{order.notes}</span>
-                      </div>
-                    )}
+  return (
+    <motion.div 
+      layout
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.3, ease: 'easeInOut' }}
+      className={`bg-white rounded-xl border ${config.border} shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-300 group`}
+    >
+      <div className="p-4">
+        <div className="flex justify-between items-start mb-3">
+          <div>
+            <p className="font-bold text-slate-800">Room {order.guest_room_number}</p>
+            <p className="text-xs text-slate-500 font-medium">{order.guest_name}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className={`text-xs font-bold px-2 py-1 rounded-full ${config.badge}`}>
+              {elapsedTime(order.created_at)} ago
+            </span>
+            <button onClick={() => onViewDetails(order)} className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md transition-colors">
+              <Eye size={16} />
+            </button>
+          </div>
+        </div>
 
-                    {/* Action Button */}
-                    {!isCompletedColumn && (
-                      <button 
-                        onClick={() => onStatusUpdate(order.id, nextStatus)}
-                        className={`
-                          w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-sm
-                          ${config.button}
-                        `}
-                      >
-                        {config.label === 'New Orders' && (
-                          <>
-                            <ChefHat size={16} />
-                            Start Preparing
-                          </>
-                        )}
-                        {config.label === 'Preparing' && (
-                          <>
-                            <CheckCircle2 size={16} />
-                            Mark Ready
-                          </>
-                        )}
-                        {config.label === 'Ready to Serve' && (
-                          <>
-                            <Truck size={16} />
-                            Mark Delivered
-                          </>
-                        )}
-                      </button>
-                    )}
-                    
-                    {isCompletedColumn && (
-                       <div className="pt-3 mt-3 border-t border-slate-100 flex justify-between items-center text-xs text-slate-400">
-                         <span>{order.order_items.length} items</span>
-                         <span className="font-medium text-slate-600">Total: K{order.total_amount}</span>
-                       </div>
-                    )}
-                  </div>
-                </div>
+        <div className="border-t border-dashed border-slate-200 my-3"></div>
+
+        <div className="space-y-2 mb-4">
+          {order.order_items.map(item => (
+            <div key={item.id} className="flex items-center justify-between text-sm">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-slate-500">{item.quantity}x</span>
+                <p className="text-slate-700 font-medium">{item.menu_items.name}</p>
               </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-
-        {orders.length === 0 && (
-          <div className="border-2 border-dashed border-slate-200 rounded-2xl p-10 flex flex-col items-center justify-center text-slate-400 bg-slate-50/50">
-            <div className={`p-4 rounded-full bg-slate-100 mb-3 opacity-50`}>
-              <Icon size={24} />
             </div>
-            <span className="text-sm font-semibold opacity-70">No {config.label.toLowerCase()}</span>
+          ))}
+        </div>
+
+        {order.notes && (
+          <div className="mb-4 p-2.5 bg-amber-50/50 border border-amber-100 rounded-lg">
+            <p className="text-xs text-amber-700 font-medium leading-snug">{order.notes}</p>
           </div>
         )}
+
+        {!isCompleted && nextStatus && (
+          <button 
+            onClick={() => onStatusUpdate(order.id, nextStatus)}
+            className={`w-full text-center py-2.5 rounded-lg font-bold text-sm transition-all duration-200 shadow-lg ${config.button} hover:shadow-xl active:scale-95`}
+          >
+            {`Move to ${nextStatus.charAt(0).toUpperCase() + nextStatus.slice(1)}`}
+          </button>
+        )}
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -1,23 +1,33 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import ImageUpload from '@/components/ui/ImageUpload';
 import MultiImageUpload from '@/components/ui/MultiImageUpload';
 import { 
   Loader2, X, Plus, ChevronRight, ChevronLeft, 
-  Check, BedDouble, Image as ImageIcon, ListPlus 
+  Check, BedDouble, Image as ImageIcon, ListPlus, CheckCircle,
+  Building, DollarSign, FileText
 } from 'lucide-react';
 
 interface RoomTypeWizardProps {
   initialData?: any;
 }
 
+const POPULAR_AMENITIES = [
+  'Free Wi-Fi', 'Air Conditioning', 'Flat-screen TV', 'Private Bathroom',
+  'Mini Bar', 'Safe', 'Balcony', 'City View', 'Ocean View',
+  'Coffee Machine', 'Desk', 'Ironing Facilities', 'Hairdryer',
+  'Room Service', 'Wake-up Service', 'Soundproofing'
+];
+
 const STEPS = [
-  { id: 1, name: 'Details', icon: BedDouble },
-  { id: 2, name: 'Media', icon: ImageIcon },
-  { id: 3, name: 'Amenities', icon: ListPlus },
+  { id: 1, name: 'Property', icon: Building },
+  { id: 2, name: 'Basic Info', icon: FileText },
+  { id: 3, name: 'Pricing', icon: DollarSign },
+  { id: 4, name: 'Media', icon: ImageIcon },
+  { id: 5, name: 'Amenities', icon: ListPlus },
 ];
 
 export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
@@ -27,18 +37,21 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
   const supabase = createClient();
   const [properties, setProperties] = useState<any[]>([]);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>('');
+  const [customAmenity, setCustomAmenity] = useState('');
 
   // Fetch properties
-  useState(() => {
+  useEffect(() => {
     const init = async () => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-
-        // Fetch User's Properties
-        const { data: userProperties } = await supabase
+        // Fetch User's Properties (RLS will filter)
+        const { data: userProperties, error } = await supabase
             .from('properties')
-            .select('id, name')
-            .eq('created_by', user.id);
+            .select('id, name');
+
+        if (error) {
+            console.error('Error fetching properties:', error);
+            alert('Could not fetch properties. Please try again.');
+            return;
+        }
         
         if (userProperties) {
             setProperties(userProperties);
@@ -53,7 +66,7 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
         }
     };
     init();
-  });
+  }, [initialData]);
   
   const [formData, setFormData] = useState({
     name: initialData?.name || '',
@@ -72,8 +85,16 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
             alert('Please select a property.');
             return;
         }
-        if (!formData.name || !formData.base_price || !formData.capacity) {
-          alert('Please fill in the required fields (Name, Price, Capacity)');
+      }
+      if (currentStep === 2) {
+        if (!formData.name) {
+          alert('Please enter a room name.');
+          return;
+        }
+      }
+      if (currentStep === 3) {
+        if (!formData.base_price || !formData.capacity) {
+          alert('Please fill in the required fields (Price, Capacity)');
           return;
         }
       }
@@ -120,7 +141,7 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
       
       {/* Property Selection */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm mb-8">
+      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
         <div className="mb-4">
             <label className="block text-base font-black text-slate-900">Select Property</label>
             <p className="text-sm text-slate-500 mt-1">Which property does this room type belong to?</p>
@@ -159,9 +180,13 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
             </div>
         )}
       </div>
+    </div>
+  );
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="col-span-2">
+  const renderStep2 = () => (
+    <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+      <div className="grid grid-cols-1 gap-6">
+        <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Room Type Name <span className="text-red-500">*</span></label>
           <input
             required
@@ -172,6 +197,23 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
           />
         </div>
 
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <textarea
+            className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 bg-white focus:ring-2 focus:ring-zambia-green focus:border-transparent"
+            rows={6}
+            placeholder="Describe the room features and view..."
+            value={formData.description}
+            onChange={e => setFormData({ ...formData, description: e.target.value })}
+          />
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderStep3 = () => (
+    <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Base Price (ZMW) <span className="text-red-500">*</span></label>
           <div className="relative">
@@ -198,22 +240,11 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
             onChange={e => setFormData({ ...formData, capacity: Number(e.target.value) })}
           />
         </div>
-
-        <div className="col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-          <textarea
-            className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 bg-white focus:ring-2 focus:ring-zambia-green focus:border-transparent"
-            rows={4}
-            placeholder="Describe the room features and view..."
-            value={formData.description}
-            onChange={e => setFormData({ ...formData, description: e.target.value })}
-          />
-        </div>
       </div>
     </div>
   );
 
-  const renderStep2 = () => (
+  const renderStep4 = () => (
     <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
       <div>
         <h3 className="text-lg font-medium text-gray-900 mb-4">Main Cover Image</h3>
@@ -238,68 +269,127 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
     </div>
   );
 
-  const renderStep3 = () => {
-    const handleAddAmenity = () => {
+  const renderStep5 = () => {
+    const toggleAmenity = (name: string) => {
+      const exists = formData.amenities.some((a: any) => a.name === name);
+      if (exists) {
+        setFormData({
+          ...formData,
+          amenities: formData.amenities.filter((a: any) => a.name !== name)
+        });
+      } else {
+        setFormData({
+          ...formData,
+          amenities: [...formData.amenities, { name }]
+        });
+      }
+    };
+
+    const handleAddCustomAmenity = () => {
+      if (customAmenity.trim()) {
+        const exists = formData.amenities.some((a: any) => a.name.toLowerCase() === customAmenity.trim().toLowerCase());
+        if (!exists) {
+          setFormData({
+            ...formData,
+            amenities: [...formData.amenities, { name: customAmenity.trim() }]
+          });
+          setCustomAmenity('');
+        }
+      }
+    };
+
+    const removeAmenity = (name: string) => {
       setFormData({
         ...formData,
-        amenities: [...formData.amenities, { name: '' }]
+        amenities: formData.amenities.filter((a: any) => a.name !== name)
       });
-    };
-
-    const handleRemoveAmenity = (index: number) => {
-      const newAmenities = formData.amenities.filter((_: any, i: number) => i !== index);
-      setFormData({ ...formData, amenities: newAmenities });
-    };
-
-    const handleAmenityChange = (index: number, value: string) => {
-      const newAmenities = [...formData.amenities];
-      newAmenities[index] = { name: value };
-      setFormData({ ...formData, amenities: newAmenities });
     };
 
     return (
       <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
         <div>
-          <div className="flex justify-between items-center mb-4">
-            <div>
-               <h3 className="text-lg font-medium text-gray-900">Room Amenities</h3>
-               <p className="text-sm text-gray-500">List features like AC, WiFi, TV, etc.</p>
-            </div>
-            <button
-              type="button"
-              onClick={handleAddAmenity}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors"
-            >
-              <Plus size={18} /> Add Amenity
-            </button>
+          <div className="text-center max-w-2xl mx-auto mb-8">
+             <h3 className="text-xl font-bold text-gray-900 mb-2">Room Amenities</h3>
+             <p className="text-gray-500">Select the features and amenities available in this room.</p>
           </div>
-          
-          {formData.amenities.length === 0 ? (
-            <div className="text-center py-12 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50">
-              <ListPlus className="mx-auto h-12 w-12 text-gray-300 mb-3" />
-              <p className="text-gray-500">No amenities added yet.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {formData.amenities.map((amenity: any, index: number) => (
-                <div key={index} className="flex gap-2 items-center bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
-                  <input
-                    placeholder="e.g. Free WiFi"
-                    className="flex-1 border-none p-0 text-gray-900 placeholder-gray-400 focus:ring-0 font-medium"
-                    value={amenity.name}
-                    onChange={e => handleAmenityChange(index, e.target.value)}
-                  />
+
+          {/* Popular Amenities */}
+          <div className="mb-8">
+            <h4 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <CheckCircle size={16} className="text-zambia-green" /> Popular Amenities
+            </h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {POPULAR_AMENITIES.map((amenity) => {
+                const isSelected = formData.amenities.some((a: any) => a.name === amenity);
+                return (
                   <button
+                    key={amenity}
                     type="button"
-                    onClick={() => handleRemoveAmenity(index)}
-                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                    onClick={() => toggleAmenity(amenity)}
+                    className={`
+                      relative flex items-center p-3 rounded-xl border-2 transition-all duration-200 text-left text-sm font-medium
+                      ${isSelected 
+                        ? 'border-zambia-green bg-green-50 text-zambia-green' 
+                        : 'border-slate-100 bg-white text-slate-600 hover:border-slate-300'
+                      }
+                    `}
                   >
-                    <X size={18} />
+                    <div className={`
+                      w-4 h-4 rounded border flex items-center justify-center mr-2 transition-colors flex-shrink-0
+                      ${isSelected ? 'bg-zambia-green border-zambia-green' : 'bg-white border-slate-300'}
+                    `}>
+                      {isSelected && <Check size={12} className="text-white" />}
+                    </div>
+                    {amenity}
                   </button>
-                </div>
-              ))}
+                );
+              })}
             </div>
-          )}
+          </div>
+
+          {/* Custom Amenities */}
+          <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+            <h4 className="text-sm font-bold text-gray-900 mb-4">Add Custom Amenities</h4>
+            <div className="flex gap-3 mb-4">
+              <input
+                type="text"
+                placeholder="e.g. Jacuzzi, Butler Service..."
+                className="flex-1 rounded-xl border border-gray-300 px-4 py-3 text-gray-900 bg-white focus:ring-2 focus:ring-zambia-green focus:border-transparent"
+                value={customAmenity}
+                onChange={(e) => setCustomAmenity(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomAmenity())}
+              />
+              <button
+                type="button"
+                onClick={handleAddCustomAmenity}
+                disabled={!customAmenity.trim()}
+                className="px-6 py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Add
+              </button>
+            </div>
+
+            {/* Display Selected Custom Amenities (those not in popular list) */}
+            <div className="flex flex-wrap gap-2">
+              {formData.amenities
+                .filter((a: any) => !POPULAR_AMENITIES.includes(a.name))
+                .map((amenity: any, index: number) => (
+                  <div key={index} className="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-lg shadow-sm">
+                    <span className="text-sm font-medium text-slate-700">{amenity.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeAmenity(amenity.name)}
+                      className="text-slate-400 hover:text-red-500 transition-colors"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
+                {formData.amenities.filter((a: any) => !POPULAR_AMENITIES.includes(a.name)).length === 0 && (
+                  <p className="text-sm text-slate-400 italic">No custom amenities added.</p>
+                )}
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -343,36 +433,38 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
         {currentStep === 1 && renderStep1()}
         {currentStep === 2 && renderStep2()}
         {currentStep === 3 && renderStep3()}
-      </div>
+        {currentStep === 4 && renderStep4()}
+        {currentStep === 5 && renderStep5()}
 
-      {/* Footer Actions */}
-      <div className="mt-8 flex justify-between items-center">
-        <button
-          onClick={() => currentStep === 1 ? router.back() : handleBack()}
-          className="px-6 py-2.5 rounded-lg font-medium text-gray-600 hover:bg-gray-100 transition-colors"
-        >
-          {currentStep === 1 ? 'Cancel' : 'Back'}
-        </button>
+        {/* Footer Actions */}
+        <div className="mt-8 flex justify-between items-center pt-6 border-t border-slate-100">
+          <button
+            onClick={() => currentStep === 1 ? router.back() : handleBack()}
+            className="px-6 py-2.5 rounded-lg font-medium text-gray-600 hover:bg-gray-100 transition-colors"
+          >
+            {currentStep === 1 ? 'Cancel' : 'Back'}
+          </button>
 
-        <button
-          onClick={() => currentStep === STEPS.length ? handleSubmit() : handleNext()}
-          disabled={loading}
-          className={`
-            flex items-center gap-2 px-8 py-2.5 rounded-lg font-bold text-white shadow-lg transition-all
-            ${loading 
-              ? 'bg-gray-400 cursor-not-allowed' 
-              : 'bg-zambia-green hover:bg-zambia-green/90 hover:shadow-xl active:scale-95'
-            }
-          `}
-        >
-          {loading ? (
-            <Loader2 className="animate-spin" size={20} />
-          ) : currentStep === STEPS.length ? (
-            <>Save Room Type <Check size={20} /></>
-          ) : (
-            <>Next Step <ChevronRight size={20} /></>
-          )}
-        </button>
+          <button
+            onClick={() => currentStep === STEPS.length ? handleSubmit() : handleNext()}
+            disabled={loading}
+            className={`
+              flex items-center gap-2 px-8 py-2.5 rounded-lg font-bold text-white shadow-lg transition-all
+              ${loading 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-zambia-green hover:bg-zambia-green/90 hover:shadow-xl active:scale-95'
+              }
+            `}
+          >
+            {loading ? (
+              <Loader2 className="animate-spin" size={20} />
+            ) : currentStep === STEPS.length ? (
+              <>Save Room Type <Check size={20} /></>
+            ) : (
+              <>Next Step <ChevronRight size={20} /></>
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );

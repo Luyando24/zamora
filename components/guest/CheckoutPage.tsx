@@ -85,6 +85,10 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
 
       if (itemsError) throw itemsError;
 
+      // Save Order ID to LocalStorage for Guest History
+      const savedOrders = JSON.parse(localStorage.getItem('zamora_guest_order_ids') || '[]');
+      localStorage.setItem('zamora_guest_order_ids', JSON.stringify([...savedOrders, orderId]));
+
       setStep('success');
       setTimeout(() => {
         onOrderSuccess();

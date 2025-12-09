@@ -66,19 +66,7 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="flex h-full w-72 flex-col bg-white border-r border-slate-100 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.05)]">
-      {/* Header */}
-      <div className="flex h-20 items-center px-8">
-        <div className="flex items-center gap-3">
-           <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center text-white font-black shadow-lg shadow-slate-900/20">
-             Z
-           </div>
-           <div>
-             <h1 className="text-lg font-black tracking-tight text-slate-900 leading-none">ZAMORA</h1>
-             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Hospitality OS</p>
-           </div>
-        </div>
-      </div>
+    <div className="flex h-full w-72 flex-col bg-white border-r border-slate-200 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.05)] pt-4">
       
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-8 custom-scrollbar">

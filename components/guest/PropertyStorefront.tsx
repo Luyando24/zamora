@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { 
   ShoppingBag, Utensils, BedDouble, Search, Plus, Minus, X, 
   MapPin, Phone, Mail, Globe, Clock, CheckCircle, Star, 
-  ChevronRight, ArrowRight, Instagram, Facebook, Twitter, Building2
+  ChevronRight, ArrowRight, Instagram, Facebook, Twitter, Building2, ArrowLeft, Wifi, Tv, Coffee, Wind
 } from 'lucide-react';
 import Image from 'next/image';
 
@@ -17,6 +17,7 @@ interface PropertyStorefrontProps {
 
 export default function PropertyStorefront({ property, roomTypes, menuItems, categories }: PropertyStorefrontProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'rooms' | 'dining' | 'amenities'>('overview');
+  const [activeRoom, setActiveRoom] = useState<any>(null);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [cart, setCart] = useState<any[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -274,10 +275,10 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
                     <p className="text-slate-600 text-sm mb-8 line-clamp-2 leading-relaxed">{room.description}</p>
                     
                     <button 
-                      onClick={() => addToCart(room, 'room')}
+                      onClick={() => setActiveRoom(room)}
                       className="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-black transition-all shadow-lg hover:shadow-xl active:scale-95"
                     >
-                      Book Now
+                      View Details & Book
                     </button>
                   </div>
                 </div>
