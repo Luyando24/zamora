@@ -634,7 +634,7 @@ function OrderCard({ order, config, onStatusUpdate, onViewDetails, nextStatus, e
             <div key={item.id} className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2">
                 <span className="font-bold text-slate-500">{item.quantity}x</span>
-                <p className="text-slate-700 font-medium">{item.menu_items.name}</p>
+                <p className="text-slate-700 font-medium">{item.menu_items?.name || 'Unknown Item'}</p>
               </div>
             </div>
           ))}
