@@ -21,12 +21,13 @@ interface OrderItem {
   unit_price: number;
   total_price: number;
   // Snapshot fields
-  item_name?: string;
-  item_description?: string;
-  item_image_url?: string;
-  weight?: string;
-  extras?: any;
-  options?: any;
+   item_name?: string;
+   item_description?: string;
+   item_ingredients?: string;
+   item_image_url?: string;
+   weight?: string;
+   extras?: any;
+   options?: any;
   
   menu_items: {
     name: string;
@@ -207,11 +208,12 @@ export default function OrdersPage() {
             unit_price,
             total_price,
             item_name,
-            item_description,
-            item_image_url,
-            weight,
-            extras,
-            options,
+             item_description,
+             item_ingredients,
+             item_image_url,
+             weight,
+             extras,
+             options,
             menu_items (
               name,
               description,
@@ -469,10 +471,10 @@ export default function OrdersPage() {
                     <div className="space-y-3">
                         {Array.isArray(selectedOrder.order_items) && selectedOrder.order_items.map((item, i) => {
                             const itemName = item.item_name || item.menu_items?.name;
-                            const itemImage = item.item_image_url || item.menu_items?.image_url;
-                            const itemDesc = item.item_description || item.menu_items?.description || item.menu_items?.ingredients;
-
-                            if (!itemName) {
+                             const itemImage = item.item_image_url || item.menu_items?.image_url;
+                             const itemDesc = item.item_description || item.menu_items?.description || item.item_ingredients || item.menu_items?.ingredients;
+ 
+                             if (!itemName) {
                                 return (
                                     <div key={i} className="p-3 rounded-lg bg-slate-50 border border-slate-200">
                                         <div className="flex items-center gap-3">
