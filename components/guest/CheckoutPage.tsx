@@ -64,7 +64,15 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
           guest_name: formData.name,
           guest_phone: formData.phone,
           guest_room_number: formData.roomNumber,
-          notes: formData.notes
+          notes: formData.notes,
+          // Snapshot fields (Summary)
+          item_name: cart.map(i => `${i.quantity}x ${i.name}`).join(', '),
+          item_description: cart.map(i => i.description).filter(Boolean).join('; '),
+          item_image_url: cart[0]?.image_url,
+          weight: cart.map(i => i.weight).filter(Boolean).join(', '),
+          category: cart[0]?.category, // Use category of first item or main item
+          options: JSON.stringify(cart.flatMap(i => i.selectedOptions || [])),
+          extras: JSON.stringify([]) // Populate if you have extras logic
         });
 
       if (orderError) throw orderError;
@@ -76,7 +84,14 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
         quantity: item.quantity,
         unit_price: item.price || item.base_price,
         total_price: (item.price || item.base_price) * item.quantity,
-        notes: item.selectedOptions?.join(', ') // Simplified options handling
+        notes: item.selectedOptions?.join(', '), // Simplified options handling
+        // Snapshot fields
+        item_name: item.name,
+        item_description: item.description,
+        item_image_url: item.image_url,
+        weight: item.weight,
+        category: item.category,
+        options: item.selectedOptions ? JSON.stringify(item.selectedOptions) : JSON.stringify([])
       }));
 
       const { error: itemsError } = await supabase

@@ -20,6 +20,14 @@ interface OrderItem {
   notes?: string;
   unit_price: number;
   total_price: number;
+  // Snapshot fields
+  item_name?: string;
+  item_description?: string;
+  item_image_url?: string;
+  weight?: string;
+  extras?: any;
+  options?: any;
+  
   menu_items: {
     name: string;
     description?: string;
@@ -198,6 +206,12 @@ export default function OrdersPage() {
             notes,
             unit_price,
             total_price,
+            item_name,
+            item_description,
+            item_image_url,
+            weight,
+            extras,
+            options,
             menu_items (
               name,
               description,
@@ -453,19 +467,26 @@ export default function OrdersPage() {
                  <div className="bg-white p-4 rounded-xl border border-slate-200/80">
                     <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Items</h3>
                     <div className="space-y-3">
-                        {selectedOrder.order_items.map((item, i) => {
-                            // Robust check for menu_items and its essential properties
-                            if (!item.menu_items || !item.menu_items.name) {
+                        {Array.isArray(selectedOrder.order_items) && selectedOrder.order_items.map((item, i) => {
+                            const itemName = item.item_name || item.menu_items?.name;
+                            const itemImage = item.item_image_url || item.menu_items?.image_url;
+                            const itemDesc = item.item_description || item.menu_items?.description || item.menu_items?.ingredients;
+
+                            if (!itemName) {
                                 return (
-                                    <div key={i} className="flex items-center gap-3 text-sm text-slate-400 p-2 bg-slate-50 rounded-md">
-                                        <span className="bg-slate-200 font-bold w-7 h-7 rounded-md flex items-center justify-center text-xs border border-slate-300">{item.quantity}x</span>
-                                        <div className="flex-1">
-                                            <p className="font-semibold text-slate-500">Menu item data is unavailable.</p>
-                                            {item.notes && (
-                                                <div className="mt-1 text-amber-600 text-xs">
-                                                    Note: {item.notes}
-                                                </div>
-                                            )}
+                                    <div key={i} className="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                                        <div className="flex items-center gap-3">
+                                            <span className="bg-slate-200 text-slate-600 font-bold w-7 h-7 rounded-md flex items-center justify-center text-xs shrink-0 border border-slate-300">
+                                                {item.quantity}x
+                                            </span>
+                                            <div className="flex-1">
+                                                <p className="font-semibold text-slate-600">Menu item data is unavailable</p>
+                                                {item.notes && (
+                                                    <div className="mt-1.5 text-amber-600 text-xs font-medium bg-amber-50 px-2 py-1 rounded border border-amber-100 inline-block">
+                                                        Note: {item.notes}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 );
@@ -474,28 +495,25 @@ export default function OrdersPage() {
                             return (
                                 <div key={i} className="flex justify-between items-start pb-3 border-b border-slate-100 last:border-0 last:pb-0">
                                     <div className="flex gap-3 w-full">
-                                        {/* Quantity Badge */}
                                         <span className="bg-slate-100 text-slate-700 font-bold w-7 h-7 rounded-md flex items-center justify-center text-xs shrink-0 border border-slate-200 mt-1">
                                             {item.quantity}x
                                         </span>
 
-                                        {/* Image (if available) */}
-                                        {item.menu_items?.image_url && (
-                                        <div className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden shrink-0">
-                                            <img src={item.menu_items.image_url} alt={item.menu_items.name} className="w-full h-full object-cover" />
-                                        </div>
+                                        {itemImage && (
+                                            <div className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden shrink-0">
+                                                <img src={itemImage} alt={itemName} className="w-full h-full object-cover" />
+                                            </div>
                                         )}
 
                                         <div className="flex-1">
                                             <div className="flex justify-between items-start">
-                                                <p className="font-bold text-slate-800 text-sm">{item.menu_items?.name}</p>
+                                                <p className="font-bold text-slate-800 text-sm">{itemName}</p>
                                                 <p className="font-bold text-slate-900 text-sm">K{item.total_price?.toFixed(2) || '0.00'}</p>
                                             </div>
                                             
-                                            {/* Description/Ingredients */}
-                                            {(item.menu_items?.description || item.menu_items?.ingredients) && (
+                                            {itemDesc && (
                                                 <p className="text-slate-500 text-xs mt-0.5 line-clamp-2">
-                                                    {item.menu_items.description || item.menu_items.ingredients}
+                                                    {itemDesc}
                                                 </p>
                                             )}
 
@@ -634,7 +652,7 @@ function OrderCard({ order, config, onStatusUpdate, onViewDetails, nextStatus, e
             <div key={item.id} className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2">
                 <span className="font-bold text-slate-500">{item.quantity}x</span>
-                <p className="text-slate-700 font-medium">{item.menu_items?.name || 'Unknown Item'}</p>
+                <p className="text-slate-700 font-medium">{item.item_name || item.menu_items?.name || 'Unknown Item'}</p>
               </div>
             </div>
           ))}
