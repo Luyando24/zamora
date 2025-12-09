@@ -58,7 +58,7 @@ export default function MenuStorefront({ property, menuItems, categories, roomNu
       }
       return [...prev, { ...item, type: 'food', quantity: quantity, ...options }];
     });
-    setIsCartOpen(true);
+    // setIsCartOpen(true); // Don't auto-open cart
   };
 
   const updateQuantity = (id: string, delta: number) => {
@@ -407,6 +407,24 @@ export default function MenuStorefront({ property, menuItems, categories, roomNu
                 Checkout <ArrowRight size={20} />
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating Cart Summary */}
+      {cart.length > 0 && (
+        <div className="fixed bottom-24 md:bottom-8 left-4 right-4 md:left-auto md:right-8 md:w-96 z-40 animate-in slide-in-from-bottom duration-300">
+          <div className="bg-slate-900 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between border border-slate-800 backdrop-blur-md bg-opacity-95">
+             <div className="flex flex-col">
+                <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">{cart.reduce((a, b) => a + b.quantity, 0)} Items</span>
+                <span className="text-xl font-black">K{cartTotal.toFixed(2)}</span>
+             </div>
+             <button 
+               onClick={() => setIsCartOpen(true)}
+               className="bg-white text-slate-900 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-slate-200 transition-colors flex items-center gap-2 shadow-sm transform active:scale-95"
+             >
+               View Order <ArrowRight size={16} />
+             </button>
           </div>
         </div>
       )}
