@@ -25,6 +25,35 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const supabase = createClient();
+  const [properties, setProperties] = useState<any[]>([]);
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string>('');
+
+  // Fetch properties
+  useState(() => {
+    const init = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Fetch User's Properties
+        const { data: userProperties } = await supabase
+            .from('properties')
+            .select('id, name')
+            .eq('created_by', user.id);
+        
+        if (userProperties) {
+            setProperties(userProperties);
+            
+            // If editing, set from initialData
+            if (initialData?.property_id) {
+                setSelectedPropertyId(initialData.property_id);
+            } else if (userProperties.length === 1) {
+                // Auto-select if only one
+                setSelectedPropertyId(userProperties[0].id);
+            }
+        }
+    };
+    init();
+  });
   
   const [formData, setFormData] = useState({
     name: initialData?.name || '',
@@ -39,6 +68,10 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
   const handleNext = () => {
     if (currentStep < STEPS.length) {
       if (currentStep === 1) {
+        if (!selectedPropertyId) {
+            alert('Please select a property.');
+            return;
+        }
         if (!formData.name || !formData.base_price || !formData.capacity) {
           alert('Please fill in the required fields (Name, Price, Capacity)');
           return;
@@ -57,28 +90,11 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      let property_id = user?.user_metadata?.property_id || user?.user_metadata?.hotel_id;
-
-      if (!property_id) {
-         // Fallback: Check if user profile has property_id (better source of truth)
-         const { data: profile } = await supabase.from('profiles').select('property_id').eq('id', user?.id).single();
-         property_id = profile?.property_id;
+      if (!selectedPropertyId) {
+          throw new Error('Please select a property.');
       }
 
-      if (!property_id) {
-          // Fallback 2: For demo/dev purposes, if user is super_admin, let them pick the first property or use a default
-          // In a real multi-tenant app, this should force a selection UI. 
-          // For now, we'll try to find ANY property to attach to.
-          const { data: anyProperty } = await supabase.from('properties').select('id').limit(1).single();
-          property_id = anyProperty?.id;
-          
-          if (!property_id) {
-             throw new Error('No Property ID associated with your account. Please contact support.');
-          }
-      }
-
-      const payload = { ...formData, property_id };
+      const payload = { ...formData, property_id: selectedPropertyId };
       
       let error;
       if (initialData?.id) {
@@ -102,6 +118,48 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
 
   const renderStep1 = () => (
     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+      
+      {/* Property Selection */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm mb-8">
+        <div className="mb-4">
+            <label className="block text-base font-black text-slate-900">Select Property</label>
+            <p className="text-sm text-slate-500 mt-1">Which property does this room type belong to?</p>
+        </div>
+
+        {properties.length === 0 ? (
+            <div className="text-sm text-slate-500 italic bg-slate-50 p-4 rounded-lg text-center">No properties found. Please create a property first.</div>
+        ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                {properties.map(prop => {
+                    const isSelected = selectedPropertyId === prop.id;
+                    return (
+                        <button
+                            key={prop.id}
+                            type="button"
+                            onClick={() => setSelectedPropertyId(prop.id)}
+                            className={`relative flex items-center p-3 rounded-xl border-2 transition-all duration-200 group text-left ${
+                                isSelected
+                                ? 'border-zambia-green bg-green-50/50'
+                                : 'border-slate-100 bg-white hover:border-slate-300'
+                            }`}
+                        >
+                            <div className={`w-5 h-5 rounded-full border flex items-center justify-center mr-3 transition-colors ${
+                                isSelected 
+                                ? 'bg-zambia-green border-zambia-green' 
+                                : 'bg-white border-slate-300 group-hover:border-slate-400'
+                            }`}>
+                                {isSelected && <div className="w-2 h-2 bg-white rounded-full" />}
+                            </div>
+                            <span className={`font-bold text-sm ${isSelected ? 'text-zambia-green' : 'text-slate-700'}`}>
+                                {prop.name}
+                            </span>
+                        </button>
+                    );
+                })}
+            </div>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-1">Room Type Name <span className="text-red-500">*</span></label>

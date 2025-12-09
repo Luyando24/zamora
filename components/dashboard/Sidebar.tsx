@@ -3,24 +3,61 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
-import { LayoutDashboard, CalendarDays, BedDouble, FileText, Settings, LogOut, DoorOpen, Utensils, Building2 } from 'lucide-react';
+import { 
+  LayoutDashboard, CalendarDays, BedDouble, FileText, 
+  Settings, LogOut, DoorOpen, Utensils, Building2, 
+  ChevronRight, User
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-const navigation = [
-  { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Properties', href: '/dashboard/properties', icon: Building2 },
-  { name: 'Inventory Grid', href: '/dashboard/inventory', icon: CalendarDays },
-  { name: 'Rooms Management', href: '/dashboard/rooms', icon: DoorOpen },
-  { name: 'Kitchen Orders', href: '/dashboard/orders', icon: Utensils },
-  { name: 'Food & Beverage', href: '/dashboard/menu', icon: Utensils },
-  { name: 'Housekeeping', href: '/housekeeping', icon: BedDouble }, // Separate module, but linked here
-  { name: 'ZRA Reports', href: '/dashboard/zra', icon: FileText },
-  { name: 'Settings', href: '/dashboard/settings', icon: Settings },
+// Grouped Navigation
+const navigationGroups = [
+  {
+    title: 'Main',
+    items: [
+      { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
+    ]
+  },
+  {
+    title: 'Operations',
+    items: [
+      { name: 'Inventory Grid', href: '/dashboard/inventory', icon: CalendarDays },
+      { name: 'Kitchen Orders', href: '/dashboard/orders', icon: Utensils },
+      { name: 'Food & Beverage', href: '/dashboard/menu', icon: Utensils },
+      { name: 'Housekeeping', href: '/housekeeping', icon: BedDouble },
+    ]
+  },
+  {
+    title: 'Management',
+    items: [
+      { name: 'Properties', href: '/dashboard/properties', icon: Building2 },
+      { name: 'Rooms Setup', href: '/dashboard/rooms', icon: DoorOpen },
+      { name: 'ZRA Reports', href: '/dashboard/zra', icon: FileText },
+    ]
+  },
+  {
+    title: 'System',
+    items: [
+      { name: 'Settings', href: '/dashboard/settings', icon: Settings },
+    ]
+  }
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
+  const [userEmail, setUserEmail] = useState<string>('User');
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email) {
+        setUserEmail(user.email.split('@')[0]); // Simple display name
+      }
+    };
+    getUser();
+  }, []);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -29,46 +66,76 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="flex h-full w-64 flex-col bg-white text-slate-900 border-r border-slate-200 shadow-sm">
-      <div className="flex h-16 items-center px-6 border-b border-slate-100">
-        <div className="flex items-center gap-2">
-           <div className="h-8 w-8 rounded bg-zambia-blue flex items-center justify-center text-white font-bold">Z</div>
-           <h1 className="text-lg font-bold tracking-wide text-slate-900">ZAMORA</h1>
+    <div className="flex h-full w-72 flex-col bg-white border-r border-slate-100 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.05)]">
+      {/* Header */}
+      <div className="flex h-20 items-center px-8">
+        <div className="flex items-center gap-3">
+           <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center text-white font-black shadow-lg shadow-slate-900/20">
+             Z
+           </div>
+           <div>
+             <h1 className="text-lg font-black tracking-tight text-slate-900 leading-none">ZAMORA</h1>
+             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Hospitality OS</p>
+           </div>
         </div>
       </div>
       
-      <nav className="flex-1 space-y-1 px-3 py-4">
-        {navigation.map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`group flex items-center rounded-md px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
-                isActive
-                  ? 'bg-slate-100 text-zambia-blue shadow-sm border-l-4 border-zambia-blue'
-                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
-              }`}
-            >
-              <item.icon
-                className={`mr-3 h-5 w-5 flex-shrink-0 transition-colors ${
-                  isActive ? 'text-zambia-blue' : 'text-slate-400 group-hover:text-slate-600'
-                }`}
-              />
-              {item.name}
-            </Link>
-          );
-        })}
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-8 custom-scrollbar">
+        {navigationGroups.map((group) => (
+          <div key={group.title}>
+            <h3 className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+              {group.title}
+            </h3>
+            <div className="space-y-1">
+              {group.items.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`group flex items-center justify-between rounded-xl px-4 py-3 text-sm font-bold transition-all duration-200 ${
+                      isActive
+                        ? 'bg-slate-900 text-white shadow-md shadow-slate-900/10'
+                        : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <item.icon
+                        className={`h-5 w-5 flex-shrink-0 transition-colors ${
+                          isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'
+                        }`}
+                        strokeWidth={isActive ? 2.5 : 2}
+                      />
+                      {item.name}
+                    </div>
+                    {isActive && <ChevronRight size={14} className="text-white/50" />}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
-      <div className="border-t border-slate-100 p-4">
-        <button 
-          onClick={handleSignOut}
-          className="group flex w-full items-center rounded-md px-3 py-2 text-sm font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors"
-        >
-          <LogOut className="mr-3 h-5 w-5 text-slate-400 group-hover:text-slate-600" />
-          Sign Out
-        </button>
+      {/* User Profile / Footer */}
+      <div className="p-4 border-t border-slate-50">
+        <div className="bg-slate-50 rounded-2xl p-4 flex items-center gap-3 border border-slate-100">
+          <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center text-slate-900 border border-slate-200 shadow-sm">
+            <User size={20} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-slate-900 truncate capitalize">{userEmail}</p>
+            <p className="text-xs text-slate-500 truncate">Manager</p>
+          </div>
+          <button 
+            onClick={handleSignOut}
+            className="p-2 text-slate-400 hover:text-rose-600 hover:bg-white rounded-lg transition-all"
+            title="Sign Out"
+          >
+            <LogOut size={18} />
+          </button>
+        </div>
       </div>
     </div>
   );

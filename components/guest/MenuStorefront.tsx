@@ -423,7 +423,7 @@ export default function MenuStorefront({ property, menuItems, categories, roomNu
                onClick={() => setIsCartOpen(true)}
                className="bg-white text-slate-900 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-slate-200 transition-colors flex items-center gap-2 shadow-sm transform active:scale-95"
              >
-               View Order <ArrowRight size={16} />
+               Continue <ArrowRight size={16} />
              </button>
           </div>
         </div>
