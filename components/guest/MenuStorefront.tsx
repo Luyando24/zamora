@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { 
   ShoppingBag, Utensils, Search, Plus, Minus, X, 
   MapPin, Phone, Clock, Star, ArrowRight, CheckCircle,
@@ -25,6 +25,27 @@ export default function MenuStorefront({ property, menuItems, categories, roomNu
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Load cart from localStorage
+  useEffect(() => {
+    const savedCart = localStorage.getItem('zamora_guest_cart');
+    if (savedCart) {
+      try {
+        setCart(JSON.parse(savedCart));
+      } catch (e) {
+        console.error('Failed to parse cart', e);
+      }
+    }
+    setIsLoaded(true);
+  }, []);
+
+  // Save cart to localStorage
+  useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem('zamora_guest_cart', JSON.stringify(cart));
+    }
+  }, [cart, isLoaded]);
 
   // -- Cart Logic --
   const addToCart = (item: any, quantity: number = 1, options: any = {}) => {

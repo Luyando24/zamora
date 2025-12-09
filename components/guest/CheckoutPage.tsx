@@ -31,8 +31,11 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
   });
 
   useEffect(() => {
-    if (isOpen && roomNumber) {
-      setFormData(prev => ({ ...prev, roomNumber: roomNumber }));
+    if (isOpen) {
+      if (roomNumber) {
+        setFormData(prev => ({ ...prev, roomNumber: roomNumber }));
+      }
+      setStep('details'); // Reset step when modal opens
     }
   }, [isOpen, roomNumber]);
 
