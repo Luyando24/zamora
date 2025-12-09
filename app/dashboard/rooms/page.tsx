@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import Modal from '@/components/ui/Modal';
-import { Plus, Edit, Trash2, BedDouble, Image as ImageIcon, AlertTriangle, ArrowRight } from 'lucide-react';
+import { Plus, Edit, Trash2, BedDouble, AlertTriangle, ArrowRight, LayoutGrid, List } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -99,56 +99,58 @@ export default function RoomsPage() {
   const SkeletonGrid = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="bg-gray-100 rounded-lg h-64"></div>
+        <div key={i} className="bg-slate-100 rounded-2xl h-64"></div>
       ))}
     </div>
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">Rooms Management</h1>
+    <div className="space-y-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Rooms Management</h1>
+           <p className="text-slate-500 text-sm">Configure room types and physical units.</p>
+        </div>
         <div className="flex gap-3">
           <button
             onClick={() => handleAddClick('type')}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded hover:bg-gray-50 font-medium"
+            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 font-bold text-sm shadow-sm transition-all"
           >
-            <Plus size={18} /> Add Room Type
+            <Plus size={16} /> Add Type
           </button>
           <button
             onClick={() => handleAddClick('unit')}
-            className="flex items-center gap-2 px-4 py-2 bg-zambia-green text-white rounded hover:bg-zambia-green/90 font-medium shadow-sm"
+            className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 text-white rounded-xl hover:bg-slate-800 font-bold text-sm shadow-lg shadow-slate-900/10 transition-all"
           >
-            <Plus size={18} /> Add Room Unit
+            <Plus size={16} /> Add Room
           </button>
         </div>
       </div>
       
       {/* Tabs */}
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
-           {/* ... tab buttons ... */}
+      <div className="bg-slate-100 p-1 rounded-xl inline-flex gap-1">
            <button
              onClick={() => setActiveTab('types')}
-             className={`py-4 px-1 border-b-2 font-medium text-sm ${
+             className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all ${
                activeTab === 'types'
-                 ? 'border-zambia-green text-zambia-green'
-                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                 ? 'bg-white text-slate-900 shadow-sm'
+                 : 'text-slate-500 hover:text-slate-700'
              }`}
            >
+             <LayoutGrid size={16} />
              Room Types
            </button>
            <button
              onClick={() => setActiveTab('rooms')}
-             className={`py-4 px-1 border-b-2 font-medium text-sm ${
+             className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all ${
                activeTab === 'rooms'
-                 ? 'border-zambia-green text-zambia-green'
-                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                 ? 'bg-white text-slate-900 shadow-sm'
+                 : 'text-slate-500 hover:text-slate-700'
              }`}
            >
-             Physical Rooms (Units)
+             <List size={16} />
+             Physical Rooms
            </button>
-        </nav>
       </div>
 
       {/* Content */}
@@ -157,34 +159,34 @@ export default function RoomsPage() {
       ) : activeTab === 'types' ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {roomTypes.map((type) => (
-            <div key={type.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col hover:shadow-md transition-shadow">
-              <div className="h-48 bg-gray-100 flex items-center justify-center relative">
+            <div key={type.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col hover:shadow-md transition-shadow group">
+              <div className="h-48 bg-slate-100 flex items-center justify-center relative overflow-hidden">
                  {type.image_url ? (
-                   <img src={type.image_url} alt={type.name} className="w-full h-full object-cover" />
+                   <img src={type.image_url} alt={type.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                  ) : (
-                   <BedDouble className="text-gray-300" size={48} />
+                   <BedDouble className="text-slate-300" size={48} />
                  )}
-                 <div className="absolute bottom-2 right-2 bg-black/60 text-white px-2 py-1 rounded text-xs">
+                 <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur text-slate-900 px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
                    Capacity: {type.capacity}
                  </div>
               </div>
-              <div className="p-4 flex-1 flex flex-col">
-                <div className="flex justify-between items-start">
-                   <h3 className="font-bold text-gray-900">{type.name}</h3>
-                   <p className="font-bold text-zambia-copper">K{type.base_price}</p>
+              <div className="p-5 flex-1 flex flex-col">
+                <div className="flex justify-between items-start mb-2">
+                   <h3 className="font-bold text-slate-900 text-lg">{type.name}</h3>
+                   <p className="font-black text-slate-900">K{type.base_price}</p>
                 </div>
-                <p className="text-sm text-gray-600 mt-2 line-clamp-2 flex-1">{type.description || 'No description provided.'}</p>
+                <p className="text-sm text-slate-500 line-clamp-2 flex-1 leading-relaxed">{type.description || 'No description provided.'}</p>
                 
-                <div className="mt-4 pt-4 border-t border-gray-100 flex justify-end gap-2">
+                <div className="mt-5 pt-4 border-t border-slate-50 flex justify-end gap-2">
                   <Link 
                     href={`/dashboard/rooms/types/${type.id}`}
-                    className="p-2 text-blue-600 hover:bg-blue-50 rounded"
+                    className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                   >
                     <Edit size={18} />
                   </Link>
                   <button 
                     onClick={() => handleDelete(type.id, 'room_types')}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded"
+                    className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
                   >
                     <Trash2 size={18} />
                   </button>
@@ -193,7 +195,7 @@ export default function RoomsPage() {
             </div>
           ))}
           {roomTypes.length === 0 && (
-             <div className="col-span-full text-center py-12 text-gray-400 border-2 border-dashed border-gray-200 rounded-lg">
+             <div className="col-span-full text-center py-12 text-slate-400 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
                No room types found. Create one to get started.
              </div>
           )}
@@ -227,23 +229,23 @@ export default function RoomsPage() {
         title="Property Setup Required"
       >
         <div className="space-y-4">
-           <div className="flex items-center gap-3 text-orange-600 bg-orange-50 p-3 rounded-lg">
+           <div className="flex items-center gap-3 text-amber-600 bg-amber-50 p-4 rounded-xl border border-amber-100">
              <AlertTriangle size={24} />
-             <p className="font-medium">You need to set up your property first.</p>
+             <p className="font-bold text-sm">You need to set up your property first.</p>
            </div>
-           <p className="text-gray-600">
+           <p className="text-slate-600 text-sm leading-relaxed">
              Before you can add rooms or room types, you must register your hotel, lodge, or guesthouse details.
            </p>
            <div className="flex justify-end gap-3 pt-2">
              <button
                onClick={() => setIsWarningOpen(false)}
-               className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
+               className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg font-bold text-sm transition-colors"
              >
                Cancel
              </button>
              <Link
                href="/dashboard/setup"
-               className="flex items-center gap-2 px-4 py-2 bg-zambia-green text-white rounded hover:bg-zambia-green/90 font-medium"
+               className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 font-bold text-sm transition-colors"
              >
                Setup Property <ArrowRight size={16} />
              </Link>
@@ -264,21 +266,26 @@ interface RoomsTableProps {
 
 function RoomsTable({ rooms, onEdit, onDelete }: RoomsTableProps) {
   return (
-    <div className="bg-white shadow overflow-hidden sm:rounded-md border border-gray-200">
-      <ul className="divide-y divide-gray-200">
+    <div className="bg-white shadow-sm overflow-hidden sm:rounded-2xl border border-slate-200">
+      <ul className="divide-y divide-slate-100">
         {rooms.map((room) => (
-          <li key={room.id} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50">
-            <div>
-              <p className="text-sm font-medium text-gray-900">Room {room.room_number}</p>
-              <p className="text-sm text-gray-500">{room.room_types?.name || 'No Type Assigned'}</p>
+          <li key={room.id} className="px-6 py-4 flex items-center justify-between hover:bg-slate-50 transition-colors group">
+            <div className="flex items-center gap-4">
+               <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 font-bold group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                 {room.room_number}
+               </div>
+               <div>
+                 <p className="text-sm font-bold text-slate-900">Room {room.room_number}</p>
+                 <p className="text-xs font-medium text-slate-500">{room.room_types?.name || 'No Type Assigned'}</p>
+               </div>
             </div>
-            <div className="flex gap-2">
-              <button onClick={() => onEdit(room)} className="text-blue-600 hover:text-blue-800"><Edit size={18} /></button>
-              <button onClick={() => onDelete(room.id)} className="text-red-600 hover:text-red-800"><Trash2 size={18} /></button>
+            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button onClick={() => onEdit(room)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"><Edit size={18} /></button>
+              <button onClick={() => onDelete(room.id)} className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"><Trash2 size={18} /></button>
             </div>
           </li>
         ))}
-        {rooms.length === 0 && <li className="px-6 py-4 text-center text-gray-500">No rooms found.</li>}
+        {rooms.length === 0 && <li className="px-6 py-12 text-center text-slate-400 text-sm">No rooms found. Add a room to get started.</li>}
       </ul>
     </div>
   );
@@ -298,83 +305,100 @@ function RoomForm({ initialData, roomTypes, onSuccess }: RoomFormProps) {
     status: initialData?.status || 'clean',
     notes: initialData?.notes || ''
   });
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { data: { user } } = await supabase.auth.getUser();
-    const hotel_id = user?.user_metadata?.hotel_id || '00000000-0000-0000-0000-000000000000';
+    setLoading(true);
 
-    const payload = { ...formData, hotel_id };
-    
-    let error;
-    if (initialData) {
-      const { error: err } = await supabase.from('rooms').update(payload).eq('id', initialData.id);
-      error = err;
-    } else {
-      const { error: err } = await supabase.from('rooms').insert(payload);
-      error = err;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    // Get property ID (simplified for brevity, assume profile has it or user metadata)
+    let propertyId = user.user_metadata?.property_id; 
+    if (!propertyId) {
+         const { data: profile } = await supabase.from('profiles').select('property_id').eq('id', user.id).single();
+         propertyId = profile?.property_id;
     }
 
-    if (error) alert('Error: ' + error.message);
-    else onSuccess();
+    if (!propertyId) {
+        alert('No property selected');
+        setLoading(false);
+        return;
+    }
+
+    const payload = {
+        ...formData,
+        property_id: propertyId
+    };
+
+    let error;
+    if (initialData) {
+        const { error: e } = await supabase.from('rooms').update(payload).eq('id', initialData.id);
+        error = e;
+    } else {
+        const { error: e } = await supabase.from('rooms').insert(payload);
+        error = e;
+    }
+
+    if (error) {
+        alert(error.message);
+    } else {
+        onSuccess();
+    }
+    setLoading(false);
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Room Number</label>
-        <input
-          required
-          placeholder="e.g. 101"
-          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 bg-white focus:ring-zambia-green focus:border-zambia-green"
-          value={formData.room_number}
-          onChange={e => setFormData({ ...formData, room_number: e.target.value })}
-        />
-      </div>
-      
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Room Type</label>
-        <select
-          required
-          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 bg-white focus:ring-zambia-green focus:border-zambia-green"
-          value={formData.room_type_id}
-          onChange={e => setFormData({ ...formData, room_type_id: e.target.value })}
+        <div>
+            <label className="block text-sm font-bold text-slate-700 mb-1">Room Number</label>
+            <input 
+                required
+                type="text" 
+                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 font-medium text-slate-900"
+                placeholder="e.g. 101"
+                value={formData.room_number}
+                onChange={e => setFormData({...formData, room_number: e.target.value})}
+            />
+        </div>
+        
+        <div>
+            <label className="block text-sm font-bold text-slate-700 mb-1">Room Type</label>
+            <select 
+                required
+                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 font-medium text-slate-900 bg-white"
+                value={formData.room_type_id}
+                onChange={e => setFormData({...formData, room_type_id: e.target.value})}
+            >
+                <option value="">Select a type...</option>
+                {roomTypes.map(t => (
+                    <option key={t.id} value={t.id}>{t.name} (Cap: {t.capacity})</option>
+                ))}
+            </select>
+        </div>
+
+        <div>
+            <label className="block text-sm font-bold text-slate-700 mb-1">Status</label>
+            <select 
+                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 font-medium text-slate-900 bg-white"
+                value={formData.status}
+                onChange={e => setFormData({...formData, status: e.target.value})}
+            >
+                <option value="clean">Clean</option>
+                <option value="dirty">Dirty</option>
+                <option value="maintenance">Maintenance</option>
+                <option value="occupied">Occupied</option>
+            </select>
+        </div>
+
+        <button 
+            type="submit" 
+            disabled={loading}
+            className="w-full py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-colors disabled:opacity-50 mt-4"
         >
-          <option value="">Select Type</option>
-          {roomTypes.map((t) => (
-            <option key={t.id} value={t.id}>{t.name} (K{t.base_price})</option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Status</label>
-        <select
-          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 bg-white focus:ring-zambia-green focus:border-zambia-green"
-          value={formData.status}
-          onChange={e => setFormData({ ...formData, status: e.target.value })}
-        >
-          <option value="clean">Clean</option>
-          <option value="dirty">Dirty</option>
-          <option value="maintenance">Maintenance</option>
-          <option value="occupied">Occupied</option>
-        </select>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Notes</label>
-        <textarea
-          rows={3}
-          placeholder="Optional notes about this room..."
-          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 bg-white focus:ring-zambia-green focus:border-zambia-green"
-          value={formData.notes}
-          onChange={e => setFormData({ ...formData, notes: e.target.value })}
-        />
-      </div>
-
-      <button type="submit" className="w-full bg-zambia-green text-white py-2 rounded hover:bg-zambia-green/90 font-bold transition-colors">
-        {initialData ? 'Update Room' : 'Add Room'}
-      </button>
+            {loading ? 'Saving...' : 'Save Room'}
+        </button>
     </form>
   );
 }

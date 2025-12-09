@@ -29,11 +29,11 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="flex h-full w-64 flex-col bg-zambia-blue text-white shadow-xl">
-      <div className="flex h-16 items-center px-6 border-b border-white/10">
+    <div className="flex h-full w-64 flex-col bg-white text-slate-900 border-r border-slate-200 shadow-sm">
+      <div className="flex h-16 items-center px-6 border-b border-slate-100">
         <div className="flex items-center gap-2">
-           <div className="h-8 w-8 rounded bg-white flex items-center justify-center text-zambia-blue font-bold">Z</div>
-           <h1 className="text-lg font-bold tracking-wide">ZAMORA</h1>
+           <div className="h-8 w-8 rounded bg-zambia-blue flex items-center justify-center text-white font-bold">Z</div>
+           <h1 className="text-lg font-bold tracking-wide text-slate-900">ZAMORA</h1>
         </div>
       </div>
       
@@ -46,13 +46,13 @@ export default function Sidebar() {
               href={item.href}
               className={`group flex items-center rounded-md px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
                 isActive
-                  ? 'bg-white/10 text-white shadow-sm border-l-4 border-white'
-                  : 'text-white/70 hover:bg-white/5 hover:text-white'
+                  ? 'bg-slate-100 text-zambia-blue shadow-sm border-l-4 border-zambia-blue'
+                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
               }`}
             >
               <item.icon
                 className={`mr-3 h-5 w-5 flex-shrink-0 transition-colors ${
-                  isActive ? 'text-white' : 'text-white/60 group-hover:text-white'
+                  isActive ? 'text-zambia-blue' : 'text-slate-400 group-hover:text-slate-600'
                 }`}
               />
               {item.name}
@@ -61,12 +61,12 @@ export default function Sidebar() {
         })}
       </nav>
 
-      <div className="border-t border-white/10 p-4">
+      <div className="border-t border-slate-100 p-4">
         <button 
           onClick={handleSignOut}
-          className="group flex w-full items-center rounded-md px-3 py-2 text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white transition-colors"
+          className="group flex w-full items-center rounded-md px-3 py-2 text-sm font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors"
         >
-          <LogOut className="mr-3 h-5 w-5 text-white/60 group-hover:text-white" />
+          <LogOut className="mr-3 h-5 w-5 text-slate-400 group-hover:text-slate-600" />
           Sign Out
         </button>
       </div>

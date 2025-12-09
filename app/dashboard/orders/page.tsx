@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { 
   Clock, CheckCircle2, ChefHat, Truck, AlertCircle, 
-  RefreshCw, Building2, Utensils, XCircle
+  RefreshCw, Building2, Utensils, XCircle, Volume2, VolumeX
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -93,6 +93,55 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [properties, setProperties] = useState<Property[]>([]);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>('');
+  const [soundEnabled, setSoundEnabled] = useState(true);
+
+  // Sound Player using Web Audio API
+  const playNotificationSound = () => {
+    if (!soundEnabled) return;
+
+    try {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContext) return;
+      
+      const ctx = new AudioContext();
+      
+      // Create oscillator for the "ding"
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      // Nice "ding" sound: High pitch dropping slightly
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, ctx.currentTime); // A5
+      osc.frequency.exponentialRampToValueAtTime(500, ctx.currentTime + 0.6); 
+      
+      // Envelope: Fast attack, slow decay
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.6);
+
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.6);
+
+      // Add a second harmonic for richness
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.type = 'triangle';
+      osc2.frequency.setValueAtTime(1760, ctx.currentTime); // A6
+      gain2.gain.setValueAtTime(0, ctx.currentTime);
+      gain2.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.05);
+      gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+      osc2.start(ctx.currentTime);
+      osc2.stop(ctx.currentTime + 0.4);
+
+    } catch (e) {
+      console.error('Audio play failed', e);
+    }
+  };
 
   const fetchProperties = async () => {
     try {
@@ -172,7 +221,11 @@ export default function OrdersPage() {
             table: 'orders',
             filter: `property_id=eq.${selectedPropertyId}`
           },
-          () => {
+          (payload) => {
+            // Play sound on new order
+            if (payload.eventType === 'INSERT') {
+                playNotificationSound();
+            }
             fetchOrders();
           }
         )
@@ -182,7 +235,7 @@ export default function OrdersPage() {
         supabase.removeChannel(channel);
       };
     }
-  }, [selectedPropertyId]);
+  }, [selectedPropertyId, soundEnabled]); // Re-subscribe if soundEnabled changes to ensure closure captures latest value
 
   const updateStatus = async (orderId: string, newStatus: string) => {
     try {
@@ -236,6 +289,24 @@ export default function OrdersPage() {
         </div>
         
         <div className="flex items-center gap-4">
+          
+          <button
+            onClick={() => {
+                const newState = !soundEnabled;
+                setSoundEnabled(newState);
+                if (newState) playNotificationSound(); // Test sound when enabling
+            }}
+            className={`p-2.5 rounded-lg transition-all active:scale-95 flex items-center gap-2 font-bold text-sm ${
+                soundEnabled 
+                ? 'bg-blue-50 text-blue-600 hover:bg-blue-100' 
+                : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
+            }`}
+            title={soundEnabled ? 'Mute Notifications' : 'Enable Notifications'}
+          >
+            {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
+            <span className="hidden sm:inline">{soundEnabled ? 'Sound On' : 'Sound Off'}</span>
+          </button>
+
           {/* Property Selector */}
           <div className="relative group">
             <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-slate-600 transition-colors" size={16} />
