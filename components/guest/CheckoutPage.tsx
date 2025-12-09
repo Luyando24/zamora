@@ -127,8 +127,11 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
         <div className="w-10" /> {/* Spacer */}
       </div>
 
+      {/* Scrollable Content Wrapper for Mobile */}
+      <div className="flex-1 overflow-y-auto flex flex-col md:contents">
+
       {/* LEFT COLUMN: Order Summary */}
-      <div className="flex-1 overflow-y-auto order-2 md:order-1 bg-white md:bg-slate-50 md:p-8">
+      <div className="shrink-0 order-2 md:order-1 bg-white md:bg-slate-50 md:p-8 md:flex-1 md:overflow-y-auto">
         <div className="max-w-2xl mx-auto space-y-6 p-4 md:p-0">
             
             {/* Desktop Header */}
@@ -197,8 +200,8 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
       </div>
 
       {/* RIGHT COLUMN: Form */}
-      <div className="w-full md:w-[480px] bg-white border-l border-slate-100 overflow-y-auto order-1 md:order-2 shrink-0">
-         <div className="p-6 md:p-8 h-full flex flex-col">
+      <div className="w-full md:w-[480px] bg-white border-l border-slate-100 order-1 md:order-2 shrink-0 md:overflow-y-auto">
+         <div className="p-6 md:p-8 md:h-full flex flex-col">
             <h2 className="text-xl font-black text-slate-900 mb-6">Delivery Details</h2>
             
             <form onSubmit={handleSubmit} className="flex-1 flex flex-col space-y-6">
@@ -322,6 +325,8 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
                 </div>
             </form>
          </div>
+      </div>
+      
       </div>
 
     </div>

@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { 
   Clock, CheckCircle2, ChefHat, Truck, AlertCircle, 
-  RefreshCw, Building2
+  RefreshCw, Building2, Utensils, XCircle
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Types
 interface Property {
@@ -34,11 +35,56 @@ interface Order {
 }
 
 const STATUS_CONFIG = {
-  pending: { label: 'New Orders', icon: AlertCircle, color: 'bg-red-50 text-red-700 border-red-100', dot: 'bg-red-500' },
-  preparing: { label: 'Preparing', icon: ChefHat, color: 'bg-orange-50 text-orange-700 border-orange-100', dot: 'bg-orange-500' },
-  ready: { label: 'Ready to Serve', icon: CheckCircle2, color: 'bg-green-50 text-green-700 border-green-100', dot: 'bg-green-500' },
-  delivered: { label: 'Delivered', icon: Truck, color: 'bg-slate-50 text-slate-700 border-slate-100', dot: 'bg-slate-500' },
-  cancelled: { label: 'Cancelled', icon: AlertCircle, color: 'bg-slate-50 text-slate-400 border-slate-100', dot: 'bg-slate-400' },
+  pending: { 
+    label: 'New Orders', 
+    icon: AlertCircle, 
+    color: 'text-rose-600', 
+    bg: 'bg-rose-50',
+    border: 'border-rose-200',
+    accent: 'border-l-rose-500',
+    badge: 'bg-rose-100 text-rose-700',
+    button: 'bg-rose-600 hover:bg-rose-700 text-white shadow-rose-200'
+  },
+  preparing: { 
+    label: 'Preparing', 
+    icon: ChefHat, 
+    color: 'text-amber-600', 
+    bg: 'bg-amber-50',
+    border: 'border-amber-200',
+    accent: 'border-l-amber-500',
+    badge: 'bg-amber-100 text-amber-800',
+    button: 'bg-amber-500 hover:bg-amber-600 text-white shadow-amber-200'
+  },
+  ready: { 
+    label: 'Ready to Serve', 
+    icon: CheckCircle2, 
+    color: 'text-emerald-600', 
+    bg: 'bg-emerald-50',
+    border: 'border-emerald-200',
+    accent: 'border-l-emerald-500',
+    badge: 'bg-emerald-100 text-emerald-700',
+    button: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200'
+  },
+  delivered: { 
+    label: 'Delivered', 
+    icon: Truck, 
+    color: 'text-slate-600', 
+    bg: 'bg-slate-50',
+    border: 'border-slate-200',
+    accent: 'border-l-slate-400',
+    badge: 'bg-slate-100 text-slate-600',
+    button: 'bg-slate-800 hover:bg-slate-900 text-white'
+  },
+  cancelled: { 
+    label: 'Cancelled', 
+    icon: XCircle, 
+    color: 'text-slate-400', 
+    bg: 'bg-slate-50',
+    border: 'border-slate-200',
+    accent: 'border-l-slate-300',
+    badge: 'bg-slate-100 text-slate-500',
+    button: ''
+  },
 };
 
 export default function OrdersPage() {
@@ -162,9 +208,9 @@ export default function OrdersPage() {
   const getElapsedTime = (dateString: string) => {
     const diff = new Date().getTime() - new Date(dateString).getTime();
     const minutes = Math.floor(diff / 60000);
-    if (minutes < 60) return `${minutes}m ago`;
+    if (minutes < 60) return `${minutes}m`;
     const hours = Math.floor(minutes / 60);
-    return `${hours}h ${minutes % 60}m ago`;
+    return `${hours}h ${minutes % 60}m`;
   };
 
   // Group orders by status
@@ -176,21 +222,27 @@ export default function OrdersPage() {
   };
 
   return (
-    <div className="h-[calc(100vh-4rem)] flex flex-col">
+    <div className="h-[calc(100vh-4rem)] flex flex-col bg-slate-50/50">
       {/* Header */}
-      <div className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shrink-0">
-        <div>
-          <h1 className="text-2xl font-black text-slate-900">Kitchen Display System</h1>
-          <p className="text-slate-500 text-sm">Manage incoming orders and kitchen workflow</p>
+      <div className="bg-white border-b border-slate-200 px-8 py-5 flex items-center justify-between shrink-0 shadow-sm z-10">
+        <div className="flex items-center gap-4">
+          <div className="p-2.5 bg-slate-900 rounded-xl text-white">
+            <Utensils size={24} />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-slate-900 tracking-tight">Kitchen Display</h1>
+            <p className="text-slate-500 text-sm font-medium">Live orders & workflow</p>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
+        
+        <div className="flex items-center gap-4">
           {/* Property Selector */}
-          <div className="relative">
-            <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+          <div className="relative group">
+            <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-slate-600 transition-colors" size={16} />
             <select
               value={selectedPropertyId}
               onChange={handlePropertyChange}
-              className="pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all"
+              className="pl-9 pr-8 py-2.5 border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 bg-slate-50 hover:bg-white hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 transition-all cursor-pointer min-w-[200px] appearance-none"
             >
               {properties.map(p => (
                 <option key={p.id} value={p.id}>
@@ -198,11 +250,15 @@ export default function OrdersPage() {
                 </option>
               ))}
             </select>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+              <div className="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[4px] border-t-slate-400"></div>
+            </div>
           </div>
 
           <button 
             onClick={fetchOrders}
-            className="p-2 hover:bg-slate-100 rounded-full text-slate-500 transition-colors"
+            className="p-2.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-700 transition-all active:scale-95"
+            title="Refresh Orders"
           >
             <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
           </button>
@@ -210,10 +266,9 @@ export default function OrdersPage() {
       </div>
 
       {/* Kanban Board */}
-      <div className="flex-1 overflow-x-auto p-6 bg-slate-50">
-        <div className="flex gap-6 h-full min-w-[1200px]">
+      <div className="flex-1 overflow-x-auto p-8">
+        <div className="flex gap-8 h-full min-w-[1400px]">
           
-          {/* 1. New Orders */}
           <Column 
             title="New Orders" 
             orders={groupedOrders.pending} 
@@ -223,7 +278,6 @@ export default function OrdersPage() {
             elapsedTime={getElapsedTime}
           />
 
-          {/* 2. Preparing */}
           <Column 
             title="Preparing" 
             orders={groupedOrders.preparing} 
@@ -233,7 +287,6 @@ export default function OrdersPage() {
             elapsedTime={getElapsedTime}
           />
 
-          {/* 3. Ready */}
           <Column 
             title="Ready to Serve" 
             orders={groupedOrders.ready} 
@@ -243,40 +296,15 @@ export default function OrdersPage() {
             elapsedTime={getElapsedTime}
           />
 
-          {/* 4. Completed/Delivered */}
-          <div className="w-80 flex flex-col shrink-0">
-            <div className="flex items-center justify-between mb-4 px-1">
-              <div className="flex items-center gap-2">
-                <div className={`w-3 h-3 rounded-full ${STATUS_CONFIG.delivered.dot}`} />
-                <h3 className="font-bold text-slate-700">Completed</h3>
-                <span className="bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full text-xs font-bold">
-                  {groupedOrders.completed.length}
-                </span>
-              </div>
-            </div>
-            
-            <div className="flex-1 overflow-y-auto pr-2 space-y-4">
-              {groupedOrders.completed.map(order => (
-                <div key={order.id} className="bg-white border border-slate-200 rounded-xl p-4 opacity-75 hover:opacity-100 transition-opacity">
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="font-bold text-slate-900">Room {order.guest_room_number}</span>
-                    <span className={`text-[10px] px-2 py-1 rounded-full font-bold uppercase ${
-                      order.status === 'delivered' ? 'bg-slate-100 text-slate-600' : 'bg-red-50 text-red-500'
-                    }`}>
-                      {order.status}
-                    </span>
-                  </div>
-                  <div className="text-sm text-slate-500 mb-2">{order.guest_name}</div>
-                  <div className="text-xs text-slate-400">
-                    {order.order_items.length} items • K{order.total_amount}
-                  </div>
-                </div>
-              ))}
-              {groupedOrders.completed.length === 0 && (
-                <div className="text-center py-10 text-slate-400 text-sm">No completed orders yet</div>
-              )}
-            </div>
-          </div>
+          <Column 
+            title="Completed" 
+            orders={groupedOrders.completed} 
+            config={STATUS_CONFIG.delivered}
+            onStatusUpdate={updateStatus}
+            nextStatus="" // No next status
+            elapsedTime={getElapsedTime}
+            isCompletedColumn
+          />
 
         </div>
       </div>
@@ -291,81 +319,139 @@ interface ColumnProps {
   onStatusUpdate: (id: string, status: string) => void;
   nextStatus: string;
   elapsedTime: (date: string) => string;
+  isCompletedColumn?: boolean;
 }
 
-function Column({ title, orders, config, onStatusUpdate, nextStatus, elapsedTime }: ColumnProps) {
+function Column({ title, orders, config, onStatusUpdate, nextStatus, elapsedTime, isCompletedColumn }: ColumnProps) {
+  const Icon = config.icon;
+
   return (
-    <div className="w-80 flex flex-col shrink-0">
-      <div className="flex items-center justify-between mb-4 px-1">
-        <div className="flex items-center gap-2">
-          <div className={`w-3 h-3 rounded-full ${config.dot}`} />
-          <h3 className="font-bold text-slate-700">{title}</h3>
-          <span className="bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full text-xs font-bold">
+    <div className="flex-1 min-w-[320px] flex flex-col h-full">
+      {/* Column Header */}
+      <div className="flex items-center justify-between mb-6 px-1">
+        <div className="flex items-center gap-3">
+          <div className={`p-2 rounded-lg ${config.bg} ${config.color}`}>
+            <Icon size={18} strokeWidth={2.5} />
+          </div>
+          <h3 className="font-bold text-slate-800 text-lg tracking-tight">{title}</h3>
+          <span className="bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full text-xs font-bold border border-slate-200">
             {orders.length}
           </span>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto pr-2 space-y-4">
-        {orders.map((order) => (
-          <div 
-            key={order.id} 
-            className="bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden"
-          >
-            {/* Card Header */}
-            <div className={`px-4 py-3 border-b border-slate-50 flex justify-between items-center ${config.color.split(' ')[0]}`}>
-              <div className="flex items-center gap-2">
-                <span className="font-black text-lg">Room {order.guest_room_number || 'N/A'}</span>
-              </div>
-              <div className="flex items-center gap-1 text-xs font-medium opacity-80">
-                <Clock size={12} />
-                {elapsedTime(order.created_at)}
-              </div>
-            </div>
-
-            {/* Card Body */}
-            <div className="p-4">
-              <div className="mb-3">
-                <div className="text-sm font-bold text-slate-900">{order.guest_name || 'Guest'}</div>
-                {order.notes && (
-                  <div className="mt-1 text-xs bg-yellow-50 text-yellow-800 p-2 rounded border border-yellow-100">
-                    Note: {order.notes}
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-2 mb-4">
-                {order.order_items.map((item, i) => (
-                  <div key={i} className="flex justify-between items-start text-sm">
-                    <div className="flex gap-2">
-                      <span className="font-bold text-slate-700">{item.quantity}x</span>
-                      <span className="text-slate-600">{item.menu_items?.name || 'Unknown Item'}</span>
+      {/* Orders List */}
+      <div className="flex-1 overflow-y-auto pr-2 pb-4 space-y-4 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+        <AnimatePresence mode="popLayout">
+          {orders.map((order) => (
+            <motion.div
+              key={order.id}
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className={`
+                bg-white border rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group
+                ${isCompletedColumn ? 'opacity-75 hover:opacity-100 border-slate-200' : 'border-slate-200 hover:border-slate-300'}
+              `}>
+                <div className="flex">
+                  {/* Status Strip */}
+                  <div className={`w-1.5 ${config.accent.replace('border-l-', 'bg-')}`}></div>
+                  
+                  <div className="flex-1 p-5">
+                    {/* Card Header */}
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-bold text-xl text-slate-900">Room {order.guest_room_number || 'N/A'}</span>
+                          {isCompletedColumn && (
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                              order.status === 'delivered' ? 'bg-slate-100 text-slate-600' : 'bg-rose-50 text-rose-600'
+                            }`}>
+                              {order.status}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-sm font-medium text-slate-500">{order.guest_name || 'Guest'}</div>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
+                        <Clock size={12} />
+                        {elapsedTime(order.created_at)}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
 
-              {/* Action Button */}
-              <button 
-                onClick={() => onStatusUpdate(order.id, nextStatus)}
-                className={`w-full py-2 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-colors ${
-                  config.label === 'New Orders' ? 'bg-black text-white hover:bg-slate-800' :
-                  config.label === 'Preparing' ? 'bg-orange-500 text-white hover:bg-orange-600' :
-                  'bg-green-600 text-white hover:bg-green-700'
-                }`}
-              >
-                {config.label === 'New Orders' && 'Start Preparing'}
-                {config.label === 'Preparing' && 'Mark Ready'}
-                {config.label === 'Ready to Serve' && 'Mark Delivered'}
-              </button>
-            </div>
-          </div>
-        ))}
+                    {/* Order Items */}
+                    <div className="space-y-3 mb-5">
+                      {order.order_items.map((item, i) => (
+                        <div key={i} className="flex justify-between items-start text-sm group/item">
+                          <div className="flex gap-3">
+                            <span className="font-bold text-slate-900 min-w-[20px] text-center bg-slate-100 rounded px-1 h-fit">
+                              {item.quantity}
+                            </span>
+                            <span className="text-slate-600 font-medium leading-snug">{item.menu_items?.name || 'Unknown Item'}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Notes */}
+                    {order.notes && (
+                      <div className="mb-5 text-xs bg-amber-50 text-amber-700 p-3 rounded-lg border border-amber-100 flex gap-2">
+                        <AlertCircle size={14} className="shrink-0 mt-0.5" />
+                        <span className="font-medium">{order.notes}</span>
+                      </div>
+                    )}
+
+                    {/* Action Button */}
+                    {!isCompletedColumn && (
+                      <button 
+                        onClick={() => onStatusUpdate(order.id, nextStatus)}
+                        className={`
+                          w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-sm
+                          ${config.button}
+                        `}
+                      >
+                        {config.label === 'New Orders' && (
+                          <>
+                            <ChefHat size={16} />
+                            Start Preparing
+                          </>
+                        )}
+                        {config.label === 'Preparing' && (
+                          <>
+                            <CheckCircle2 size={16} />
+                            Mark Ready
+                          </>
+                        )}
+                        {config.label === 'Ready to Serve' && (
+                          <>
+                            <Truck size={16} />
+                            Mark Delivered
+                          </>
+                        )}
+                      </button>
+                    )}
+                    
+                    {isCompletedColumn && (
+                       <div className="pt-3 mt-3 border-t border-slate-100 flex justify-between items-center text-xs text-slate-400">
+                         <span>{order.order_items.length} items</span>
+                         <span className="font-medium text-slate-600">Total: K{order.total_amount}</span>
+                       </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
 
         {orders.length === 0 && (
-          <div className="border-2 border-dashed border-slate-200 rounded-xl p-8 flex flex-col items-center justify-center text-slate-400">
-            <config.icon size={32} className="mb-2 opacity-50" />
-            <span className="text-sm font-medium">No orders</span>
+          <div className="border-2 border-dashed border-slate-200 rounded-2xl p-10 flex flex-col items-center justify-center text-slate-400 bg-slate-50/50">
+            <div className={`p-4 rounded-full bg-slate-100 mb-3 opacity-50`}>
+              <Icon size={24} />
+            </div>
+            <span className="text-sm font-semibold opacity-70">No {config.label.toLowerCase()}</span>
           </div>
         )}
       </div>
