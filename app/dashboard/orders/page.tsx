@@ -472,7 +472,8 @@ export default function OrdersPage() {
                         {Array.isArray(selectedOrder.order_items) && selectedOrder.order_items.map((item, i) => {
                             const itemName = item.item_name || item.menu_items?.name;
                              const itemImage = item.item_image_url || item.menu_items?.image_url;
-                             const itemDesc = item.item_description || item.menu_items?.description || item.item_ingredients || item.menu_items?.ingredients;
+                             const description = item.item_description || item.menu_items?.description;
+                             const ingredients = item.item_ingredients || item.menu_items?.ingredients;
  
                              if (!itemName) {
                                 return (
@@ -513,9 +514,16 @@ export default function OrdersPage() {
                                                 <p className="font-bold text-slate-900 text-sm">K{item.total_price?.toFixed(2) || '0.00'}</p>
                                             </div>
                                             
-                                            {itemDesc && (
+                                            {description && (
                                                 <p className="text-slate-500 text-xs mt-0.5 line-clamp-2">
-                                                    {itemDesc}
+                                                    {description}
+                                                </p>
+                                            )}
+                                            
+                                            {ingredients && (
+                                                <p className="text-slate-500 text-xs mt-0.5 line-clamp-2 italic">
+                                                    <span className="font-medium not-italic text-slate-400 mr-1">Ingredients:</span>
+                                                    {ingredients}
                                                 </p>
                                             )}
 

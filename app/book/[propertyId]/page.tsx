@@ -2,7 +2,7 @@ import { supabase } from '@/lib/supabase';
 import PropertyStorefront from '@/components/guest/PropertyStorefront';
 
 export async function generateStaticParams() {
-  const { data: properties } = await supabase.from('properties').select('id');
+  const { data: properties } = await supabase.from('public_properties').select('id');
   return properties?.map(({ id }) => ({ propertyId: id })) || [];
 }
 
@@ -11,7 +11,7 @@ export default async function BookingPage({ params }: { params: Promise<{ proper
 
   // 1. Fetch Property Details
   const { data: property } = await supabase
-    .from('properties')
+    .from('public_properties')
     .select('*')
     .eq('id', propertyId)
     .single();

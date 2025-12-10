@@ -35,10 +35,10 @@ export default function ExplorePage() {
     const fetchProperties = async () => {
       const supabase = createClient();
       
-      // Fetch all properties
+      // Fetch all properties from the secure public view
       // In a real app, we'd implement pagination and server-side filtering
       const { data, error } = await supabase
-        .from('properties')
+        .from('public_properties')
         .select('*');
         
       if (error) {
