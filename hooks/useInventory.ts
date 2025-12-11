@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/client';
 import { bookingsStore, roomsStore } from '@/lib/localdb';
 import { addDays, format, startOfMonth, endOfMonth } from 'date-fns';
 
@@ -26,6 +26,7 @@ export interface Booking {
 }
 
 export function useInventory(startDate: Date = new Date(), days: number = 30) {
+  const supabase = createClient();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);

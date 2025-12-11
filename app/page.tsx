@@ -6,13 +6,13 @@ import { ArrowRight, CheckCircle2, BarChart3, ShieldCheck, Zap, Smartphone } fro
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#030712] text-white overflow-x-hidden selection:bg-zambia-red selection:text-white">
+    <div className="min-h-screen bg-[#030712] text-white overflow-x-hidden selection:bg-pink-600 selection:text-white">
       
       {/* Navigation */}
       <nav className="fixed w-full z-50 bg-[#030712]/80 backdrop-blur-md border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-zambia-red to-zambia-blue flex items-center justify-center font-bold text-xl shadow-lg shadow-zambia-red/20">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-600 to-pink-400 flex items-center justify-center font-bold text-xl shadow-lg shadow-pink-600/20">
               Z
             </div>
             <span className="font-bold text-xl tracking-tight">ZAMORA</span>
@@ -21,15 +21,15 @@ export default function LandingPage() {
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-300">
             <Link href="#features" className="hover:text-white transition-colors relative group">
               Features
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-zambia-red transition-all group-hover:w-full"></span>
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-pink-600 transition-all group-hover:w-full"></span>
             </Link>
             <Link href="#compliance" className="hover:text-white transition-colors relative group">
               Compliance
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-zambia-red transition-all group-hover:w-full"></span>
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-pink-600 transition-all group-hover:w-full"></span>
             </Link>
             <Link href="#pricing" className="hover:text-white transition-colors relative group">
               Pricing
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-zambia-red transition-all group-hover:w-full"></span>
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-pink-600 transition-all group-hover:w-full"></span>
             </Link>
           </div>
 
@@ -55,8 +55,8 @@ export default function LandingPage() {
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
         {/* Background Elements */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-zambia-red/20 rounded-full blur-[100px] animate-pulse"></div>
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-zambia-blue/20 rounded-full blur-[120px] animate-pulse delay-1000"></div>
+          <div className="absolute top-20 left-10 w-72 h-72 bg-pink-600/20 rounded-full blur-[100px] animate-pulse"></div>
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] animate-pulse delay-1000"></div>
         </div>
 
         <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -66,7 +66,7 @@ export default function LandingPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <span className="inline-block py-1 px-3 rounded-full bg-white/5 border border-white/10 text-zambia-red text-xs font-bold tracking-wider mb-6">
+              <span className="inline-block py-1 px-3 rounded-full bg-white/5 border border-white/10 text-pink-500 text-xs font-bold tracking-wider mb-6">
                 NEXT-GEN HOSPITALITY OS
               </span>
             </motion.div>
@@ -99,7 +99,7 @@ export default function LandingPage() {
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Link
                   href="/dashboard"
-                  className="w-full sm:w-auto px-8 py-4 bg-zambia-red text-white rounded-full font-bold text-lg hover:bg-zambia-red/90 transition-all flex items-center justify-center gap-2 group shadow-lg shadow-zambia-red/25"
+                  className="w-full sm:w-auto px-8 py-4 bg-pink-600 text-white rounded-full font-bold text-lg hover:bg-pink-500 transition-all flex items-center justify-center gap-2 group shadow-lg shadow-pink-600/25"
                 >
                   Start Free Trial
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -124,7 +124,7 @@ export default function LandingPage() {
             transition={{ duration: 0.8, delay: 0.5 }}
             className="mt-20 relative mx-auto max-w-5xl perspective-1000"
           >
-            <div className="absolute -inset-1 bg-gradient-to-r from-zambia-red to-zambia-blue rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
+            <div className="absolute -inset-1 bg-gradient-to-r from-pink-600 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
             <div className="relative bg-[#0f1623] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
               <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-[#030712]">
                 <div className="w-3 h-3 rounded-full bg-red-500/50"></div>
@@ -159,7 +159,7 @@ export default function LandingPage() {
             />
             <FeatureCard 
               id="compliance"
-              icon={<ShieldCheck className="w-8 h-8 text-zambia-red" />}
+              icon={<ShieldCheck className="w-8 h-8 text-pink-500" />}
               title="ZRA Compliance"
               description="Automated Smart Invoice fiscalization. Never worry about tax compliance again."
             />
@@ -181,7 +181,7 @@ export default function LandingPage() {
               transition={{ duration: 0.3 }}
               className="md:col-span-2 bg-gradient-to-br from-white/5 to-transparent p-8 rounded-3xl border border-white/10 hover:bg-white/5 transition-colors group"
             >
-              <h3 className="text-2xl font-bold mb-4 group-hover:text-zambia-red transition-colors">Integrated Food & Beverage</h3>
+              <h3 className="text-2xl font-bold mb-4 group-hover:text-pink-500 transition-colors">Integrated Food & Beverage</h3>
               <p className="text-gray-400 mb-8 max-w-md group-hover:text-gray-300 transition-colors">
                 Seamlessly manage your restaurant and bar. Orders are automatically linked to guest folios for a unified billing experience.
               </p>
@@ -197,7 +197,7 @@ export default function LandingPage() {
 
       {/* CTA Section */}
       <section id="pricing" className="py-32 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#030712] to-zambia-red/20"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#030712] to-pink-600/20"></div>
         <div className="max-w-4xl mx-auto px-6 relative z-10 text-center">
           <h2 className="text-4xl lg:text-6xl font-bold mb-8">Ready to modernize?</h2>
           <p className="text-xl text-gray-300 mb-12">

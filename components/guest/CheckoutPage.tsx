@@ -50,61 +50,117 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
     setLoading(true);
 
     try {
-      const orderId = crypto.randomUUID();
+      const foodCart = cart.filter(i => i.type === 'food' || !i.type);
+      const barCart = cart.filter(i => i.type === 'bar');
+      const newOrderIds: string[] = [];
 
-      // 1. Create Order
-      const { error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          id: orderId,
-          property_id: property.id,
-          status: 'pending',
-          total_amount: grandTotal,
-          payment_method: formData.paymentMethod,
-          guest_name: formData.name,
-          guest_phone: formData.phone,
-          guest_room_number: formData.roomNumber,
-          notes: formData.notes,
-          // Snapshot fields (Summary)
-           item_name: cart.map(i => `${i.quantity}x ${i.name}`).join(', '),
-           item_description: cart.map(i => i.description).filter(Boolean).join('; '),
-           item_ingredients: cart.map(i => i.ingredients).filter(Boolean).join('; '),
-           item_image_url: cart[0]?.image_url,
-           weight: cart.map(i => i.weight).filter(Boolean).join(', '),
-           category: cart[0]?.category, // Use category of first item or main item
-           options: JSON.stringify(cart.flatMap(i => i.selectedOptions || [])),
-           extras: JSON.stringify([]) // Populate if you have extras logic
-         });
+      // 1. Process Food Order
+      if (foodCart.length > 0) {
+        const foodOrderId = crypto.randomUUID();
+        const foodTotal = foodCart.reduce((sum, i) => sum + (i.price || i.base_price) * i.quantity, 0);
+        const foodServiceCharge = foodTotal * 0.10;
+        const foodGrandTotal = foodTotal + foodServiceCharge;
 
-      if (orderError) throw orderError;
+        const { error: orderError } = await supabase
+          .from('orders')
+          .insert({
+            id: foodOrderId,
+            property_id: property.id,
+            status: 'pending',
+            total_amount: foodGrandTotal,
+            payment_method: formData.paymentMethod,
+            guest_name: formData.name,
+            guest_phone: formData.phone,
+            guest_room_number: formData.roomNumber,
+            notes: formData.notes,
+            // Snapshot fields (Summary)
+            item_name: foodCart.map(i => `${i.quantity}x ${i.name}`).join(', '),
+            item_description: foodCart.map(i => i.description).filter(Boolean).join('; '),
+            item_ingredients: foodCart.map(i => i.ingredients).filter(Boolean).join('; '),
+            item_image_url: foodCart[0]?.image_url,
+            weight: foodCart.map(i => i.weight).filter(Boolean).join(', '),
+            category: foodCart[0]?.category, 
+            options: JSON.stringify(foodCart.flatMap(i => i.selectedOptions || [])),
+            extras: JSON.stringify([]) 
+          });
 
-      // 2. Create Order Items
-      const orderItems = cart.map(item => ({
-        order_id: orderId,
-        menu_item_id: item.id,
-        quantity: item.quantity,
-        unit_price: item.price || item.base_price,
-        total_price: (item.price || item.base_price) * item.quantity,
-        notes: item.selectedOptions?.join(', '), // Simplified options handling
-        // Snapshot fields
-         item_name: item.name,
-         item_description: item.description,
-         item_ingredients: item.ingredients,
-         item_image_url: item.image_url,
-         weight: item.weight,
-         category: item.category,
-         options: item.selectedOptions ? JSON.stringify(item.selectedOptions) : JSON.stringify([])
-       }));
+        if (orderError) throw orderError;
 
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(orderItems);
+        const orderItems = foodCart.map(item => ({
+          order_id: foodOrderId,
+          menu_item_id: item.id,
+          quantity: item.quantity,
+          unit_price: item.price || item.base_price,
+          total_price: (item.price || item.base_price) * item.quantity,
+          notes: item.selectedOptions?.join(', '),
+          // Snapshot fields
+          item_name: item.name,
+          item_description: item.description,
+          item_ingredients: item.ingredients,
+          item_image_url: item.image_url,
+          weight: item.weight,
+          category: item.category,
+          options: item.selectedOptions ? JSON.stringify(item.selectedOptions) : JSON.stringify([])
+        }));
 
-      if (itemsError) throw itemsError;
+        const { error: itemsError } = await supabase
+          .from('order_items')
+          .insert(orderItems);
+
+        if (itemsError) throw itemsError;
+        newOrderIds.push(foodOrderId);
+      }
+
+      // 2. Process Bar Order
+      if (barCart.length > 0) {
+        const barOrderId = crypto.randomUUID();
+        const barTotal = barCart.reduce((sum, i) => sum + (i.price || i.base_price) * i.quantity, 0);
+        const barServiceCharge = barTotal * 0.10;
+        const barGrandTotal = barTotal + barServiceCharge;
+
+        const { error: orderError } = await supabase
+          .from('bar_orders')
+          .insert({
+            id: barOrderId,
+            property_id: property.id,
+            status: 'pending',
+            total_amount: barGrandTotal,
+            payment_method: formData.paymentMethod,
+            guest_name: formData.name,
+            guest_phone: formData.phone,
+            guest_room_number: formData.roomNumber,
+            notes: formData.notes,
+          });
+
+        if (orderError) throw orderError;
+
+        const orderItems = barCart.map(item => ({
+          order_id: barOrderId,
+          bar_menu_item_id: item.id,
+          quantity: item.quantity,
+          unit_price: item.price || item.base_price,
+          total_price: (item.price || item.base_price) * item.quantity,
+          notes: item.selectedOptions?.join(', '),
+          // Snapshot fields
+          item_name: item.name,
+          item_description: item.description,
+          item_ingredients: item.ingredients,
+          item_image_url: item.image_url,
+          weight: item.weight,
+          options: item.selectedOptions ? JSON.stringify(item.selectedOptions) : JSON.stringify([])
+        }));
+
+        const { error: itemsError } = await supabase
+          .from('bar_order_items')
+          .insert(orderItems);
+
+        if (itemsError) throw itemsError;
+        newOrderIds.push(barOrderId);
+      }
 
       // Save Order ID to LocalStorage for Guest History
       const savedOrders = JSON.parse(localStorage.getItem('zamora_guest_order_ids') || '[]');
-      localStorage.setItem('zamora_guest_order_ids', JSON.stringify([...savedOrders, orderId]));
+      localStorage.setItem('zamora_guest_order_ids', JSON.stringify([...savedOrders, ...newOrderIds]));
 
       setStep('success');
       setTimeout(() => {

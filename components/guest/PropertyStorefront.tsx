@@ -22,6 +22,7 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [cart, setCart] = useState<any[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   // -- Booking State --
   const [bookingDates, setBookingDates] = useState({ checkIn: '', checkOut: '' });
@@ -87,6 +88,47 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
   const filteredMenu = selectedCategory === 'All' 
     ? menuItems 
     : menuItems.filter(i => i.category === selectedCategory);
+
+  const handleCheckout = async () => {
+    setIsCheckingOut(true);
+    try {
+      const roomItems = cart.filter(item => item.type === 'room');
+      
+      // Process Room Bookings
+      for (const item of roomItems) {
+        const response = await fetch('/api/bookings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            roomTypeId: item.id, // This is the room_type_id from the roomTypes array
+            propertyId: property.id,
+            checkIn: item.bookingDates.checkIn,
+            checkOut: item.bookingDates.checkOut,
+            guestDetails: item.guestDetails
+          })
+        });
+        
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.error || 'Failed to book room');
+        }
+      }
+      
+      // TODO: Handle food orders similarly (requires Orders API)
+      
+      // Clear cart on success
+      setCart([]);
+      setIsCartOpen(false);
+      alert('Booking confirmed! We look forward to your stay.');
+      setActiveTab('overview');
+      
+    } catch (error: any) {
+      console.error('Checkout error:', error);
+      alert(`Checkout failed: ${error.message}`);
+    } finally {
+      setIsCheckingOut(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-black selection:text-white">
@@ -775,10 +817,15 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
                 <span className="text-3xl font-bold text-slate-900">K{cartTotal.toFixed(2)}</span>
               </div>
               <button 
-                disabled={cart.length === 0}
-                className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-lg hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-slate-900/10 transition-all transform active:scale-[0.98]"
+                onClick={handleCheckout}
+                disabled={cart.length === 0 || isCheckingOut}
+                className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-lg hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-slate-900/10 transition-all transform active:scale-[0.98] flex items-center justify-center gap-2"
               >
-                Proceed to Checkout
+                {isCheckingOut ? (
+                  <>Processing...</>
+                ) : (
+                  <>Proceed to Checkout <ArrowRight size={20} /></>
+                )}
               </button>
             </div>
           </div>

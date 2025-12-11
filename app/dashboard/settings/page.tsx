@@ -2,13 +2,19 @@
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { Building2, Save, Globe, Mail, Phone, Facebook, Instagram, Twitter } from 'lucide-react';
+import { Building2, Save, Globe, Mail, Phone, Facebook, Instagram, Twitter, Wifi, ChevronDown, Plus } from 'lucide-react';
 import ImageUpload from '@/components/ui/ImageUpload';
+import Link from 'next/link';
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const supabase = createClient();
+  
+  // List of all properties user has access to
+  const [properties, setProperties] = useState<any[]>([]);
+  
+  // Currently selected property for editing
   const [hotel, setHotel] = useState<any>({
     name: '',
     address: '',
@@ -19,32 +25,71 @@ export default function SettingsPage() {
     website_url: '',
     facebook_url: '',
     instagram_url: '',
-    twitter_url: ''
+    twitter_url: '',
+    wifi_ssid: '',
+    wifi_password: ''
   });
 
   useEffect(() => {
-    fetchProfile();
+    fetchProperties();
   }, []);
 
-  const fetchProfile = async () => {
-    // In a real app, we get the property_id from the logged-in user's profile
+  const fetchProperties = async () => {
     const { data: { user } } = await supabase.auth.getUser();
-    const propertyId = user?.user_metadata?.property_id || user?.user_metadata?.hotel_id || '00000000-0000-0000-0000-000000000000';
+    if (!user) return;
 
-    // Since we are using a dummy ID for the demo, let's try to fetch ANY property if the specific one fails, 
-    // or just handle the create case.
-    let { data, error } = await supabase.from('properties').select('*').eq('id', propertyId).single();
+    // Fetch all properties user has access to via RLS
+    const { data: props, error } = await supabase
+        .from('properties')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    if (!data) {
-      // If no property found (e.g., first run), let's see if there's ANY property to bind to for the demo
-      const { data: anyProperty } = await supabase.from('properties').select('*').limit(1).single();
-      if (anyProperty) data = anyProperty;
+    if (error) {
+        console.error('Error fetching properties:', error);
     }
 
-    if (data) {
-      setHotel(data);
+    if (props && props.length > 0) {
+        setProperties(props);
+        
+        // Determine which property to select initially
+        // 1. Try to get from profile (last selected)
+        // 2. Or default to the first one
+        const savedId = localStorage.getItem('zamora_selected_property');
+        const initialProp = props.find(p => p.id === savedId) || props[0];
+        
+        setHotel(initialProp);
+    } else {
+        // No properties found, maybe initialize blank for creation?
+        // Or redirect to setup?
+        // For now, let's keep the blank form which allows creating a new one in handleSave
     }
     setLoading(false);
+  };
+
+  const handlePropertyChange = (propertyId: string) => {
+      if (propertyId === 'new') {
+          // Clear form for new property
+          setHotel({
+            name: '',
+            address: '',
+            zra_tpin: '',
+            logo_url: '',
+            phone: '',
+            email: '',
+            website_url: '',
+            facebook_url: '',
+            instagram_url: '',
+            twitter_url: '',
+            wifi_ssid: '',
+            wifi_password: ''
+          });
+      } else {
+          const selected = properties.find(p => p.id === propertyId);
+          if (selected) {
+              setHotel(selected);
+              localStorage.setItem('zamora_selected_property', selected.id);
+          }
+      }
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -52,24 +97,33 @@ export default function SettingsPage() {
     setSaving(true);
 
     const { data: { user } } = await supabase.auth.getUser();
-    // Fallback logic for demo
-    let propertyId = hotel.id;
+    let propertyId = hotel.id; // May be undefined if 'new'
     
-    if (!propertyId) {
-        // Create new property if none exists
-        const { data: newProperty, error } = await supabase.from('properties').insert(hotel).select().single();
-        if (error) {
-            alert('Error creating property: ' + error.message);
-            setSaving(false);
-            return;
+    try {
+        if (!propertyId) {
+            // Create new property
+            const { data: newProperty, error } = await supabase.from('properties').insert({
+                ...hotel,
+                created_by: user?.id 
+            }).select().single();
+            
+            if (error) throw error;
+            
+            // Add to list and select it
+            setProperties([newProperty, ...properties]);
+            setHotel(newProperty);
+            alert('Property created successfully!');
+        } else {
+            // Update existing
+            const { error } = await supabase.from('properties').update(hotel).eq('id', propertyId);
+            if (error) throw error;
+            
+            // Update list
+            setProperties(properties.map(p => p.id === propertyId ? { ...p, ...hotel } : p));
+            alert('Settings saved successfully!');
         }
-        propertyId = newProperty.id;
-        setHotel(newProperty);
-    } else {
-        // Update existing
-        const { error } = await supabase.from('properties').update(hotel).eq('id', propertyId);
-        if (error) alert('Error updating profile: ' + error.message);
-        else alert('Settings saved successfully!');
+    } catch (error: any) {
+        alert('Error saving settings: ' + error.message);
     }
 
     setSaving(false);
@@ -78,16 +132,47 @@ export default function SettingsPage() {
   if (loading) return <div className="p-8 text-gray-500">Loading settings...</div>;
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
-      <div className="border-b border-gray-200 pb-4">
-        <h1 className="text-2xl font-bold text-gray-900">Hotel Settings</h1>
-        <p className="text-gray-500">Manage your property details and public profile.</p>
+    <div className="max-w-2xl mx-auto space-y-8 pb-12">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-200 pb-4">
+        <div>
+            <h1 className="text-2xl font-bold text-gray-900">Property Settings</h1>
+            <p className="text-gray-500">Manage details for your properties.</p>
+        </div>
+        
+        {/* Property Selector */}
+        <div className="relative min-w-[200px]">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Building2 className="h-4 w-4 text-gray-500" />
+            </div>
+            <select
+                value={hotel.id || 'new'}
+                onChange={(e) => handlePropertyChange(e.target.value)}
+                className="block w-full pl-10 pr-10 py-2 text-base text-gray-900 border-gray-300 focus:outline-none focus:ring-zambia-green focus:border-zambia-green sm:text-sm rounded-md shadow-sm bg-white border cursor-pointer hover:bg-gray-50 transition-colors"
+            >
+                {properties.map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+                <option value="new">+ Add New Property</option>
+            </select>
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <ChevronDown className="h-4 w-4 text-gray-400" />
+            </div>
+        </div>
       </div>
 
       <form onSubmit={handleSave} className="space-y-6 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-        <div className="flex items-center gap-3 text-zambia-green mb-4">
-          <Building2 size={24} />
-          <h2 className="text-lg font-semibold">Property Profile</h2>
+        <div className="flex items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-3 text-zambia-green">
+                <Building2 size={24} />
+                <h2 className="text-lg font-semibold">
+                    {hotel.id ? 'Edit Profile' : 'New Property Profile'}
+                </h2>
+            </div>
+            {hotel.id && (
+                <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-mono rounded">
+                    ID: {hotel.id.slice(0, 8)}...
+                </span>
+            )}
         </div>
 
         <div className="grid grid-cols-1 gap-6">
@@ -126,6 +211,37 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        {/* Wi-Fi Section */}
+        <div className="pt-6 border-t border-gray-200">
+          <div className="flex items-center gap-3 text-zambia-green mb-4">
+            <Wifi size={24} />
+            <h2 className="text-lg font-semibold">Wi-Fi Settings</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Wi-Fi Network Name (SSID)</label>
+              <input
+                type="text"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-zambia-green focus:ring-zambia-green px-3 py-2 border text-gray-900 bg-white"
+                value={hotel.wifi_ssid || ''}
+                onChange={e => setHotel({ ...hotel, wifi_ssid: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Wi-Fi Password</label>
+              <input
+                type="text"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-zambia-green focus:ring-zambia-green px-3 py-2 border text-gray-900 bg-white"
+                value={hotel.wifi_password || ''}
+                onChange={e => setHotel({ ...hotel, wifi_password: e.target.value })}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Contact Section */}
         <div className="pt-6 border-t border-gray-200">
           <div className="flex items-center gap-3 text-zambia-green mb-4">
             <Phone size={24} />
@@ -181,6 +297,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        {/* Social Section */}
         <div className="pt-6 border-t border-gray-200">
           <div className="flex items-center gap-3 text-zambia-green mb-4">
             <Facebook size={24} />
@@ -238,6 +355,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        {/* ZRA Section */}
         <div className="pt-6 border-t border-gray-200">
           <div className="flex items-center gap-3 text-zambia-green mb-4">
             <Building2 size={24} />
@@ -269,21 +387,23 @@ export default function SettingsPage() {
         </div>
       </form>
       
-      <div className="bg-blue-50 p-4 rounded-md border border-blue-100">
-        <h3 className="text-sm font-medium text-blue-800">Public Booking Link</h3>
-        <div className="mt-2 flex items-center gap-2">
-          <code className="bg-white px-2 py-1 rounded border border-blue-200 text-sm text-blue-600 flex-1">
-            {typeof window !== 'undefined' ? `${window.location.origin}/book/${hotel.id}` : `/book/${hotel.id}`}
-          </code>
-          <a 
-            href={`/book/${hotel.id}`} 
-            target="_blank" 
-            className="text-sm font-medium text-blue-600 hover:text-blue-500"
-          >
-            View Page &rarr;
-          </a>
+      {hotel.id && (
+        <div className="bg-blue-50 p-4 rounded-md border border-blue-100">
+            <h3 className="text-sm font-medium text-blue-800">Public Booking Link</h3>
+            <div className="mt-2 flex items-center gap-2">
+            <code className="bg-white px-2 py-1 rounded border border-blue-200 text-sm text-blue-600 flex-1 overflow-x-auto">
+                {typeof window !== 'undefined' ? `${window.location.origin}/book/${hotel.id}` : `/book/${hotel.id}`}
+            </code>
+            <a 
+                href={`/book/${hotel.id}`} 
+                target="_blank" 
+                className="text-sm font-medium text-blue-600 hover:text-blue-500 whitespace-nowrap"
+            >
+                View Page &rarr;
+            </a>
+            </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

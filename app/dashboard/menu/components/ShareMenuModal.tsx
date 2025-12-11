@@ -1,7 +1,7 @@
 'use client';
 
 import { QRCodeCanvas } from 'qrcode.react';
-import { Copy, ExternalLink, X, Download, Share2, ScanLine, Smartphone, Building2, MapPin } from 'lucide-react';
+import { Copy, ExternalLink, X, Download, Share2, ScanLine, Smartphone, Building2, MapPin, Wifi } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 
 interface ShareMenuModalProps {
@@ -67,14 +67,30 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
   };
 
   const handleDownload = () => {
-    // 1. Setup Canvas (A5 size @ 300dpi approx 1748 x 2480, let's do 1200x1800 for manageable file size)
+    // 1. Setup Canvas (A4 size @ 300dpi: 2480 x 3508 px)
     const canvas = document.createElement('canvas');
-    const WIDTH = 1200;
-    const HEIGHT = 1800;
+    const WIDTH = 2480;
+    const HEIGHT = 3508;
+
     canvas.width = WIDTH;
     canvas.height = HEIGHT;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+
+    // Helper for Rounded Rect (Polyfill for older browsers)
+    const drawRoundedRect = (x: number, y: number, w: number, h: number, r: number) => {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+    };
 
     // 2. Background (Dark Theme: Slate 950 -> #020617)
     const gradient = ctx.createLinearGradient(0, 0, WIDTH, HEIGHT);
@@ -84,11 +100,11 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
     // Decorative Pink/Purple glow top
-    const topGlow = ctx.createLinearGradient(0, 0, 0, 600);
+    const topGlow = ctx.createLinearGradient(0, 0, 0, 1000);
     topGlow.addColorStop(0, 'rgba(236, 72, 153, 0.15)'); // Pink 500
     topGlow.addColorStop(1, 'transparent');
     ctx.fillStyle = topGlow;
-    ctx.fillRect(0, 0, WIDTH, 600);
+    ctx.fillRect(0, 0, WIDTH, 1000);
 
     // 3. Text Configuration
     ctx.textAlign = 'center';
@@ -99,23 +115,23 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         // Draw a pill background behind room number for emphasis
         ctx.fillStyle = '#fce7f3'; // Pink 100
         const roomText = `ROOM ${roomNumber}`;
-        ctx.font = 'bold 60px sans-serif';
+        ctx.font = 'bold 100px sans-serif';
         const textWidth = ctx.measureText(roomText).width;
-        const padding = 40;
+        const padding = 60;
         const pillWidth = textWidth + (padding * 2);
-        const pillHeight = 100;
+        const pillHeight = 180;
         const pillX = (WIDTH - pillWidth) / 2;
-        const pillY = 150;
+        const pillY = 200;
         
         // Draw Pill
-        ctx.beginPath();
-        ctx.roundRect(pillX, pillY, pillWidth, pillHeight, 50);
+        ctx.fillStyle = '#fce7f3'; // Pink 100
+        drawRoundedRect(pillX, pillY, pillWidth, pillHeight, 90);
         ctx.fill();
 
         ctx.fillStyle = '#db2777'; // Pink 600
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(roomText, WIDTH / 2, pillY + (pillHeight/2) + 4);
+        ctx.fillText(roomText, WIDTH / 2, pillY + (pillHeight/2) + 6);
         
         // Reset text baseline
         ctx.textBaseline = 'alphabetic';
@@ -125,53 +141,56 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     }
 
     // Hotel Name
-    ctx.font = 'bold 90px sans-serif';
-    ctx.fillText(currentHotelName || 'Digital Menu', WIDTH / 2, 350);
+    ctx.font = 'bold 150px sans-serif';
+    ctx.fillText(currentHotelName || 'Digital Menu', WIDTH / 2, 550);
 
     // Subtitle
-    ctx.font = '500 40px sans-serif';
+    ctx.font = '500 70px sans-serif';
     ctx.fillStyle = '#94a3b8'; // Slate 400
-    ctx.letterSpacing = '10px';
-    ctx.fillText('FOOD DELIVERED TO YOUR ROOM', WIDTH / 2, 450);
+    ctx.letterSpacing = '15px';
+    ctx.fillText('FOOD DELIVERED TO YOUR ROOM', WIDTH / 2, 700);
 
     // 4. Draw QR Code
     const sourceCanvas = qrRef.current?.querySelector('canvas');
     if (sourceCanvas) {
         // Draw a white card container for QR
-        const cardSize = 800;
+        const cardSize = 1300;
         const cardX = (WIDTH - cardSize) / 2;
-        const cardY = 550;
+        const cardY = 850;
+        const r = 100;
+
+        // --- Gradient Glow Effect ---
+        // Simulating: bg-gradient-to-tr from-pink-500 via-purple-500 to-indigo-500
         
-        ctx.shadowColor = 'rgba(236, 72, 153, 0.2)'; // Pink shadow
-        ctx.shadowBlur = 100;
-        ctx.fillStyle = '#ffffff';
+        // We use a strong blur to create a glow effect instead of a solid border
+        const glowGradient = ctx.createLinearGradient(cardX, cardY + cardSize, cardX + cardSize, cardY);
+        glowGradient.addColorStop(0, '#ec4899'); // Pink 500
+        glowGradient.addColorStop(0.5, '#a855f7'); // Purple 500
+        glowGradient.addColorStop(1, '#6366f1'); // Indigo 500
+
+        ctx.save();
+        ctx.filter = 'blur(80px)'; // Strong blur for glow effect
+        ctx.fillStyle = glowGradient;
         
-        // Draw rounded rect manually
-        const r = 60;
-        ctx.beginPath();
-        ctx.moveTo(cardX + r, cardY);
-        ctx.lineTo(cardX + cardSize - r, cardY);
-        ctx.quadraticCurveTo(cardX + cardSize, cardY, cardX + cardSize, cardY + r);
-        ctx.lineTo(cardX + cardSize, cardY + cardSize - r);
-        ctx.quadraticCurveTo(cardX + cardSize, cardY + cardSize, cardX + cardSize - r, cardY + cardSize);
-        ctx.lineTo(cardX + r, cardY + cardSize);
-        ctx.quadraticCurveTo(cardX, cardY + cardSize, cardX, cardY + cardSize - r);
-        ctx.lineTo(cardX, cardY + r);
-        ctx.quadraticCurveTo(cardX, cardY, cardX + r, cardY);
-        ctx.closePath();
+        // Draw blurred rect behind (same size as card)
+        drawRoundedRect(cardX, cardY, cardSize, cardSize, r);
         ctx.fill();
-        
-        ctx.shadowBlur = 0; // Reset shadow
+        ctx.restore();
+
+        // Draw White Card Inner (Solid, Sharp)
+        ctx.fillStyle = '#ffffff';
+        drawRoundedRect(cardX, cardY, cardSize, cardSize, r);
+        ctx.fill();
 
         // Draw QR centered in card
-        const qrSize = 600;
+        const qrSize = 1000;
         const qrX = cardX + (cardSize - qrSize) / 2;
         const qrY = cardY + (cardSize - qrSize) / 2;
         
         ctx.drawImage(sourceCanvas, qrX, qrY, qrSize, qrSize);
 
         // Draw Center Overlay (Scan Icon)
-        const overlaySize = 140;
+        const overlaySize = 220;
         const cx = qrX + qrSize / 2;
         const cy = qrY + qrSize / 2;
 
@@ -181,27 +200,27 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         ctx.fillStyle = '#ffffff';
         ctx.fill();
         ctx.shadowColor = 'rgba(0,0,0,0.2)';
-        ctx.shadowBlur = 10;
+        ctx.shadowBlur = 20;
 
         // Black inner circle
         ctx.beginPath();
-        ctx.arc(cx, cy, (overlaySize - 10) / 2, 0, Math.PI * 2);
+        ctx.arc(cx, cy, (overlaySize - 20) / 2, 0, Math.PI * 2);
         ctx.fillStyle = '#000000';
         ctx.fill();
         ctx.shadowBlur = 0;
 
         // Draw Scan Icon (White)
         ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 6;
+        ctx.lineWidth = 10;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
-        const iconSize = 50; // Half-size relative to center
-        const cornerLen = 15;
+        const iconSize = 80; // Half-size relative to center
+        const cornerLen = 25;
 
         // Center Dash
         ctx.beginPath();
-        ctx.moveTo(cx - 10, cy);
-        ctx.lineTo(cx + 10, cy);
+        ctx.moveTo(cx - 15, cy);
+        ctx.lineTo(cx + 15, cy);
         ctx.stroke();
 
         // Top Left Corner
@@ -233,21 +252,87 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         ctx.stroke();
     }
 
-    // 5. Footer Instructions
+    // 5. Scan Instructions (Moved UP, below QR)
+    const instructionsY = 2350;
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 70px sans-serif';
-    ctx.fillText('Scan to Order', WIDTH / 2, 1530);
+    ctx.font = 'bold 110px sans-serif';
+    ctx.letterSpacing = '0px';
+    ctx.fillText('Scan to Order', WIDTH / 2, instructionsY);
 
     ctx.fillStyle = '#cbd5e1'; // Slate 300
-    ctx.font = '40px sans-serif';
-    ctx.fillText('Open Camera & Scan QR Code', WIDTH / 2, 1610);
+    ctx.font = '60px sans-serif';
+    ctx.fillText('Open Camera & Scan QR Code', WIDTH / 2, instructionsY + 100);
+
+
     
+    // 6. Wifi Info (Restored for Printout)
+    // @ts-ignore
+    if (currentProperty.wifi_ssid) {
+        const wifiY = 2850;
+        
+        // Draw Card Background
+        const cardWidth = 1600;
+        const cardHeight = 450;
+        const cardX = (WIDTH - cardWidth) / 2;
+        const cardY = wifiY - 100;
+        
+        ctx.fillStyle = 'rgba(30, 41, 59, 0.6)'; // Slate 800
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.lineWidth = 5;
+        
+        drawRoundedRect(cardX, cardY, cardWidth, cardHeight, 60);
+        ctx.fill();
+        ctx.stroke();
+
+        // Title: GUEST WI-FI
+        const contentX = cardX + 120;
+        const contentY = cardY + 100;
+        
+        ctx.textAlign = 'left';
+        ctx.font = 'bold 60px sans-serif';
+        ctx.fillStyle = '#ec4899'; // Pink 500
+        ctx.fillText('GUEST WI-FI', contentX, contentY);
+
+        // Network Row
+        const row1Y = contentY + 120;
+        const valueX = cardX + cardWidth - 120;
+        
+        ctx.font = '500 70px sans-serif';
+        ctx.fillStyle = '#94a3b8'; // Slate 400
+        ctx.fillText('Wi-Fi Name', contentX, row1Y);
+        
+        ctx.textAlign = 'right';
+        ctx.font = 'bold 70px monospace'; // Monospace for clear reading
+        ctx.fillStyle = '#ffffff';
+        // @ts-ignore
+        ctx.fillText(currentProperty.wifi_ssid, valueX, row1Y);
+        
+        // Password Row
+        // @ts-ignore
+        if (currentProperty.wifi_password) {
+            const row2Y = row1Y + 110;
+            ctx.textAlign = 'left';
+            ctx.font = '500 70px sans-serif';
+            ctx.fillStyle = '#94a3b8'; // Slate 400
+            ctx.fillText('Password', contentX, row2Y);
+            
+            ctx.textAlign = 'right';
+            ctx.font = 'bold 70px monospace';
+            ctx.fillStyle = '#ffffff';
+            // @ts-ignore
+            ctx.fillText(currentProperty.wifi_password, valueX, row2Y);
+        }
+        
+        // Reset Alignment
+        ctx.textAlign = 'center';
+    }
+
     // Powered By
     ctx.fillStyle = '#475569'; // Slate 600
-    ctx.font = 'bold 30px sans-serif';
-    ctx.fillText('POWERED BY ZAMORA', WIDTH / 2, 1720);
+    ctx.font = 'bold 50px sans-serif';
+    ctx.fillText('POWERED BY ZAMORA', WIDTH / 2, HEIGHT - 100);
 
-    // 6. Download
+    // 7. Download
     const url = canvas.toDataURL('image/png');
     const a = document.createElement('a');
     a.href = url;
@@ -357,8 +442,37 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
             </div>
           </div>
 
+          {/* Wifi Info Card */}
+          {/* @ts-ignore */}
+          {currentProperty.wifi_ssid && (
+            <div className="w-full mt-6 mb-2 bg-slate-900/50 border border-slate-800/50 rounded-2xl p-4 backdrop-blur-sm">
+                <div className="flex items-center gap-2 mb-3">
+                    <Wifi size={14} className="text-pink-500" />
+                    <span className="text-pink-500 text-[10px] font-bold uppercase tracking-wider">Guest Wi-Fi</span>
+                </div>
+                
+                <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                        <span className="text-slate-500 text-xs font-medium">Wi-Fi Name</span>
+                        {/* @ts-ignore */}
+                        <span className="text-slate-200 text-xs font-bold font-mono">{currentProperty.wifi_ssid}</span>
+                    </div>
+                    {/* @ts-ignore */}
+                    {currentProperty.wifi_password && (
+                        <div className="flex justify-between items-center">
+                            <span className="text-slate-500 text-xs font-medium">Password</span>
+                            {/* @ts-ignore */}
+                            <span className="text-slate-200 text-xs font-bold font-mono">{currentProperty.wifi_password}</span>
+                        </div>
+                    )}
+                </div>
+            </div>
+          )}
+
+
+
           {/* Actions */}
-          <div className="mt-10 w-full space-y-3">
+          <div className="w-full space-y-3">
              <button 
                 onClick={handleDownload}
                 className="w-full py-3.5 bg-white text-black rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-pink-50 transition-colors shadow-lg shadow-pink-500/10 active:scale-[0.98]"

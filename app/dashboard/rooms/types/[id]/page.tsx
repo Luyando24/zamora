@@ -6,16 +6,24 @@ import RoomTypeWizard from '../../components/RoomTypeWizard';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
-export default function EditRoomTypePage({ params }: { params: { id: string } }) {
+export default function EditRoomTypePage({ params }: { params: Promise<{ id: string }> }) {
   const [item, setItem] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [id, setId] = useState<string | null>(null);
 
   useEffect(() => {
+    // Unwrap params (Next.js 15+ requirement)
+    Promise.resolve(params).then((p) => setId(p.id));
+  }, [params]);
+
+  useEffect(() => {
+    if (!id) return;
+
     const fetchItem = async () => {
       const { data, error } = await supabase
         .from('room_types')
         .select('*')
-        .eq('id', params.id)
+        .eq('id', id)
         .single();
       
       if (data) setItem(data);
@@ -24,7 +32,7 @@ export default function EditRoomTypePage({ params }: { params: { id: string } })
     };
 
     fetchItem();
-  }, [params.id]);
+  }, [id]);
 
   if (loading) {
     return (

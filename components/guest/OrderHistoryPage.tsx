@@ -73,21 +73,44 @@ export default function OrderHistoryPage({ isOpen, onClose, propertyId }: OrderH
     }
 
     try {
-      const { data, error } = await supabase
+      // Fetch Food Orders
+      const foodQuery = supabase
         .from('orders')
         .select(`
           *,
-          order_items (
+          items:order_items (
             *,
-            menu_items (name, image_url)
+            details:menu_items (name, image_url)
           )
         `)
         .in('id', savedOrderIds)
-        .eq('property_id', propertyId) // Only show orders for this property
-        .order('created_at', { ascending: false });
+        .eq('property_id', propertyId);
 
-      if (error) throw error;
-      setOrders(data || []);
+      // Fetch Bar Orders
+      const barQuery = supabase
+        .from('bar_orders')
+        .select(`
+          *,
+          items:bar_order_items (
+            *,
+            details:bar_menu_items (name, image_url)
+          )
+        `)
+        .in('id', savedOrderIds)
+        .eq('property_id', propertyId);
+
+      const [foodRes, barRes] = await Promise.all([foodQuery, barQuery]);
+
+      if (foodRes.error) throw foodRes.error;
+      if (barRes.error) throw barRes.error;
+
+      // Combine and Sort
+      const allOrders = [
+        ...(foodRes.data || []).map(o => ({ ...o, type: 'food' })), 
+        ...(barRes.data || []).map(o => ({ ...o, type: 'bar' }))
+      ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+      setOrders(allOrders);
     } catch (err) {
       console.error('Error fetching history:', err);
     } finally {
@@ -170,11 +193,11 @@ export default function OrderHistoryPage({ isOpen, onClose, propertyId }: OrderH
 
                     {/* Order Items Preview */}
                     <div className="space-y-3">
-                      {order.order_items.map((item: any) => (
+                      {order.items?.map((item: any) => (
                         <div key={item.id} className="flex gap-3 items-center">
                           <div className="w-10 h-10 bg-slate-100 rounded-lg overflow-hidden shrink-0">
-                            {item.menu_items?.image_url ? (
-                                <img src={item.menu_items.image_url} className="w-full h-full object-cover" />
+                            {item.details?.image_url ? (
+                                <img src={item.details.image_url} className="w-full h-full object-cover" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-slate-300">
                                     <ShoppingBag size={14} />
@@ -183,7 +206,7 @@ export default function OrderHistoryPage({ isOpen, onClose, propertyId }: OrderH
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-bold text-slate-900 truncate">
-                              {item.quantity}x {item.menu_items?.name || 'Unknown Item'}
+                              {item.quantity}x {item.details?.name || 'Unknown Item'}
                             </p>
                             {item.notes && (
                                 <p className="text-xs text-slate-400 truncate">{item.notes}</p>

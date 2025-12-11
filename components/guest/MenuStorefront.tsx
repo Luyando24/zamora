@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { 
   ShoppingBag, Utensils, Search, Plus, Minus, X, 
   MapPin, Phone, Clock, Star, ArrowRight, CheckCircle,
-  Instagram, Facebook, Twitter, ChefHat, Coffee, Mail, Home
+  Instagram, Facebook, Twitter, ChefHat, Coffee, Mail, Home, Wifi, Lock
 } from 'lucide-react';
 import Image from 'next/image';
 import FoodDetailsPage from './FoodDetailsPage';
@@ -15,10 +15,20 @@ interface MenuStorefrontProps {
   property: any;
   menuItems: any[];
   categories: any[];
+  barMenuItems?: any[];
+  barCategories?: any[];
   roomNumber?: string;
 }
 
-export default function MenuStorefront({ property, menuItems, categories, roomNumber }: MenuStorefrontProps) {
+export default function MenuStorefront({ 
+  property, 
+  menuItems, 
+  categories, 
+  barMenuItems = [], 
+  barCategories = [], 
+  roomNumber 
+}: MenuStorefrontProps) {
+  const [activeTab, setActiveTab] = useState<'food' | 'bar'>('food');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [cart, setCart] = useState<any[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -28,6 +38,39 @@ export default function MenuStorefront({ property, menuItems, categories, roomNu
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+
+  // Auth State
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
+
+  useEffect(() => {
+    // Check if password is required
+    if (!property.wifi_password) {
+      setIsAuthenticated(true);
+      setIsAuthChecking(false);
+      return;
+    }
+
+    // Check session storage
+    const savedAuth = sessionStorage.getItem(`zamora_auth_${property.id}`);
+    if (savedAuth === 'true') {
+      setIsAuthenticated(true);
+    }
+    setIsAuthChecking(false);
+  }, [property.id, property.wifi_password]);
+
+  const handleAuthSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordInput === property.wifi_password) {
+      setIsAuthenticated(true);
+      sessionStorage.setItem(`zamora_auth_${property.id}`, 'true');
+      setAuthError('');
+    } else {
+      setAuthError('Incorrect password. Please try again.');
+    }
+  };
 
   // Load cart from localStorage
   useEffect(() => {
@@ -58,7 +101,7 @@ export default function MenuStorefront({ property, menuItems, categories, roomNu
       if (existing) {
         return prev.map(i => i.id === item.id ? { ...i, quantity: i.quantity + quantity } : i);
       }
-      return [...prev, { ...item, type: 'food', quantity: quantity, ...options }];
+      return [...prev, { ...item, type: activeTab, quantity: quantity, ...options }];
     });
     // setIsCartOpen(true); // Don't auto-open cart
   };
@@ -76,7 +119,10 @@ export default function MenuStorefront({ property, menuItems, categories, roomNu
   const cartTotal = cart.reduce((sum, item) => sum + (item.price || item.base_price) * item.quantity, 0);
 
   // -- Filtering --
-  const filteredMenu = menuItems.filter(item => {
+  const currentItems = activeTab === 'food' ? menuItems : barMenuItems;
+  const currentCategories = activeTab === 'food' ? categories : barCategories;
+
+  const filteredMenu = currentItems.filter(item => {
     const normalizedSelected = selectedCategory.toLowerCase().trim();
     const normalizedItemCategory = (item.category || '').toLowerCase().trim();
     
@@ -93,8 +139,57 @@ export default function MenuStorefront({ property, menuItems, categories, roomNu
     }, 500);
   };
 
+  if (isAuthChecking) {
+    return <div className="min-h-screen flex items-center justify-center bg-slate-50"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div></div>;
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-slate-100 animate-in fade-in zoom-in-95 duration-300">
+           <div className="text-center mb-6">
+             <div className="w-20 h-20 bg-pink-50 rounded-full flex items-center justify-center mx-auto mb-4 text-pink-500 shadow-sm border border-pink-100">
+               <Lock size={32} />
+             </div>
+             <h2 className="text-2xl font-black text-slate-900">Wi-Fi Password Required</h2>
+             <p className="text-slate-500 mt-2 font-medium">Please enter the property's Wi-Fi password to access the menu.</p>
+           </div>
+           
+           <form onSubmit={handleAuthSubmit} className="space-y-4">
+             <div>
+               <div className="relative">
+                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                   <Wifi size={18} className="text-slate-400" />
+                 </div>
+                 <input 
+                   type="text" 
+                   value={passwordInput}
+                   onChange={(e) => setPasswordInput(e.target.value)}
+                   placeholder="Enter Wi-Fi Password"
+                   className="w-full pl-11 pr-4 py-4 rounded-xl border border-slate-200 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 outline-none transition-all font-medium bg-slate-50 focus:bg-white"
+                   autoFocus
+                 />
+               </div>
+               {authError && <p className="text-red-500 text-sm mt-3 font-bold text-center flex items-center justify-center gap-1"><X size={14} /> {authError}</p>}
+             </div>
+             <button 
+               type="submit"
+               className="w-full py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl font-bold hover:from-pink-600 hover:to-purple-700 transition-all shadow-lg shadow-pink-500/20 hover:shadow-xl active:scale-[0.98]"
+             >
+               Access Menu
+             </button>
+           </form>
+           
+           <div className="mt-8 text-center">
+             <p className="text-xs text-slate-400 uppercase tracking-widest font-bold">Powered by Zamora</p>
+           </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-black selection:text-white pb-20 md:pb-0">
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-pink-500 selection:text-white pb-20 md:pb-0">
       
       {/* 1. Navbar - Fixed Top */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-white/20 transition-all duration-300">
@@ -186,13 +281,35 @@ export default function MenuStorefront({ property, menuItems, categories, roomNu
             
             {/* Filter Header (Search removed from here) */}
             <div className="flex flex-col md:flex-row gap-6 justify-between items-center mb-6 md:mb-10 pb-4 md:pb-8 border-b border-slate-100">
-                <div className="flex items-center gap-2">
-                    <h2 className="hidden text-2xl font-bold text-slate-900 tracking-tight">Menu Categories</h2>
+                <div className="flex items-center gap-4">
+                    {/* Menu Type Switcher */}
+                    <div className="flex bg-slate-100 p-1 rounded-full">
+                        <button
+                            onClick={() => { setActiveTab('food'); setSelectedCategory('All'); }}
+                            className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
+                                activeTab === 'food' 
+                                ? 'bg-white text-black shadow-md' 
+                                : 'text-slate-500 hover:text-slate-700'
+                            }`}
+                        >
+                            Food
+                        </button>
+                        <button
+                            onClick={() => { setActiveTab('bar'); setSelectedCategory('All'); }}
+                            className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
+                                activeTab === 'bar' 
+                                ? 'bg-white text-black shadow-md' 
+                                : 'text-slate-500 hover:text-slate-700'
+                            }`}
+                        >
+                            Bar
+                        </button>
+                    </div>
                 </div>
 
                 {/* Categories */}
                 <div className="flex overflow-x-auto gap-2 w-full md:w-auto pb-2 md:pb-0 scrollbar-hide mask-linear-fade [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-                    {['All', ...categories].map(cat => (
+                    {['All', ...currentCategories].map(cat => (
                         <button
                             key={cat}
                             onClick={() => setSelectedCategory(cat)}

@@ -2,13 +2,18 @@
 
 import { useState } from 'react';
 import { useInventory } from '@/hooks/useInventory';
+import { useProperty } from '@/hooks/useProperty';
 import { addDays, format, isSameDay, parseISO, isWithinInterval, startOfDay } from 'date-fns';
 import NewBookingModal from '@/components/dashboard/NewBookingModal';
+import EditBookingModal from '@/components/dashboard/EditBookingModal';
 import { Plus, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 
 export default function InventoryPage() {
   const [startDate, setStartDate] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  const { propertyId } = useProperty();
   const daysToShow = 14;
   const { rooms, bookings, loading, refetch } = useInventory(startDate, daysToShow);
 
@@ -40,7 +45,7 @@ export default function InventoryPage() {
     <div className="flex flex-col h-full space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Inventory Grid</h2>
+          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Room Bookings</h2>
           <p className="text-slate-500 text-sm">Manage room availability and bookings.</p>
         </div>
         
@@ -127,6 +132,10 @@ export default function InventoryPage() {
                       <td key={date.toISOString()} className={`px-1 py-2 whitespace-nowrap text-center relative h-24 border-r border-slate-50/50 ${isToday ? 'bg-blue-50/10' : ''}`}>
                         {booking ? (
                           <div 
+                            onClick={() => {
+                                setSelectedBooking(booking);
+                                setIsEditModalOpen(true);
+                            }}
                             className={`
                               h-full rounded-lg text-xs flex flex-col items-center justify-center px-2 overflow-hidden cursor-pointer hover:brightness-95 transition-all shadow-sm
                               ${booking.status === 'confirmed' 
@@ -165,6 +174,18 @@ export default function InventoryPage() {
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         onSuccess={refetch} 
+        propertyId={propertyId}
+      />
+      
+      <EditBookingModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+            setIsEditModalOpen(false);
+            setSelectedBooking(null);
+        }}
+        onSuccess={refetch}
+        booking={selectedBooking}
+        propertyId={propertyId}
       />
     </div>
   );

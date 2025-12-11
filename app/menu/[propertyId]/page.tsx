@@ -41,11 +41,27 @@ export default async function MenuPage({
     .or(`created_by.eq.${property.created_by},created_by.is.null`)
     .order('name');
 
+  // 4. Fetch Bar Menu Items
+  const { data: barMenuItems } = await supabase
+    .from('bar_menu_items')
+    .select('*, bar_menu_item_properties!inner(property_id)')
+    .eq('bar_menu_item_properties.property_id', propertyId)
+    .eq('is_available', true);
+
+  // 5. Fetch Bar Menu Categories
+  const { data: barCategories } = await supabase
+    .from('bar_menu_categories')
+    .select('name')
+    .or(`created_by.eq.${property.created_by},created_by.is.null`)
+    .order('name');
+
   return (
     <MenuStorefront
       property={property}
       menuItems={menuItems || []}
       categories={categories?.map(c => c.name) || []}
+      barMenuItems={barMenuItems || []}
+      barCategories={barCategories?.map(c => c.name) || []}
       roomNumber={room}
     />
   );

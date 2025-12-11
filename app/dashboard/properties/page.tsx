@@ -21,14 +21,21 @@ export default function PropertiesPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    // Fetch properties created by the user
-    const { data } = await supabase
+    // Fetch permitted properties via RLS
+    // We let RLS decide what we see: owned, assigned, or super admin access
+    const { data, error } = await supabase
       .from('properties')
       .select('*')
-      .eq('created_by', user.id)
       .order('created_at', { ascending: false });
     
-    if (data) setProperties(data);
+    if (error) {
+        // eslint-disable-next-line no-console
+        const errorMessage = error.message || (typeof error === 'object' ? JSON.stringify(error, null, 2) : String(error));
+        console.error('Error fetching properties:', errorMessage);
+        setProperties([]);
+      } else {
+      if (data) setProperties(data);
+    }
     setLoading(false);
   };
 

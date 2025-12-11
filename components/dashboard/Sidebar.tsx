@@ -6,7 +6,7 @@ import { createClient } from '@/utils/supabase/client';
 import { 
   LayoutDashboard, CalendarDays, BedDouble, FileText, 
   Settings, LogOut, DoorOpen, Utensils, Building2, 
-  ChevronRight, User
+  ChevronRight, User, Wine
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -21,9 +21,11 @@ const navigationGroups = [
   {
     title: 'Operations',
     items: [
-      { name: 'Inventory Grid', href: '/dashboard/inventory', icon: CalendarDays },
-      { name: 'Kitchen Orders', href: '/dashboard/orders', icon: Utensils },
-      { name: 'Food & Beverage', href: '/dashboard/menu', icon: Utensils },
+      { name: 'Room Bookings', href: '/dashboard/inventory', icon: CalendarDays },
+      { name: 'Food Orders', href: '/dashboard/orders', icon: Utensils },
+      { name: 'Food Menu', href: '/dashboard/menu', icon: Utensils },
+      { name: 'Bar Orders', href: '/dashboard/bar-orders', icon: Wine },
+      { name: 'Bar Menu', href: '/dashboard/bar-menu', icon: Wine },
       { name: 'Housekeeping', href: '/housekeeping', icon: BedDouble },
     ]
   },
@@ -106,24 +108,24 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* User Profile / Footer */}
-      <div className="p-4 border-t border-slate-50">
-        <div className="bg-slate-50 rounded-2xl p-4 flex items-center gap-3 border border-slate-100">
-          <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center text-slate-900 border border-slate-200 shadow-sm">
+      {/* User Profile */}
+      <div className="p-4 border-t border-slate-100 bg-slate-50/50">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold border-2 border-white shadow-sm">
             <User size={20} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-slate-900 truncate capitalize">{userEmail}</p>
-            <p className="text-xs text-slate-500 truncate">Manager</p>
+            <p className="text-sm font-bold text-slate-900 truncate">{userEmail}</p>
+            <p className="text-xs text-slate-500">Administrator</p>
           </div>
-          <button 
-            onClick={handleSignOut}
-            className="p-2 text-slate-400 hover:text-rose-600 hover:bg-white rounded-lg transition-all"
-            title="Sign Out"
-          >
-            <LogOut size={18} />
-          </button>
         </div>
+        <button
+          onClick={handleSignOut}
+          className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
+        >
+          <LogOut size={16} />
+          Sign Out
+        </button>
       </div>
     </div>
   );

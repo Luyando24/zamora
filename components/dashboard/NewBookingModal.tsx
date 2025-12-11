@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Modal from '@/components/ui/Modal';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/client';
 import { format } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';
 import { addToSyncQueue } from '@/lib/localdb';
@@ -11,9 +11,11 @@ interface NewBookingModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  propertyId?: string | null;
 }
 
-export default function NewBookingModal({ isOpen, onClose, onSuccess }: NewBookingModalProps) {
+export default function NewBookingModal({ isOpen, onClose, onSuccess, propertyId: propPropertyId }: NewBookingModalProps) {
+  const supabase = createClient();
   const [loading, setLoading] = useState(false);
   const [rooms, setRooms] = useState<any[]>([]);
   const [formData, setFormData] = useState({
@@ -23,6 +25,8 @@ export default function NewBookingModal({ isOpen, onClose, onSuccess }: NewBooki
     roomId: '',
     checkIn: format(new Date(), 'yyyy-MM-dd'),
     checkOut: format(new Date(Date.now() + 86400000), 'yyyy-MM-dd'), // Tomorrow
+    paymentMethod: 'cash',
+    paymentStatus: 'pending',
   });
 
   useEffect(() => {
@@ -32,8 +36,32 @@ export default function NewBookingModal({ isOpen, onClose, onSuccess }: NewBooki
   }, [isOpen]);
 
   const fetchRooms = async () => {
-    const { data } = await supabase.from('rooms').select('id, room_number, room_types(name, base_price)');
-    if (data) setRooms(data);
+    let propertyId = propPropertyId;
+
+    if (!propertyId) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      propertyId = user.user_metadata?.property_id || user.user_metadata?.hotel_id;
+
+      if (!propertyId) {
+        const { data: profile } = await supabase.from('profiles').select('property_id').eq('id', user.id).single();
+        propertyId = profile?.property_id;
+      }
+    }
+    
+    if (propertyId) {
+      const { data, error } = await supabase
+        .from('rooms')
+        .select('id, room_number, room_types(name, base_price)')
+        .eq('property_id', propertyId);
+      
+      if (error) {
+        console.error('Error fetching rooms:', error);
+      }
+      
+      if (data) setRooms(data);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -64,7 +92,9 @@ export default function NewBookingModal({ isOpen, onClose, onSuccess }: NewBooki
         check_in_date: formData.checkIn,
         check_out_date: formData.checkOut,
         property_id: propertyId,
-        status: 'confirmed'
+        status: 'confirmed',
+        payment_method: formData.paymentMethod,
+        payment_status: formData.paymentStatus
       };
 
       // Attempt Online Submission
@@ -80,7 +110,7 @@ export default function NewBookingModal({ isOpen, onClose, onSuccess }: NewBooki
 
       onSuccess();
       onClose();
-      setFormData({ ...formData, firstName: '', lastName: '', phone: '' });
+      setFormData({ ...formData, firstName: '', lastName: '', phone: '', paymentMethod: 'cash', paymentStatus: 'pending' });
 
     } catch (error: any) {
       console.log('Online submission failed, queuing for offline sync...', error);
@@ -112,7 +142,9 @@ export default function NewBookingModal({ isOpen, onClose, onSuccess }: NewBooki
            room_id: formData.roomId,
            check_in_date: formData.checkIn,
            check_out_date: formData.checkOut,
-           status: 'confirmed'
+           status: 'confirmed',
+           payment_method: formData.paymentMethod,
+           payment_status: formData.paymentStatus
         },
         timestamp: timestamp + 1
       });
@@ -135,7 +167,7 @@ export default function NewBookingModal({ isOpen, onClose, onSuccess }: NewBooki
             <input
               type="text"
               required
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-zambia-green focus:outline-none focus:ring-1 focus:ring-zambia-green"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-zambia-green focus:outline-none focus:ring-1 focus:ring-zambia-green text-gray-900 bg-white"
               value={formData.firstName}
               onChange={e => setFormData({ ...formData, firstName: e.target.value })}
             />
@@ -145,7 +177,7 @@ export default function NewBookingModal({ isOpen, onClose, onSuccess }: NewBooki
             <input
               type="text"
               required
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-zambia-green focus:outline-none focus:ring-1 focus:ring-zambia-green"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-zambia-green focus:outline-none focus:ring-1 focus:ring-zambia-green text-gray-900 bg-white"
               value={formData.lastName}
               onChange={e => setFormData({ ...formData, lastName: e.target.value })}
             />
@@ -153,12 +185,12 @@ export default function NewBookingModal({ isOpen, onClose, onSuccess }: NewBooki
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Phone (Mobile Money)</label>
+          <label className="block text-sm font-medium text-gray-700">Phone</label>
           <input
             type="tel"
             required
             placeholder="097..."
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-zambia-green focus:outline-none focus:ring-1 focus:ring-zambia-green"
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-zambia-green focus:outline-none focus:ring-1 focus:ring-zambia-green text-gray-900 bg-white"
             value={formData.phone}
             onChange={e => setFormData({ ...formData, phone: e.target.value })}
           />
@@ -168,7 +200,7 @@ export default function NewBookingModal({ isOpen, onClose, onSuccess }: NewBooki
           <label className="block text-sm font-medium text-gray-700">Room</label>
           <select
             required
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-zambia-green focus:outline-none focus:ring-1 focus:ring-zambia-green"
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-zambia-green focus:outline-none focus:ring-1 focus:ring-zambia-green text-gray-900 bg-white"
             value={formData.roomId}
             onChange={e => setFormData({ ...formData, roomId: e.target.value })}
           >
@@ -187,7 +219,7 @@ export default function NewBookingModal({ isOpen, onClose, onSuccess }: NewBooki
             <input
               type="date"
               required
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-zambia-green focus:outline-none focus:ring-1 focus:ring-zambia-green"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-zambia-green focus:outline-none focus:ring-1 focus:ring-zambia-green text-gray-900 bg-white"
               value={formData.checkIn}
               onChange={e => setFormData({ ...formData, checkIn: e.target.value })}
             />
@@ -197,10 +229,38 @@ export default function NewBookingModal({ isOpen, onClose, onSuccess }: NewBooki
             <input
               type="date"
               required
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-zambia-green focus:outline-none focus:ring-1 focus:ring-zambia-green"
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-zambia-green focus:outline-none focus:ring-1 focus:ring-zambia-green text-gray-900 bg-white"
               value={formData.checkOut}
               onChange={e => setFormData({ ...formData, checkOut: e.target.value })}
             />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Payment Method</label>
+            <select
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-zambia-green focus:outline-none focus:ring-1 focus:ring-zambia-green text-gray-900 bg-white"
+              value={formData.paymentMethod}
+              onChange={e => setFormData({ ...formData, paymentMethod: e.target.value })}
+            >
+              <option value="cash">Cash</option>
+              <option value="card">Card</option>
+              <option value="mobile_money">Mobile Money</option>
+              <option value="bank_transfer">Bank Transfer</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Payment Status</label>
+            <select
+              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-zambia-green focus:outline-none focus:ring-1 focus:ring-zambia-green text-gray-900 bg-white"
+              value={formData.paymentStatus}
+              onChange={e => setFormData({ ...formData, paymentStatus: e.target.value })}
+            >
+              <option value="pending">Pending</option>
+              <option value="paid">Paid</option>
+              <option value="partial">Partial</option>
+            </select>
           </div>
         </div>
 
