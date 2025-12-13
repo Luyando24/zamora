@@ -261,7 +261,7 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
          <div className="p-6 md:p-8 md:h-full flex flex-col">
             <h2 className="text-xl font-black text-slate-900 mb-6">Delivery Details</h2>
             
-            <form onSubmit={handleSubmit} className="flex-1 flex flex-col space-y-6">
+            <form id="checkout-form" onSubmit={handleSubmit} className="flex-1 flex flex-col space-y-6">
                 
                     {/* Room & Guest Info */}
                     <div className="space-y-4">
@@ -368,7 +368,7 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
                     </div>
                 </div>
 
-                <div className="mt-auto pt-6">
+                <div className="mt-auto pt-6 hidden md:block">
                     <button 
                         type="submit" 
                         disabled={loading}
@@ -384,6 +384,18 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
          </div>
       </div>
       
+      </div>
+
+      {/* Mobile Floating Action Button */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-4 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+         <button 
+             type="submit"
+             form="checkout-form"
+             disabled={loading}
+             className="w-full py-4 bg-black text-white rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2"
+         >
+             {loading ? <Loader2 className="animate-spin" /> : 'Confirm Order'}
+         </button>
       </div>
 
     </div>

@@ -94,7 +94,7 @@ export default function FoodDetailsPage({ item, isOpen, onClose, onAddToCart, si
            {/* Badges */}
            <div className="absolute bottom-4 left-4 flex gap-2 z-10 flex-wrap">
               {item.discount_badge && (
-                <span className="bg-red-500 text-white font-bold px-3 py-1 rounded-lg text-sm shadow-sm">
+                <span className="bg-pink-500 text-white font-bold px-3 py-1 rounded-lg text-sm shadow-sm">
                   {item.discount_badge}
                 </span>
               )}
@@ -152,9 +152,9 @@ export default function FoodDetailsPage({ item, isOpen, onClose, onAddToCart, si
                            {options.map((option: any, idx: number) => {
                              const isSelected = selectedOptions.has(option.name);
                              return (
-                               <label key={idx} className={`flex items-center justify-between p-4 rounded-2xl border bg-white shadow-sm cursor-pointer transition-colors group ${isSelected ? 'border-red-500 ring-1 ring-red-500' : 'border-slate-100 hover:border-red-300'}`}>
+                               <label key={idx} className={`flex items-center justify-between p-4 rounded-2xl border bg-white shadow-sm cursor-pointer transition-colors group ${isSelected ? 'border-pink-500 ring-1 ring-pink-500' : 'border-slate-100 hover:border-pink-300'}`}>
                                   <div className="flex items-center gap-4">
-                                     <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors ${isSelected ? 'bg-red-500 border-red-500' : 'border-slate-300 group-hover:border-red-300'}`}>
+                                     <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors ${isSelected ? 'bg-pink-500 border-pink-500' : 'border-slate-300 group-hover:border-pink-300'}`}>
                                         {isSelected && <Check size={16} className="text-white" />}
                                      </div>
                                      <span className="font-bold text-slate-900">{option.name}</span>
@@ -208,7 +208,7 @@ export default function FoodDetailsPage({ item, isOpen, onClose, onAddToCart, si
             </div>
 
             {/* Bottom Action Bar - Sticky within the right column on desktop */}
-            <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-4 pb-8 md:pb-6 z-20 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+            <div className="fixed bottom-0 left-0 right-0 md:absolute md:bottom-0 bg-white border-t border-slate-100 p-4 pb-8 md:pb-6 z-50 md:z-20 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
                <div className="max-w-md mx-auto md:max-w-none flex gap-4">
                   {/* Quantity Control */}
                   <div className="flex items-center gap-4 bg-slate-50 rounded-xl px-4 py-3 border border-slate-200">
@@ -244,7 +244,7 @@ export default function FoodDetailsPage({ item, isOpen, onClose, onAddToCart, si
                            onAddToCart(item, quantity, { selectedOptions: Array.from(selectedOptions) });
                            handleClose();
                         }}
-                        className="bg-red-500 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-red-200 active:scale-95 transition-all hover:bg-red-600 flex items-center gap-2"
+                        className="bg-pink-500 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-pink-200 active:scale-95 transition-all hover:bg-pink-600 flex items-center gap-2"
                      >
                         <span>Add to cart</span>
                      </button>

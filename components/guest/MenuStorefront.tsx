@@ -113,9 +113,13 @@ export default function MenuStorefront({
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-white/20 transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 md:px-6 h-20 flex items-center justify-center md:justify-between gap-4">
             {/* Property Name/Logo */}
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="flex flex-col md:flex-row md:items-center gap-0 md:gap-3 shrink-0 text-center md:text-left">
                 <div className="font-black text-2xl tracking-tighter leading-none text-slate-900">
                     ZAMORA
+                </div>
+                <div className="h-6 w-px bg-slate-200 mx-2 hidden md:block"></div>
+                <div className="text-[10px] md:text-sm font-bold text-slate-500 uppercase tracking-widest max-w-[200px] truncate">
+                    {property.name}
                 </div>
             </div>
 
@@ -161,40 +165,8 @@ export default function MenuStorefront({
         </div>
       </nav>
 
-      {/* 2. Hero Section - Immersive & Clean */}
-      <div className="relative h-[50vh] w-full overflow-hidden mt-0 group">
-         {/* Background Image */}
-         {property.cover_image_url ? (
-             <img src={property.cover_image_url} alt={property.name} className="w-full h-full object-cover transition-transform duration-[30s] ease-linear transform scale-100 group-hover:scale-110" />
-         ) : (
-             <div className="w-full h-full bg-slate-900 flex items-center justify-center">
-                <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '32px 32px' }}></div>
-                <Utensils size={64} className="text-slate-700 relative z-10"/>
-             </div>
-         )}
-         
-         {/* Overlays */}
-         <div className="absolute inset-0 bg-black/40 mix-blend-multiply"></div>
-         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-         
-         <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-6 pt-20">
-            <div className="animate-slide-up space-y-6 max-w-4xl mx-auto">
-                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-white text-xs font-bold uppercase tracking-widest shadow-lg">
-                    <Star size={12} className="fill-white" /> 
-                    <span>Culinary Experience</span>
-                 </div>
-                 <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white tracking-tighter drop-shadow-2xl">
-                    {property.name} Menu
-                 </h1>
-                 <p className="text-lg md:text-xl text-slate-200 max-w-2xl mx-auto font-medium leading-relaxed drop-shadow-md">
-                    Explore a symphony of flavors crafted with passion.
-                 </p>
-            </div>
-         </div>
-      </div>
-
-      {/* 3. Main Content - Overlapping Card */}
-      <main className="max-w-7xl mx-auto px-1 md:px-6 relative z-10 -mt-24 mb-20">
+      {/* 3. Main Content - Adjusted spacing since Hero is removed */}
+      <main className="max-w-7xl mx-auto px-1 md:px-6 relative z-10 pt-24 mb-20">
          <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/50 p-3 md:p-10 min-h-[60vh] border border-slate-100">
             
             {/* Filter Header (Search removed from here) */}
@@ -479,14 +451,14 @@ export default function MenuStorefront({
       {/* Floating Cart Summary */}
       {cart.length > 0 && (
         <div className="fixed bottom-24 md:bottom-8 left-4 right-4 md:left-auto md:right-8 md:w-96 z-40 animate-in slide-in-from-bottom duration-300">
-          <div className="bg-slate-900 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between border border-slate-800 backdrop-blur-md bg-opacity-95">
+          <div className="bg-pink-500 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between border border-pink-400 backdrop-blur-md bg-opacity-95 shadow-pink-200">
              <div className="flex flex-col">
-                <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">{cart.reduce((a, b) => a + b.quantity, 0)} Items</span>
+                <span className="text-xs text-white/90 font-bold uppercase tracking-wider">{cart.reduce((a, b) => a + b.quantity, 0)} Items</span>
                 <span className="text-xl font-black">K{cartTotal.toFixed(2)}</span>
              </div>
              <button 
                onClick={() => setIsCartOpen(true)}
-               className="bg-white text-slate-900 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-slate-200 transition-colors flex items-center gap-2 shadow-sm transform active:scale-95"
+               className="bg-white text-pink-600 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-white/90 transition-colors flex items-center gap-2 shadow-sm transform active:scale-95"
              >
                Continue <ArrowRight size={16} />
              </button>
