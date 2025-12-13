@@ -6,7 +6,7 @@ import { createClient } from '@/utils/supabase/client';
 import { 
   LayoutDashboard, CalendarDays, BedDouble, FileText, 
   Settings, LogOut, DoorOpen, Utensils, Building2, 
-  ChevronRight, User, Wine
+  ChevronRight, User, Wine, Users
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -14,12 +14,14 @@ import { useEffect, useState } from 'react';
 const navigationGroups = [
   {
     title: 'Main',
+    roles: ['admin', 'manager', 'staff'],
     items: [
       { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
     ]
   },
   {
     title: 'Operations',
+    roles: ['admin', 'manager', 'staff'],
     items: [
       { name: 'Room Bookings', href: '/dashboard/inventory', icon: CalendarDays },
       { name: 'Food Orders', href: '/dashboard/orders', icon: Utensils },
@@ -29,14 +31,17 @@ const navigationGroups = [
   },
   {
     title: 'Management',
+    roles: ['admin', 'manager'],
     items: [
       { name: 'Properties', href: '/dashboard/properties', icon: Building2 },
       { name: 'Rooms Setup', href: '/dashboard/rooms', icon: DoorOpen },
+      { name: 'Team Members', href: '/dashboard/users', icon: Users },
       { name: 'ZRA Reports', href: '/dashboard/zra', icon: FileText },
     ]
   },
   {
     title: 'System',
+    roles: ['admin'],
     items: [
       { name: 'Settings', href: '/dashboard/settings', icon: Settings },
     ]
@@ -48,12 +53,26 @@ export default function Sidebar() {
   const router = useRouter();
   const supabase = createClient();
   const [userEmail, setUserEmail] = useState<string>('User');
+  const [userRole, setUserRole] = useState<string>('staff');
 
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (user?.email) {
-        setUserEmail(user.email.split('@')[0]); // Simple display name
+      if (user) {
+        if (user.email) {
+          setUserEmail(user.email.split('@')[0]); // Simple display name
+        }
+        
+        // Fetch role
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+          
+        if (profile?.role) {
+          setUserRole(profile.role);
+        }
       }
     };
     getUser();
@@ -70,7 +89,9 @@ export default function Sidebar() {
       
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-8 custom-scrollbar">
-        {navigationGroups.map((group) => (
+        {navigationGroups
+          .filter(group => group.roles.includes(userRole))
+          .map((group) => (
           <div key={group.title}>
             <h3 className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
               {group.title}
@@ -114,7 +135,7 @@ export default function Sidebar() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-bold text-slate-900 truncate">{userEmail}</p>
-            <p className="text-xs text-slate-500">Administrator</p>
+            <p className="text-xs text-slate-500 capitalize">{userRole}</p>
           </div>
         </div>
         <button

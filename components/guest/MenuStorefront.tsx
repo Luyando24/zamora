@@ -107,8 +107,11 @@ export default function MenuStorefront({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-pink-500 selection:text-white pb-20 md:pb-0">
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-pink-500 selection:text-white pb-20 md:pb-0 relative">
       
+      {/* Subtle Theme Background Accent */}
+      <div className="absolute top-0 left-0 right-0 h-80 bg-gradient-to-b from-pink-100/60 to-transparent pointer-events-none" />
+
       {/* 1. Navbar - Fixed Top */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-white/20 transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 md:px-6 h-20 flex items-center justify-center md:justify-between gap-4">
