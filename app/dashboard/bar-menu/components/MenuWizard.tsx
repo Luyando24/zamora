@@ -122,7 +122,18 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
           throw new Error('Please select at least one property for this item.');
       }
 
+      // Sanitize payload
       const payload: any = { ...formData };
+
+      // Handle numeric fields that might be empty strings
+      if (payload.original_price === '') {
+        payload.original_price = null;
+      }
+      
+      // Price is required but safe to sanitize just in case
+      if (payload.price === '') {
+        payload.price = null; 
+      }
       
       let itemId;
       let error;

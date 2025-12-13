@@ -196,8 +196,8 @@ export default function OrderHistoryPage({ isOpen, onClose, propertyId }: OrderH
                       {order.items?.map((item: any) => (
                         <div key={item.id} className="flex gap-3 items-center">
                           <div className="w-10 h-10 bg-slate-100 rounded-lg overflow-hidden shrink-0">
-                            {item.details?.image_url ? (
-                                <img src={item.details.image_url} className="w-full h-full object-cover" />
+                            {item.details?.image_url || item.item_image_url ? (
+                                <img src={item.details?.image_url || item.item_image_url} className="w-full h-full object-cover" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-slate-300">
                                     <ShoppingBag size={14} />
@@ -206,7 +206,7 @@ export default function OrderHistoryPage({ isOpen, onClose, propertyId }: OrderH
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-bold text-slate-900 truncate">
-                              {item.quantity}x {item.details?.name || 'Unknown Item'}
+                              {item.quantity}x {item.details?.name || item.item_name || 'Unknown Item'}
                             </p>
                             {item.notes && (
                                 <p className="text-xs text-slate-400 truncate">{item.notes}</p>

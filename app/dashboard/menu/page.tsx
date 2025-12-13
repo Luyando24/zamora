@@ -123,9 +123,26 @@ export default function MenuPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this menu item?')) return;
+
+    // 1. Manually unlink related order items to avoid FK constraint violation
+    // (This is a fallback because the foreign key constraint might be restricted in the DB)
+    const { error: unlinkError } = await supabase
+      .from('order_items')
+      .update({ menu_item_id: null })
+      .eq('menu_item_id', id);
+
+    if (unlinkError) {
+      console.error('Error unlinking order items:', unlinkError);
+      // We proceed, but the delete might fail if the constraint is still enforcing.
+    }
+    
     const { error } = await supabase.from('menu_items').delete().eq('id', id);
-    if (error) alert(error.message);
-    else setItems(prev => prev.filter(item => item.id !== id));
+    
+    if (error) {
+       alert(error.message);
+    } else {
+      setItems(prev => prev.filter(item => item.id !== id));
+    }
   };
 
   const filteredItems = items.filter(i => {

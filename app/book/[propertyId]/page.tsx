@@ -1,10 +1,9 @@
 import { supabase } from '@/lib/supabase';
 import PropertyStorefront from '@/components/guest/PropertyStorefront';
 
-export async function generateStaticParams() {
-  const { data: properties } = await supabase.from('public_properties').select('id');
-  return properties?.map(({ id }) => ({ propertyId: id })) || [];
-}
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function BookingPage({ params }: { params: Promise<{ propertyId: string }> }) {
   const { propertyId } = await params;
@@ -22,18 +21,18 @@ export default async function BookingPage({ params }: { params: Promise<{ proper
     .select('*')
     .eq('property_id', propertyId);
 
-  // 3. Fetch Menu Items
+  // 3. Fetch Menu Items (via Junction)
   const { data: menuItems } = await supabase
     .from('menu_items')
-    .select('*')
-    .eq('property_id', propertyId)
+    .select('*, menu_item_properties!inner(property_id)')
+    .eq('menu_item_properties.property_id', propertyId)
     .eq('is_available', true);
 
   // 4. Fetch Menu Categories
   const { data: categories } = await supabase
     .from('menu_categories')
     .select('name')
-    .or(`property_id.eq.${propertyId},property_id.is.null`)
+    .or(`created_by.eq.${property?.created_by},created_by.is.null`)
     .order('name');
 
   if (!property) return <div className="min-h-screen flex items-center justify-center text-slate-500">Property not found</div>;

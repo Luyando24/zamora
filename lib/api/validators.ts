@@ -57,7 +57,7 @@ export const paymentSchema = z.object({
 
 // Upload validation
 export const uploadSchema = z.object({
-  bucket: z.enum(['player-documents', 'hotel-images', 'invoices'], {
+  bucket: z.enum(['player-documents', 'hotel-images', 'invoices', 'menu-images', 'room-images', 'property-images'], {
     message: 'Invalid bucket name'
   }),
   path: z.string()
