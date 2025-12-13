@@ -317,10 +317,7 @@ export default function OrdersPage() {
           *,
           bar_order_items (
             id, quantity, notes, unit_price, total_price,
-            item_name, item_description, item_ingredients, item_image_url, weight, extras, options,
-            bar_menu_items (
-              name, description, ingredients, image_url, category, weight, dietary_info
-            )
+            item_name, item_description, item_ingredients, item_image_url, weight, extras, options
           )
         `)
         .eq('property_id', selectedPropertyId)
@@ -410,6 +407,10 @@ export default function OrdersPage() {
   const currentOrders = activeTab === 'food' ? foodOrders : barOrders;
   const currentConfig = activeTab === 'food' ? FOOD_STATUS_CONFIG : BAR_STATUS_CONFIG;
 
+  // Calculate active counts for badges
+  const activeFoodCount = foodOrders.filter(o => !['delivered', 'cancelled'].includes(o.status)).length;
+  const activeBarCount = barOrders.filter(o => !['delivered', 'cancelled'].includes(o.status)).length;
+
   // Group orders by status
   const groupedOrders = {
     pending: currentOrders.filter(o => o.status === 'pending'),
@@ -442,15 +443,25 @@ export default function OrdersPage() {
           <div className="bg-slate-100 p-1 rounded-lg flex items-center">
              <button 
                onClick={() => setActiveTab('food')}
-               className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${activeTab === 'food' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+               className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'food' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
              >
                Food Orders
+               {activeFoodCount > 0 && (
+                 <span className="flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[10px] font-bold rounded-full bg-red-500 text-white shadow-sm">
+                   {activeFoodCount}
+                 </span>
+               )}
              </button>
              <button 
                onClick={() => setActiveTab('bar')}
-               className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${activeTab === 'bar' ? 'bg-white text-purple-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+               className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'bar' ? 'bg-white text-purple-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
              >
                Bar Orders
+               {activeBarCount > 0 && (
+                 <span className="flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[10px] font-bold rounded-full bg-red-500 text-white shadow-sm">
+                   {activeBarCount}
+                 </span>
+               )}
              </button>
           </div>
         </div>
