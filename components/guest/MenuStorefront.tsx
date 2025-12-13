@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { 
   ShoppingBag, Utensils, Search, Plus, Minus, X, 
   MapPin, Phone, Clock, Star, ArrowRight, CheckCircle,
-  Instagram, Facebook, Twitter, ChefHat, Coffee, Mail, Home, Wifi, Lock
+  Instagram, Facebook, Twitter, ChefHat, Coffee, Mail, Home
 } from 'lucide-react';
 import Image from 'next/image';
 import FoodDetailsPage from './FoodDetailsPage';
@@ -38,12 +38,6 @@ export default function MenuStorefront({
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-
-  // Auth State
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
-  const [passwordInput, setPasswordInput] = useState('');
-  const [authError, setAuthError] = useState('');
-  const [isAuthChecking, setIsAuthChecking] = useState(false);
 
   // Load cart from localStorage
   useEffect(() => {
@@ -111,55 +105,6 @@ export default function MenuStorefront({
         searchInputRef.current?.focus();
     }, 500);
   };
-
-  if (isAuthChecking) {
-    return <div className="min-h-screen flex items-center justify-center bg-slate-50"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div></div>;
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-slate-100 animate-in fade-in zoom-in-95 duration-300">
-           <div className="text-center mb-6">
-             <div className="w-20 h-20 bg-pink-50 rounded-full flex items-center justify-center mx-auto mb-4 text-pink-500 shadow-sm border border-pink-100">
-               <Lock size={32} />
-             </div>
-             <h2 className="text-2xl font-black text-slate-900">Wi-Fi Password Required</h2>
-             <p className="text-slate-500 mt-2 font-medium">Please enter the property's Wi-Fi password to access the menu.</p>
-           </div>
-           
-           <form onSubmit={handleAuthSubmit} className="space-y-4">
-             <div>
-               <div className="relative">
-                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                   <Wifi size={18} className="text-slate-400" />
-                 </div>
-                 <input 
-                   type="text" 
-                   value={passwordInput}
-                   onChange={(e) => setPasswordInput(e.target.value)}
-                   placeholder="Enter Wi-Fi Password"
-                   className="w-full pl-11 pr-4 py-4 rounded-xl border border-slate-200 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 outline-none transition-all font-medium bg-slate-50 focus:bg-white"
-                   autoFocus
-                 />
-               </div>
-               {authError && <p className="text-red-500 text-sm mt-3 font-bold text-center flex items-center justify-center gap-1"><X size={14} /> {authError}</p>}
-             </div>
-             <button 
-               type="submit"
-               className="w-full py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl font-bold hover:from-pink-600 hover:to-purple-700 transition-all shadow-lg shadow-pink-500/20 hover:shadow-xl active:scale-[0.98]"
-             >
-               Access Menu
-             </button>
-           </form>
-           
-           <div className="mt-8 text-center">
-             <p className="text-xs text-slate-400 uppercase tracking-widest font-bold">Powered by Zamora</p>
-           </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-pink-500 selection:text-white pb-20 md:pb-0">
@@ -321,14 +266,26 @@ export default function MenuStorefront({
                                 <span className="font-black text-slate-900 text-sm md:text-lg">K{item.price}</span>
                             </div>
 
-                            {/* Dietary Info Badge (Moved from footer) */}
-                            {item.dietary_info && (
-                                <div className="absolute top-2 left-2 md:top-4 md:left-4 z-10">
-                                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 bg-green-50 text-green-700 rounded-md border border-green-100 shadow-sm">
-                                        Vegetarian
+                            {/* Badges Container */}
+                            <div className="absolute top-2 left-2 md:top-4 md:left-4 z-10 flex flex-col gap-1 items-start max-w-[70%]">
+                                {/* Discount Badge */}
+                                {item.discount_badge && (
+                                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 bg-red-500 text-white rounded-md shadow-md animate-pulse-slow">
+                                        {item.discount_badge}
                                     </span>
-                                </div>
-                            )}
+                                )}
+
+                                {/* Dietary Info Badges */}
+                                {item.dietary_info && (
+                                    <div className="flex gap-1 flex-wrap">
+                                        {item.dietary_info.split(',').map((tag: string, i: number) => (
+                                            <span key={i} className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 bg-white/90 backdrop-blur-sm text-slate-700 rounded-md shadow-sm border border-slate-100 truncate">
+                                                {tag.trim()}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                         
                         {/* Content */}
