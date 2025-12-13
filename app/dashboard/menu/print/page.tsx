@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { Loader2, Printer, ChevronLeft, ChefHat } from 'lucide-react';
+import { Loader2, Printer, ChevronLeft, ChefHat, FileText } from 'lucide-react';
 import Link from 'next/link';
+import { generateFoodMenuPdf } from '../utils/generateFoodMenuPdf';
 
 export default function PrintMenuPage({ searchParams }: { searchParams: { propertyId: string } }) {
   const propertyId = searchParams.propertyId;
@@ -79,12 +80,20 @@ export default function PrintMenuPage({ searchParams }: { searchParams: { proper
         <Link href="/dashboard/menu" className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm font-bold uppercase tracking-wider">
             <ChevronLeft size={16} /> Back to Dashboard
         </Link>
-        <button
-          onClick={() => window.print()}
-          className="flex items-center gap-2 px-6 py-2.5 bg-pink-600 text-white rounded-full font-bold shadow-lg shadow-pink-900/20 hover:bg-pink-500 hover:scale-105 transition-all"
-        >
-          <Printer size={18} /> Print Menu
-        </button>
+        <div className="flex gap-3">
+            <button
+            onClick={() => generateFoodMenuPdf(items, property?.name || 'Menu')}
+            className="flex items-center gap-2 px-6 py-2.5 bg-slate-800 text-slate-200 border border-slate-700 rounded-full font-bold hover:bg-slate-700 hover:text-white transition-all"
+            >
+            <FileText size={18} /> Export PDF
+            </button>
+            <button
+            onClick={() => window.print()}
+            className="flex items-center gap-2 px-6 py-2.5 bg-pink-600 text-white rounded-full font-bold shadow-lg shadow-pink-900/20 hover:bg-pink-500 hover:scale-105 transition-all"
+            >
+            <Printer size={18} /> Print Menu
+            </button>
+        </div>
       </nav>
 
       {/* --- Printable Canvas --- */}

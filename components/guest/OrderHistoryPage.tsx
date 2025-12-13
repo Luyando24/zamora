@@ -57,10 +57,67 @@ export default function OrderHistoryPage({ isOpen, onClose, propertyId }: OrderH
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let channel: any;
+
     if (isOpen) {
       fetchOrders();
+      
+      // Set up Realtime Subscription
+      const savedOrderIds = JSON.parse(localStorage.getItem('zamora_guest_order_ids') || '[]');
+      
+      if (savedOrderIds.length > 0) {
+        channel = supabase
+          .channel('guest_orders_tracking')
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'orders',
+              filter: `property_id=eq.${propertyId}`,
+            },
+            (payload) => {
+              if (savedOrderIds.includes(payload.new.id)) {
+                setOrders((prev) => 
+                  prev.map((order) => 
+                    order.id === payload.new.id 
+                      ? { ...order, ...payload.new } 
+                      : order
+                  )
+                );
+              }
+            }
+          )
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'bar_orders',
+              filter: `property_id=eq.${propertyId}`,
+            },
+            (payload) => {
+              if (savedOrderIds.includes(payload.new.id)) {
+                setOrders((prev) => 
+                  prev.map((order) => 
+                    order.id === payload.new.id 
+                      ? { ...order, ...payload.new } 
+                      : order
+                  )
+                );
+              }
+            }
+          )
+          .subscribe();
+      }
     }
-  }, [isOpen]);
+
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
+  }, [isOpen, propertyId]);
 
   const fetchOrders = async () => {
     setLoading(true);
