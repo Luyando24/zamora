@@ -136,8 +136,7 @@ export default function OrderHistoryPage({ isOpen, onClose, propertyId }: OrderH
         .select(`
           *,
           items:order_items (
-            *,
-            details:menu_items (name, image_url)
+            *
           )
         `)
         .in('id', savedOrderIds)
@@ -149,8 +148,7 @@ export default function OrderHistoryPage({ isOpen, onClose, propertyId }: OrderH
         .select(`
           *,
           items:bar_order_items (
-            *,
-            details:bar_menu_items (name, image_url)
+            *
           )
         `)
         .in('id', savedOrderIds)
