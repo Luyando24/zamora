@@ -120,10 +120,10 @@ export default function EditBookingModal({ isOpen, onClose, onSuccess, booking, 
             table: 'guests',
             action: 'UPDATE',
             payload: {
+              id: booking.guest_id,
               first_name: formData.firstName,
               last_name: formData.lastName
             },
-            match: { id: booking.guest_id },
             timestamp: timestamp
           });
         }
@@ -133,6 +133,7 @@ export default function EditBookingModal({ isOpen, onClose, onSuccess, booking, 
           table: 'bookings',
           action: 'UPDATE',
           payload: {
+            id: booking.id,
             room_id: formData.roomId,
             check_in_date: formData.checkIn,
             check_out_date: formData.checkOut,
@@ -140,7 +141,6 @@ export default function EditBookingModal({ isOpen, onClose, onSuccess, booking, 
             payment_method: formData.paymentMethod,
             payment_status: formData.paymentStatus
           },
-          match: { id: booking.id },
           timestamp: timestamp + 1
         });
         
@@ -173,8 +173,10 @@ export default function EditBookingModal({ isOpen, onClose, onSuccess, booking, 
           id: uuidv4(),
           table: 'bookings',
           action: 'UPDATE',
-          payload: { status: 'cancelled' },
-          match: { id: booking.id },
+          payload: { 
+            id: booking.id,
+            status: 'cancelled' 
+          },
           timestamp: Date.now()
         });
         alert('Cancellation saved locally.');

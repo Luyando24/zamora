@@ -1,66 +1,189 @@
-import { createClient } from '@supabase/supabase-js';
-import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { createClient as createServerSupabaseClient } from '@/utils/supabase/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { getSupabaseAdmin } from '@/lib/db/supabase-admin';
+import { createClient } from '@/utils/supabase/server';
+import { authenticateRequest } from '@/lib/api/auth';
+import { validateRequest, uploadSchema } from '@/lib/api/validators';
+import {
+  createErrorResponse,
+  createSuccessResponse,
+  AuthenticationError,
+  ValidationError
+} from '@/lib/api/errors';
+import { rateLimitCombined, getRateLimitHeaders, RATE_LIMITS } from '@/lib/api/rate-limit';
+import { logger, generateRequestId } from '@/lib/monitoring/logger';
+import { extractIPAddress } from '@/lib/api/webhook-verify';
 
-export async function POST(request: Request) {
+// Allowed file types
+const ALLOWED_MIME_TYPES = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+  'application/pdf',
+];
+
+// Max file size: 10MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
+export async function POST(req: NextRequest) {
+  const requestId = generateRequestId();
+  const startTime = Date.now();
+  const ip = extractIPAddress(req.headers);
+
   try {
-    // 1. Authenticate the user
-    const supabase = await createServerSupabaseClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    logger.logRequest('POST', '/api/upload', { requestId, ip });
 
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // 1. Authentication
+    const authResult = await authenticateRequest(req);
+    if (!authResult.success || !authResult.user) {
+      throw new AuthenticationError(authResult.error);
     }
 
-    // 2. Parse the multipart form data
-    const formData = await request.formData();
+    const user = authResult.user;
+
+    // 2. Rate limiting
+    const rateLimitResult = await rateLimitCombined(ip, user.id, {
+      ipConfig: RATE_LIMITS.UPLOAD,
+      userConfig: RATE_LIMITS.UPLOAD,
+    });
+
+    if (!rateLimitResult.success) {
+      logger.warn('Upload rate limit exceeded', { requestId, ip, userId: user.id });
+      return NextResponse.json(
+        { error: 'Upload rate limit exceeded. Please try again later.' },
+        { status: 429, headers: getRateLimitHeaders(rateLimitResult) }
+      );
+    }
+
+    // 3. Parse multipart form data
+    const formData = await req.formData();
     const file = formData.get('file') as File;
     const bucket = formData.get('bucket') as string;
     const path = formData.get('path') as string;
 
     if (!file || !bucket || !path) {
-      return NextResponse.json({ error: 'Missing file, bucket, or path' }, { status: 400 });
+      throw new ValidationError('Missing required fields: file, bucket, or path');
     }
 
-    // 3. Initialize Supabase Admin Client (Service Role)
-    const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        }
-      }
-    );
+    // 4. Validate file type
+    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+      logger.warn('Invalid file type upload attempt', {
+        requestId,
+        userId: user.id,
+        fileType: file.type
+      });
+      throw new ValidationError(
+        `Invalid file type. Allowed types: ${ALLOWED_MIME_TYPES.join(', ')}`
+      );
+    }
 
-    // 4. Upload file using admin client (bypasses RLS)
-    // We need to convert the File to an ArrayBuffer for the upload
+    // 5. Validate file size
+    if (file.size > MAX_FILE_SIZE) {
+      logger.warn('File size exceeds limit', {
+        requestId,
+        userId: user.id,
+        fileSize: file.size
+      });
+      throw new ValidationError(
+        `File size exceeds ${MAX_FILE_SIZE / 1024 / 1024}MB limit`
+      );
+    }
+
+    // 6. Validate upload parameters
+    const validation = validateRequest(uploadSchema, {
+      bucket,
+      path,
+      fileSize: file.size,
+      fileType: file.type,
+    });
+
+    if (!validation.success) {
+      return createErrorResponse(validation.errors);
+    }
+
+    // 7. Sanitize file path (prevent directory traversal)
+    const sanitizedPath = path.replace(/\.\./g, '').replace(/^\/+/, '');
+    if (!sanitizedPath) {
+      throw new ValidationError('Invalid file path');
+    }
+
+    // 8. Add user ID to path for isolation
+    const userPath = `${user.id}/${sanitizedPath}`;
+
+    logger.info('File upload validated', {
+      requestId,
+      userId: user.id,
+      bucket,
+      path: userPath,
+      fileSize: file.size,
+      fileType: file.type,
+    });
+
+    // 9. Convert file to buffer
     const arrayBuffer = await file.arrayBuffer();
     const fileBuffer = Buffer.from(arrayBuffer);
 
+    // 10. Upload using admin client
+    const supabaseAdmin = getSupabaseAdmin();
+
     const { data, error: uploadError } = await supabaseAdmin.storage
       .from(bucket)
-      .upload(path, fileBuffer, {
+      .upload(userPath, fileBuffer, {
         contentType: file.type,
-        upsert: true
+        upsert: true,
+        cacheControl: '3600',
       });
 
     if (uploadError) {
-      console.error('Upload error:', uploadError);
-      return NextResponse.json({ error: uploadError.message }, { status: 500 });
+      logger.error('File upload failed', uploadError, {
+        requestId,
+        userId: user.id,
+        bucket,
+        path: userPath
+      });
+      throw new Error(`Upload failed: ${uploadError.message}`);
     }
 
-    // 5. Get Public URL
+    // 11. Get public URL
     const { data: { publicUrl } } = supabaseAdmin.storage
       .from(bucket)
-      .getPublicUrl(path);
+      .getPublicUrl(userPath);
 
-    return NextResponse.json({ publicUrl });
+    logger.info('File uploaded successfully', {
+      requestId,
+      userId: user.id,
+      bucket,
+      path: userPath,
+      publicUrl,
+    });
+
+    const duration = Date.now() - startTime;
+    logger.logResponse('POST', '/api/upload', 200, duration, {
+      requestId,
+      fileSize: file.size,
+    });
+
+    return createSuccessResponse(
+      {
+        success: true,
+        publicUrl,
+        path: userPath,
+        bucket,
+        size: file.size,
+        type: file.type,
+      },
+      200,
+      {
+        ...getRateLimitHeaders(rateLimitResult),
+        'X-Request-ID': requestId,
+      }
+    );
 
   } catch (error: any) {
-    console.error('Server upload error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const duration = Date.now() - startTime;
+    logger.error('File upload failed', error, { requestId, ip });
+    logger.logResponse('POST', '/api/upload', error.statusCode || 500, duration, { requestId });
+
+    return createErrorResponse(error);
   }
 }

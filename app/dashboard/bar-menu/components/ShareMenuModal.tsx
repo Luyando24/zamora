@@ -66,6 +66,21 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // Helper for rounded rects (polyfill for better compatibility)
+  const drawRoundedRect = (ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number) => {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+  };
+
   const handleDownload = () => {
     // 1. Setup Canvas (A4 size @ 300dpi: 2480 x 3508 px)
     const canvas = document.createElement('canvas');
@@ -109,8 +124,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         const pillY = 200;
         
         // Draw Pill
-        ctx.beginPath();
-        ctx.roundRect(pillX, pillY, pillWidth, pillHeight, 90);
+        drawRoundedRect(ctx, pillX, pillY, pillWidth, pillHeight, 90);
         ctx.fill();
 
         ctx.fillStyle = '#db2777'; // Pink 600
@@ -158,15 +172,13 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         ctx.fillStyle = glowGradient;
         
         // Draw blurred rect behind (same size as card)
-        ctx.beginPath();
-        ctx.roundRect(cardX, cardY, cardSize, cardSize, r);
+        drawRoundedRect(ctx, cardX, cardY, cardSize, cardSize, r);
         ctx.fill();
         ctx.restore();
 
         // Draw White Card Inner (Solid, Sharp)
         ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.roundRect(cardX, cardY, cardSize, cardSize, r);
+        drawRoundedRect(ctx, cardX, cardY, cardSize, cardSize, r);
         ctx.fill();
 
         // Draw QR centered in card
@@ -267,8 +279,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
         ctx.lineWidth = 5;
         
-        ctx.beginPath();
-        ctx.roundRect(cardX, cardY, cardWidth, cardHeight, 60);
+        drawRoundedRect(ctx, cardX, cardY, cardWidth, cardHeight, 60);
         ctx.fill();
         ctx.stroke();
 

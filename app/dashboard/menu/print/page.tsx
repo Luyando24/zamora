@@ -2,18 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { useMenuCategories } from '@/hooks/useMenuCategories';
-import { Loader2, Printer } from 'lucide-react';
-import Image from 'next/image';
-
-interface PrintMenuPageProps {
-  params: {
-    propertyId: string;
-  };
-  searchParams: {
-    propertyId?: string; // Fallback
-  };
-}
+import { Loader2, Printer, ChevronLeft, ChefHat } from 'lucide-react';
+import Link from 'next/link';
 
 export default function PrintMenuPage({ searchParams }: { searchParams: { propertyId: string } }) {
   const propertyId = searchParams.propertyId;
@@ -24,11 +14,6 @@ export default function PrintMenuPage({ searchParams }: { searchParams: { proper
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!propertyId || propertyId === 'all') {
-        // If no specific property, maybe fetch user profile or just items? 
-        // For print view, it's best to be property specific, but we can handle generic.
-      }
-
       // 1. Fetch Property Details
       if (propertyId && propertyId !== 'all') {
         const { data: prop } = await supabase.from('properties').select('*').eq('id', propertyId).single();
@@ -78,116 +63,150 @@ export default function PrintMenuPage({ searchParams }: { searchParams: { proper
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-white">
-        <Loader2 className="animate-spin text-slate-300" size={32} />
+        <div className="flex flex-col items-center gap-4">
+            <Loader2 className="animate-spin text-pink-600" size={40} />
+            <p className="text-slate-400 font-medium tracking-widest text-sm">DESIGNING MENU...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white min-h-screen text-slate-900 font-sans selection:bg-black selection:text-white print:p-0 p-8">
-      {/* Print Controls (Hidden when printing) */}
-      <div className="fixed top-6 right-6 print:hidden z-50">
+    <div className="bg-slate-950 min-h-screen text-slate-100 font-sans selection:bg-pink-500 selection:text-white print:p-0">
+      
+      {/* --- Screen-Only Controls --- */}
+      <nav className="print:hidden fixed top-0 w-full bg-slate-950/80 backdrop-blur-md border-b border-slate-800 z-50 px-6 py-4 flex justify-between items-center">
+        <Link href="/dashboard/menu" className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm font-bold uppercase tracking-wider">
+            <ChevronLeft size={16} /> Back to Dashboard
+        </Link>
         <button
           onClick={() => window.print()}
-          className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-full font-bold shadow-xl hover:scale-105 transition-transform"
+          className="flex items-center gap-2 px-6 py-2.5 bg-pink-600 text-white rounded-full font-bold shadow-lg shadow-pink-900/20 hover:bg-pink-500 hover:scale-105 transition-all"
         >
           <Printer size={18} /> Print Menu
         </button>
-      </div>
+      </nav>
 
-      {/* A4 Container */}
-      <div className="max-w-[210mm] mx-auto bg-white print:max-w-none">
+      {/* --- Printable Canvas --- */}
+      {/* Using A4 dimensions max-width for screen preview, full width for print */}
+      <div className="max-w-[210mm] mx-auto bg-slate-950 pt-24 pb-12 px-12 print:pt-0 print:px-0 print:max-w-none min-h-screen flex flex-col relative overflow-hidden">
         
-        {/* COVER SECTION */}
-        <header className="mb-16 text-center pt-12 print:pt-0">
-          <div className="mb-8 flex justify-center">
-            {property?.logo_url ? (
-               <img src={property.logo_url} alt="Logo" className="h-24 w-auto object-contain grayscale" />
-            ) : (
-               <div className="h-20 w-20 border-2 border-slate-900 rounded-full flex items-center justify-center">
-                  <span className="font-black text-2xl tracking-tighter">ZM</span>
-               </div>
-            )}
-          </div>
-          
-          <h1 className="text-5xl font-black uppercase tracking-[0.2em] mb-4 text-slate-900">
-            {property?.name || 'Menu'}
-          </h1>
-          <div className="w-24 h-1 bg-black mx-auto mb-6"></div>
-          <p className="text-slate-500 uppercase tracking-widest text-sm font-medium">
-            Exquisite Dining Experience
-          </p>
+        {/* Decorative Background Elements (Futuristic) */}
+        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-pink-900/10 to-transparent pointer-events-none print:hidden"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-pink-600/5 rounded-full blur-3xl pointer-events-none print:hidden"></div>
+
+        {/* Header */}
+        <header className="text-center mb-16 print:mb-12 print:mt-12 relative z-10">
+            <div className="inline-block mb-6 relative">
+                {property?.logo_url ? (
+                    <img src={property.logo_url} alt="Logo" className="h-24 w-auto object-contain brightness-0 invert" />
+                ) : (
+                    <div className="h-20 w-20 bg-slate-900 rounded-full flex items-center justify-center mx-auto border border-slate-800 shadow-xl shadow-black/50">
+                        <ChefHat className="text-pink-500" size={32} />
+                    </div>
+                )}
+            </div>
+            
+            <h1 className="text-5xl font-black uppercase tracking-[0.2em] text-white mb-2 drop-shadow-sm">
+                {property?.name || 'MENU'}
+            </h1>
+            <div className="flex items-center justify-center gap-4 text-xs font-bold tracking-[0.3em] text-pink-500 uppercase">
+                <span>Est. 2024</span>
+                <span className="w-1 h-1 bg-pink-500 rounded-full shadow-[0_0_10px_rgba(236,72,153,0.8)]"></span>
+                <span>Fine Dining</span>
+            </div>
         </header>
 
-        {/* MENU GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-12 print:grid-cols-2 print:gap-x-12">
-          {categories.map((cat) => (
-            <section key={cat} className="break-inside-avoid">
-              <h2 className="text-2xl font-black uppercase tracking-wider mb-8 flex items-center gap-4">
-                <span className="text-slate-900">{cat}</span>
-                <span className="h-[1px] flex-1 bg-slate-200"></span>
-              </h2>
+        {/* Content Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-20 gap-y-16 print:grid-cols-2 print:gap-x-16 relative z-10">
+            {categories.map((cat) => (
+                <section key={cat} className="break-inside-avoid mb-8">
+                    <div className="flex items-center gap-4 mb-8">
+                        <h2 className="text-xl font-black uppercase tracking-widest text-white shrink-0 border-b-2 border-pink-600 pb-1">
+                            {cat}
+                        </h2>
+                        <div className="h-[1px] bg-slate-800 flex-1"></div>
+                    </div>
 
-              <div className="space-y-8">
-                {grouped[cat].map((item: any) => (
-                  <div key={item.id} className="group flex justify-between items-baseline gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-baseline justify-between mb-1">
-                        <h3 className="font-bold text-lg text-slate-900 uppercase tracking-tight">
-                          {item.name}
-                        </h3>
-                      </div>
-                      <p className="text-slate-500 text-sm font-light leading-relaxed pr-4">
-                        {item.description}
-                      </p>
-                      {item.dietary_info && (
-                          <span className="inline-block mt-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 border border-slate-200 px-1.5 rounded-sm">
-                              {item.dietary_info}
-                          </span>
-                      )}
-                    </div>
-                    
-                    <div className="text-right">
-                        <span className="text-lg font-bold text-slate-900 tabular-nums">
-                            {/* Format Price cleanly */}
-                            <span className="text-sm font-normal align-top mr-0.5">K</span>
-                            {item.price}
-                        </span>
-                        {item.weight && (
-                            <div className="text-[10px] text-slate-400 font-medium uppercase tracking-wide mt-0.5">
-                                {item.weight}
+                    <div className="space-y-8">
+                        {grouped[cat].map((item: any) => (
+                            <div key={item.id} className="group relative pl-4 border-l border-slate-800 hover:border-pink-600 transition-colors duration-300">
+                                <div className="flex justify-between items-baseline mb-1">
+                                    <h3 className="font-bold text-base text-slate-100 uppercase tracking-wide group-hover:text-pink-400 transition-colors print:text-slate-100">
+                                        {item.name}
+                                    </h3>
+                                    <span className="shrink-0 ml-4 font-bold text-pink-500 text-lg tabular-nums drop-shadow-[0_0_8px_rgba(236,72,153,0.5)]">
+                                        <span className="text-xs font-medium mr-0.5 text-pink-400/70">K</span>
+                                        {item.price}
+                                    </span>
+                                </div>
+                                
+                                <p className="text-slate-400 text-xs leading-relaxed font-medium pr-8 mb-2">
+                                    {item.description}
+                                </p>
+
+                                <div className="flex flex-wrap gap-2">
+                                    {item.weight && (
+                                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-wider border border-slate-800 px-1.5 py-0.5 rounded-sm">
+                                            {item.weight}
+                                        </span>
+                                    )}
+                                    {item.dietary_info && (
+                                        <span className="text-[9px] font-bold text-pink-400 uppercase tracking-wider border border-pink-900/30 bg-pink-900/10 px-1.5 py-0.5 rounded-sm">
+                                            {item.dietary_info}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
-                        )}
+                        ))}
                     </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          ))}
+                </section>
+            ))}
         </div>
 
-        {/* FOOTER */}
-        <footer className="mt-24 pt-8 border-t border-slate-100 flex justify-between items-center text-xs text-slate-400 uppercase tracking-widest print:fixed print:bottom-8 print:left-0 print:right-0 print:px-12 print:border-none">
-          <span>{property?.name || 'Fine Dining'}</span>
-          <span>Powered by Zamora</span>
+        {/* Footer */}
+        <footer className="mt-auto pt-20 text-center print:fixed print:bottom-8 print:left-0 print:right-0 relative z-10">
+            <div className="w-12 h-[2px] bg-pink-600 mx-auto mb-6"></div>
+            <p className="text-[10px] font-bold tracking-[0.2em] text-slate-600 uppercase">
+                {property?.name ? `${property.name} • ` : ''} Powered by Zamora
+            </p>
         </footer>
+
       </div>
 
-      {/* CSS for Print */}
       <style jsx global>{`
         @media print {
           @page {
-            margin: 15mm;
+            margin: 0; /* Minimal margin to allow full bleed if printer supports */
             size: A4;
           }
           body {
-            background: white;
-            color: black;
-          }
-          /* Ensure backgrounds print if user enabled them, but we kept it minimal */
-          * {
+            background-color: #020617 !important; /* Slate 950 */
+            color: white !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+          }
+          /* Force background on the main container */
+          .bg-slate-950 {
+            background-color: #020617 !important;
+          }
+          /* Ensure text is white */
+          .text-slate-100, .text-white {
+            color: #f1f5f9 !important;
+          }
+          .text-slate-400 {
+            color: #94a3b8 !important;
+          }
+          .border-slate-800 {
+            border-color: #1e293b !important;
+          }
+          nav {
+            display: none;
+          }
+          /* Add some padding back for the content inside the page */
+          .max-w-\[210mm\] {
+            padding: 15mm !important;
+            min-height: 100vh;
           }
         }
       `}</style>

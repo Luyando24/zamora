@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useMenuCategories } from '@/hooks/useMenuCategories';
-import { generateMenuPdf } from './utils/generateMenuPdf';
 import CategoryManager from './components/CategoryManager';
 import ShareMenuModal from './components/ShareMenuModal';
 import { Plus, Edit, Trash2, UtensilsCrossed, QrCode, Building2, FileText, Search, ChefHat, Sparkles } from 'lucide-react';

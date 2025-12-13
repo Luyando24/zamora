@@ -309,7 +309,6 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
                 <ImageUpload
                     value={formData.image_url}
                     onChange={(url) => setFormData({ ...formData, image_url: url })}
-                    onRemove={() => setFormData({ ...formData, image_url: '' })}
                 />
             </div>
             <p className="text-sm text-slate-500 mt-4 text-center">
@@ -324,7 +323,6 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
           <MultiImageUpload
             values={formData.gallery_urls}
             onChange={(urls) => setFormData({ ...formData, gallery_urls: urls })}
-            onRemove={(url) => setFormData({ ...formData, gallery_urls: formData.gallery_urls.filter(u => u !== url) })}
           />
       </div>
     </div>
