@@ -29,14 +29,71 @@ export default function DashboardPage() {
     };
     getUser();
 
-    // Placeholder for real data fetching
-    // In a real app, we would fetch counts here
-    setStats([
-        { name: 'Today\'s Check-ins', value: '12', change: '+12%', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
-        { name: 'Occupancy Rate', value: '85%', change: '+5%', icon: BedDouble, color: 'text-amber-600', bg: 'bg-amber-50' },
-        { name: 'Pending Folios', value: '3', change: '-2', icon: FileCheck, color: 'text-rose-600', bg: 'bg-rose-50' },
-        { name: 'Available Rooms', value: '8', change: '-4', icon: CalendarCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-    ]);
+    const fetchStats = async () => {
+        const today = new Date().toISOString().split('T')[0];
+        
+        // 1. Total Rooms
+        const { count: totalRooms } = await supabase
+            .from('rooms')
+            .select('*', { count: 'exact', head: true });
+
+        // 2. Maintenance Rooms
+        const { count: maintenanceRooms } = await supabase
+            .from('rooms')
+            .select('*', { count: 'exact', head: true })
+            .eq('status', 'maintenance');
+            
+        // 3. Today's Check-ins
+        const { count: checkIns } = await supabase
+            .from('bookings')
+            .select('*', { count: 'exact', head: true })
+            .eq('check_in_date', today)
+            .in('status', ['confirmed', 'checked_in']);
+
+        // 4. Occupied Rooms (Active Bookings)
+        // Logic: check_in <= today AND check_out > today
+        const { count: occupied } = await supabase
+            .from('bookings')
+            .select('*', { count: 'exact', head: true })
+            .lte('check_in_date', today)
+            .gt('check_out_date', today)
+            .in('status', ['confirmed', 'checked_in']);
+            
+        // 5. Pending Folios
+        const { count: pendingFolios } = await supabase
+            .from('folios')
+            .select('*', { count: 'exact', head: true })
+            .eq('status', 'open');
+
+        const safeTotalRooms = totalRooms || 0;
+        const safeMaintenance = maintenanceRooms || 0;
+        const safeOccupied = occupied || 0;
+        
+        const occupancyRate = safeTotalRooms > 0 
+            ? Math.round((safeOccupied / safeTotalRooms) * 100) 
+            : 0;
+            
+        const availableRooms = Math.max(0, safeTotalRooms - safeOccupied - safeMaintenance);
+
+        setStats([
+            { name: 'Today\'s Check-ins', value: (checkIns || 0).toString(), change: '', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
+            { name: 'Occupancy Rate', value: `${occupancyRate}%`, change: '', icon: BedDouble, color: 'text-amber-600', bg: 'bg-amber-50' },
+            { name: 'Pending Folios', value: (pendingFolios || 0).toString(), change: '', icon: FileCheck, color: 'text-rose-600', bg: 'bg-rose-50' },
+            { name: 'Available Rooms', value: availableRooms.toString(), change: '', icon: CalendarCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+        ]);
+    };
+
+    fetchStats();
+
+    const channels = supabase.channel('dashboard-stats')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, fetchStats)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'rooms' }, fetchStats)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'folios' }, fetchStats)
+        .subscribe();
+
+    return () => {
+        supabase.removeChannel(channels);
+    };
   }, []);
 
   return (

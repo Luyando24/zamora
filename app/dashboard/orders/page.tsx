@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { 
   Clock, CheckCircle2, ChefHat, Truck, AlertCircle, 
-  RefreshCw, Building2, Utensils, XCircle, Volume2, VolumeX, Eye, X
+  RefreshCw, Building2, Utensils, XCircle, Volume2, VolumeX, Eye, X, Wine
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -20,15 +20,13 @@ interface OrderItem {
   notes?: string;
   unit_price: number;
   total_price: number;
-  // Snapshot fields
-   item_name?: string;
-   item_description?: string;
-   item_ingredients?: string;
-   item_image_url?: string;
-   weight?: string;
-   extras?: any;
-   options?: any;
-  
+  item_name?: string;
+  item_description?: string;
+  item_ingredients?: string;
+  item_image_url?: string;
+  weight?: string;
+  extras?: any;
+  options?: any;
   menu_items: {
     name: string;
     description?: string;
@@ -51,9 +49,48 @@ interface Order {
   order_items: OrderItem[];
   guest_phone?: string;
   payment_method?: string;
+  property_id?: string;
 }
 
-const STATUS_CONFIG = {
+interface BarOrderItem {
+  id: string;
+  quantity: number;
+  notes?: string;
+  unit_price: number;
+  total_price: number;
+  item_name?: string;
+  item_description?: string;
+  item_ingredients?: string;
+  item_image_url?: string;
+  weight?: string;
+  extras?: any;
+  options?: any;
+  bar_menu_items: {
+    name: string;
+    description?: string;
+    ingredients?: string;
+    image_url?: string;
+    category?: string;
+    weight?: string;
+    dietary_info?: string;
+  } | null;
+}
+
+interface BarOrder {
+  id: string;
+  created_at: string;
+  status: 'pending' | 'preparing' | 'ready' | 'delivered' | 'cancelled';
+  guest_room_number: string;
+  guest_name: string;
+  total_amount: number;
+  notes?: string;
+  bar_order_items: BarOrderItem[];
+  guest_phone?: string;
+  payment_method?: string;
+  property_id?: string;
+}
+
+const FOOD_STATUS_CONFIG = {
   pending: { 
     label: 'New Orders', 
     icon: AlertCircle, 
@@ -106,14 +143,69 @@ const STATUS_CONFIG = {
   },
 };
 
+const BAR_STATUS_CONFIG = {
+  pending: { 
+    label: 'New Orders', 
+    icon: AlertCircle, 
+    color: 'text-purple-600', 
+    bg: 'bg-purple-50',
+    border: 'border-purple-200',
+    accent: 'border-l-purple-500',
+    badge: 'bg-purple-100 text-purple-700',
+    button: 'bg-purple-600 hover:bg-purple-700 text-white shadow-purple-200'
+  },
+  preparing: { 
+    label: 'Preparing', 
+    icon: ChefHat, 
+    color: 'text-amber-600', 
+    bg: 'bg-amber-50',
+    border: 'border-amber-200',
+    accent: 'border-l-amber-500',
+    badge: 'bg-amber-100 text-amber-800',
+    button: 'bg-amber-500 hover:bg-amber-600 text-white shadow-amber-200'
+  },
+  ready: { 
+    label: 'Ready for Pickup', 
+    icon: CheckCircle2, 
+    color: 'text-emerald-600', 
+    bg: 'bg-emerald-50',
+    border: 'border-emerald-200',
+    accent: 'border-l-emerald-500',
+    badge: 'bg-emerald-100 text-emerald-700',
+    button: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200'
+  },
+  delivered: { 
+    label: 'Completed', 
+    icon: Truck, 
+    color: 'text-slate-600', 
+    bg: 'bg-slate-100',
+    border: 'border-slate-200',
+    accent: 'border-l-slate-400',
+    badge: 'bg-slate-200 text-slate-600',
+    button: 'bg-slate-800 hover:bg-slate-900 text-white'
+  },
+  cancelled: { 
+    label: 'Cancelled', 
+    icon: XCircle, 
+    color: 'text-slate-500', 
+    bg: 'bg-slate-100',
+    border: 'border-slate-200',
+    accent: 'border-l-slate-300',
+    badge: 'bg-slate-200 text-slate-500',
+    button: ''
+  },
+};
+
 export default function OrdersPage() {
   const supabase = createClient();
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [activeTab, setActiveTab] = useState<'food' | 'bar'>('food');
+  const [foodOrders, setFoodOrders] = useState<Order[]>([]);
+  const [barOrders, setBarOrders] = useState<BarOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [properties, setProperties] = useState<Property[]>([]);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>('');
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | BarOrder | null>(null);
 
   // Sound Player using Web Audio API
   const playNotificationSound = () => {
@@ -124,20 +216,16 @@ export default function OrdersPage() {
       if (!AudioContext) return;
       
       const ctx = new AudioContext();
-      
-      // Create oscillator for the "ding"
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
 
       osc.connect(gain);
       gain.connect(ctx.destination);
 
-      // Nice "ding" sound: High pitch dropping slightly
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(880, ctx.currentTime); // A5
+      osc.frequency.setValueAtTime(880, ctx.currentTime); 
       osc.frequency.exponentialRampToValueAtTime(500, ctx.currentTime + 0.6); 
       
-      // Envelope: Fast attack, slow decay
       gain.gain.setValueAtTime(0, ctx.currentTime);
       gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.05);
       gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.6);
@@ -145,13 +233,12 @@ export default function OrdersPage() {
       osc.start(ctx.currentTime);
       osc.stop(ctx.currentTime + 0.6);
 
-      // Add a second harmonic for richness
       const osc2 = ctx.createOscillator();
       const gain2 = ctx.createGain();
       osc2.connect(gain2);
       gain2.connect(ctx.destination);
       osc2.type = 'triangle';
-      osc2.frequency.setValueAtTime(1760, ctx.currentTime); // A6
+      osc2.frequency.setValueAtTime(1760, ctx.currentTime); 
       gain2.gain.setValueAtTime(0, ctx.currentTime);
       gain2.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.05);
       gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
@@ -192,9 +279,8 @@ export default function OrdersPage() {
     localStorage.setItem('zamora_selected_property', newId);
   };
 
-  const fetchOrders = async () => {
+  const fetchFoodOrders = async () => {
     if (!selectedPropertyId) return;
-    
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -202,26 +288,10 @@ export default function OrdersPage() {
         .select(`
           *,
           order_items (
-            id,
-            quantity,
-            notes,
-            unit_price,
-            total_price,
-            item_name,
-             item_description,
-             item_ingredients,
-             item_image_url,
-             weight,
-             extras,
-             options,
+            id, quantity, notes, unit_price, total_price,
+            item_name, item_description, item_ingredients, item_image_url, weight, extras, options,
             menu_items (
-              name,
-              description,
-              ingredients,
-              image_url,
-              category,
-              weight,
-              dietary_info
+              name, description, ingredients, image_url, category, weight, dietary_info
             )
           )
         `)
@@ -229,10 +299,37 @@ export default function OrdersPage() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      
-      setOrders((data as any[]) || []);
+      setFoodOrders((data as any[]) || []);
     } catch (error) {
-      console.error('Error fetching orders:', error);
+      console.error('Error fetching food orders:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchBarOrders = async () => {
+    if (!selectedPropertyId) return;
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('bar_orders')
+        .select(`
+          *,
+          bar_order_items (
+            id, quantity, notes, unit_price, total_price,
+            item_name, item_description, item_ingredients, item_image_url, weight, extras, options,
+            bar_menu_items (
+              name, description, ingredients, image_url, category, weight, dietary_info
+            )
+          )
+        `)
+        .eq('property_id', selectedPropertyId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setBarOrders((data as any[]) || []);
+    } catch (error) {
+      console.error('Error fetching bar orders:', error);
     } finally {
       setLoading(false);
     }
@@ -244,49 +341,58 @@ export default function OrdersPage() {
 
   useEffect(() => {
     if (selectedPropertyId) {
-      fetchOrders();
+      // Fetch both initially
+      fetchFoodOrders();
+      fetchBarOrders();
 
-      const channel = supabase
+      // Subscribe to Food Orders
+      const foodChannel = supabase
         .channel('orders-changes')
         .on(
           'postgres_changes',
-          { 
-            event: '*', 
-            schema: 'public', 
-            table: 'orders',
-            filter: `property_id=eq.${selectedPropertyId}`
-          },
+          { event: '*', schema: 'public', table: 'orders', filter: `property_id=eq.${selectedPropertyId}` },
           (payload) => {
-            // Play sound on new order
-            if (payload.eventType === 'INSERT') {
-                playNotificationSound();
-            }
-            fetchOrders();
+            if (payload.eventType === 'INSERT') playNotificationSound();
+            fetchFoodOrders();
+          }
+        )
+        .subscribe();
+
+      // Subscribe to Bar Orders
+      const barChannel = supabase
+        .channel('bar-orders-changes')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'bar_orders', filter: `property_id=eq.${selectedPropertyId}` },
+          (payload) => {
+            if (payload.eventType === 'INSERT') playNotificationSound();
+            fetchBarOrders();
           }
         )
         .subscribe();
 
       return () => {
-        supabase.removeChannel(channel);
+        supabase.removeChannel(foodChannel);
+        supabase.removeChannel(barChannel);
       };
     }
-  }, [selectedPropertyId, soundEnabled]); // Re-subscribe if soundEnabled changes to ensure closure captures latest value
+  }, [selectedPropertyId, soundEnabled]);
 
-  const updateStatus = async (orderId: string, newStatus: string) => {
+  const updateStatus = async (orderId: string, newStatus: string, type: 'food' | 'bar') => {
     try {
+      const table = type === 'food' ? 'orders' : 'bar_orders';
       const { error } = await supabase
-        .from('orders')
+        .from(table)
         .update({ status: newStatus })
         .eq('id', orderId);
 
       if (error) throw error;
       
-      // Optimistic update
-      setOrders(prev => prev.map(o => 
-        o.id === orderId 
-          ? { ...o, status: newStatus as Order['status'] } 
-          : o
-      ));
+      if (type === 'food') {
+        setFoodOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus as Order['status'] } : o));
+      } else {
+        setBarOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus as BarOrder['status'] } : o));
+      }
     } catch (error) {
       console.error('Error updating status:', error);
       alert('Failed to update status');
@@ -301,25 +407,51 @@ export default function OrdersPage() {
     return `${hours}h ${minutes % 60}m`;
   };
 
+  const currentOrders = activeTab === 'food' ? foodOrders : barOrders;
+  const currentConfig = activeTab === 'food' ? FOOD_STATUS_CONFIG : BAR_STATUS_CONFIG;
+
   // Group orders by status
   const groupedOrders = {
-    pending: orders.filter(o => o.status === 'pending'),
-    preparing: orders.filter(o => o.status === 'preparing'),
-    ready: orders.filter(o => o.status === 'ready'),
-    completed: orders.filter(o => ['delivered', 'cancelled'].includes(o.status)),
+    pending: currentOrders.filter(o => o.status === 'pending'),
+    preparing: currentOrders.filter(o => o.status === 'preparing'),
+    ready: currentOrders.filter(o => o.status === 'ready'),
+    completed: currentOrders.filter(o => ['delivered', 'cancelled'].includes(o.status)),
+  };
+
+  const refreshOrders = () => {
+    fetchFoodOrders();
+    fetchBarOrders();
   };
 
   return (
     <div className="h-screen flex flex-col bg-slate-50 font-sans antialiased">
       {/* Header */}
       <header className="bg-white/60 backdrop-blur-xl border-b border-slate-100 px-6 py-4 flex items-center justify-between shrink-0 z-20">
-        <div className="flex items-center gap-4">
-          <div className="p-3 bg-slate-900 rounded-lg text-white shadow-lg shadow-slate-900/10">
-            <Utensils size={22} />
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
+            <div className={`p-3 rounded-lg text-white shadow-lg transition-colors ${activeTab === 'food' ? 'bg-slate-900 shadow-slate-900/10' : 'bg-purple-900 shadow-purple-900/10'}`}>
+               {activeTab === 'food' ? <Utensils size={22} /> : <Wine size={22} />}
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-slate-800 tracking-tight">Orders Management</h1>
+              <p className="text-slate-500 text-xs font-medium">Real-time workflow</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-lg font-bold text-slate-800 tracking-tight">Kitchen Workflow</h1>
-            <p className="text-slate-500 text-xs font-medium">Real-time order management</p>
+
+          {/* Tab Switcher */}
+          <div className="bg-slate-100 p-1 rounded-lg flex items-center">
+             <button 
+               onClick={() => setActiveTab('food')}
+               className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${activeTab === 'food' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+             >
+               Food Orders
+             </button>
+             <button 
+               onClick={() => setActiveTab('bar')}
+               className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${activeTab === 'bar' ? 'bg-white text-purple-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+             >
+               Bar Orders
+             </button>
           </div>
         </div>
         
@@ -362,7 +494,7 @@ export default function OrdersPage() {
           </div>
 
           <button 
-            onClick={fetchOrders}
+            onClick={refreshOrders}
             className="p-2.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-700 transition-all active:scale-95"
             title="Refresh Orders"
           >
@@ -378,8 +510,8 @@ export default function OrdersPage() {
           <Column 
             title="New Orders" 
             orders={groupedOrders.pending} 
-            config={STATUS_CONFIG.pending}
-            onStatusUpdate={updateStatus}
+            config={currentConfig.pending}
+            onStatusUpdate={(id, status) => updateStatus(id, status, activeTab)}
             onViewDetails={setSelectedOrder}
             nextStatus="preparing"
             elapsedTime={getElapsedTime}
@@ -388,8 +520,8 @@ export default function OrdersPage() {
           <Column 
             title="Preparing" 
             orders={groupedOrders.preparing} 
-            config={STATUS_CONFIG.preparing}
-            onStatusUpdate={updateStatus}
+            config={currentConfig.preparing}
+            onStatusUpdate={(id, status) => updateStatus(id, status, activeTab)}
             onViewDetails={setSelectedOrder}
             nextStatus="ready"
             elapsedTime={getElapsedTime}
@@ -398,8 +530,8 @@ export default function OrdersPage() {
           <Column 
             title="Ready for Pickup" 
             orders={groupedOrders.ready} 
-            config={STATUS_CONFIG.ready}
-            onStatusUpdate={updateStatus}
+            config={currentConfig.ready}
+            onStatusUpdate={(id, status) => updateStatus(id, status, activeTab)}
             onViewDetails={setSelectedOrder}
             nextStatus="delivered"
             elapsedTime={getElapsedTime}
@@ -408,10 +540,10 @@ export default function OrdersPage() {
           <Column 
             title="Completed" 
             orders={groupedOrders.completed} 
-            config={STATUS_CONFIG.delivered}
-            onStatusUpdate={updateStatus}
+            config={currentConfig.delivered}
+            onStatusUpdate={(id, status) => updateStatus(id, status, activeTab)}
             onViewDetails={setSelectedOrder}
-            nextStatus="" // No next status
+            nextStatus="" 
             elapsedTime={getElapsedTime}
             isCompletedColumn
           />
@@ -429,7 +561,7 @@ export default function OrdersPage() {
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
               className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] border border-slate-200/50"
-              onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
+              onClick={(e) => e.stopPropagation()} 
             >
               {/* Modal Header */}
               <div className="p-6 border-b border-slate-100 flex justify-between items-start">
@@ -469,11 +601,11 @@ export default function OrdersPage() {
                  <div className="bg-white p-4 rounded-xl border border-slate-200/80">
                     <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Items</h3>
                     <div className="space-y-3">
-                        {Array.isArray(selectedOrder.order_items) && selectedOrder.order_items.map((item, i) => {
-                            const itemName = item.item_name || item.menu_items?.name;
-                             const itemImage = item.item_image_url || item.menu_items?.image_url;
-                             const description = item.item_description || item.menu_items?.description;
-                             const ingredients = item.item_ingredients || item.menu_items?.ingredients;
+                        {((selectedOrder as Order).order_items || (selectedOrder as BarOrder).bar_order_items || []).map((item: any, i: number) => {
+                             const itemName = item.item_name || item.menu_items?.name || item.bar_menu_items?.name;
+                             const itemImage = item.item_image_url || item.menu_items?.image_url || item.bar_menu_items?.image_url;
+                             const description = item.item_description || item.menu_items?.description || item.bar_menu_items?.description;
+                             const ingredients = item.item_ingredients || item.menu_items?.ingredients || item.bar_menu_items?.ingredients;
  
                              if (!itemName) {
                                 return (
@@ -576,10 +708,10 @@ export default function OrdersPage() {
 
 interface ColumnProps {
   title: string;
-  orders: Order[];
+  orders: (Order | BarOrder)[];
   config: any;
   onStatusUpdate: (orderId: string, newStatus: string) => void;
-  onViewDetails: (order: Order) => void;
+  onViewDetails: (order: Order | BarOrder) => void;
   nextStatus: string;
   elapsedTime: (date: string) => string;
   isCompletedColumn?: boolean;
@@ -618,17 +750,18 @@ function Column({ title, orders, config, onStatusUpdate, onViewDetails, nextStat
 }
 
 interface OrderCardProps {
-  order: Order;
+  order: Order | BarOrder;
   config: any;
   onStatusUpdate: (orderId: string, newStatus: string) => void;
-  onViewDetails: (order: Order) => void;
+  onViewDetails: (order: Order | BarOrder) => void;
   nextStatus: string;
   elapsedTime: (date: string) => string;
   isCompleted?: boolean;
 }
 
 function OrderCard({ order, config, onStatusUpdate, onViewDetails, nextStatus, elapsedTime, isCompleted }: OrderCardProps) {
-  const totalItems = order.order_items.reduce((sum, item) => sum + item.quantity, 0);
+  const items = (order as any).order_items || (order as any).bar_order_items || [];
+  const totalItems = items.reduce((sum: number, item: any) => sum + item.quantity, 0);
 
   return (
     <motion.div 
@@ -658,11 +791,11 @@ function OrderCard({ order, config, onStatusUpdate, onViewDetails, nextStatus, e
         <div className="border-t border-dashed border-slate-200 my-3"></div>
 
         <div className="space-y-2 mb-4">
-          {order.order_items.map(item => (
+          {items.map((item: any) => (
             <div key={item.id} className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2">
                 <span className="font-bold text-slate-500">{item.quantity}x</span>
-                <p className="text-slate-700 font-medium">{item.item_name || item.menu_items?.name || 'Unknown Item'}</p>
+                <p className="text-slate-700 font-medium">{item.item_name || item.menu_items?.name || item.bar_menu_items?.name || 'Unknown Item'}</p>
               </div>
             </div>
           ))}

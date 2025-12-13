@@ -3,9 +3,12 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useMenuCategories } from '@/hooks/useMenuCategories';
-import CategoryManager from './components/CategoryManager';
+import { useBarMenuCategories } from '@/hooks/useBarMenuCategories';
+import FoodCategoryManager from './components/CategoryManager';
+import BarCategoryManager from '../bar-menu/components/CategoryManager';
 import ShareMenuModal from './components/ShareMenuModal';
-import { Plus, Edit, Trash2, UtensilsCrossed, QrCode, Building2, FileText, Search, ChefHat, Sparkles } from 'lucide-react';
+import { generateMenuPdf } from '../bar-menu/utils/generateMenuPdf';
+import { Plus, Edit, Trash2, UtensilsCrossed, QrCode, Building2, FileText, Search, ChefHat, Sparkles, Wine, Martini } from 'lucide-react';
 import Link from 'next/link';
 
 interface Property {
@@ -16,7 +19,9 @@ interface Property {
 }
 
 export default function MenuPage() {
-  const [items, setItems] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'food' | 'bar'>('food');
+  const [foodItems, setFoodItems] = useState<any[]>([]);
+  const [barItems, setBarItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
@@ -25,8 +30,9 @@ export default function MenuPage() {
   const [isShareOpen, setIsShareOpen] = useState(false);
   const supabase = createClient();
   
-  // Independent categories
-  const { categories: dbCategories, loading: categoriesLoading } = useMenuCategories();
+  // Categories
+  const { categories: foodCategories, loading: foodCategoriesLoading } = useMenuCategories();
+  const { categories: barCategories, loading: barCategoriesLoading } = useBarMenuCategories();
 
   const fetchProperties = async () => {
     try {
@@ -68,31 +74,33 @@ export default function MenuPage() {
     try {
         console.log('Fetching items...');
         
-        // Timeout race for items
-        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Items fetch timeout')), 8000));
-        
-        // Use raw select first to check if table is reachable
-        const fetch = supabase
+        // Fetch Food Items
+        const foodPromise = supabase
             .from('menu_items')
-            .select('*') // Select all to avoid missing column errors if schema matches partial
-            .limit(100); 
+            .select('*')
+            .limit(100);
+
+        // Fetch Bar Items
+        const barPromise = supabase
+            .from('bar_menu_items')
+            .select('*')
+            .limit(100);
         
-        const { data, error } = await Promise.race([fetch, timeout]) as any;
+        const [foodResult, barResult] = await Promise.all([foodPromise, barPromise]);
         
-        console.log('Fetch result:', { data, error });
-        
-        if (error) {
-            console.error('Error fetching items:', error);
-            // If error is related to column not found, alert it
-            if (error.code === 'PGRST301') {
-                alert('Database schema error: ' + error.message);
-            } else {
-                alert('Error fetching items: ' + error.message);
-            }
-        } else if (data) {
-            console.log('Items fetched:', data.length);
-            setItems(data);
+        if (foodResult.error) {
+            console.error('Error fetching food items:', foodResult.error);
+        } else if (foodResult.data) {
+            setFoodItems(foodResult.data);
         }
+
+        if (barResult.error) {
+            console.error('Error fetching bar items:', barResult.error);
+            // Handle specific bar menu errors if needed
+        } else if (barResult.data) {
+            setBarItems(barResult.data);
+        }
+
     } catch (err: any) {
         console.error('Exception fetching items:', err);
         alert('Exception: ' + err.message);
@@ -108,7 +116,54 @@ export default function MenuPage() {
     fetchItems();
   }, []);
 
-  console.log('Render: loading=', loading, 'categoriesLoading=', categoriesLoading);
+  console.log('Render: loading=', loading);
+
+  const handleDelete = async (id: string) => {
+    const isFood = activeTab === 'food';
+    const tableName = isFood ? 'menu_items' : 'bar_menu_items';
+    
+    if (!confirm(`Delete this ${isFood ? 'menu' : 'bar'} item?`)) return;
+
+    if (isFood) {
+        // 1. Manually unlink related order items to avoid FK constraint violation
+        const { error: unlinkError } = await supabase
+        .from('order_items')
+        .update({ menu_item_id: null })
+        .eq('menu_item_id', id);
+
+        if (unlinkError) {
+            console.error('Error unlinking order items:', unlinkError);
+        }
+    }
+    
+    const { error } = await supabase.from(tableName).delete().eq('id', id);
+    
+    if (error) {
+       alert(error.message);
+    } else {
+      if (isFood) {
+        setFoodItems(prev => prev.filter(item => item.id !== id));
+      } else {
+        setBarItems(prev => prev.filter(item => item.id !== id));
+      }
+    }
+  };
+
+  const currentItems = activeTab === 'food' ? foodItems : barItems;
+  const currentCategories = activeTab === 'food' ? foodCategories : barCategories;
+  const categoriesLoading = activeTab === 'food' ? foodCategoriesLoading : barCategoriesLoading;
+
+  const filteredItems = currentItems.filter(i => {
+      const matchesCategory = filter === 'All' || (i.category || '').toLowerCase().trim() === filter.toLowerCase().trim();
+      const matchesSearch = i.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                            (i.description || '').toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
+  });
+  
+  // Combine 'All' with fetched categories
+  const displayCategories = ['All', ...currentCategories.map(c => c.name)];
+
+  const selectedProperty = properties.find(p => p.id === selectedPropertyId);
 
   if (loading || categoriesLoading) {
     return (
@@ -120,42 +175,6 @@ export default function MenuPage() {
       </div>
     );
   }
-
-  const handleDelete = async (id: string) => {
-    if (!confirm('Delete this menu item?')) return;
-
-    // 1. Manually unlink related order items to avoid FK constraint violation
-    // (This is a fallback because the foreign key constraint might be restricted in the DB)
-    const { error: unlinkError } = await supabase
-      .from('order_items')
-      .update({ menu_item_id: null })
-      .eq('menu_item_id', id);
-
-    if (unlinkError) {
-      console.error('Error unlinking order items:', unlinkError);
-      // We proceed, but the delete might fail if the constraint is still enforcing.
-    }
-    
-    const { error } = await supabase.from('menu_items').delete().eq('id', id);
-    
-    if (error) {
-       alert(error.message);
-    } else {
-      setItems(prev => prev.filter(item => item.id !== id));
-    }
-  };
-
-  const filteredItems = items.filter(i => {
-      const matchesCategory = filter === 'All' || (i.category || '').toLowerCase().trim() === filter.toLowerCase().trim();
-      const matchesSearch = i.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                            (i.description || '').toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
-  });
-  
-  // Combine 'All' with fetched categories
-  const displayCategories = ['All', ...dbCategories.map(c => c.name)];
-
-  const selectedProperty = properties.find(p => p.id === selectedPropertyId);
 
   return (
     <div className="space-y-8 pb-20">
@@ -171,14 +190,18 @@ export default function MenuPage() {
                     />
                 ) : (
                     <div className="h-16 w-16 bg-pink-50 rounded-xl flex items-center justify-center border border-pink-100">
-                        <ChefHat className="text-pink-600" size={32} />
+                        {activeTab === 'food' ? (
+                             <ChefHat className="text-pink-600" size={32} />
+                        ) : (
+                             <Wine className="text-pink-600" size={32} />
+                        )}
                     </div>
                 )}
                 <div>
                     <h1 className="text-3xl font-black text-slate-900 tracking-tight">
-                        {selectedProperty && selectedPropertyId !== 'all' ? selectedProperty.name : 'Food Menu'}
+                        {selectedProperty && selectedPropertyId !== 'all' ? selectedProperty.name : 'Food & Bar Menu'}
                     </h1>
-                    <p className="text-slate-500 mt-1">Manage your culinary offerings.</p>
+                    <p className="text-slate-500 mt-1">Manage your {activeTab === 'food' ? 'culinary offerings' : 'drink selection'}.</p>
                 </div>
             </div>
             
@@ -209,32 +232,83 @@ export default function MenuPage() {
                 <QrCode size={18} /> <span className="hidden sm:inline">QR Code</span>
               </button>
 
-              <button
-                onClick={() => {
-                    const printUrl = `/dashboard/menu/print?propertyId=${selectedPropertyId}`;
-                    window.open(printUrl, '_blank');
-                }}
-                className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 hover:border-slate-300 font-bold transition-colors"
-                title="Open Print Layout"
-              >
-                <FileText size={18} /> <span className="hidden sm:inline">Print View</span>
-              </button>
+              {activeTab === 'food' ? (
+                <button
+                    onClick={() => {
+                        const printUrl = `/dashboard/menu/print?propertyId=${selectedPropertyId}`;
+                        window.open(printUrl, '_blank');
+                    }}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 hover:border-slate-300 font-bold transition-colors"
+                    title="Open Print Layout"
+                >
+                    <FileText size={18} /> <span className="hidden sm:inline">Print View</span>
+                </button>
+              ) : (
+                <button
+                    onClick={() => {
+                        const hotelName = properties.find(p => p.id === selectedPropertyId)?.name || 'Bar Menu';
+                        generateMenuPdf(filteredItems, hotelName);
+                    }}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 hover:border-slate-300 font-bold transition-colors"
+                    title="Download Print-Ready Menu"
+                >
+                    <FileText size={18} /> <span className="hidden sm:inline">PDF</span>
+                </button>
+              )}
               
               <div className="h-8 w-[1px] bg-slate-200 mx-1 hidden md:block"></div>
 
-              <CategoryManager />
+              {activeTab === 'food' ? <FoodCategoryManager /> : <BarCategoryManager />}
               
               <Link
-                href="/dashboard/menu/new"
+                href={activeTab === 'food' ? "/dashboard/menu/new" : "/dashboard/bar-menu/new"}
                 className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
               >
-                <Plus size={18} strokeWidth={3} /> Add Dish
+                <Plus size={18} strokeWidth={3} /> {activeTab === 'food' ? 'Add Dish' : 'Add Drink'}
               </Link>
             </div>
         </div>
 
+        {/* Tab Switcher */}
+        <div className="mt-8 border-b border-slate-200">
+            <div className="flex gap-8">
+                <button
+                    onClick={() => { setActiveTab('food'); setFilter('All'); }}
+                    className={`pb-4 px-2 text-sm font-bold transition-all relative ${
+                        activeTab === 'food'
+                            ? 'text-pink-600'
+                            : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                >
+                    <div className="flex items-center gap-2">
+                        <UtensilsCrossed size={18} />
+                        Food Menu
+                    </div>
+                    {activeTab === 'food' && (
+                        <div className="absolute bottom-0 left-0 w-full h-0.5 bg-pink-600 rounded-t-full" />
+                    )}
+                </button>
+                <button
+                    onClick={() => { setActiveTab('bar'); setFilter('All'); }}
+                    className={`pb-4 px-2 text-sm font-bold transition-all relative ${
+                        activeTab === 'bar'
+                            ? 'text-pink-600'
+                            : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                >
+                    <div className="flex items-center gap-2">
+                        <Wine size={18} />
+                        Bar Menu
+                    </div>
+                    {activeTab === 'bar' && (
+                        <div className="absolute bottom-0 left-0 w-full h-0.5 bg-pink-600 rounded-t-full" />
+                    )}
+                </button>
+            </div>
+        </div>
+
         {/* Search & Filter Bar */}
-        <div className="mt-8 flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="mt-6 flex flex-col md:flex-row gap-4 items-center justify-between">
             {/* Categories */}
             <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto no-scrollbar mask-linear-fade">
                 {displayCategories.map(cat => (
@@ -257,7 +331,7 @@ export default function MenuPage() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input 
                     type="text"
-                    placeholder="Search dishes..."
+                    placeholder={`Search ${activeTab === 'food' ? 'dishes' : 'drinks'}...`}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-600 focus:border-transparent transition-all shadow-sm"
@@ -281,11 +355,15 @@ export default function MenuPage() {
         <>
         {filteredItems.length === 0 ? (
           <div className="text-center py-16 border-2 border-dashed border-slate-200 rounded-3xl bg-slate-50">
-            <UtensilsCrossed className="mx-auto h-12 w-12 text-slate-300 mb-3" />
-            <h3 className="text-lg font-bold text-slate-900">No menu items found</h3>
-            <p className="text-slate-500 mb-6">Get started by creating your first dish.</p>
+            {activeTab === 'food' ? (
+                 <UtensilsCrossed className="mx-auto h-12 w-12 text-slate-300 mb-3" />
+            ) : (
+                 <Martini className="mx-auto h-12 w-12 text-slate-300 mb-3" />
+            )}
+            <h3 className="text-lg font-bold text-slate-900">No {activeTab === 'food' ? 'menu' : 'bar'} items found</h3>
+            <p className="text-slate-500 mb-6">Get started by creating your first {activeTab === 'food' ? 'dish' : 'drink'}.</p>
             <Link
-              href="/dashboard/menu/new"
+              href={activeTab === 'food' ? "/dashboard/menu/new" : "/dashboard/bar-menu/new"}
               className="inline-flex items-center gap-2 px-5 py-2.5 bg-pink-600 text-white rounded-xl font-bold hover:bg-pink-700 transition-all shadow-lg hover:shadow-pink-200"
             >
               <Plus size={18} strokeWidth={3} /> Add Item
@@ -305,7 +383,11 @@ export default function MenuPage() {
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center bg-slate-50">
-                        <UtensilsCrossed className="text-slate-300 opacity-50" size={48} />
+                        {activeTab === 'food' ? (
+                            <UtensilsCrossed className="text-slate-300 opacity-50" size={48} />
+                        ) : (
+                            <Wine className="text-slate-300 opacity-50" size={48} />
+                        )}
                     </div>
                 )}
                 
@@ -345,7 +427,7 @@ export default function MenuPage() {
                     <h3 className="text-lg font-bold text-slate-900 leading-tight group-hover:text-pink-600 transition-colors">
                         {item.name}
                     </h3>
-                    {item.dietary_info && (
+                    {item.dietary_info && activeTab === 'food' && (
                         <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
                             <ChefHat size={12} /> {item.dietary_info}
                         </p>
@@ -363,7 +445,7 @@ export default function MenuPage() {
                     </span>
                     <div className="flex gap-2">
                         <Link 
-                            href={`/dashboard/menu/${item.id}`}
+                            href={activeTab === 'food' ? `/dashboard/menu/${item.id}` : `/dashboard/bar-menu/${item.id}`}
                             className="p-2 text-slate-400 hover:text-pink-600 hover:bg-pink-50 rounded-lg transition-colors"
                             title="Edit"
                         >
@@ -388,7 +470,7 @@ export default function MenuPage() {
 
       {/* Floating Action Button (Mobile) */}
       <Link
-        href="/dashboard/menu/new"
+        href={activeTab === 'food' ? "/dashboard/menu/new" : "/dashboard/bar-menu/new"}
         className="md:hidden fixed bottom-8 right-8 bg-pink-600 text-white p-4 rounded-full shadow-xl hover:bg-pink-700 transition-all hover:scale-105 z-10"
         title="Add New Item"
       >

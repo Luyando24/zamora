@@ -23,9 +23,7 @@ const navigationGroups = [
     items: [
       { name: 'Room Bookings', href: '/dashboard/inventory', icon: CalendarDays },
       { name: 'Food Orders', href: '/dashboard/orders', icon: Utensils },
-      { name: 'Food Menu', href: '/dashboard/menu', icon: Utensils },
-      { name: 'Bar Orders', href: '/dashboard/bar-orders', icon: Wine },
-      { name: 'Bar Menu', href: '/dashboard/bar-menu', icon: Wine },
+      { name: 'Food & Bar Menu', href: '/dashboard/menu', icon: Utensils },
       { name: 'Housekeeping', href: '/housekeeping', icon: BedDouble },
     ]
   },

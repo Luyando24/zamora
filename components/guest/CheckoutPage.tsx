@@ -113,49 +113,26 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
 
       // 2. Process Bar Order
       if (barCart.length > 0) {
-        const barOrderId = crypto.randomUUID();
-        const barTotal = barCart.reduce((sum, i) => sum + (i.price || i.base_price) * i.quantity, 0);
-        const barServiceCharge = barTotal * 0.10;
-        const barGrandTotal = barTotal + barServiceCharge;
+        // Use API route to bypass RLS issues for guest users
+        const response = await fetch('/api/bar-orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            barCart,
+            formData,
+            propertyId: property.id
+          })
+        });
 
-        const { error: orderError } = await supabase
-          .from('bar_orders')
-          .insert({
-            id: barOrderId,
-            property_id: property.id,
-            status: 'pending',
-            total_amount: barGrandTotal,
-            payment_method: formData.paymentMethod,
-            guest_name: formData.name,
-            guest_phone: formData.phone,
-            guest_room_number: formData.roomNumber,
-            notes: formData.notes,
-          });
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error || 'Failed to place bar order');
+        }
 
-        if (orderError) throw orderError;
-
-        const orderItems = barCart.map(item => ({
-          order_id: barOrderId,
-          bar_menu_item_id: item.id,
-          quantity: item.quantity,
-          unit_price: item.price || item.base_price,
-          total_price: (item.price || item.base_price) * item.quantity,
-          notes: item.selectedOptions?.join(', '),
-          // Snapshot fields
-          item_name: item.name,
-          item_description: item.description,
-          item_ingredients: item.ingredients,
-          item_image_url: item.image_url,
-          weight: item.weight,
-          options: item.selectedOptions ? JSON.stringify(item.selectedOptions) : JSON.stringify([])
-        }));
-
-        const { error: itemsError } = await supabase
-          .from('bar_order_items')
-          .insert(orderItems);
-
-        if (itemsError) throw itemsError;
-        newOrderIds.push(barOrderId);
+        if (data.orderId) {
+            newOrderIds.push(data.orderId);
+        }
       }
 
       // Save Order ID to LocalStorage for Guest History

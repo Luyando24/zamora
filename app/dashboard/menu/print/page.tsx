@@ -4,14 +4,71 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Loader2, Printer, ChevronLeft, ChefHat, FileText } from 'lucide-react';
 import Link from 'next/link';
-import { generateFoodMenuPdf } from '../utils/generateFoodMenuPdf';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 export default function PrintMenuPage({ searchParams }: { searchParams: { propertyId: string } }) {
   const propertyId = searchParams.propertyId;
   const [items, setItems] = useState<any[]>([]);
   const [property, setProperty] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isExporting, setIsExporting] = useState(false);
   const supabase = createClient();
+
+  const handleExportPdf = async () => {
+    const element = document.getElementById('menu-preview-container');
+    if (!element) return;
+    
+    setIsExporting(true);
+    try {
+        const canvas = await html2canvas(element, {
+            scale: 2, // Higher resolution
+            backgroundColor: '#020617', // Match slate-950
+            useCORS: true, // For images
+        });
+
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        
+        const imgWidth = canvas.width;
+        const imgHeight = canvas.height;
+        
+        // Calculate ratio to fit width
+        const ratio = pdfWidth / imgWidth;
+        const finalHeight = imgHeight * ratio;
+
+        // If content is taller than one page, we might need multiple pages or just scale down?
+        // For now, let's fit to width and let it overflow to next page if supported, or just one long image on one page?
+        // jsPDF doesn't auto-split images. 
+        // A simple approach for "Preview" is often a single page or just fit to width.
+        // If it's very long, we might need to split.
+        // But the preview container is "min-h-screen", usually one page worth of content for a menu card.
+        // Let's assume it fits on one page or we just print what fits.
+        
+        // Better approach: If height > A4 height, add pages.
+        let heightLeft = finalHeight;
+        let position = 0;
+        
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, finalHeight);
+        heightLeft -= pdfHeight;
+
+        while (heightLeft >= 0) {
+          position = heightLeft - finalHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, finalHeight);
+          heightLeft -= pdfHeight;
+        }
+
+        pdf.save(`${(property?.name || 'Menu').replace(/[^a-zA-Z0-9]/g, '_')}_Preview.pdf`);
+    } catch (error) {
+        console.error('PDF Export failed', error);
+        alert('Failed to generate PDF. Please try "Print Menu" instead.');
+    } finally {
+        setIsExporting(false);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -73,19 +130,21 @@ export default function PrintMenuPage({ searchParams }: { searchParams: { proper
   }
 
   return (
-    <div className="bg-slate-950 min-h-screen text-slate-100 font-sans selection:bg-pink-500 selection:text-white print:p-0">
+    <div className="bg-slate-950 min-h-screen text-slate-100 font-sans selection:bg-pink-500 selection:text-white print:p-0 relative">
       
       {/* --- Screen-Only Controls --- */}
-      <nav className="print:hidden fixed top-0 w-full bg-slate-950/80 backdrop-blur-md border-b border-slate-800 z-50 px-6 py-4 flex justify-between items-center">
+      <nav className="print:hidden sticky top-0 w-full bg-slate-950/80 backdrop-blur-md border-b border-slate-800 z-50 px-6 py-4 flex justify-between items-center">
         <Link href="/dashboard/menu" className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm font-bold uppercase tracking-wider">
             <ChevronLeft size={16} /> Back to Dashboard
         </Link>
         <div className="flex gap-3">
             <button
-            onClick={() => generateFoodMenuPdf(items, property?.name || 'Menu')}
-            className="flex items-center gap-2 px-6 py-2.5 bg-slate-800 text-slate-200 border border-slate-700 rounded-full font-bold hover:bg-slate-700 hover:text-white transition-all"
+            onClick={() => handleExportPdf()}
+            disabled={isExporting}
+            className="flex items-center gap-2 px-6 py-2.5 bg-slate-800 text-slate-200 border border-slate-700 rounded-full font-bold hover:bg-slate-700 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-            <FileText size={18} /> Export PDF
+            {isExporting ? <Loader2 size={18} className="animate-spin" /> : <FileText size={18} />}
+            {isExporting ? 'Exporting...' : 'Export PDF'}
             </button>
             <button
             onClick={() => window.print()}
@@ -98,7 +157,7 @@ export default function PrintMenuPage({ searchParams }: { searchParams: { proper
 
       {/* --- Printable Canvas --- */}
       {/* Using A4 dimensions max-width for screen preview, full width for print */}
-      <div className="max-w-[210mm] mx-auto bg-slate-950 pt-24 pb-12 px-12 print:pt-0 print:px-0 print:max-w-none min-h-screen flex flex-col relative overflow-hidden">
+      <div id="menu-preview-container" className="max-w-[210mm] mx-auto bg-slate-950 pt-12 pb-12 px-12 print:pt-0 print:px-0 print:max-w-none min-h-screen flex flex-col relative overflow-hidden">
         
         {/* Decorative Background Elements (Futuristic) */}
         <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-pink-900/10 to-transparent pointer-events-none print:hidden"></div>
