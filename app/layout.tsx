@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 // import { Inter } from "next/font/google";
 import OfflineIndicator from "@/components/OfflineIndicator";
+import { Toaster } from 'react-hot-toast';
 import "./globals.css";
 
 // const inter = Inter({ subsets: ["latin"] });
@@ -19,6 +20,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className="font-sans" suppressHydrationWarning>
         <OfflineIndicator />
+        <Toaster position="top-center" />
         {children}
       </body>
     </html>
