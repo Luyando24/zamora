@@ -40,37 +40,10 @@ export default function MenuStorefront({
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Auth State
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [passwordInput, setPasswordInput] = useState('');
   const [authError, setAuthError] = useState('');
-  const [isAuthChecking, setIsAuthChecking] = useState(true);
-
-  useEffect(() => {
-    // Check if password is required
-    if (!property.wifi_password) {
-      setIsAuthenticated(true);
-      setIsAuthChecking(false);
-      return;
-    }
-
-    // Check session storage
-    const savedAuth = sessionStorage.getItem(`zamora_auth_${property.id}`);
-    if (savedAuth === 'true') {
-      setIsAuthenticated(true);
-    }
-    setIsAuthChecking(false);
-  }, [property.id, property.wifi_password]);
-
-  const handleAuthSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (passwordInput === property.wifi_password) {
-      setIsAuthenticated(true);
-      sessionStorage.setItem(`zamora_auth_${property.id}`, 'true');
-      setAuthError('');
-    } else {
-      setAuthError('Incorrect password. Please try again.');
-    }
-  };
+  const [isAuthChecking, setIsAuthChecking] = useState(false);
 
   // Load cart from localStorage
   useEffect(() => {

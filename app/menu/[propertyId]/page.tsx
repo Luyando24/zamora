@@ -34,16 +34,10 @@ export default async function MenuPage({
     .eq('menu_item_properties.property_id', propertyId)
     .eq('is_available', true);
 
-  // 3. Fetch Menu Categories
-  // Fetch categories owned by the user OR global categories (created_by is null)
-  const { data: categories } = await adminSupabase
-    .from('menu_categories')
-    .select('name')
-    .or(`created_by.eq.${property.created_by},created_by.is.null`)
-    .order('name');
-
-  // Deduplicate categories by name
-  const uniqueCategories = Array.from(new Set(categories?.map(c => c.name) || [])).sort();
+  // 3. Extract Categories directly from Menu Items
+  // This ensures we only show categories that actually have items, avoids duplicates, 
+  // and prioritizes the actual data over the category definitions.
+  const uniqueCategories = Array.from(new Set((menuItems || []).map((item: any) => item.category).filter(Boolean))).sort();
 
   // 4. Fetch Bar Menu Items
   const { data: barMenuItems } = await adminSupabase
@@ -52,15 +46,8 @@ export default async function MenuPage({
     .eq('bar_menu_item_properties.property_id', propertyId)
     .eq('is_available', true);
 
-  // 5. Fetch Bar Menu Categories
-  const { data: barCategories } = await adminSupabase
-    .from('bar_menu_categories')
-    .select('name')
-    .or(`created_by.eq.${property.created_by},created_by.is.null`)
-    .order('name');
-
-  // Deduplicate bar categories by name
-  const uniqueBarCategories = Array.from(new Set(barCategories?.map(c => c.name) || [])).sort();
+  // 5. Extract Bar Categories directly from Bar Menu Items
+  const uniqueBarCategories = Array.from(new Set((barMenuItems || []).map((item: any) => item.category).filter(Boolean))).sort();
 
   return (
     <MenuStorefront

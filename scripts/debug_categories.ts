@@ -1,4 +1,10 @@
 
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load environment variables from .env.local
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+
 import { getSupabaseAdmin } from '../lib/db/supabase-admin';
 
 async function debugCategories() {
@@ -51,6 +57,17 @@ async function debugCategories() {
   if (combinedError) console.error(combinedError);
   console.log(`Found ${combinedCats?.length} combined categories`);
   console.log(combinedCats?.map(c => `${c.name} (${c.created_by ? 'Owner' : 'Global'})`));
+
+  // Check Bar Categories
+  console.log('\n--- Debugging Bar Categories ---');
+  const { data: barCats, error: barError } = await adminSupabase
+    .from('bar_menu_categories')
+    .select('name, created_by')
+    .or(`created_by.eq.${property.created_by},created_by.is.null`);
+    
+  if (barError) console.error(barError);
+  console.log(`Found ${barCats?.length} bar categories`);
+  console.log(barCats?.map(c => `${c.name} (${c.created_by ? 'Owner' : 'Global'})`));
 
 }
 
