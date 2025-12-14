@@ -17,6 +17,7 @@ interface NewBookingModalProps {
 export default function NewBookingModal({ isOpen, onClose, onSuccess, propertyId: propPropertyId }: NewBookingModalProps) {
   const supabase = createClient();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [rooms, setRooms] = useState<any[]>([]);
   const [formData, setFormData] = useState({
     firstName: '',
@@ -31,6 +32,7 @@ export default function NewBookingModal({ isOpen, onClose, onSuccess, propertyId
 
   useEffect(() => {
     if (isOpen) {
+      setError(null);
       fetchRooms();
     }
   }, [isOpen]);
@@ -67,6 +69,7 @@ export default function NewBookingModal({ isOpen, onClose, onSuccess, propertyId
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
 
     const guestId = uuidv4();
     const bookingId = uuidv4();
@@ -76,6 +79,30 @@ export default function NewBookingModal({ isOpen, onClose, onSuccess, propertyId
       const { data: { user } } = await supabase.auth.getUser();
       // Fallback for dev/demo without auth
       const propertyId = user?.user_metadata?.property_id || user?.user_metadata?.hotel_id || '00000000-0000-0000-0000-000000000000'; 
+      
+      // 1. Check for Overlapping Bookings
+      if (navigator.onLine) {
+        const { data: existingBookings, error: checkError } = await supabase
+            .from('bookings')
+            .select('id, room_id, check_in_date, check_out_date')
+            .eq('room_id', formData.roomId)
+            .in('status', ['confirmed', 'checked_in'])
+            .lt('check_in_date', formData.checkOut)
+            .gt('check_out_date', formData.checkIn);
+
+        if (checkError) {
+             console.error('Error checking availability:', checkError);
+             // Optional: Decide if we want to block or proceed with warning. 
+             // For safety, let's block but allow override if needed? No, let's just show error.
+             throw new Error('Failed to verify room availability. Please try again.');
+        }
+
+        if (existingBookings && existingBookings.length > 0) {
+            setLoading(false);
+            setError('This room is already booked for the selected dates. Please choose another room or date range.');
+            return;
+        }
+      }
 
       const guestPayload = {
         id: guestId,
@@ -160,6 +187,23 @@ export default function NewBookingModal({ isOpen, onClose, onSuccess, propertyId
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="New Booking">
+      {error && (
+        <div className="mb-4 p-4 rounded-md bg-red-50 border border-red-200">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">Booking Error</h3>
+              <div className="mt-2 text-sm text-red-700">
+                <p>{error}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
