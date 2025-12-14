@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Sidebar from '@/components/dashboard/Sidebar';
-import { Search, Bell, Moon, AlertTriangle, ArrowRight } from 'lucide-react';
+import BottomNav from '@/components/dashboard/BottomNav';
+import { Search, Bell, Moon, AlertTriangle, ArrowRight, Menu, X } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import Link from 'next/link';
 
@@ -17,6 +18,7 @@ export default function DashboardLayout({
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [hasHotel, setHasHotel] = useState(true);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
@@ -27,7 +29,7 @@ export default function DashboardLayout({
   const checkUser = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (!user) {
         router.push('/login');
         return;
@@ -46,9 +48,9 @@ export default function DashboardLayout({
           .select('property_id, role')
           .eq('id', user.id)
           .single();
-        
+
         propertyId = profile?.property_id;
-        
+
         // Update metadata if found in profile but not metadata
         if (propertyId) {
           await supabase.auth.updateUser({
@@ -83,7 +85,14 @@ export default function DashboardLayout({
     <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
       {!isSetupPage && (
         <header className="relative flex h-16 items-center justify-between bg-white/60 backdrop-blur-xl px-6 z-30 border-b border-slate-200 shrink-0">
-          <div className="flex items-center gap-12">
+          <div className="flex items-center gap-4 md:gap-12">
+            {/* Mobile Hamburger */}
+            <button
+              className="md:hidden p-2 -ml-2 text-slate-500 hover:bg-slate-100 rounded-lg"
+              onClick={() => setIsMobileMenuOpen(true)}
+            >
+              <Menu size={24} />
+            </button>
             {/* Branding */}
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center text-white font-black shadow-lg shadow-slate-900/20">
@@ -112,13 +121,13 @@ export default function DashboardLayout({
 
           <div className="flex items-center gap-2">
             <button className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors">
-               <Bell size={20} />
+              <Bell size={20} />
             </button>
             <button className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors">
-               <Moon size={20} />
+              <Moon size={20} />
             </button>
             <div className="h-8 w-px bg-slate-200 mx-3"></div>
-            
+
             <button className="flex items-center gap-3 hover:bg-slate-100 rounded-lg p-2 transition-colors">
               <div className="h-9 w-9 rounded-full bg-slate-800 flex items-center justify-center text-white font-bold shadow-sm uppercase">
                 {user?.email?.charAt(0) || 'U'}
@@ -136,6 +145,30 @@ export default function DashboardLayout({
         </header>
       )}
 
+      {/* Mobile Sidebar Overlay */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-50 flex md:hidden">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+
+          {/* Sidebar Container */}
+          <div className="relative w-80 h-full bg-white shadow-xl animate-in slide-in-from-left duration-200">
+            <div className="absolute top-2 right-2 z-50">
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-2 rounded-full hover:bg-slate-100 text-slate-500"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <Sidebar onLinkClick={() => setIsMobileMenuOpen(false)} />
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-1 overflow-hidden relative">
         {/* Sidebar - Hide on setup page */}
         {!isSetupPage && (
@@ -145,24 +178,24 @@ export default function DashboardLayout({
         )}
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto p-6 bg-slate-100">
+        <main className="flex-1 overflow-y-auto p-6 bg-slate-100 pb-20 md:pb-6">
           {!hasHotel && !isSetupPage && (
             <div className="bg-orange-50 border-l-4 border-orange-500 p-4 mb-6 shadow-sm rounded-r-lg">
               <div className="flex items-center justify-between flex-wrap gap-4">
                 <div className="flex items-center">
-                   <div className="flex-shrink-0">
-                     <AlertTriangle className="h-5 w-5 text-orange-500" aria-hidden="true" />
-                   </div>
-                   <div className="ml-3">
-                     <p className="text-sm text-orange-700">
-                       <span className="font-bold">Action Required:</span> You haven't set up your property details yet. Features will be limited.
-                     </p>
-                   </div>
+                  <div className="flex-shrink-0">
+                    <AlertTriangle className="h-5 w-5 text-orange-500" aria-hidden="true" />
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm text-orange-700">
+                      <span className="font-bold">Action Required:</span> You haven't set up your property details yet. Features will be limited.
+                    </p>
+                  </div>
                 </div>
                 <div>
-                   <Link href="/dashboard/setup" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-orange-700 bg-orange-100 hover:bg-orange-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors">
-                     Setup Property <ArrowRight className="ml-2 h-4 w-4" />
-                   </Link>
+                  <Link href="/dashboard/setup" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-orange-700 bg-orange-100 hover:bg-orange-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors">
+                    Setup Property <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
                 </div>
               </div>
             </div>
@@ -170,6 +203,7 @@ export default function DashboardLayout({
           {children}
         </main>
       </div>
+      <BottomNav />
     </div>
   );
 }

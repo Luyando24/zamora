@@ -11,7 +11,7 @@ import {
 import { useEffect, useState } from 'react';
 
 // Grouped Navigation
-const navigationGroups = [
+export const navigationGroups = [
   {
     title: 'Main',
     roles: ['admin', 'manager', 'staff'],
@@ -48,7 +48,7 @@ const navigationGroups = [
   }
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ onLinkClick }: { onLinkClick?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
@@ -85,7 +85,7 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="flex h-full w-72 flex-col bg-white border-r border-slate-200 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.05)] pt-4">
+    <div className="flex h-full w-full md:w-72 flex-col bg-white border-r border-slate-200 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.05)] pt-4">
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-8 custom-scrollbar">
@@ -103,9 +103,10 @@ export default function Sidebar() {
                     <Link
                       key={item.name}
                       href={item.href}
+                      onClick={onLinkClick}
                       className={`group flex items-center justify-between rounded-xl px-4 py-3 text-sm font-bold transition-all duration-200 ${isActive
-                          ? 'bg-slate-900 text-white shadow-md shadow-slate-900/10'
-                          : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                        ? 'bg-slate-900 text-white shadow-md shadow-slate-900/10'
+                        : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
                         }`}
                     >
                       <div className="flex items-center gap-3">
