@@ -3,9 +3,9 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
-import { 
-  LayoutDashboard, CalendarDays, BedDouble, FileText, 
-  Settings, LogOut, DoorOpen, Utensils, Building2, 
+import {
+  LayoutDashboard, CalendarDays, BedDouble, FileText,
+  Settings, LogOut, DoorOpen, Utensils, Building2,
   ChevronRight, User, Wine, Users
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -41,7 +41,7 @@ const navigationGroups = [
   },
   {
     title: 'System',
-    roles: ['admin'],
+    roles: ['admin', 'manager'],
     items: [
       { name: 'Settings', href: '/dashboard/settings', icon: Settings },
     ]
@@ -62,14 +62,14 @@ export default function Sidebar() {
         if (user.email) {
           setUserEmail(user.email.split('@')[0]); // Simple display name
         }
-        
+
         // Fetch role
         const { data: profile } = await supabase
           .from('profiles')
           .select('role')
           .eq('id', user.id)
           .single();
-          
+
         if (profile?.role) {
           setUserRole(profile.role);
         }
@@ -86,45 +86,43 @@ export default function Sidebar() {
 
   return (
     <div className="flex h-full w-72 flex-col bg-white border-r border-slate-200 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.05)] pt-4">
-      
+
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-8 custom-scrollbar">
         {navigationGroups
           .filter(group => group.roles.includes(userRole))
           .map((group) => (
-          <div key={group.title}>
-            <h3 className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
-              {group.title}
-            </h3>
-            <div className="space-y-1">
-              {group.items.map((item) => {
-                const isActive = pathname === item.href;
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`group flex items-center justify-between rounded-xl px-4 py-3 text-sm font-bold transition-all duration-200 ${
-                      isActive
-                        ? 'bg-slate-900 text-white shadow-md shadow-slate-900/10'
-                        : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <item.icon
-                        className={`h-5 w-5 flex-shrink-0 transition-colors ${
-                          isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'
+            <div key={group.title}>
+              <h3 className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                {group.title}
+              </h3>
+              <div className="space-y-1">
+                {group.items.map((item) => {
+                  const isActive = pathname === item.href;
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={`group flex items-center justify-between rounded-xl px-4 py-3 text-sm font-bold transition-all duration-200 ${isActive
+                          ? 'bg-slate-900 text-white shadow-md shadow-slate-900/10'
+                          : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
                         }`}
-                        strokeWidth={isActive ? 2.5 : 2}
-                      />
-                      {item.name}
-                    </div>
-                    {isActive && <ChevronRight size={14} className="text-white/50" />}
-                  </Link>
-                );
-              })}
+                    >
+                      <div className="flex items-center gap-3">
+                        <item.icon
+                          className={`h-5 w-5 flex-shrink-0 transition-colors ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'
+                            }`}
+                          strokeWidth={isActive ? 2.5 : 2}
+                        />
+                        {item.name}
+                      </div>
+                      {isActive && <ChevronRight size={14} className="text-white/50" />}
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
       </nav>
 
       {/* User Profile */}
