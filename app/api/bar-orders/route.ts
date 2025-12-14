@@ -75,8 +75,14 @@ export async function POST(req: NextRequest) {
 
     // 5. Send SMS Notification
     try {
+      const { data: property } = await supabaseAdmin
+        .from('properties')
+        .select('admin_notification_phone')
+        .eq('id', propertyId)
+        .single();
+
       const message = `New Bar Order #${barOrderId.slice(0, 8)} from Room ${formData.roomNumber || 'N/A'}. Total: ${barGrandTotal}`;
-      await notifyAdmin(message);
+      await notifyAdmin(message, property?.admin_notification_phone);
     } catch (smsError) {
       console.error('Failed to send SMS notification:', smsError);
     }

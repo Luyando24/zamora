@@ -27,7 +27,8 @@ export default function SettingsPage() {
     instagram_url: '',
     twitter_url: '',
     wifi_ssid: '',
-    wifi_password: ''
+    wifi_password: '',
+    admin_notification_phone: ''
   });
 
   useEffect(() => {
@@ -81,7 +82,8 @@ export default function SettingsPage() {
             instagram_url: '',
             twitter_url: '',
             wifi_ssid: '',
-            wifi_password: ''
+            wifi_password: '',
+            admin_notification_phone: ''
           });
       } else {
           const selected = properties.find(p => p.id === propertyId);
@@ -220,7 +222,21 @@ export default function SettingsPage() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Wi-Fi Network Name (SSID)</label>
+            <label className="block text-sm font-medium text-gray-700">Admin Notification Phone</label>
+            <input
+              type="text"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-zambia-green focus:ring-zambia-green px-3 py-2 border text-gray-900 bg-white"
+              value={hotel.admin_notification_phone || ''}
+              onChange={e => setHotel({ ...hotel, admin_notification_phone: e.target.value })}
+              placeholder="+260..."
+            />
+            <p className="mt-1 text-xs text-gray-500">
+                This number will receive SMS alerts for new bookings and orders. Format: +260...
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Wi-Fi Network Name (SSID)</label>
               <input
                 type="text"
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-zambia-green focus:ring-zambia-green px-3 py-2 border text-gray-900 bg-white"

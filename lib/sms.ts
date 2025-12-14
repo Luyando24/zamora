@@ -2,6 +2,7 @@ import twilio from 'twilio';
 
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
 const authToken = process.env.TWILIO_AUTH_TOKEN;
+const messagingServiceSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
 const fromNumber = process.env.TWILIO_PHONE_NUMBER;
 const adminNumber = process.env.ADMIN_PHONE_NUMBER;
 
@@ -14,11 +15,21 @@ export const sendSMS = async (to: string, body: string) => {
   }
 
   try {
-    const message = await client.messages.create({
+    const params: any = {
       body,
-      from: fromNumber,
       to,
-    });
+    };
+
+    if (messagingServiceSid) {
+      params.messagingServiceSid = messagingServiceSid;
+    } else if (fromNumber) {
+      params.from = fromNumber;
+    } else {
+      console.warn('No Twilio From number or Messaging Service SID found. SMS might fail.');
+      // Twilio might fail if neither is provided, unless using a default from console
+    }
+
+    const message = await client.messages.create(params);
     console.log('SMS sent:', message.sid);
     return { success: true, sid: message.sid };
   } catch (error) {
@@ -27,10 +38,12 @@ export const sendSMS = async (to: string, body: string) => {
   }
 };
 
-export const notifyAdmin = async (message: string) => {
-    if (!adminNumber) {
+export const notifyAdmin = async (message: string, overridePhone?: string | null) => {
+    const targetPhone = overridePhone || adminNumber;
+    
+    if (!targetPhone) {
         console.warn('Admin phone number not set. Notification skipped.');
         return { success: false, error: 'Missing admin phone' };
     }
-    return sendSMS(adminNumber, message);
+    return sendSMS(targetPhone, message);
 }

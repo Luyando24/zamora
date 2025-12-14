@@ -115,7 +115,8 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                message: `New Food Order #${foodOrderId.slice(0, 8)} from Room ${formData.roomNumber || 'N/A'}. Total: ${foodGrandTotal}`
+                message: `New Food Order #${foodOrderId.slice(0, 8)} from Room ${formData.roomNumber || 'N/A'}. Total: ${foodGrandTotal}`,
+                propertyId: property.id
             })
         }).catch(err => console.error('Failed to send SMS notification', err));
       }

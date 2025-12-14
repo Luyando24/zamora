@@ -138,7 +138,8 @@ export default function NewBookingModal({ isOpen, onClose, onSuccess, propertyId
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                message: `New Booking: ${formData.firstName} ${formData.lastName} in Room ${roomNumber}. Check-in: ${formData.checkIn}`
+                message: `New Booking: ${formData.firstName} ${formData.lastName} in Room ${roomNumber}. Check-in: ${formData.checkIn}`,
+                propertyId: propertyId
             })
         }).catch(err => console.error('Failed to send SMS notification', err));
       } else {

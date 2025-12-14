@@ -110,7 +110,16 @@ export async function POST(req: NextRequest) {
 
     // Notify via SMS
     try {
-      await notifyAdmin(`New Web Booking: ${guestDetails.firstName} ${guestDetails.lastName}. Check-in: ${checkIn}`);
+      const { data: property } = await supabase
+        .from('properties')
+        .select('admin_notification_phone')
+        .eq('id', propertyId)
+        .single();
+
+      await notifyAdmin(
+        `New Web Booking: ${guestDetails.firstName} ${guestDetails.lastName}. Check-in: ${checkIn}`,
+        property?.admin_notification_phone
+      );
     } catch (e) {
       console.error('SMS Notification Failed:', e);
     }
