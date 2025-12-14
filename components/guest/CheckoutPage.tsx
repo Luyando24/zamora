@@ -109,6 +109,15 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
 
         if (itemsError) throw itemsError;
         newOrderIds.push(foodOrderId);
+
+        // Notify via SMS
+        fetch('/api/notifications/sms', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: `New Food Order #${foodOrderId.slice(0, 8)} from Room ${formData.roomNumber || 'N/A'}. Total: ${foodGrandTotal}`
+            })
+        }).catch(err => console.error('Failed to send SMS notification', err));
       }
 
       // 2. Process Bar Order

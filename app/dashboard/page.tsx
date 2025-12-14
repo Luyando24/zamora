@@ -3,12 +3,13 @@
 import { 
   BedDouble, CalendarCheck, FileCheck, Users, 
   ArrowUpRight, ArrowDownRight, TrendingUp, Clock,
-  Utensils, Wine
+  Utensils, Wine, DollarSign, BarChart3
 } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import { useEffect, useState } from 'react';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, startOfWeek, startOfMonth, subDays, format, isSameDay, parseISO, differenceInDays } from 'date-fns';
 import Link from 'next/link';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
 export default function DashboardPage() {
   const [userName, setUserName] = useState<string>('User');
@@ -19,6 +20,12 @@ export default function DashboardPage() {
     { name: 'Available Rooms', value: '0', change: '-0', icon: CalendarCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
     { name: 'Food & Bar Orders', value: '0', change: '0', icon: Utensils, color: 'text-purple-600', bg: 'bg-purple-50' },
   ]);
+  const [financialStats, setFinancialStats] = useState({
+    today: 0,
+    week: 0,
+    month: 0
+  });
+  const [revenueData, setRevenueData] = useState<any[]>([]);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
 
   const supabase = createClient();
@@ -33,6 +40,117 @@ export default function DashboardPage() {
       }
     };
     getUser();
+
+    const fetchFinancials = async () => {
+        const today = new Date();
+        const startOfToday = new Date(today.setHours(0,0,0,0)).toISOString();
+        const startOfThisWeek = startOfWeek(new Date()).toISOString();
+        const startOfThisMonth = startOfMonth(new Date()).toISOString();
+        const last30Days = subDays(new Date(), 30).toISOString();
+
+        // Fetch Orders (Food)
+        const { data: foodOrders } = await supabase
+            .from('orders')
+            .select('total_amount, created_at')
+            .gte('created_at', last30Days);
+
+        // Fetch Bar Orders
+        const { data: barOrders } = await supabase
+            .from('bar_orders')
+            .select('total_amount, created_at')
+            .gte('created_at', last30Days);
+
+        // Fetch Bookings (with Room Price)
+        // We estimate revenue based on check-in date for simplicity in this view
+        const { data: bookings } = await supabase
+            .from('bookings')
+            .select(`
+                check_in_date,
+                check_out_date,
+                rooms (
+                    room_types (
+                        base_price
+                    )
+                )
+            `)
+            .gte('check_in_date', last30Days.split('T')[0])
+            .neq('status', 'cancelled');
+
+        // Helper to calculate booking value
+        const getBookingValue = (b: any) => {
+            const price = b.rooms?.room_types?.base_price || 0;
+            const nights = differenceInDays(parseISO(b.check_out_date), parseISO(b.check_in_date)) || 1;
+            return price * nights;
+        };
+
+        // Calculate Totals
+        let todayRev = 0;
+        let weekRev = 0;
+        let monthRev = 0;
+
+        // Process Orders
+        foodOrders?.forEach(o => {
+            const date = new Date(o.created_at);
+            const amount = o.total_amount || 0;
+            if (date >= new Date(startOfToday)) todayRev += amount;
+            if (date >= new Date(startOfThisWeek)) weekRev += amount;
+            if (date >= new Date(startOfThisMonth)) monthRev += amount;
+        });
+
+        barOrders?.forEach(o => {
+            const date = new Date(o.created_at);
+            const amount = o.total_amount || 0;
+            if (date >= new Date(startOfToday)) todayRev += amount;
+            if (date >= new Date(startOfThisWeek)) weekRev += amount;
+            if (date >= new Date(startOfThisMonth)) monthRev += amount;
+        });
+
+        bookings?.forEach(b => {
+            const date = parseISO(b.check_in_date);
+            const amount = getBookingValue(b);
+            // Comparison for dates (ignoring time for bookings as they are YYYY-MM-DD)
+            const dateStr = b.check_in_date;
+            
+            if (dateStr === format(new Date(), 'yyyy-MM-dd')) todayRev += amount;
+            if (date >= new Date(startOfThisWeek)) weekRev += amount;
+            if (date >= new Date(startOfThisMonth)) monthRev += amount;
+        });
+
+        setFinancialStats({ today: todayRev, week: weekRev, month: monthRev });
+
+        // Prepare Chart Data (Last 7 Days)
+        const chartData = [];
+        for (let i = 6; i >= 0; i--) {
+            const date = subDays(new Date(), i);
+            const dateStr = format(date, 'yyyy-MM-dd'); // For bookings
+            const dateLabel = format(date, 'MMM dd');
+            
+            let dailyFood = 0;
+            let dailyBar = 0;
+            let dailyRoom = 0;
+
+            foodOrders?.forEach(o => {
+                if (isSameDay(new Date(o.created_at), date)) dailyFood += (o.total_amount || 0);
+            });
+
+            barOrders?.forEach(o => {
+                if (isSameDay(new Date(o.created_at), date)) dailyBar += (o.total_amount || 0);
+            });
+
+            bookings?.forEach(b => {
+                if (b.check_in_date === dateStr) dailyRoom += getBookingValue(b);
+            });
+
+            chartData.push({
+                name: dateLabel,
+                Food: dailyFood,
+                Bar: dailyBar,
+                Rooms: dailyRoom,
+                Total: dailyFood + dailyBar + dailyRoom
+            });
+        }
+        setRevenueData(chartData);
+    };
 
     const fetchStats = async () => {
         const today = new Date().toISOString().split('T')[0];
@@ -177,13 +295,14 @@ export default function DashboardPage() {
 
     fetchStats();
     fetchRecentActivity();
+    fetchFinancials();
 
     const channels = supabase.channel('dashboard-stats')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => { fetchStats(); fetchRecentActivity(); })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => { fetchStats(); fetchRecentActivity(); fetchFinancials(); })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'rooms' }, fetchStats)
         .on('postgres_changes', { event: '*', schema: 'public', table: 'folios' }, fetchStats)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, fetchRecentActivity)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'bar_orders' }, fetchRecentActivity)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => { fetchRecentActivity(); fetchFinancials(); })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'bar_orders' }, () => { fetchRecentActivity(); fetchFinancials(); })
         .subscribe();
 
     return () => {
@@ -213,6 +332,74 @@ export default function DashboardPage() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Financial Overview */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <DollarSign className="w-5 h-5 text-emerald-600" />
+            Financial Performance
+        </h3>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Financial Stats Cards */}
+            <div className="space-y-4">
+                <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p className="text-sm font-medium text-slate-500">Revenue Today</p>
+                        <p className="text-2xl font-bold text-slate-900">K{financialStats.today.toLocaleString()}</p>
+                    </div>
+                    <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600">
+                        <TrendingUp size={20} />
+                    </div>
+                </div>
+                <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p className="text-sm font-medium text-slate-500">Revenue This Week</p>
+                        <p className="text-2xl font-bold text-slate-900">K{financialStats.week.toLocaleString()}</p>
+                    </div>
+                    <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                        <BarChart3 size={20} />
+                    </div>
+                </div>
+                <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p className="text-sm font-medium text-slate-500">Revenue This Month</p>
+                        <p className="text-2xl font-bold text-slate-900">K{financialStats.month.toLocaleString()}</p>
+                    </div>
+                    <div className="p-2 bg-purple-50 rounded-lg text-purple-600">
+                        <CalendarCheck size={20} />
+                    </div>
+                </div>
+            </div>
+
+            {/* Revenue Chart */}
+            <div className="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <div className="mb-4 flex items-center justify-between">
+                    <h4 className="font-bold text-slate-800">Revenue Trend (Last 7 Days)</h4>
+                    <div className="flex gap-4 text-xs">
+                        <div className="flex items-center gap-1"><div className="w-3 h-3 bg-blue-500 rounded-sm"></div> Rooms</div>
+                        <div className="flex items-center gap-1"><div className="w-3 h-3 bg-amber-500 rounded-sm"></div> Food</div>
+                        <div className="flex items-center gap-1"><div className="w-3 h-3 bg-purple-600 rounded-sm"></div> Bar</div>
+                    </div>
+                </div>
+                <div className="h-[250px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={revenueData}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} dy={10} />
+                            <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} tickFormatter={(value) => `K${value}`} />
+                            <Tooltip 
+                                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                                cursor={{ fill: '#f8fafc' }}
+                            />
+                            <Bar dataKey="Rooms" stackId="a" fill="#3b82f6" radius={[0, 0, 0, 0]} />
+                            <Bar dataKey="Food" stackId="a" fill="#f59e0b" radius={[0, 0, 0, 0]} />
+                            <Bar dataKey="Bar" stackId="a" fill="#9333ea" radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </div>
+            </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/db/supabase-admin';
+import { notifyAdmin } from '@/lib/sms';
 import * as crypto from 'crypto';
 
 export async function POST(req: NextRequest) {
@@ -70,6 +71,14 @@ export async function POST(req: NextRequest) {
       console.error('Error inserting bar order items:', itemsError);
       // Note: In a real scenario, we might want to delete the order if items fail, or use a transaction if possible.
       return NextResponse.json({ error: 'Failed to create order items: ' + itemsError.message }, { status: 500 });
+    }
+
+    // 5. Send SMS Notification
+    try {
+      const message = `New Bar Order #${barOrderId.slice(0, 8)} from Room ${formData.roomNumber || 'N/A'}. Total: ${barGrandTotal}`;
+      await notifyAdmin(message);
+    } catch (smsError) {
+      console.error('Failed to send SMS notification:', smsError);
     }
 
     return NextResponse.json({ 

@@ -131,6 +131,16 @@ export default function NewBookingModal({ isOpen, onClose, onSuccess, propertyId
 
         const { error: bookingError } = await supabase.from('bookings').insert(bookingPayload);
         if (bookingError) throw bookingError;
+
+        // Notify via SMS
+        const roomNumber = rooms.find(r => r.id === formData.roomId)?.room_number || 'Unknown';
+        fetch('/api/notifications/sms', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: `New Booking: ${formData.firstName} ${formData.lastName} in Room ${roomNumber}. Check-in: ${formData.checkIn}`
+            })
+        }).catch(err => console.error('Failed to send SMS notification', err));
       } else {
         throw new Error('Offline');
       }
