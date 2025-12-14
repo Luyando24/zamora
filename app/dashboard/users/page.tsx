@@ -182,7 +182,7 @@ export default function TeamPage() {
               <label className="block text-sm font-medium text-slate-700 mb-1">First Name</label>
               <input
                 required
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-black/5 outline-none"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-black/5 outline-none text-slate-900"
                 value={formData.firstName}
                 onChange={e => setFormData({...formData, firstName: e.target.value})}
               />
@@ -191,7 +191,7 @@ export default function TeamPage() {
               <label className="block text-sm font-medium text-slate-700 mb-1">Last Name</label>
               <input
                 required
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-black/5 outline-none"
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-black/5 outline-none text-slate-900"
                 value={formData.lastName}
                 onChange={e => setFormData({...formData, lastName: e.target.value})}
               />
@@ -203,7 +203,7 @@ export default function TeamPage() {
             <input
               type="email"
               required
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-black/5 outline-none"
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-black/5 outline-none text-slate-900"
               value={formData.email}
               onChange={e => setFormData({...formData, email: e.target.value})}
             />
