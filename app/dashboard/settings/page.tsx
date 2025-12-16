@@ -5,14 +5,13 @@ import { createClient } from '@/utils/supabase/client';
 import { Building2, Save, Globe, Mail, Phone, Facebook, Instagram, Twitter, Wifi, ChevronDown, Plus } from 'lucide-react';
 import ImageUpload from '@/components/ui/ImageUpload';
 import Link from 'next/link';
+import { useProperty } from '../context/PropertyContext';
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const supabase = createClient();
-  
-  // List of all properties user has access to
-  const [properties, setProperties] = useState<any[]>([]);
+  const { properties, selectedPropertyId, setSelectedPropertyId, refreshProperties } = useProperty();
   
   // Currently selected property for editing
   const [hotel, setHotel] = useState<any>({
@@ -33,40 +32,17 @@ export default function SettingsPage() {
   });
 
   useEffect(() => {
-    fetchProperties();
-  }, []);
-
-  const fetchProperties = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    // Fetch all properties user has access to via RLS
-    const { data: props, error } = await supabase
-        .from('properties')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-    if (error) {
-        console.error('Error fetching properties:', error);
-    }
-
-    if (props && props.length > 0) {
-        setProperties(props);
-        
-        // Determine which property to select initially
-        // 1. Try to get from profile (last selected)
-        // 2. Or default to the first one
-        const savedId = localStorage.getItem('zamora_selected_property');
-        const initialProp = props.find(p => p.id === savedId) || props[0];
-        
-        setHotel(initialProp);
-    } else {
-        // No properties found, maybe initialize blank for creation?
-        // Or redirect to setup?
-        // For now, let's keep the blank form which allows creating a new one in handleSave
+    if (selectedPropertyId && properties.length > 0) {
+      const selected = properties.find(p => p.id === selectedPropertyId);
+      if (selected) {
+        setHotel(selected);
+      }
+    } else if (properties.length > 0 && !selectedPropertyId) {
+       // If properties exist but none selected, select the first one
+       setSelectedPropertyId(properties[0].id);
     }
     setLoading(false);
-  };
+  }, [selectedPropertyId, properties]);
 
   const handlePropertyChange = (propertyId: string) => {
       if (propertyId === 'new') {
@@ -87,12 +63,9 @@ export default function SettingsPage() {
             wifi_password: '',
             admin_notification_phone: ''
           });
+          // We don't change selectedPropertyId here, just the form state
       } else {
-          const selected = properties.find(p => p.id === propertyId);
-          if (selected) {
-              setHotel(selected);
-              localStorage.setItem('zamora_selected_property', selected.id);
-          }
+          setSelectedPropertyId(propertyId);
       }
   };
 
@@ -101,10 +74,19 @@ export default function SettingsPage() {
     setSaving(true);
 
     const { data: { user } } = await supabase.auth.getUser();
-    let propertyId = hotel.id; // May be undefined if 'new'
+    // If hotel.id exists, we are updating. If not, we are creating.
+    // However, if the user selected 'new', hotel.id might be missing or empty string.
+    // But wait, if they selected 'new', selectedPropertyId is not changed to 'new' (it stays as previous or null), 
+    // but the FORM state (hotel) is cleared.
+    // So we need to check if we are in "create mode".
+    
+    // A better way to detect create mode: check if hotel.id is present and matches a known property.
+    // Or just check if hotel.id is truthy.
+    
+    let isNew = !hotel.id;
     
     try {
-        if (!propertyId) {
+        if (isNew) {
             // Create new property
             const { data: newProperty, error } = await supabase.from('properties').insert({
                 ...hotel,
@@ -113,20 +95,30 @@ export default function SettingsPage() {
             
             if (error) throw error;
             
-            // Add to list and select it
-            setProperties([newProperty, ...properties]);
+            // Add to list and select it via context
+            await refreshProperties();
+            setSelectedPropertyId(newProperty.id);
             setHotel(newProperty);
+            
+            // Also need to add creator as admin in property_staff
+            await supabase.from('property_staff').insert({
+                property_id: newProperty.id,
+                user_id: user?.id,
+                role: 'admin'
+            });
+
             alert('Property created successfully!');
         } else {
             // Update existing
-            const { error } = await supabase.from('properties').update(hotel).eq('id', propertyId);
+            const { error } = await supabase.from('properties').update(hotel).eq('id', hotel.id);
             if (error) throw error;
             
-            // Update list
-            setProperties(properties.map(p => p.id === propertyId ? { ...p, ...hotel } : p));
+            // Refresh context
+            await refreshProperties();
             alert('Settings saved successfully!');
         }
     } catch (error: any) {
+        console.error(error);
         alert('Error saving settings: ' + error.message);
     }
 

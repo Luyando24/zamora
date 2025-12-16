@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useInventory } from '@/hooks/useInventory';
-import { useProperty } from '@/hooks/useProperty';
+import { useProperty } from '../context/PropertyContext';
 import { addDays, format, isSameDay, parseISO, isWithinInterval, startOfDay } from 'date-fns';
 import NewBookingModal from '@/components/dashboard/NewBookingModal';
 import EditBookingModal from '@/components/dashboard/EditBookingModal';
@@ -13,9 +13,9 @@ export default function InventoryPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
-  const { propertyId } = useProperty();
+  const { selectedPropertyId } = useProperty();
   const daysToShow = 14;
-  const { rooms, bookings, loading, refetch } = useInventory(startDate, daysToShow);
+  const { rooms, bookings, loading, refetch } = useInventory(startDate, daysToShow, selectedPropertyId);
 
   // Generate array of dates to display
   const dates = Array.from({ length: daysToShow }, (_, i) => addDays(startDate, i));
@@ -174,7 +174,7 @@ export default function InventoryPage() {
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         onSuccess={refetch} 
-        propertyId={propertyId}
+        propertyId={selectedPropertyId}
       />
       
       <EditBookingModal
@@ -185,7 +185,7 @@ export default function InventoryPage() {
         }}
         onSuccess={refetch}
         booking={selectedBooking}
-        propertyId={propertyId}
+        propertyId={selectedPropertyId}
       />
     </div>
   );

@@ -7,6 +7,7 @@ import BottomNav from '@/components/dashboard/BottomNav';
 import { Search, Bell, Moon, AlertTriangle, ArrowRight, Menu, X } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import Link from 'next/link';
+import { PropertyProvider } from './context/PropertyContext';
 
 export default function DashboardLayout({
   children,
@@ -82,9 +83,10 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
-      {!isSetupPage && (
-        <header className="relative flex h-16 items-center justify-between bg-white/60 backdrop-blur-xl px-6 z-30 border-b border-slate-200 shrink-0">
+    <PropertyProvider>
+      <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
+        {!isSetupPage && (
+          <header className="relative flex h-16 items-center justify-between bg-white/60 backdrop-blur-xl px-6 z-30 border-b border-slate-200 shrink-0">
           <div className="flex items-center gap-4 md:gap-12">
             {/* Mobile Hamburger */}
             <button
@@ -205,5 +207,6 @@ export default function DashboardLayout({
       </div>
       <BottomNav />
     </div>
+    </PropertyProvider>
   );
 }

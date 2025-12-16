@@ -44,7 +44,7 @@ export default function NewBookingModal({ isOpen, onClose, onSuccess, propertyId
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      propertyId = user.user_metadata?.property_id || user.user_metadata?.hotel_id;
+      propertyId = user.user_metadata?.property_id;
 
       if (!propertyId) {
         const { data: profile } = await supabase.from('profiles').select('property_id').eq('id', user.id).single();
@@ -78,7 +78,7 @@ export default function NewBookingModal({ isOpen, onClose, onSuccess, propertyId
       // Get Property ID (Assume user is logged in)
       const { data: { user } } = await supabase.auth.getUser();
       // Fallback for dev/demo without auth
-      const propertyId = user?.user_metadata?.property_id || user?.user_metadata?.hotel_id || '00000000-0000-0000-0000-000000000000'; 
+      const propertyId = user?.user_metadata?.property_id || '00000000-0000-0000-0000-000000000000'; 
       
       // 1. Check for Overlapping Bookings
       if (navigator.onLine) {

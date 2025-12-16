@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/utils/supabase/client';
+import { useProperty } from '../context/PropertyContext';
 import { 
   Clock, CheckCircle2, ChefHat, Truck, AlertCircle, 
   RefreshCw, Building2, Utensils, XCircle, Volume2, VolumeX, Eye, X, Wine
@@ -9,11 +10,6 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Types
-interface Property {
-  id: string;
-  name: string;
-}
-
 interface OrderItem {
   id: string;
   quantity: number;
@@ -197,86 +193,29 @@ const BAR_STATUS_CONFIG = {
 };
 
 export default function OrdersPage() {
-  const supabase = createClient();
+  const { selectedProperty, selectedPropertyId, setSelectedPropertyId, properties } = useProperty();
   const [activeTab, setActiveTab] = useState<'food' | 'bar'>('food');
   const [foodOrders, setFoodOrders] = useState<Order[]>([]);
   const [barOrders, setBarOrders] = useState<BarOrder[]>([]);
   const [loading, setLoading] = useState(true);
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [selectedPropertyId, setSelectedPropertyId] = useState<string>('');
-  const [soundEnabled, setSoundEnabled] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | BarOrder | null>(null);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const supabase = createClient();
 
-  // Sound Player using Web Audio API
+  // Sound effect
+  useEffect(() => {
+    audioRef.current = new Audio('/sounds/notification.mp3');
+  }, []);
+
   const playNotificationSound = () => {
-    if (!soundEnabled) return;
-
-    try {
-      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioContext) return;
-      
-      const ctx = new AudioContext();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(880, ctx.currentTime); 
-      osc.frequency.exponentialRampToValueAtTime(500, ctx.currentTime + 0.6); 
-      
-      gain.gain.setValueAtTime(0, ctx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.05);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.6);
-
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.6);
-
-      const osc2 = ctx.createOscillator();
-      const gain2 = ctx.createGain();
-      osc2.connect(gain2);
-      gain2.connect(ctx.destination);
-      osc2.type = 'triangle';
-      osc2.frequency.setValueAtTime(1760, ctx.currentTime); 
-      gain2.gain.setValueAtTime(0, ctx.currentTime);
-      gain2.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.05);
-      gain2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
-      osc2.start(ctx.currentTime);
-      osc2.stop(ctx.currentTime + 0.4);
-
-    } catch (e) {
-      console.error('Audio play failed', e);
-    }
-  };
-
-  const fetchProperties = async () => {
-    try {
-      const { data: properties, error } = await supabase
-        .from('properties')
-        .select('id, name')
-        .order('name');
-
-      if (error) throw error;
-
-      if (properties && properties.length > 0) {
-        setProperties(properties);
-        const saved = localStorage.getItem('zamora_selected_property');
-        if (saved && properties.find(p => p.id === saved)) {
-          setSelectedPropertyId(saved);
-        } else {
-          setSelectedPropertyId(properties[0].id);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching properties:', error);
+    if (soundEnabled && audioRef.current) {
+      audioRef.current.play().catch(e => console.error('Error playing sound:', e));
     }
   };
 
   const handlePropertyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newId = e.target.value;
-    setSelectedPropertyId(newId);
-    localStorage.setItem('zamora_selected_property', newId);
+    setSelectedPropertyId(e.target.value);
   };
 
   const fetchFoodOrders = async () => {
@@ -331,10 +270,6 @@ export default function OrdersPage() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchProperties();
-  }, []);
 
   useEffect(() => {
     if (selectedPropertyId) {

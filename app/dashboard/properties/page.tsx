@@ -100,7 +100,7 @@ export default function PropertiesPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200">
-            {loading ? (
+            {contextLoading ? (
               <tr><td colSpan={5} className="px-6 py-8 text-center text-slate-500">Loading properties...</td></tr>
             ) : properties.length === 0 ? (
               <tr><td colSpan={5} className="px-6 py-8 text-center text-slate-500">No properties found. Add one to get started.</td></tr>

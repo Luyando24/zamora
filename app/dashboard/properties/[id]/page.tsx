@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/utils/supabase/client';
+import { useProperty } from '../../context/PropertyContext';
 import { 
   Building2, MapPin, Phone, Mail, Globe, 
   BedDouble, Home, Sun, Car, Tent, Building,
@@ -24,32 +24,17 @@ const PROPERTY_ICONS: Record<string, any> = {
 
 export default function PropertyDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const { properties, loading: contextLoading } = useProperty();
   const [property, setProperty] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
-  const router = useRouter();
 
   useEffect(() => {
-    fetchProperty();
-  }, [id]);
-
-  const fetchProperty = async () => {
-    if (!id) return;
-    
-    const { data, error } = await supabase
-      .from('properties')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) {
-      console.error('Error fetching property:', error);
-      // alert('Error loading property details');
-    } else {
-      setProperty(data);
+    if (!contextLoading) {
+      const found = properties.find(p => p.id === id);
+      setProperty(found || null);
+      setLoading(false);
     }
-    setLoading(false);
-  };
+  }, [id, properties, contextLoading]);
 
   if (loading) {
     return (

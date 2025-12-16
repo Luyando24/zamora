@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
+import { useProperty } from '../context/PropertyContext';
 import Modal from '@/components/ui/Modal';
 import { Plus, Edit, Trash2, BedDouble, AlertTriangle, ArrowRight, LayoutGrid, List } from 'lucide-react';
 import Link from 'next/link';
@@ -29,9 +30,9 @@ interface Room {
 }
 
 export default function RoomsPage() {
+  const { selectedPropertyId } = useProperty();
   const [activeTab, setActiveTab] = useState<'rooms' | 'types'>('types');
   const supabase = createClient();
-  const [hasProperty, setHasProperty] = useState(false);
   const [isWarningOpen, setIsWarningOpen] = useState(false);
   const router = useRouter();
   
@@ -46,24 +47,23 @@ export default function RoomsPage() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [selectedPropertyId]);
 
   const fetchData = async () => {
+    if (!selectedPropertyId) return;
     setLoading(true);
     
-    // Check for property
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-       let propertyId = user.user_metadata?.property_id || user.user_metadata?.hotel_id;
-       if (!propertyId) {
-          const { data: profile } = await supabase.from('profiles').select('property_id').eq('id', user.id).single();
-          propertyId = profile?.property_id;
-       }
-       setHasProperty(!!propertyId);
-    }
-
-    const { data: rData } = await supabase.from('rooms').select('*, room_types(name)').order('room_number');
-    const { data: tData } = await supabase.from('room_types').select('*').order('name');
+    const { data: rData } = await supabase
+      .from('rooms')
+      .select('*, room_types(name)')
+      .eq('property_id', selectedPropertyId)
+      .order('room_number');
+      
+    const { data: tData } = await supabase
+      .from('room_types')
+      .select('*')
+      .eq('property_id', selectedPropertyId)
+      .order('name');
     
     if (rData) setRooms(rData);
     if (tData) setRoomTypes(tData);
@@ -71,7 +71,7 @@ export default function RoomsPage() {
   };
 
   const handleAddClick = (type: 'type' | 'unit') => {
-    if (!hasProperty) {
+    if (!selectedPropertyId) {
       setIsWarningOpen(true);
       return;
     }

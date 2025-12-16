@@ -60,24 +60,46 @@ export async function authenticateRequest(req: NextRequest): Promise<AuthResult>
  */
 export async function authorizeHotelAccess(
     userId: string,
-    hotelId: string
+    propertyId: string
 ): Promise<{ authorized: boolean; error?: string }> {
     try {
         const supabase = await createClient();
 
-        // Check if user is associated with this hotel
-        const { data: userHotel, error } = await supabase
-            .from('user_hotels')
+        // 1. Check if user is the owner (creator) of the property
+        const { data: property, error: propError } = await supabase
+            .from('properties')
+            .select('created_by')
+            .eq('id', propertyId)
+            .single();
+        
+        if (!propError && property && property.created_by === userId) {
+            return { authorized: true };
+        }
+
+        // 2. Check if user is super_admin
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', userId)
+            .single();
+        
+        if (profile?.role === 'super_admin') {
+            return { authorized: true };
+        }
+
+        // 3. Check if user is assigned staff
+        const { data: staff, error } = await supabase
+            .from('property_staff')
             .select('id, role')
             .eq('user_id', userId)
-            .eq('hotel_id', hotelId)
+            .eq('property_id', propertyId)
             .maybeSingle();
 
         if (error) {
             return { authorized: false, error: 'Database error checking authorization' };
         }
 
-        if (!userHotel) {
+        if (!staff) {
             return { authorized: false, error: 'Access denied - User not associated with this property' };
         }
 
@@ -165,10 +187,10 @@ export async function authorizeFolioAccess(
     try {
         const supabase = await createClient();
 
-        // Get folio with hotel information
+        // Get folio with property information
         const { data: folio, error: folioError } = await supabase
             .from('folios')
-            .select('hotel_id')
+            .select('property_id')
             .eq('id', folioId)
             .single();
 
@@ -176,8 +198,8 @@ export async function authorizeFolioAccess(
             return { authorized: false, error: 'Folio not found' };
         }
 
-        // Check if user has access to this hotel
-        return await authorizeHotelAccess(userId, folio.hotel_id);
+        // Check if user has access to this property
+        return await authorizeHotelAccess(userId, folio.property_id);
     } catch (error) {
         return { authorized: false, error: 'Folio access check failed' };
     }

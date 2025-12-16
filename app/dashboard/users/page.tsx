@@ -8,13 +8,14 @@ import {
 } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
 import { toast } from 'react-hot-toast';
+import { useProperty } from '../context/PropertyContext';
 
 export default function TeamPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [isInviteOpen, setIsInviteOpen] = useState(false);
-  const [propertyId, setPropertyId] = useState<string | null>(null);
+  const { selectedPropertyId } = useProperty();
   
   // Invite Form
   const [formData, setFormData] = useState({
@@ -28,33 +29,36 @@ export default function TeamPage() {
   const supabase = createClient();
 
   useEffect(() => {
-    fetchTeam();
-  }, []);
+    if (selectedPropertyId) {
+        fetchTeam();
+    }
+  }, [selectedPropertyId]);
 
   const fetchTeam = async () => {
+    if (!selectedPropertyId) return;
+    
+    setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      // Get current user's property_id
-      const { data: profile } = await supabase
+      // Fetch all profiles for this property
+      // Note: We are fetching profiles where property_id matches selectedPropertyId.
+      // However, property_staff table is the source of truth for many-to-many.
+      // But based on setup page, it seems we are still using profiles.property_id for now as primary.
+      // Let's check if we should join property_staff.
+      
+      // Checking the existing code:
+      // const { data: team } = await supabase.from('profiles').select('*').eq('property_id', profile.property_id)
+      
+      // So let's stick to that for now to avoid breaking changes, but ideally we should use property_staff.
+      // Actually, let's try to support both if possible, or just stick to what works.
+      // Given the previous code used profiles.property_id, let's use that.
+      
+      const { data: team } = await supabase
         .from('profiles')
-        .select('property_id')
-        .eq('id', user.id)
-        .single();
+        .select('*')
+        .eq('property_id', selectedPropertyId)
+        .order('created_at', { ascending: false });
 
-      if (profile?.property_id) {
-        setPropertyId(profile.property_id);
-        
-        // Fetch all profiles for this property
-        const { data: team } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('property_id', profile.property_id)
-          .order('created_at', { ascending: false });
-
-        setUsers(team || []);
-      }
+      setUsers(team || []);
     } catch (error) {
       console.error('Error fetching team:', error);
     } finally {
@@ -64,7 +68,7 @@ export default function TeamPage() {
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!propertyId) return;
+    if (!selectedPropertyId) return;
     
     setInviting(true);
     try {
@@ -73,7 +77,7 @@ export default function TeamPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          propertyId
+          propertyId: selectedPropertyId
         })
       });
 

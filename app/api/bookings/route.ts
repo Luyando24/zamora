@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
       .from('rooms')
       .select('id')
       .eq('room_type_id', roomTypeId)
-      .eq('hotel_id', propertyId);
+      .eq('property_id', propertyId);
 
     if (roomsError) throw roomsError;
     if (!rooms || rooms.length === 0) {
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
       .from('guests')
       .select('id')
       .eq('email', guestDetails.email)
-      .eq('hotel_id', propertyId)
+      .eq('property_id', propertyId)
       .single();
 
     if (existingGuest) {
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
       const { data: newGuest, error: createGuestError } = await supabase
         .from('guests')
         .insert({
-          hotel_id: propertyId,
+          property_id: propertyId,
           first_name: guestDetails.firstName,
           last_name: guestDetails.lastName,
           email: guestDetails.email,
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
     const { data: booking, error: createBookingError } = await supabase
       .from('bookings')
       .insert({
-        hotel_id: propertyId,
+        property_id: propertyId,
         guest_id: guestId,
         room_id: availableRoom.id,
         check_in_date: checkIn,

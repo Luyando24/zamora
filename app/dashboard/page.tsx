@@ -10,8 +10,10 @@ import { useEffect, useState } from 'react';
 import { formatDistanceToNow, startOfWeek, startOfMonth, subDays, format, isSameDay, parseISO, differenceInDays } from 'date-fns';
 import Link from 'next/link';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { useProperty } from './context/PropertyContext';
 
 export default function DashboardPage() {
+  const { selectedPropertyId } = useProperty();
   const [userName, setUserName] = useState<string>('User');
   const [stats, setStats] = useState([
     { name: 'Today\'s Check-ins', value: '0', change: '+0%', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
@@ -42,6 +44,8 @@ export default function DashboardPage() {
     getUser();
 
     const fetchFinancials = async () => {
+        if (!selectedPropertyId) return;
+
         const today = new Date();
         const startOfToday = new Date(today.setHours(0,0,0,0)).toISOString();
         const startOfThisWeek = startOfWeek(new Date()).toISOString();
@@ -52,12 +56,14 @@ export default function DashboardPage() {
         const { data: foodOrders } = await supabase
             .from('orders')
             .select('total_amount, created_at')
+            .eq('property_id', selectedPropertyId)
             .gte('created_at', last30Days);
 
         // Fetch Bar Orders
         const { data: barOrders } = await supabase
             .from('bar_orders')
             .select('total_amount, created_at')
+            .eq('property_id', selectedPropertyId)
             .gte('created_at', last30Days);
 
         // Fetch Bookings (with Room Price)
@@ -67,12 +73,14 @@ export default function DashboardPage() {
             .select(`
                 check_in_date,
                 check_out_date,
-                rooms (
+                rooms!inner (
+                    property_id,
                     room_types (
                         base_price
                     )
                 )
             `)
+            .eq('rooms.property_id', selectedPropertyId)
             .gte('check_in_date', last30Days.split('T')[0])
             .neq('status', 'cancelled');
 
@@ -153,53 +161,73 @@ export default function DashboardPage() {
     };
 
     const fetchStats = async () => {
+        if (!selectedPropertyId) return;
+
         const today = new Date().toISOString().split('T')[0];
         const startOfDay = new Date(today).toISOString();
         
         // 1. Total Rooms
         const { count: totalRooms } = await supabase
             .from('rooms')
-            .select('*', { count: 'exact', head: true });
+            .select('*', { count: 'exact', head: true })
+            .eq('property_id', selectedPropertyId);
 
         // 2. Maintenance Rooms
         const { count: maintenanceRooms } = await supabase
             .from('rooms')
             .select('*', { count: 'exact', head: true })
-            .eq('status', 'maintenance');
+            .eq('status', 'maintenance')
+            .eq('property_id', selectedPropertyId);
             
         // 3. Today's Check-ins
         const { count: checkIns } = await supabase
             .from('bookings')
-            .select('*', { count: 'exact', head: true })
+            .select('*, rooms!inner(property_id)', { count: 'exact', head: true })
             .eq('check_in_date', today)
-            .in('status', ['confirmed', 'checked_in']);
+            .in('status', ['confirmed', 'checked_in'])
+            .eq('rooms.property_id', selectedPropertyId);
 
         // 4. Occupied Rooms (Active Bookings)
         // Logic: check_in <= today AND check_out > today
         const { count: occupied } = await supabase
             .from('bookings')
-            .select('*', { count: 'exact', head: true })
+            .select('*, rooms!inner(property_id)', { count: 'exact', head: true })
             .lte('check_in_date', today)
             .gt('check_out_date', today)
-            .in('status', ['confirmed', 'checked_in']);
+            .in('status', ['confirmed', 'checked_in'])
+            .eq('rooms.property_id', selectedPropertyId);
             
         // 5. Pending Folios
-        const { count: pendingFolios } = await supabase
+        // Try direct property_id filter first
+        let folioQuery = supabase
             .from('folios')
             .select('*', { count: 'exact', head: true })
             .eq('status', 'open');
+            
+        // Check if we can filter by property_id on folios, otherwise we might miss filtering if column missing
+        // For now assuming it exists based on migrations
+        // To be safe, let's filter by booking -> room if needed, but simple is better
+        // Attempting direct filter:
+        const { count: pendingFolios, error: folioError } = await folioQuery.eq('property_id', selectedPropertyId);
+
+        if (folioError) {
+             console.warn('Folio property_id filter failed, might need join', folioError);
+             // Fallback or ignore for now to avoid breaking UI
+        }
 
         // 6. Today's Food Orders
         const { count: foodOrders } = await supabase
             .from('orders')
             .select('*', { count: 'exact', head: true })
-            .gte('created_at', startOfDay);
+            .gte('created_at', startOfDay)
+            .eq('property_id', selectedPropertyId);
 
         // 7. Today's Bar Orders
         const { count: barOrders } = await supabase
             .from('bar_orders')
             .select('*', { count: 'exact', head: true })
-            .gte('created_at', startOfDay);
+            .gte('created_at', startOfDay)
+            .eq('property_id', selectedPropertyId);
 
         const safeTotalRooms = totalRooms || 0;
         const safeMaintenance = maintenanceRooms || 0;
@@ -222,10 +250,13 @@ export default function DashboardPage() {
     };
 
     const fetchRecentActivity = async () => {
+        if (!selectedPropertyId) return;
+
         // Fetch latest bookings
         const { data: bookings } = await supabase
             .from('bookings')
-            .select('*, guests(first_name, last_name), rooms(room_number)')
+            .select('*, guests(first_name, last_name), rooms!inner(room_number, property_id)')
+            .eq('rooms.property_id', selectedPropertyId)
             .order('created_at', { ascending: false })
             .limit(5);
 
@@ -233,6 +264,7 @@ export default function DashboardPage() {
         const { data: foodOrders } = await supabase
             .from('orders')
             .select('*')
+            .eq('property_id', selectedPropertyId)
             .order('created_at', { ascending: false })
             .limit(5);
 
@@ -240,6 +272,7 @@ export default function DashboardPage() {
         const { data: barOrders } = await supabase
             .from('bar_orders')
             .select('*')
+            .eq('property_id', selectedPropertyId)
             .order('created_at', { ascending: false })
             .limit(5);
 
@@ -308,7 +341,7 @@ export default function DashboardPage() {
     return () => {
         supabase.removeChannel(channels);
     };
-  }, []);
+  }, [selectedPropertyId]);
 
   return (
     <div className="space-y-6">

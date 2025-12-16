@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/utils/supabase/client';
+import { useProperty } from '../context/PropertyContext';
 import { 
   Clock, CheckCircle2, ChefHat, Truck, AlertCircle, 
   RefreshCw, Building2, Wine, XCircle, Volume2, VolumeX, Eye, X
@@ -108,10 +109,9 @@ const STATUS_CONFIG = {
 
 export default function BarOrdersPage() {
   const supabase = createClient();
+  const { selectedPropertyId } = useProperty();
   const [orders, setOrders] = useState<BarOrder[]>([]);
   const [loading, setLoading] = useState(true);
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [selectedPropertyId, setSelectedPropertyId] = useState<string>('');
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<BarOrder | null>(null);
 
@@ -163,35 +163,6 @@ export default function BarOrdersPage() {
     }
   };
 
-  const fetchProperties = async () => {
-    try {
-      const { data: properties, error } = await supabase
-        .from('properties')
-        .select('id, name')
-        .order('name');
-
-      if (error) throw error;
-
-      if (properties && properties.length > 0) {
-        setProperties(properties);
-        const saved = localStorage.getItem('zamora_selected_property');
-        if (saved && properties.find(p => p.id === saved)) {
-          setSelectedPropertyId(saved);
-        } else {
-          setSelectedPropertyId(properties[0].id);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching properties:', error);
-    }
-  };
-
-  const handlePropertyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newId = e.target.value;
-    setSelectedPropertyId(newId);
-    localStorage.setItem('zamora_selected_property', newId);
-  };
-
   const fetchOrders = async () => {
     if (!selectedPropertyId) return;
     
@@ -237,10 +208,6 @@ export default function BarOrdersPage() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchProperties();
-  }, []);
 
   useEffect(() => {
     if (selectedPropertyId) {
@@ -346,7 +313,6 @@ export default function BarOrdersPage() {
         </div>
         
         <div className="flex items-center gap-3">
-          
           <button
             onClick={() => {
                 const newState = !soundEnabled;
@@ -363,25 +329,6 @@ export default function BarOrdersPage() {
             {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
             <span className="hidden sm:inline">{soundEnabled ? 'Sound On' : 'Sound Off'}</span>
           </button>
-
-          {/* Property Selector */}
-          <div className="relative group">
-            <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-            <select
-              value={selectedPropertyId}
-              onChange={handlePropertyChange}
-              className="pl-9 pr-8 py-2 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 bg-white hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-800/10 focus:border-slate-800 transition-all appearance-none"
-            >
-              {properties.map(p => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-              <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-            </div>
-          </div>
 
           <button 
             onClick={fetchOrders}

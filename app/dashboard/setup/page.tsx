@@ -28,6 +28,7 @@ import {
   Check
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useProperty } from '../context/PropertyContext';
 
 const PROPERTY_TYPES = [
   { id: 'hotel', label: 'Hotel', icon: Building2, description: 'Standard hotel services' },
@@ -91,6 +92,7 @@ export default function PropertySetupPage() {
   const [newAmenity, setNewAmenity] = useState('');
   const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
+  const { refreshProperties, setSelectedPropertyId } = useProperty();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -203,6 +205,10 @@ export default function PropertySetupPage() {
       await supabase.auth.updateUser({
         data: { property_id: hotel.id }
       });
+
+      // 4. Update Context
+      await refreshProperties();
+      setSelectedPropertyId(hotel.id);
 
       setStep(5);
       

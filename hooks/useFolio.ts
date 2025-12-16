@@ -22,7 +22,7 @@ export interface FolioItem {
   tax_category: string;
 }
 
-export const useFolio = (bookingId: string) => {
+export const useFolio = (bookingId: string, propertyId?: string | null) => {
   const fetchFolio = async () => {
     // 1. Get or Create Folio for Booking
     let { data: folio, error } = await supabase
@@ -31,13 +31,23 @@ export const useFolio = (bookingId: string) => {
       .eq('booking_id', bookingId)
       .single();
 
+    if (folio && propertyId && folio.property_id !== propertyId) {
+       console.error('Folio belongs to different property');
+       throw new Error('This folio belongs to a different property');
+    }
+
     if (!folio) {
        // Create one if missing
+       if (!propertyId) {
+         console.error('Cannot create folio: Property ID is missing');
+         throw new Error('Property ID is required to create a folio');
+       }
+
        const { data: newFolio, error: createError } = await supabase
          .from('folios')
          .insert({ 
            booking_id: bookingId,
-           hotel_id: (await supabase.auth.getUser()).data.user?.user_metadata?.hotel_id || '00000000-0000-0000-0000-000000000000'
+           property_id: propertyId
          })
          .select()
          .single();

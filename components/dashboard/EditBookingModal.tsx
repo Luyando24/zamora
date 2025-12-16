@@ -57,7 +57,7 @@ export default function EditBookingModal({ isOpen, onClose, onSuccess, booking, 
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      propertyId = user.user_metadata?.property_id || user.user_metadata?.hotel_id;
+      propertyId = user.user_metadata?.property_id;
 
       if (!propertyId) {
         const { data: profile } = await supabase.from('profiles').select('property_id').eq('id', user.id).single();

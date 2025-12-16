@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
+import { useProperty } from '../context/PropertyContext';
 import { useBarMenuCategories } from '@/hooks/useBarMenuCategories';
 import { generateMenuPdf } from './utils/generateMenuPdf';
 import CategoryManager from './components/CategoryManager';
@@ -9,66 +10,32 @@ import ShareMenuModal from './components/ShareMenuModal';
 import { Plus, Edit, Trash2, UtensilsCrossed, QrCode, Building2, FileText, Wine, Beer, Martini, Search } from 'lucide-react';
 import Link from 'next/link';
 
-interface Property {
-  id: string;
-  name: string;
-  created_by?: string;
-}
-
 export default function BarMenuPage() {
+  const { selectedProperty, selectedPropertyId, setSelectedPropertyId, properties } = useProperty();
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [selectedPropertyId, setSelectedPropertyId] = useState<string>('');
   const [isShareOpen, setIsShareOpen] = useState(false);
   const supabase = createClient();
   
   // Independent categories
-  const { categories: dbCategories, loading: categoriesLoading } = useBarMenuCategories();
-
-  const fetchProperties = async () => {
-    try {
-        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Properties timeout')), 5000));
-        const fetch = supabase.from('properties').select('id, name, created_by, wifi_ssid, wifi_password');
-        
-        const { data: fetchedProperties, error } = await Promise.race([fetch, timeout]) as any;
-
-      if (error) {
-        console.error('Supabase error fetching properties:', error);
-        return; 
-      }
-
-      if (fetchedProperties && fetchedProperties.length > 0) {
-        setProperties(fetchedProperties);
-        const saved = localStorage.getItem('zamora_selected_property');
-        if (saved && (saved === 'all' || fetchedProperties.find((p: any) => p.id === saved))) {
-            setSelectedPropertyId(saved);
-        } else {
-            setSelectedPropertyId(fetchedProperties.length > 1 ? 'all' : fetchedProperties[0].id);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching properties:', error);
-    }
-  };
+  const { categories: dbCategories, loading: categoriesLoading } = useBarMenuCategories(selectedPropertyId);
 
   const handlePropertyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const newId = e.target.value;
-      setSelectedPropertyId(newId);
-      localStorage.setItem('zamora_selected_property', newId);
+      setSelectedPropertyId(e.target.value);
   };
 
   const fetchItems = async () => {
+    if (!selectedPropertyId) return;
     setLoading(true);
     try {
         const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Items fetch timeout')), 8000));
         
         const fetch = supabase
             .from('bar_menu_items')
-            .select('*') 
-            .limit(100); 
+            .select('*, bar_menu_item_properties!inner(property_id)') 
+            .eq('bar_menu_item_properties.property_id', selectedPropertyId);
         
         const { data, error } = await Promise.race([fetch, timeout]) as any;
         
@@ -90,9 +57,8 @@ export default function BarMenuPage() {
   };
 
   useEffect(() => {
-    fetchProperties();
     fetchItems();
-  }, []);
+  }, [selectedPropertyId]);
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this bar menu item?')) return;

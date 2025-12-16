@@ -19,6 +19,7 @@ interface ZraTransaction {
 }
 
 export default function ZraDashboard() {
+  const { selectedPropertyId } = useProperty();
   const [transactions, setTransactions] = useState<ZraTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -29,10 +30,14 @@ export default function ZraDashboard() {
   });
 
   useEffect(() => {
-    fetchReport();
-  }, []);
+    if (selectedPropertyId) {
+      fetchReport();
+    }
+  }, [selectedPropertyId]);
 
   const fetchReport = async () => {
+    if (!selectedPropertyId) return;
+    setLoading(true);
     // Fetch successful ZRA transactions from the last 30 days
     const { data, error } = await supabase
       .from('zra_transactions')
@@ -41,6 +46,7 @@ export default function ZraDashboard() {
         folios ( total_amount, zra_invoice_number )
       `)
       .eq('status', 'success')
+      .eq('property_id', selectedPropertyId)
       .gte('created_at', subDays(new Date(), 30).toISOString())
       .order('created_at', { ascending: false });
 

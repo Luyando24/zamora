@@ -24,12 +24,16 @@ export function useBarMenuCategories(propertyId?: string | null) {
       const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Categories timeout')), 5000));
 
       // Fetch categories. RLS will handle filtering (user's own + global public ones)
-      const fetch = supabase
+      let query = supabase
         .from('bar_menu_categories')
         .select('*')
         .order('name');
       
-      const { data, error } = await Promise.race([fetch, timeout]) as any;
+      if (propertyId) {
+        query = query.or(`property_id.eq.${propertyId},property_id.is.null`);
+      }
+
+      const { data, error } = await Promise.race([query, timeout]) as any;
 
       if (error) throw error;
 
@@ -52,6 +56,9 @@ export function useBarMenuCategories(propertyId?: string | null) {
       const payload: any = { name };
       if (user) {
           payload.created_by = user.id;
+      }
+      if (propertyId) {
+        payload.property_id = propertyId;
       }
 
       const { data, error } = await supabase

@@ -25,7 +25,7 @@ export interface Booking {
   };
 }
 
-export function useInventory(startDate: Date = new Date(), days: number = 30) {
+export function useInventory(startDate: Date = new Date(), days: number = 30, propertyId?: string | null) {
   const supabase = createClient();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -34,24 +34,27 @@ export function useInventory(startDate: Date = new Date(), days: number = 30) {
   useEffect(() => {
     fetchData();
 
+    if (!propertyId) return;
+
     // Realtime Subscriptions
     const roomsChannel = supabase
       .channel('public:rooms')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'rooms' }, fetchData)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'rooms', filter: `property_id=eq.${propertyId}` }, fetchData)
       .subscribe();
 
     const bookingsChannel = supabase
       .channel('public:bookings')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, fetchData)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings', filter: `property_id=eq.${propertyId}` }, fetchData)
       .subscribe();
 
     return () => {
       supabase.removeChannel(roomsChannel);
       supabase.removeChannel(bookingsChannel);
     };
-  }, []);
+  }, [propertyId]);
 
   const fetchData = async () => {
+    if (!propertyId) return;
     try {
       setLoading(true);
       
@@ -62,6 +65,7 @@ export function useInventory(startDate: Date = new Date(), days: number = 30) {
           *,
           room_types ( name, base_price )
         `)
+        .eq('property_id', propertyId)
         .order('room_number', { ascending: true });
 
       if (roomsError) throw roomsError;
@@ -77,6 +81,7 @@ export function useInventory(startDate: Date = new Date(), days: number = 30) {
           *,
           guests ( first_name, last_name )
         `)
+        .eq('property_id', propertyId)
         .in('status', ['confirmed', 'checked_in']);
 
       if (bookingsError) throw bookingsError;

@@ -161,7 +161,7 @@ export async function POST(req: NextRequest) {
 
     // 11. Log ZRA transaction
     await supabase.from('zra_transactions').insert({
-      hotel_id: folio.hotel_id,
+      property_id: folio.property_id,
       folio_id: folioId,
       request_payload: zraPayload,
       response_payload: mockZraResponse,

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import ImageUpload from '@/components/ui/ImageUpload';
 import MultiImageUpload from '@/components/ui/MultiImageUpload';
+import { useProperty } from '../../context/PropertyContext';
 import { 
   Loader2, X, Plus, ChevronRight, ChevronLeft, 
   Check, BedDouble, Image as ImageIcon, ListPlus, CheckCircle,
@@ -35,38 +36,20 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const supabase = createClient();
-  const [properties, setProperties] = useState<any[]>([]);
+  const { properties, selectedPropertyId: activePropertyId } = useProperty();
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>('');
   const [customAmenity, setCustomAmenity] = useState('');
 
-  // Fetch properties
+  // Initialize selection
   useEffect(() => {
-    const init = async () => {
-        // Fetch User's Properties (RLS will filter)
-        const { data: userProperties, error } = await supabase
-            .from('properties')
-            .select('id, name');
-
-        if (error) {
-            console.error('Error fetching properties:', error);
-            alert('Could not fetch properties. Please try again.');
-            return;
-        }
-        
-        if (userProperties) {
-            setProperties(userProperties);
-            
-            // If editing, set from initialData
-            if (initialData?.property_id) {
-                setSelectedPropertyId(initialData.property_id);
-            } else if (userProperties.length === 1) {
-                // Auto-select if only one
-                setSelectedPropertyId(userProperties[0].id);
-            }
-        }
-    };
-    init();
-  }, [initialData]);
+    if (initialData?.property_id) {
+        setSelectedPropertyId(initialData.property_id);
+    } else if (activePropertyId) {
+        setSelectedPropertyId(activePropertyId);
+    } else if (properties.length === 1) {
+        setSelectedPropertyId(properties[0].id);
+    }
+  }, [initialData, activePropertyId, properties]);
   
   const [formData, setFormData] = useState({
     name: initialData?.name || '',

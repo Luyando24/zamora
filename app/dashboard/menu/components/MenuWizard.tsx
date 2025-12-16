@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { useMenuCategories } from '@/hooks/useMenuCategories';
 import ImageUpload from '@/components/ui/ImageUpload';
 import MultiImageUpload from '@/components/ui/MultiImageUpload';
+import { useProperty } from '../../context/PropertyContext';
 import { 
   Loader2, X, Plus, ChevronRight, ChevronLeft, 
   Check, Utensils, Image as ImageIcon, Sparkles, Building2,
@@ -26,34 +27,16 @@ const STEPS = [
 export default function MenuWizard({ initialData }: MenuWizardProps) {
   const router = useRouter();
   const supabase = createClient();
-  const { categories: dbCategories } = useMenuCategories();
+  const { properties, selectedPropertyId } = useProperty();
+  const { categories: dbCategories } = useMenuCategories(selectedPropertyId);
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [properties, setProperties] = useState<any[]>([]);
   const [selectedPropertyIds, setSelectedPropertyIds] = useState<string[]>([]);
 
-  // Fetch properties and initial assignments
-  useState(() => {
+  // Fetch initial assignments
+  useEffect(() => {
     const init = async () => {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-
-        // 1. Fetch User's Properties
-        const { data: userProperties } = await supabase
-            .from('properties')
-            .select('id, name')
-            .eq('created_by', user.id);
-        
-        if (userProperties) {
-            setProperties(userProperties);
-            
-            // If new item, default to ALL properties
-            if (!initialData?.id) {
-                setSelectedPropertyIds(userProperties.map(p => p.id));
-            }
-        }
-
-        // 2. If editing, fetch existing assignments
+        // 1. If editing, fetch existing assignments
         if (initialData?.id) {
             const { data: assignments } = await supabase
                 .from('menu_item_properties')
@@ -63,10 +46,15 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
             if (assignments) {
                 setSelectedPropertyIds(assignments.map(a => a.property_id));
             }
+        } else {
+            // If new item, default to ACTIVE property
+            if (selectedPropertyId && selectedPropertyIds.length === 0) {
+                setSelectedPropertyIds([selectedPropertyId]);
+            }
         }
     };
     init();
-  });
+  }, [initialData, selectedPropertyId]);
   
   const [formData, setFormData] = useState({
     name: initialData?.name || '',
