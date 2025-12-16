@@ -454,8 +454,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
             </div>
           </div>
 
-          {/* Wifi Info Card */}
-          {/* @ts-ignore */}
+          {/* Wifi Info Card - Hidden from modal but available in printout
           {currentProperty.wifi_ssid && (
             <div className="w-full mt-6 mb-2 bg-slate-900/50 border border-slate-800/50 rounded-2xl p-4 backdrop-blur-sm">
                 <div className="flex items-center gap-2 mb-3">
@@ -466,20 +465,18 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
                 <div className="space-y-2">
                     <div className="flex justify-between items-center">
                         <span className="text-slate-500 text-xs font-medium">Wi-Fi Name</span>
-                        {/* @ts-ignore */}
                         <span className="text-slate-200 text-xs font-bold font-mono">{currentProperty.wifi_ssid}</span>
                     </div>
-                    {/* @ts-ignore */}
                     {currentProperty.wifi_password && (
                         <div className="flex justify-between items-center">
                             <span className="text-slate-500 text-xs font-medium">Password</span>
-                            {/* @ts-ignore */}
                             <span className="text-slate-200 text-xs font-bold font-mono">{currentProperty.wifi_password}</span>
                         </div>
                     )}
                 </div>
             </div>
           )}
+          */}
 
 
 

@@ -385,6 +385,30 @@ export default function OrdersPage() {
 
       if (error) throw error;
       
+      // Send SMS Notification
+      const orderList = type === 'food' ? foodOrders : barOrders;
+      const order = orderList.find(o => o.id === orderId);
+      
+      if (order && order.guest_phone) {
+          const statusMessages: Record<string, string> = {
+            preparing: `Your order is being prepared! 👨‍🍳`,
+            ready: `Your order is ready! 🎉`,
+            delivered: `Your order has been delivered. Enjoy! 🍽️`,
+            cancelled: `Your order has been cancelled. Please contact staff.`
+          };
+          const msg = statusMessages[newStatus];
+          if (msg) {
+             fetch('/api/notifications/sms', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: `Zamora: ${msg}`,
+                    phone: order.guest_phone
+                })
+             }).catch(err => console.error('Failed to send SMS:', err));
+          }
+      }
+
       if (type === 'food') {
         setFoodOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus as Order['status'] } : o));
       } else {

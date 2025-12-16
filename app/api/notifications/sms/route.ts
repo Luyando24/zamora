@@ -5,15 +5,15 @@ import { getSupabaseAdmin } from '@/lib/db/supabase-admin';
 
 export async function POST(request: Request) {
   try {
-    const { message, propertyId } = await request.json();
+    const { message, propertyId, phone } = await request.json();
     
     if (!message) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
-    let targetPhone = null;
+    let targetPhone = phone;
 
-    if (propertyId) {
+    if (!targetPhone && propertyId) {
         const supabaseAdmin = getSupabaseAdmin();
         const { data: property } = await supabaseAdmin
             .from('properties')
