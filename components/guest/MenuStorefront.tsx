@@ -326,6 +326,9 @@ export default function MenuStorefront({
                  <div className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors cursor-pointer"><Twitter size={20} /></div>
              </div>
              <p className="text-slate-500 text-sm">© {new Date().getFullYear()} {property.name}. All rights reserved.</p>
+             <a href="https://www.zamoraapp.com" target="_blank" rel="noopener noreferrer" className="text-slate-600 text-xs font-bold hover:text-white transition-colors mt-2">
+                Powered By www.zamoraapp.com
+             </a>
           </div>
         </div>
       </footer>

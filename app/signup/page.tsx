@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
-import { Loader2, AlertCircle, ArrowRight, ArrowLeft, Mail, Lock, User, Building2, Check } from 'lucide-react';
+import { Loader2, AlertCircle, ArrowRight, ArrowLeft, Mail, Lock, User, Building2, Check, PenTool } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import ServiceContractModal from '@/components/auth/ServiceContractModal';
 
 export default function SignupPage() {
   const [step, setStep] = useState(1);
@@ -47,6 +48,12 @@ export default function SignupPage() {
     }
   };
 
+  const handleContractSign = (signatureData: string, printedName: string) => {
+    setContractAgreed(true);
+    setSignerName(printedName);
+    setIsContractModalOpen(false);
+  };
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -78,7 +85,9 @@ export default function SignupPage() {
           data: {
             first_name: firstName,
             last_name: lastName,
-            contract_requested: true
+            contract_signed: true,
+            contract_signed_at: new Date().toISOString(),
+            contract_signer: signerName
           }
         }
       });
@@ -186,7 +195,7 @@ export default function SignupPage() {
               {step === 1 ? "Let's start with your name" : step === 2 ? "Secure your account" : "Service Contract"}
             </h2>
             <p className="text-gray-400 text-sm">
-              {step === 1 ? "Tell us who you are" : step === 2 ? "Create your login credentials" : "Request contract signing to proceed"}
+              {step === 1 ? "Tell us who you are" : step === 2 ? "Create your login credentials" : "Sign the service contract to proceed"}
             </p>
           </div>
 
