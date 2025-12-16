@@ -286,30 +286,52 @@ export default function SignupPage() {
                   className="space-y-5"
                 >
                   <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                    <h3 className="text-white font-bold mb-2">Contract Request</h3>
-                    <p className="text-sm text-gray-400 mb-4">
-                      By proceeding, you agree to our Terms of Service and Privacy Policy. 
-                      You also formally request to sign the Zamora Service Contract.
-                      Our team will prepare the documents for your digital signature.
+                    <h3 className="text-white font-bold mb-2">Service Contract</h3>
+                    <p className="text-sm text-gray-400 mb-6">
+                      Please review and sign the Zamora Service Contract to create your account.
+                      This agreement outlines the terms of use and your responsibilities.
                     </p>
-                    <label className="flex items-start gap-3 cursor-pointer group">
-                      <div className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors ${contractAgreed ? 'bg-zambia-green border-zambia-green' : 'border-gray-500 group-hover:border-gray-400'}`}>
-                        {contractAgreed && <Check className="w-3.5 h-3.5 text-white" />}
-                      </div>
-                      <input 
-                        type="checkbox" 
-                        className="hidden" 
-                        checked={contractAgreed}
-                        onChange={(e) => setContractAgreed(e.target.checked)}
-                      />
-                      <span className="text-sm text-gray-300 group-hover:text-white transition-colors">
-                        I agree to the Terms of Service and request to sign the contract.
-                      </span>
-                    </label>
+                    
+                    {contractAgreed ? (
+                        <div className="flex items-center gap-4 p-4 bg-zambia-green/10 border border-zambia-green/20 rounded-xl">
+                            <div className="w-10 h-10 bg-zambia-green rounded-full flex items-center justify-center text-white shrink-0">
+                                <Check size={20} />
+                            </div>
+                            <div>
+                                <p className="font-bold text-zambia-green">Contract Signed</p>
+                                <p className="text-xs text-gray-400">Signed by {signerName}</p>
+                            </div>
+                            <button 
+                                type="button"
+                                onClick={() => setIsContractModalOpen(true)}
+                                className="ml-auto text-xs text-gray-400 hover:text-white underline"
+                            >
+                                View
+                            </button>
+                        </div>
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={() => setIsContractModalOpen(true)}
+                            className="w-full py-4 border-2 border-dashed border-white/20 hover:border-zambia-green/50 hover:bg-zambia-green/5 rounded-xl flex flex-col items-center justify-center gap-2 transition-all group"
+                        >
+                            <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center group-hover:bg-zambia-green/20 transition-colors">
+                                <PenTool className="text-gray-400 group-hover:text-zambia-green" size={24} />
+                            </div>
+                            <span className="font-bold text-gray-300 group-hover:text-white">Review & Sign Contract</span>
+                        </button>
+                    )}
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
+
+            <ServiceContractModal 
+                isOpen={isContractModalOpen}
+                onClose={() => setIsContractModalOpen(false)}
+                onSign={handleContractSign}
+                userName={`${firstName} ${lastName}`}
+            />
 
             {error && (
               <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-start gap-3 animate-in fade-in slide-in-from-top-2">

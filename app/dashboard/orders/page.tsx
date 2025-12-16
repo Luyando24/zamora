@@ -537,7 +537,9 @@ export default function OrdersPage() {
               <div className="p-6 border-b border-slate-100 flex justify-between items-start">
                 <div>
                   <h2 className="text-xl font-bold text-slate-900">Order Details</h2>
-                  <p className="text-slate-500 text-sm font-medium">Room {selectedOrder.guest_room_number} • {new Date(selectedOrder.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                  <p className="text-slate-500 text-sm font-medium">
+                    {selectedOrder.guest_room_number.toString().startsWith('Table') ? selectedOrder.guest_room_number : `Room ${selectedOrder.guest_room_number}`} • {new Date(selectedOrder.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
                 </div>
                 <button 
                   onClick={() => setSelectedOrder(null)}
@@ -745,7 +747,9 @@ function OrderCard({ order, config, onStatusUpdate, onViewDetails, nextStatus, e
       <div className="p-4">
         <div className="flex justify-between items-start mb-3">
           <div>
-            <p className="font-bold text-slate-800">Room {order.guest_room_number}</p>
+            <p className="font-bold text-slate-800">
+              {order.guest_room_number.toString().startsWith('Table') ? order.guest_room_number : `Room ${order.guest_room_number}`}
+            </p>
             <p className="text-xs text-slate-500 font-medium">{order.guest_name}</p>
           </div>
           <div className="flex items-center gap-2">
