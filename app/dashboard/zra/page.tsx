@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { FileText, TrendingUp, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { format, subDays } from 'date-fns';
+import { useProperty } from '../context/PropertyContext';
 
 interface ZraTransaction {
   id: string;

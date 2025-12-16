@@ -298,7 +298,7 @@ export default function BarMenuPage() {
       <ShareMenuModal 
         isOpen={isShareOpen} 
         onClose={() => setIsShareOpen(false)} 
-        hotelId={selectedPropertyId}
+        hotelId={selectedPropertyId || ''}
         properties={properties}
       />
     </div>

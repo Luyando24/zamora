@@ -24,7 +24,7 @@ const PROPERTY_ICONS: Record<string, any> = {
 
 export default function PropertyDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { properties, loading: contextLoading } = useProperty();
+  const { properties, isLoading: contextLoading } = useProperty();
   const [property, setProperty] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 

@@ -337,7 +337,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     // Powered By
     ctx.fillStyle = '#475569'; // Slate 600
     ctx.font = 'bold 50px sans-serif';
-    ctx.fillText('POWERED BY ZAMORA', WIDTH / 2, HEIGHT - 100);
+    ctx.fillText('POWERED BY WWW.ZAMORAAPP.COM', WIDTH / 2, HEIGHT - 100);
 
     // 7. Download
     const url = canvas.toDataURL('image/png');

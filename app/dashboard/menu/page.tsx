@@ -436,7 +436,7 @@ export default function MenuPage() {
       <ShareMenuModal 
         isOpen={isShareOpen}
         onClose={() => setIsShareOpen(false)}
-        hotelId={selectedPropertyId}
+        hotelId={selectedPropertyId || ''}
         hotelName={properties.find(p => p.id === selectedPropertyId)?.name}
         properties={properties}
       />

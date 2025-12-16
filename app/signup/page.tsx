@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
-import { Loader2, AlertCircle, ArrowRight, ArrowLeft, Mail, Lock, User, Building2 } from 'lucide-react';
+import { Loader2, AlertCircle, ArrowRight, ArrowLeft, Mail, Lock, User, Building2, Check } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -13,6 +13,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [contractAgreed, setContractAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -28,6 +29,21 @@ export default function SignupPage() {
         return;
       }
       setStep(2);
+    } else if (step === 2) {
+      if (!email.trim() || !password) {
+        setError('Please enter your email and password.');
+        return;
+      }
+      // Basic email validation
+      if (!email.includes('@')) {
+        setError('Please enter a valid email address.');
+        return;
+      }
+      if (password.length < 8) {
+        setError('Password must be at least 8 characters.');
+        return;
+      }
+      setStep(3);
     }
   };
 
@@ -35,6 +51,12 @@ export default function SignupPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
+    if (!contractAgreed) {
+      setError('You must request contract signing to proceed.');
+      setLoading(false);
+      return;
+    }
 
     const trimmedEmail = email.trim().toLowerCase();
 
@@ -56,21 +78,21 @@ export default function SignupPage() {
           data: {
             first_name: firstName,
             last_name: lastName,
+            contract_requested: true
           }
         }
       });
 
       if (authError) throw authError;
 
-      // Check if session was created (auto-confirm enabled) or if verification is needed
+      // Direct redirect to dashboard or login, skipping email verification screen
       if (authData.session) {
         router.push('/dashboard');
-      } else if (authData.user && !authData.session) {
-         // User created but no session (verification required)
-         router.push(`/verify-email?email=${encodeURIComponent(trimmedEmail)}`);
       } else {
-         // Should not happen if no error, but fallback
-         router.push('/login?message=Account created. Please sign in.');
+         // Even if no session (verification technically required by Supabase),
+         // we treat it as successful and redirect to login or dashboard.
+         // We remove the specific /verify-email page requirement.
+         router.push('/login?message=Account created successfully. Please sign in.');
       } 
       
     } catch (err: any) {
@@ -144,27 +166,31 @@ export default function SignupPage() {
             <div className="flex space-x-2 mb-3">
               <div className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${step >= 1 ? 'bg-zambia-green' : 'bg-white/10'}`} />
               <div className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${step >= 2 ? 'bg-zambia-green' : 'bg-white/10'}`} />
+              <div className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${step >= 3 ? 'bg-zambia-green' : 'bg-white/10'}`} />
             </div>
             <div className="flex justify-between px-1">
               <span className={`text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${step >= 1 ? 'text-zambia-green' : 'text-gray-500'}`}>
-                Personal Details
+                Personal
               </span>
               <span className={`text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${step >= 2 ? 'text-zambia-green' : 'text-gray-500'}`}>
-                Account Security
+                Security
+              </span>
+              <span className={`text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${step >= 3 ? 'text-zambia-green' : 'text-gray-500'}`}>
+                Contract
               </span>
             </div>
           </div>
 
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-white mb-2">
-              {step === 1 ? "Let's start with your name" : "Secure your account"}
+              {step === 1 ? "Let's start with your name" : step === 2 ? "Secure your account" : "Service Contract"}
             </h2>
             <p className="text-gray-400 text-sm">
-              {step === 1 ? "Tell us who you are" : "Create your login credentials"}
+              {step === 1 ? "Tell us who you are" : step === 2 ? "Create your login credentials" : "Request contract signing to proceed"}
             </p>
           </div>
 
-          <form onSubmit={step === 1 ? handleNext : handleSignup} className="space-y-5">
+          <form onSubmit={step < 3 ? handleNext : handleSignup} className="space-y-5">
             <AnimatePresence mode="wait">
               {step === 1 && (
                 <motion.div
@@ -249,6 +275,40 @@ export default function SignupPage() {
                   </div>
                 </motion.div>
               )}
+
+              {step === 3 && (
+                <motion.div
+                  key="step3"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-5"
+                >
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+                    <h3 className="text-white font-bold mb-2">Contract Request</h3>
+                    <p className="text-sm text-gray-400 mb-4">
+                      By proceeding, you agree to our Terms of Service and Privacy Policy. 
+                      You also formally request to sign the Zamora Service Contract.
+                      Our team will prepare the documents for your digital signature.
+                    </p>
+                    <label className="flex items-start gap-3 cursor-pointer group">
+                      <div className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors ${contractAgreed ? 'bg-zambia-green border-zambia-green' : 'border-gray-500 group-hover:border-gray-400'}`}>
+                        {contractAgreed && <Check className="w-3.5 h-3.5 text-white" />}
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        className="hidden" 
+                        checked={contractAgreed}
+                        onChange={(e) => setContractAgreed(e.target.checked)}
+                      />
+                      <span className="text-sm text-gray-300 group-hover:text-white transition-colors">
+                        I agree to the Terms of Service and request to sign the contract.
+                      </span>
+                    </label>
+                  </div>
+                </motion.div>
+              )}
             </AnimatePresence>
 
             {error && (
@@ -276,7 +336,7 @@ export default function SignupPage() {
               >
                 {loading ? <Loader2 className="animate-spin h-5 w-5" /> : (
                   <>
-                    {step === 1 ? 'Next Step' : 'Create Account'} 
+                    {step < 3 ? 'Next Step' : 'Create Account'} 
                     <ArrowRight className="h-5 w-5" />
                   </>
                 )}
