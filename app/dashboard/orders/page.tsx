@@ -448,7 +448,7 @@ export default function OrdersPage() {
           <div className="relative group">
             <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <select
-              value={selectedPropertyId}
+              value={selectedPropertyId || ''}
               onChange={handlePropertyChange}
               className="pl-9 pr-8 py-2 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 bg-white hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-800/10 focus:border-slate-800 transition-all appearance-none"
             >

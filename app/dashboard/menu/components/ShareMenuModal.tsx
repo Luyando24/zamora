@@ -1,7 +1,7 @@
 'use client';
 
 import { QRCodeCanvas } from 'qrcode.react';
-import { Copy, ExternalLink, X, Download, Share2, ScanLine, Smartphone, Building2, MapPin, Wifi } from 'lucide-react';
+import { Copy, ExternalLink, X, Download, Share2, ScanLine, Smartphone, Building2, MapPin, Wifi, UtensilsCrossed } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 
 interface ShareMenuModalProps {
@@ -14,7 +14,8 @@ interface ShareMenuModalProps {
 
 export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, properties = [] }: ShareMenuModalProps) {
   const [copied, setCopied] = useState(false);
-  const [roomNumber, setRoomNumber] = useState('');
+  const [locationType, setLocationType] = useState<'room' | 'table'>('room');
+  const [locationValue, setLocationValue] = useState('');
   const [selectedPropertyId, setSelectedPropertyId] = useState(hotelId);
   const qrRef = useRef<HTMLDivElement>(null);
   
@@ -28,7 +29,8 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
       document.body.style.overflow = 'hidden';
       // Reset state when opening
       setSelectedPropertyId(hotelId);
-      setRoomNumber('');
+      setLocationValue('');
+      setLocationType('room');
     }
     return () => {
       window.removeEventListener('keydown', handleEscape);
@@ -59,6 +61,10 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
   const menuUrl = typeof window !== 'undefined' 
     ? (() => {
         const slug = (currentProperty as any).slug;
+        const queryParam = locationValue 
+            ? (locationType === 'room' ? `?room=${encodeURIComponent(locationValue)}` : `?table=${encodeURIComponent(locationValue)}`)
+            : '';
+
         if (slug) {
             const protocol = window.location.protocol;
             const host = window.location.host;
@@ -66,9 +72,9 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
                  ? 'localhost:3000' 
                  : host.split('.').slice(-2).join('.');
                  
-             return `${protocol}//${slug}.${domain}/menu${roomNumber ? `?room=${encodeURIComponent(roomNumber)}` : ''}`;
+             return `${protocol}//${slug}.${domain}/menu${queryParam}`;
          }
-         return `${window.location.origin}/menu/${currentHotelId}${roomNumber ? `?room=${encodeURIComponent(roomNumber)}` : ''}`;
+         return `${window.location.origin}/menu/${currentHotelId}${queryParam}`;
     })()
     : '';
 
@@ -122,13 +128,13 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     ctx.textAlign = 'center';
     ctx.fillStyle = '#ffffff';
 
-    // Room Number (Top)
-    if (roomNumber) {
-        // Draw a pill background behind room number for emphasis
+    // Room/Table Number (Top)
+    if (locationValue) {
+        // Draw a pill background behind number for emphasis
         ctx.fillStyle = '#fce7f3'; // Pink 100
-        const roomText = `ROOM ${roomNumber}`;
+        const labelText = locationType === 'room' ? `ROOM ${locationValue}` : `TABLE ${locationValue}`;
         ctx.font = 'bold 100px sans-serif';
-        const textWidth = ctx.measureText(roomText).width;
+        const textWidth = ctx.measureText(labelText).width;
         const padding = 60;
         const pillWidth = textWidth + (padding * 2);
         const pillHeight = 180;
@@ -143,7 +149,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         ctx.fillStyle = '#db2777'; // Pink 600
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(roomText, WIDTH / 2, pillY + (pillHeight/2) + 6);
+        ctx.fillText(labelText, WIDTH / 2, pillY + (pillHeight/2) + 6);
         
         // Reset text baseline
         ctx.textBaseline = 'alphabetic';
@@ -160,7 +166,8 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     ctx.font = '500 70px sans-serif';
     ctx.fillStyle = '#94a3b8'; // Slate 400
     ctx.letterSpacing = '15px';
-    ctx.fillText('FOOD DELIVERED TO YOUR ROOM', WIDTH / 2, 700);
+    const subtitleText = locationType === 'room' ? 'FOOD DELIVERED TO YOUR ROOM' : 'ORDER DIRECTLY FROM YOUR TABLE';
+    ctx.fillText(subtitleText, WIDTH / 2, 700);
 
     // 4. Draw QR Code
     const sourceCanvas = qrRef.current?.querySelector('canvas');
@@ -348,7 +355,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     const url = canvas.toDataURL('image/png');
     const a = document.createElement('a');
     a.href = url;
-    a.download = `menu-flyer-${currentHotelId}${roomNumber ? `-room-${roomNumber}` : ''}.png`;
+    a.download = `menu-flyer-${currentHotelId}${locationValue ? `-${locationType}-${locationValue}` : ''}.png`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -395,7 +402,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
                   <div className="relative group">
                       <Building2 className="absolute left-3 top-2.5 text-slate-500 group-hover:text-pink-400 transition-colors" size={16} />
                       <select 
-                          value={selectedPropertyId}
+                          value={selectedPropertyId || ''}
                           onChange={(e) => setSelectedPropertyId(e.target.value)}
                           className="w-full pl-9 pr-8 py-2 bg-slate-900 border border-slate-800 rounded-lg text-slate-300 text-sm focus:ring-1 focus:ring-pink-500 focus:border-pink-500 outline-none appearance-none cursor-pointer hover:bg-slate-800 transition-colors"
                       >
@@ -410,14 +417,34 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
                   </div>
               )}
 
-              {/* Room Number Input */}
+              {/* Location Type Toggle */}
+              <div className="flex bg-slate-900 p-1 rounded-lg border border-slate-800">
+                  <button 
+                      onClick={() => setLocationType('room')}
+                      className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all ${locationType === 'room' ? 'bg-slate-800 text-white shadow-sm ring-1 ring-slate-700' : 'text-slate-500 hover:text-slate-300'}`}
+                  >
+                      Room
+                  </button>
+                  <button 
+                      onClick={() => setLocationType('table')}
+                      className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all ${locationType === 'table' ? 'bg-slate-800 text-white shadow-sm ring-1 ring-slate-700' : 'text-slate-500 hover:text-slate-300'}`}
+                  >
+                      Table
+                  </button>
+              </div>
+
+              {/* Number Input */}
               <div className="relative group">
-                  <MapPin className="absolute left-3 top-2.5 text-slate-500 group-focus-within:text-pink-400 transition-colors" size={16} />
+                  {locationType === 'room' ? (
+                      <MapPin className="absolute left-3 top-2.5 text-slate-500 group-focus-within:text-pink-400 transition-colors" size={16} />
+                  ) : (
+                      <UtensilsCrossed className="absolute left-3 top-2.5 text-slate-500 group-focus-within:text-pink-400 transition-colors" size={16} />
+                  )}
                   <input 
                       type="text"
-                      placeholder="Room Number (Optional)"
-                      value={roomNumber}
-                      onChange={(e) => setRoomNumber(e.target.value)}
+                      placeholder={locationType === 'room' ? "Room Number (Optional)" : "Table Number (Optional)"}
+                      value={locationValue}
+                      onChange={(e) => setLocationValue(e.target.value)}
                       className="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-sm focus:ring-1 focus:ring-pink-500 focus:border-pink-500 outline-none placeholder:text-slate-600 hover:bg-slate-800 transition-colors"
                   />
               </div>

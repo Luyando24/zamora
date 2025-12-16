@@ -15,15 +15,17 @@ interface CheckoutPageProps {
   property: any;
   onOrderSuccess: () => void;
   roomNumber?: string;
+  tableNumber?: string;
 }
 
-export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderSuccess, roomNumber }: CheckoutPageProps) {
+export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderSuccess, roomNumber, tableNumber }: CheckoutPageProps) {
   const supabase = createClient();
   const [step, setStep] = useState<'details' | 'confirm' | 'success'>('details');
   const [loading, setLoading] = useState(false);
   
   const [formData, setFormData] = useState({
     roomNumber: roomNumber || '',
+    tableNumber: tableNumber || '',
     name: '',
     phone: '',
     notes: '',
@@ -35,9 +37,12 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
       if (roomNumber) {
         setFormData(prev => ({ ...prev, roomNumber: roomNumber }));
       }
+      if (tableNumber) {
+        setFormData(prev => ({ ...prev, tableNumber: tableNumber }));
+      }
       setStep('details'); // Reset step when modal opens
     }
-  }, [isOpen, roomNumber]);
+  }, [isOpen, roomNumber, tableNumber]);
 
   if (!isOpen) return null;
 
@@ -60,6 +65,11 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
         const foodTotal = foodCart.reduce((sum, i) => sum + (i.price || i.base_price) * i.quantity, 0);
         const foodServiceCharge = foodTotal * 0.10;
         const foodGrandTotal = foodTotal + foodServiceCharge;
+        
+        // Determine location string
+        const locationString = formData.tableNumber 
+            ? `Table ${formData.tableNumber}` 
+            : formData.roomNumber;
 
         const { error: orderError } = await supabase
           .from('orders')
@@ -71,7 +81,7 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
             payment_method: formData.paymentMethod,
             guest_name: formData.name,
             guest_phone: formData.phone,
-            guest_room_number: formData.roomNumber,
+            guest_room_number: locationString,
             notes: formData.notes,
             // Snapshot fields (Summary)
             item_name: foodCart.map(i => `${i.quantity}x ${i.name}`).join(', '),
@@ -115,7 +125,7 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                message: `New Food Order #${foodOrderId.slice(0, 8)} from Room ${formData.roomNumber || 'N/A'}. Total: ${foodGrandTotal}`,
+                message: `New Food Order #${foodOrderId.slice(0, 8)} from ${locationString || 'N/A'}. Total: ${foodGrandTotal}`,
                 propertyId: property.id
             })
         }).catch(err => console.error('Failed to send SMS notification', err));
@@ -285,6 +295,19 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
                                     <p className="text-xs text-emerald-700 mt-1 leading-relaxed">
                                         Rest assured, we know you are in <span className="font-bold">Room {roomNumber}</span>. 
                                         Your order will be delivered directly to your door.
+                                    </p>
+                                </div>
+                            </div>
+                        ) : tableNumber ? (
+                             <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex items-start gap-3 animate-in fade-in slide-in-from-top-2 shadow-sm">
+                                <div className="bg-emerald-100 p-2 rounded-full text-emerald-600 shrink-0">
+                                    <Utensils size={20} />
+                                </div>
+                                <div>
+                                    <p className="font-bold text-emerald-900 text-sm">✓ Table Verified</p>
+                                    <p className="text-xs text-emerald-700 mt-1 leading-relaxed">
+                                        Ordering from <span className="font-bold">Table {tableNumber}</span>. 
+                                        We'll bring your order right to you.
                                     </p>
                                 </div>
                             </div>

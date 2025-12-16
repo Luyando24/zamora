@@ -18,6 +18,7 @@ interface MenuStorefrontProps {
   barMenuItems?: any[];
   barCategories?: any[];
   roomNumber?: string;
+  tableNumber?: string;
 }
 
 export default function MenuStorefront({ 
@@ -26,7 +27,8 @@ export default function MenuStorefront({
   categories, 
   barMenuItems = [], 
   barCategories = [], 
-  roomNumber 
+  roomNumber,
+  tableNumber
 }: MenuStorefrontProps) {
   const [activeTab, setActiveTab] = useState<'food' | 'bar'>('food');
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -484,6 +486,7 @@ export default function MenuStorefront({
         cart={cart}
         property={property}
         roomNumber={roomNumber}
+        tableNumber={tableNumber}
         onOrderSuccess={() => {
           setCart([]);
           setIsCheckoutOpen(false);

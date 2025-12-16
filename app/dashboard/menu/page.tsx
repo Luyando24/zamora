@@ -167,7 +167,7 @@ export default function MenuPage() {
                    <div className="relative group">
                        <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-pink-600 transition-colors" size={18} />
                        <select 
-                           value={selectedPropertyId}
+                           value={selectedPropertyId || ''}
                            onChange={handlePropertyChange}
                            className="pl-10 pr-8 py-2.5 bg-slate-50 border border-slate-200 text-slate-700 rounded-xl hover:bg-white hover:border-pink-200 hover:ring-2 hover:ring-pink-50 font-bold transition-all appearance-none outline-none cursor-pointer w-full md:w-auto"
                        >

@@ -12,10 +12,10 @@ export default async function MenuPage({
   searchParams 
 }: { 
   params: Promise<{ propertyId: string }>,
-  searchParams: Promise<{ room?: string }>
+  searchParams: Promise<{ room?: string, table?: string }>
 }) {
   const { propertyId } = await params;
-  const { room } = await searchParams;
+  const { room, table } = await searchParams;
 
   // 1. Fetch Property Details (Use Admin to bypass RLS for guests)
   const adminSupabase = getSupabaseAdmin();
@@ -65,6 +65,7 @@ export default async function MenuPage({
       barMenuItems={barMenuItems || []}
       barCategories={uniqueBarCategories}
       roomNumber={room}
+      tableNumber={table}
     />
   );
 }

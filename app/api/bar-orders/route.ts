@@ -19,6 +19,11 @@ export async function POST(req: NextRequest) {
     // Use Admin Client to bypass RLS
     const supabaseAdmin = getSupabaseAdmin();
 
+    // Determine location string
+    const locationString = formData.tableNumber 
+        ? `Table ${formData.tableNumber}` 
+        : formData.roomNumber;
+
     // 1. Calculate Totals
     const barTotal = barCart.reduce((sum: number, i: any) => sum + (i.price || i.base_price) * i.quantity, 0);
     const barServiceCharge = barTotal * 0.10;
@@ -36,7 +41,7 @@ export async function POST(req: NextRequest) {
         payment_method: formData.paymentMethod,
         guest_name: formData.name,
         guest_phone: formData.phone,
-        guest_room_number: formData.roomNumber,
+        guest_room_number: locationString,
         notes: formData.notes,
       });
 
@@ -81,7 +86,7 @@ export async function POST(req: NextRequest) {
         .eq('id', propertyId)
         .single();
 
-      const message = `New Bar Order #${barOrderId.slice(0, 8)} from Room ${formData.roomNumber || 'N/A'}. Total: ${barGrandTotal}`;
+      const message = `New Bar Order #${barOrderId.slice(0, 8)} from ${locationString || 'N/A'}. Total: ${barGrandTotal}`;
       await notifyAdmin(message, property?.admin_notification_phone);
     } catch (smsError) {
       console.error('Failed to send SMS notification:', smsError);
