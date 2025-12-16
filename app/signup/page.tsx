@@ -15,6 +15,8 @@ export default function SignupPage() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [contractAgreed, setContractAgreed] = useState(false);
+  const [isContractModalOpen, setIsContractModalOpen] = useState(false);
+  const [signerName, setSignerName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
