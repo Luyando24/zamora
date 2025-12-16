@@ -17,6 +17,7 @@ export default function SettingsPage() {
   // Currently selected property for editing
   const [hotel, setHotel] = useState<any>({
     name: '',
+    slug: '',
     address: '',
     zra_tpin: '',
     logo_url: '',
@@ -72,6 +73,7 @@ export default function SettingsPage() {
           // Clear form for new property
           setHotel({
             name: '',
+            slug: '',
             address: '',
             zra_tpin: '',
             logo_url: '',
@@ -188,6 +190,23 @@ export default function SettingsPage() {
               onChange={e => setHotel({ ...hotel, name: e.target.value })}
             />
             <p className="mt-1 text-xs text-gray-500">This name will appear on your public booking page.</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Subdomain (Slug)</label>
+            <div className="flex mt-1 rounded-md shadow-sm">
+                <input
+                  type="text"
+                  className="block w-full rounded-l-md border-gray-300 focus:border-zambia-green focus:ring-zambia-green px-3 py-2 border text-gray-900 bg-white"
+                  value={hotel.slug || ''}
+                  onChange={e => setHotel({ ...hotel, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })}
+                  placeholder="my-hotel"
+                />
+                <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+                  .zamoraapp.com
+                </span>
+            </div>
+            <p className="mt-1 text-xs text-gray-500">Your custom web address. Only lowercase letters, numbers, and hyphens.</p>
           </div>
 
           <div>
