@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { Search, MapPin, Star, Menu, User, Globe, SlidersHorizontal, Heart, Building2, ChevronRight, ChevronLeft } from 'lucide-react';
+import { Search, MapPin, Star, Menu, User, Globe, SlidersHorizontal, Heart, Building2, ChevronRight, ChevronLeft, Calendar, Users } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -15,13 +15,18 @@ interface Property {
   cover_image_url: string;
   description: string;
   amenities: string[];
-  base_price?: number; // Optional, might need to fetch min room price
+  base_price?: number;
+  slug?: string;
+  min_price?: number;
 }
 
 export default function ExplorePage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [checkIn, setCheckIn] = useState('');
+  const [checkOut, setCheckOut] = useState('');
+  const [guestCount, setGuestCount] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState('All');
   
   const categories = [
@@ -31,35 +36,43 @@ export default function ExplorePage() {
     { name: 'Lodges', icon: MapPin },
   ];
 
-  useEffect(() => {
-    const fetchProperties = async () => {
-      const supabase = createClient();
+  const fetchProperties = async () => {
+    setLoading(true);
+    const supabase = createClient();
+    
+    // Call the search RPC function
+    const { data, error } = await supabase.rpc('search_properties', {
+      p_check_in: checkIn || null,
+      p_check_out: checkOut || null,
+      p_guests: guestCount,
+      p_search_query: searchQuery
+    });
       
-      // Fetch all properties from the secure public view
-      // In a real app, we'd implement pagination and server-side filtering
-      const { data, error } = await supabase
-        .from('public_properties')
-        .select('*');
-        
-      if (error) {
-        console.error('Error fetching properties:', error);
-      } else {
-        setProperties(data || []);
+    if (error) {
+      console.error('Error fetching properties:', error);
+      // Fallback to basic fetch if RPC fails
+      const { data: fallbackData } = await supabase.from('public_properties').select('*');
+      if (fallbackData) {
+          // Client-side filter as fallback
+          const filtered = fallbackData.filter((p: any) => 
+            p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+            p.city?.toLowerCase().includes(searchQuery.toLowerCase())
+          );
+          setProperties(filtered);
       }
-      setLoading(false);
-    };
+    } else {
+      setProperties(data || []);
+    }
+    setLoading(false);
+  };
 
+  useEffect(() => {
     fetchProperties();
   }, []);
 
-  // Filter logic (client-side for now)
-  const filteredProperties = properties.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          p.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          p.country?.toLowerCase().includes(searchQuery.toLowerCase());
-    // Add category filter logic here if categories were in DB
-    return matchesSearch;
-  });
+  const handleSearch = () => {
+    fetchProperties();
+  };
 
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900">
@@ -73,8 +86,8 @@ export default function ExplorePage() {
         </Link>
 
         {/* Search Bar - Centered & Rounded */}
-        <div className="hidden md:flex items-center shadow-sm hover:shadow-md border border-slate-300 rounded-full py-2.5 px-4 gap-4 transition-all cursor-pointer w-full max-w-lg mx-4">
-           <div className="px-4 border-r border-slate-300">
+        <div className="hidden md:flex items-center shadow-sm hover:shadow-md border border-slate-300 rounded-full py-2.5 px-4 gap-4 transition-all w-full max-w-2xl mx-4">
+           <div className="px-4 border-r border-slate-300 flex-1">
               <p className="text-xs font-bold text-slate-800">Where</p>
               <input 
                 type="text" 
@@ -82,18 +95,42 @@ export default function ExplorePage() {
                 className="text-sm text-slate-600 outline-none bg-transparent w-full placeholder:text-slate-400"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               />
            </div>
            <div className="px-4 border-r border-slate-300 hidden lg:block">
               <p className="text-xs font-bold text-slate-800">Check in</p>
-              <p className="text-sm text-slate-400">Add dates</p>
+              <input 
+                 type="date" 
+                 className="text-sm text-slate-600 outline-none bg-transparent w-full placeholder:text-slate-400"
+                 value={checkIn}
+                 onChange={(e) => setCheckIn(e.target.value)}
+              />
            </div>
-           <div className="px-4 hidden lg:block">
+           <div className="px-4 border-r border-slate-300 hidden lg:block">
+              <p className="text-xs font-bold text-slate-800">Check out</p>
+              <input 
+                 type="date" 
+                 className="text-sm text-slate-600 outline-none bg-transparent w-full placeholder:text-slate-400"
+                 value={checkOut}
+                 onChange={(e) => setCheckOut(e.target.value)}
+              />
+           </div>
+           <div className="px-4 hidden lg:block w-24">
               <p className="text-xs font-bold text-slate-800">Who</p>
-              <p className="text-sm text-slate-400">Add guests</p>
+              <input 
+                 type="number" 
+                 min="1"
+                 className="text-sm text-slate-600 outline-none bg-transparent w-full placeholder:text-slate-400"
+                 value={guestCount}
+                 onChange={(e) => setGuestCount(parseInt(e.target.value) || 1)}
+              />
            </div>
-           <button className="bg-zambia-red p-2.5 rounded-full text-white hover:bg-red-600 transition-colors">
-              <Search size={16} strokeWidth={3} />
+           <button 
+             onClick={handleSearch}
+             className="bg-zambia-red p-3 rounded-full text-white hover:bg-red-600 transition-colors flex items-center justify-center"
+           >
+              <Search size={18} strokeWidth={3} />
            </button>
         </div>
 
@@ -165,10 +202,10 @@ export default function ExplorePage() {
                   </div>
                ))}
             </div>
-         ) : filteredProperties.length > 0 ? (
+         ) : properties.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-6 gap-y-10">
-               {filteredProperties.map((property) => (
-                  <Link href={`/book/${property.id}`} key={property.id} className="group block cursor-pointer">
+               {properties.map((property) => (
+                  <Link href={`/book/${property.slug || property.id}`} key={property.id} className="group block cursor-pointer">
                      <div className="relative aspect-square overflow-hidden rounded-xl bg-slate-100 mb-3">
                         {property.cover_image_url ? (
                            <img 
@@ -197,36 +234,29 @@ export default function ExplorePage() {
                         {/* Carousel Controls (Mock) */}
                         <div className="absolute inset-0 flex items-center justify-between p-2 opacity-0 group-hover:opacity-100 transition-opacity">
                            <button className="p-1.5 bg-white/90 rounded-full hover:bg-white hover:scale-105 transition-all shadow-sm">
-                              <ChevronLeft size={16} className="text-slate-900" />
+                              <ChevronLeft size={16} />
                            </button>
                            <button className="p-1.5 bg-white/90 rounded-full hover:bg-white hover:scale-105 transition-all shadow-sm">
-                              <ChevronRight size={16} className="text-slate-900" />
+                              <ChevronRight size={16} />
                            </button>
-                        </div>
-
-                        {/* Pagination Dots (Mock) */}
-                        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                           <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
-                           <div className="w-1.5 h-1.5 rounded-full bg-white/50"></div>
-                           <div className="w-1.5 h-1.5 rounded-full bg-white/50"></div>
-                           <div className="w-1.5 h-1.5 rounded-full bg-white/50"></div>
-                           <div className="w-1.5 h-1.5 rounded-full bg-white/50"></div>
                         </div>
                      </div>
 
                      <div className="space-y-1">
-                        <div className="flex justify-between items-start gap-2">
-                           <h3 className="font-semibold text-slate-900 truncate flex-1">{property.city || property.address || property.name}</h3>
-                           <div className="flex items-center gap-1 text-sm shrink-0">
+                        <div className="flex justify-between items-start">
+                           <h3 className="font-bold text-slate-900 truncate">{property.name}</h3>
+                           <div className="flex items-center gap-1 text-sm">
                               <Star size={14} className="fill-slate-900 text-slate-900" />
-                              <span>{(4 + Math.random()).toFixed(2)}</span>
+                              <span>4.8</span>
                            </div>
                         </div>
-                        <p className="text-slate-500 text-sm truncate">{property.country || 'Zambia'}</p>
-                        <p className="text-slate-500 text-sm">24-29 Oct</p>
-                        <div className="flex items-baseline gap-1 mt-1.5">
-                           <span className="font-semibold text-slate-900">K{property.base_price || 1500}</span>
-                           <span className="text-slate-900">night</span>
+                        <p className="text-slate-500 text-sm truncate">{property.city}, {property.country}</p>
+                        <p className="text-slate-500 text-sm">Hosted by Zamora</p>
+                        <div className="flex items-baseline gap-1 mt-1">
+                           <span className="font-black text-slate-900">
+                             {property.min_price ? `K${property.min_price}` : 'Price Varies'}
+                           </span>
+                           <span className="text-slate-500 text-sm">night</span>
                         </div>
                      </div>
                   </Link>
@@ -234,11 +264,11 @@ export default function ExplorePage() {
             </div>
          ) : (
             <div className="text-center py-20">
-               <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
-                  <Search size={24} />
+               <div className="inline-flex items-center justify-center w-16 h-16 bg-slate-100 rounded-full mb-4">
+                  <Search size={32} className="text-slate-400" />
                </div>
-               <h3 className="text-xl font-bold text-slate-900">No properties found</h3>
-               <p className="text-slate-500 mt-2">Try adjusting your search or filters.</p>
+               <h3 className="text-lg font-bold text-slate-900 mb-2">No properties found</h3>
+               <p className="text-slate-500">Try adjusting your search criteria or dates.</p>
             </div>
          )}
 

@@ -87,10 +87,14 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
   }, 0);
 
   // -- Filtering --
-  const filteredRooms = roomTypes.filter(room => 
-    room.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    room.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredRooms = roomTypes.filter(room => {
+    const matchesSearch = room.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      room.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const isAvailable = availableRoomTypes ? availableRoomTypes.has(room.id) : true;
+    
+    return matchesSearch && isAvailable;
+  });
 
   const filteredFood = menuItems.filter(item => {
     const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
@@ -606,7 +610,7 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
                                     addToCart(activeRoom, 'room');
                                     setActiveRoom(null); 
                                 }}
-                                disabled={!bookingDates.checkIn || !bookingDates.checkOut || !guestDetails.firstName || !guestDetails.email}
+                                disabled={!bookingDates.checkIn || !bookingDates.checkOut || !guestDetails.firstName || !guestDetails.email || (availableRoomTypes !== null && !availableRoomTypes.has(activeRoom.id))}
                                 className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-lg hover:bg-black transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                             >
                                 Confirm Booking <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
