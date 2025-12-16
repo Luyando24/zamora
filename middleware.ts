@@ -76,7 +76,28 @@ export async function middleware(request: NextRequest) {
       // Rewrite to /book/[subdomain]
       // Exclude API, _next, etc. (Already excluded by matcher, but good to be safe for API)
       if (!url.pathname.startsWith('/api') && !url.pathname.startsWith('/_next')) {
-           rewrittenUrl.pathname = `/book/${subdomain}${url.pathname === '/' ? '' : url.pathname}`
+           // Handle dedicated menu path: subdomain.zamoraapp.com/menu -> /menu/[subdomain]
+           if (url.pathname === '/menu' || url.pathname.startsWith('/menu/')) {
+                // If the path is just /menu, rewrite to /menu/[subdomain]
+                // If it's /menu/something (not expected currently), we might want to handle it too.
+                // But /menu/[propertyId] expects the ID/slug in the path.
+                // Here we inject the subdomain as the ID.
+                
+                // If url is /menu, we map to /menu/subdomain
+                if (url.pathname === '/menu') {
+                    rewrittenUrl.pathname = `/menu/${subdomain}`;
+                } else {
+                    // if it is /menu/extra, we map to /menu/subdomain/extra?
+                    // Currently app/menu/[propertyId] is the page.
+                    // app/menu/[propertyId]/page.tsx
+                    // So /menu/slug serves the page.
+                    // If url is /menu/something, it might be 404 unless we have sub-routes.
+                    // Let's stick to strict /menu mapping for now.
+                    rewrittenUrl.pathname = `/menu/${subdomain}${url.pathname.replace('/menu', '')}`;
+                }
+           } else {
+               rewrittenUrl.pathname = `/book/${subdomain}${url.pathname === '/' ? '' : url.pathname}`
+           }
       }
   }
 

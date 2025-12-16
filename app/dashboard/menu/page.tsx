@@ -38,7 +38,7 @@ export default function MenuPage() {
     try {
         // Add a timeout race
         const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Properties timeout')), 5000));
-        const fetch = supabase.from('properties').select('id, name, created_by, wifi_ssid, wifi_password, logo_url');
+        const fetch = supabase.from('properties').select('id, name, slug, created_by, wifi_ssid, wifi_password, logo_url');
         
         const { data: fetchedProperties, error } = await Promise.race([fetch, timeout]) as any;
 

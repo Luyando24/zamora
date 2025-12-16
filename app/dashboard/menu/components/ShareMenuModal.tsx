@@ -54,10 +54,22 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     );
   }
 
-  // Point to the dedicated public menu page: /menu/[propertyId]
-  // Append room number query param if present
+  // Point to the dedicated public menu page
+  // Use subdomain if available, otherwise fallback to /menu/[propertyId]
   const menuUrl = typeof window !== 'undefined' 
-    ? `${window.location.origin}/menu/${currentHotelId}${roomNumber ? `?room=${encodeURIComponent(roomNumber)}` : ''}` 
+    ? (() => {
+        const slug = (currentProperty as any).slug;
+        if (slug) {
+            const protocol = window.location.protocol;
+            const host = window.location.host;
+            const domain = host.includes('localhost') 
+                 ? 'localhost:3000' 
+                 : host.split('.').slice(-2).join('.');
+                 
+             return `${protocol}//${slug}.${domain}/menu${roomNumber ? `?room=${encodeURIComponent(roomNumber)}` : ''}`;
+         }
+         return `${window.location.origin}/menu/${currentHotelId}${roomNumber ? `?room=${encodeURIComponent(roomNumber)}` : ''}`;
+    })()
     : '';
 
   const handleCopy = () => {

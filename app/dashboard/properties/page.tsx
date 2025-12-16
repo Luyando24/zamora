@@ -114,7 +114,13 @@ export default function PropertiesPage() {
                       </div>
                       <div>
                         <p className="font-bold text-slate-900">{property.name}</p>
-                        <p className="text-xs text-slate-500">ID: {property.id.slice(0, 8)}...</p>
+                        {property.slug ? (
+                          <p className="text-xs text-blue-600 font-medium hover:underline">
+                             {property.slug}.zamoraapp.com
+                          </p>
+                        ) : (
+                          <p className="text-xs text-slate-500">ID: {property.id.slice(0, 8)}...</p>
+                        )}
                       </div>
                     </div>
                   </td>
@@ -144,7 +150,11 @@ export default function PropertiesPage() {
                         <LayoutDashboard size={18} />
                       </button>
                       <Link 
-                        href={`/book/${property.id}`} 
+                        href={property.slug 
+                          ? (typeof window !== 'undefined' && window.location.hostname.includes('localhost') 
+                              ? `http://${property.slug}.localhost:3000` 
+                              : `https://${property.slug}.zamoraapp.com`)
+                          : `/book/${property.id}`}
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" 
