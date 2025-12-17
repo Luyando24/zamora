@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 
-export const generateMenuPdf = (items: any[], hotelName: string) => {
+export const generateMenuPdf = async (items: any[], hotelName: string, logoUrl?: string) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.width;
   const pageHeight = doc.internal.pageSize.height;
@@ -11,6 +11,37 @@ export const generateMenuPdf = (items: any[], hotelName: string) => {
   const colorAccent = [255, 180, 0];   // #FFB400
   const colorWhite = [255, 255, 255];
   const colorGray = [180, 180, 180];
+
+  // Helper: Load Image
+  const getLogoData = async (url: string): Promise<{ data: string, width: number, height: number } | null> => {
+    try {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.crossOrigin = 'Anonymous';
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    ctx.drawImage(img, 0, 0);
+                    resolve({
+                        data: canvas.toDataURL('image/png'),
+                        width: img.width,
+                        height: img.height
+                    });
+                } else {
+                    resolve(null);
+                }
+            };
+            img.onerror = () => resolve(null);
+            img.src = url;
+        });
+    } catch (e) {
+        console.error("Error loading logo", e);
+        return null;
+    }
+  };
 
   // Helper: Background
   const drawBackground = () => {
@@ -34,13 +65,33 @@ export const generateMenuPdf = (items: any[], hotelName: string) => {
   // --- 1. FRONT COVER ---
   drawBackground();
   
+  // Logo (Small)
+  if (logoUrl) {
+    const logoData = await getLogoData(logoUrl);
+    if (logoData) {
+        const logoSize = 25; // Small logo size in mm
+        const ratio = logoData.width / logoData.height;
+        let w = logoSize;
+        let h = logoSize / ratio;
+        
+        // Safety cap on height to prevent overlap
+        if (h > 40) {
+            h = 40;
+            w = h * ratio;
+        }
+        
+        // Center the logo near top
+        doc.addImage(logoData.data, 'PNG', (pageWidth - w) / 2, 30, w, h);
+    }
+  }
+
   // "MENU" Title
-  centerText('MENU', 60, 60, colorAccent);
+  centerText('MENU', 90, 60, colorAccent);
   
   // Decorative Line/Shape under MENU
   doc.setDrawColor(colorAccent[0], colorAccent[1], colorAccent[2]);
   doc.setLineWidth(2);
-  doc.line(pageWidth / 2 - 30, 65, pageWidth / 2 + 30, 65);
+  doc.line(pageWidth / 2 - 30, 95, pageWidth / 2 + 30, 95);
 
   // Hotel Name
   // Draw a "Brush" background for the name

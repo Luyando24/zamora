@@ -88,7 +88,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     ctx.closePath();
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     // 1. Setup Canvas (A4 size @ 300dpi: 2480 x 3508 px)
     const canvas = document.createElement('canvas');
     const WIDTH = 2480;
@@ -98,6 +98,24 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     canvas.height = HEIGHT;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+
+    // Load Logo if available
+    let logoImg: HTMLImageElement | null = null;
+    // @ts-ignore
+    if (currentProperty.logo_url) {
+        try {
+            logoImg = new Image();
+            logoImg.crossOrigin = "anonymous";
+            // @ts-ignore
+            logoImg.src = currentProperty.logo_url;
+            await new Promise((resolve) => {
+                logoImg!.onload = resolve;
+                logoImg!.onerror = resolve;
+            });
+        } catch (e) {
+            console.error("Failed to load logo", e);
+        }
+    }
 
     // 2. Background (Dark Theme: Slate 950 -> #020617)
     const gradient = ctx.createLinearGradient(0, 0, WIDTH, HEIGHT);
@@ -146,9 +164,21 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         ctx.fillStyle = '#ffffff';
     }
 
-    // Hotel Name
-    ctx.font = 'bold 150px sans-serif';
-    ctx.fillText(currentHotelName || 'Digital Menu', WIDTH / 2, 550);
+    // Logo (Small)
+    if (logoImg) {
+        const logoSize = 150; // Small logo
+        const aspect = logoImg.width / logoImg.height;
+        let lw = logoSize;
+        let lh = logoSize;
+        
+        if (aspect > 1) {
+            lh = lw / aspect;
+        } else {
+            lw = lh * aspect;
+        }
+
+        ctx.drawImage(logoImg, (WIDTH - lw) / 2, 550 - 100, lw, lh); // Adjust Y slightly up
+    }
 
     // Subtitle
     ctx.font = '500 70px sans-serif';
@@ -270,7 +300,10 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     ctx.font = '60px sans-serif';
     ctx.fillText('Open Camera & Scan QR Code', WIDTH / 2, instructionsY + 100);
 
-
+    // Link
+    ctx.fillStyle = '#94a3b8'; // Slate 400
+    ctx.font = 'bold 50px sans-serif';
+    ctx.fillText(`or visit ${menuUrl}`, WIDTH / 2, instructionsY + 220);
     
     // 6. Wifi Info (Restored for Printout)
     // @ts-ignore

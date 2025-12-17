@@ -201,9 +201,11 @@ export default function MenuPage() {
                 </button>
               ) : (
                 <button
-                    onClick={() => {
-                        const hotelName = properties.find(p => p.id === selectedPropertyId)?.name || 'Bar Menu';
-                        generateMenuPdf(filteredItems, hotelName);
+                    onClick={async () => {
+                        const property = properties.find(p => p.id === selectedPropertyId);
+                        const hotelName = property?.name || 'Bar Menu';
+                        const logoUrl = property?.logo_url;
+                        await generateMenuPdf(filteredItems, hotelName, logoUrl);
                     }}
                     className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 hover:border-slate-300 font-bold transition-colors"
                     title="Download Print-Ready Menu"

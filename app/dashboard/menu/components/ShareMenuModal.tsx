@@ -84,7 +84,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     // 1. Setup Canvas (A4 size @ 300dpi: 2480 x 3508 px)
     const canvas = document.createElement('canvas');
     const WIDTH = 2480;
@@ -94,6 +94,24 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     canvas.height = HEIGHT;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+
+    // Load Logo if available
+    let logoImg: HTMLImageElement | null = null;
+    // @ts-ignore
+    if (currentProperty.logo_url) {
+        try {
+            logoImg = new Image();
+            logoImg.crossOrigin = "anonymous";
+            // @ts-ignore
+            logoImg.src = currentProperty.logo_url;
+            await new Promise((resolve) => {
+                logoImg!.onload = resolve;
+                logoImg!.onerror = resolve;
+            });
+        } catch (e) {
+            console.error("Failed to load logo", e);
+        }
+    }
 
     // Helper for Rounded Rect (Polyfill for older browsers)
     const drawRoundedRect = (x: number, y: number, w: number, h: number, r: number) => {
@@ -128,6 +146,8 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     ctx.textAlign = 'center';
     ctx.fillStyle = '#ffffff';
 
+    let cursorY = 200;
+
     // Room/Table Number (Top)
     if (locationValue) {
         // Draw a pill background behind number for emphasis
@@ -139,7 +159,8 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         const pillWidth = textWidth + (padding * 2);
         const pillHeight = 180;
         const pillX = (WIDTH - pillWidth) / 2;
-        const pillY = 200;
+        // Move pill slightly up to make room
+        const pillY = 150; 
         
         // Draw Pill
         ctx.fillStyle = '#fce7f3'; // Pink 100
@@ -156,18 +177,39 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         
         // Reset fill style for subsequent text
         ctx.fillStyle = '#ffffff';
+
+        cursorY = pillY + pillHeight + 50;
+    } else {
+        cursorY = 250;
     }
 
-    // Hotel Name
-    ctx.font = 'bold 150px sans-serif';
-    ctx.fillText(currentHotelName || 'Digital Menu', WIDTH / 2, 550);
+    // Logo (Small)
+    if (logoImg) {
+        const logoSize = 150; // Small logo
+        const aspect = logoImg.width / logoImg.height;
+        let lw = logoSize;
+        let lh = logoSize;
+        
+        if (aspect > 1) {
+            lh = lw / aspect;
+        } else {
+            lw = lh * aspect;
+        }
+
+        ctx.drawImage(logoImg, (WIDTH - lw) / 2, cursorY, lw, lh);
+        cursorY += lh + 50;
+    } else {
+        // If no logo, add a bit of spacing
+        cursorY += 50;
+    }
 
     // Subtitle
+    cursorY += 150;
     ctx.font = '500 70px sans-serif';
     ctx.fillStyle = '#94a3b8'; // Slate 400
     ctx.letterSpacing = '15px';
     const subtitleText = locationType === 'room' ? 'FOOD DELIVERED TO YOUR ROOM' : 'ORDER DIRECTLY FROM YOUR TABLE';
-    ctx.fillText(subtitleText, WIDTH / 2, 700);
+    ctx.fillText(subtitleText, WIDTH / 2, cursorY);
 
     // 4. Draw QR Code
     const sourceCanvas = qrRef.current?.querySelector('canvas');
@@ -175,7 +217,8 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         // Draw a white card container for QR
         const cardSize = 1300;
         const cardX = (WIDTH - cardSize) / 2;
-        const cardY = 850;
+        // Push card down slightly
+        const cardY = cursorY + 150;
         const r = 100;
 
         // --- Gradient Glow Effect ---
@@ -269,10 +312,13 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         ctx.lineTo(cx - iconSize / 2, cy + iconSize / 2);
         ctx.lineTo(cx - iconSize / 2, cy + iconSize / 2 - cornerLen);
         ctx.stroke();
+        
+        // Update cursor for next elements
+        cursorY = cardY + cardSize;
     }
 
     // 5. Scan Instructions (Moved UP, below QR)
-    const instructionsY = 2350;
+    const instructionsY = cursorY + 200;
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 110px sans-serif';
     ctx.letterSpacing = '0px';
@@ -282,12 +328,16 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     ctx.font = '60px sans-serif';
     ctx.fillText('Open Camera & Scan QR Code', WIDTH / 2, instructionsY + 100);
 
-
+    // Link
+    ctx.fillStyle = '#94a3b8'; // Slate 400
+    ctx.font = 'bold 50px sans-serif';
+    ctx.fillText(`or visit ${menuUrl}`, WIDTH / 2, instructionsY + 220);
     
     // 6. Wifi Info (Restored for Printout)
     // @ts-ignore
     if (currentProperty.wifi_ssid) {
-        const wifiY = 2850;
+        // Adjust wifiY based on available space, or push it down
+        const wifiY = instructionsY + 700;
         
         // Draw Card Background
         const cardWidth = 1600;
