@@ -135,40 +135,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     ctx.textAlign = 'center';
     ctx.fillStyle = '#ffffff';
 
-    let cursorY = 200;
-
-    // Room/Table Number (Top)
-    if (locationValue) {
-        // Draw a pill background behind number for emphasis
-        ctx.fillStyle = '#fce7f3'; // Pink 100
-        const labelText = locationType === 'room' ? `ROOM ${locationValue}` : `TABLE ${locationValue}`;
-        ctx.font = 'bold 100px sans-serif';
-        const textWidth = ctx.measureText(labelText).width;
-        const padding = 60;
-        const pillWidth = textWidth + (padding * 2);
-        const pillHeight = 180;
-        const pillX = (WIDTH - pillWidth) / 2;
-        const pillY = 200;
-        
-        // Draw Pill
-        drawRoundedRect(ctx, pillX, pillY, pillWidth, pillHeight, 90);
-        ctx.fill();
-
-        ctx.fillStyle = '#db2777'; // Pink 600
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(labelText, WIDTH / 2, pillY + (pillHeight/2) + 6);
-        
-        // Reset text baseline
-        ctx.textBaseline = 'alphabetic';
-        
-        // Reset fill style for subsequent text
-        ctx.fillStyle = '#ffffff';
-
-        cursorY = pillY + pillHeight + 50;
-    } else {
-        cursorY = 250;
-    }
+    let cursorY = 250;
 
     // Logo (Circular Container & Larger)
     if (logoImg) {
@@ -208,7 +175,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     }
 
     // Subtitle
-    cursorY += 50; // Add some spacing before subtitle
+    cursorY += 100; // Add some spacing before subtitle
     ctx.font = '500 70px sans-serif';
     ctx.fillStyle = '#94a3b8'; // Slate 400
     ctx.letterSpacing = '15px';
