@@ -59,16 +59,29 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     );
   }
 
-  // Point to the dedicated public menu page: /menu/[propertyId]
-  // Append room/table number query param if present
-  const menuUrl = typeof window !== 'undefined' 
-    ? (() => {
-        const queryParam = locationValue 
-            ? (locationType === 'room' ? `?room=${encodeURIComponent(locationValue)}` : `?table=${encodeURIComponent(locationValue)}`)
-            : '';
-        return `${window.location.origin}/menu/${currentHotelId}${queryParam}`;
-    })()
-    : '';
+  // Point to the dedicated public menu page
+  const getMenuUrl = (locValue: string) => {
+    if (typeof window === 'undefined') return '';
+    
+    // @ts-ignore
+    const slug = currentProperty.slug;
+    const queryParam = locValue 
+        ? (locationType === 'room' ? `?room=${encodeURIComponent(locValue)}` : `?table=${encodeURIComponent(locValue)}`)
+        : '';
+
+    if (slug) {
+        const protocol = window.location.protocol;
+        const host = window.location.host;
+        const domain = host.includes('localhost') 
+                ? 'localhost:3000' 
+                : host.split('.').slice(-2).join('.');
+                
+        return `${protocol}//${slug}.${domain}/menu${queryParam}`;
+    }
+    return `${window.location.origin}/menu/${currentHotelId}${queryParam}`;
+  };
+
+  const menuUrl = getMenuUrl(locationValue);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(menuUrl);
