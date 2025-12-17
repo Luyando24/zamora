@@ -262,24 +262,67 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
                
                {/* Content */}
                <div className="relative z-10 text-white w-full">
-                  <div className="max-w-3xl">
-                    <h1 className="text-4xl md:text-7xl font-black mb-6 tracking-tighter leading-tight">
+                  <div className="max-w-4xl mx-auto">
+                    <h1 className="text-4xl md:text-7xl font-black mb-8 tracking-tighter leading-tight text-center drop-shadow-lg">
                         {property.name}
                     </h1>
-                    <p className="text-lg md:text-2xl text-slate-200 font-medium leading-relaxed mb-8 max-w-2xl">
-                        {property.description || "Experience the perfect blend of comfort and style. Your unforgettable stay begins here."}
-                    </p>
                     
-                    {/* Quick Stats or Badges */}
-                    <div className="flex flex-wrap gap-3">
-                        <div className="px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-sm font-bold border border-white/20 flex items-center gap-2">
-                            <MapPin size={16} /> {property.address || "Premium Location"}
+                    {/* Search Form */}
+                    <div className="bg-white/10 backdrop-blur-xl border border-white/20 p-4 md:p-6 rounded-[2rem] shadow-2xl">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-slate-200 uppercase ml-3">Check-in</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                        <Calendar size={18} className="text-slate-800" />
+                                    </div>
+                                    <input 
+                                        type="date"
+                                        value={bookingDates.checkIn}
+                                        onChange={(e) => setBookingDates(prev => ({ ...prev, checkIn: e.target.value }))}
+                                        className="w-full pl-11 pr-4 py-3 bg-white text-slate-900 rounded-xl font-bold focus:ring-4 focus:ring-white/20 outline-none transition-all cursor-pointer"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-slate-200 uppercase ml-3">Check-out</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                        <Calendar size={18} className="text-slate-800" />
+                                    </div>
+                                    <input 
+                                        type="date"
+                                        value={bookingDates.checkOut}
+                                        min={bookingDates.checkIn}
+                                        onChange={(e) => setBookingDates(prev => ({ ...prev, checkOut: e.target.value }))}
+                                        className="w-full pl-11 pr-4 py-3 bg-white text-slate-900 rounded-xl font-bold focus:ring-4 focus:ring-white/20 outline-none transition-all cursor-pointer"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex items-end">
+                                <button 
+                                    onClick={() => {
+                                        // Scroll to rooms if needed, but the search is reactive
+                                        document.getElementById('rooms-grid')?.scrollIntoView({ behavior: 'smooth' });
+                                    }}
+                                    className="w-full py-3 bg-slate-900 text-white rounded-xl font-bold text-lg hover:bg-black hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg flex items-center justify-center gap-2"
+                                >
+                                    {checkingAvailability ? (
+                                        <>
+                                            <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"/>
+                                            Checking...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Search size={20} />
+                                            Check Availability
+                                        </>
+                                    )}
+                                </button>
+                            </div>
                         </div>
-                        {property.amenities?.slice(0, 3).map((amenity: string) => (
-                            <span key={amenity} className="px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-sm font-bold border border-white/20">
-                            {amenity}
-                            </span>
-                        ))}
                     </div>
                   </div>
                </div>
@@ -347,7 +390,7 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
 
             {/* ROOMS GRID */}
             {activeTab === 'rooms' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 animate-in fade-in duration-500">
+              <div id="rooms-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6 animate-in fade-in duration-500">
                 {filteredRooms.map(room => (
                     <div 
                         key={room.id} 
