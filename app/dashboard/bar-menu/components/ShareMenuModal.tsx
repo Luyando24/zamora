@@ -135,6 +135,8 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     ctx.textAlign = 'center';
     ctx.fillStyle = '#ffffff';
 
+    let cursorY = 200;
+
     // Room/Table Number (Top)
     if (locationValue) {
         // Draw a pill background behind number for emphasis
@@ -162,6 +164,10 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         
         // Reset fill style for subsequent text
         ctx.fillStyle = '#ffffff';
+
+        cursorY = pillY + pillHeight + 50;
+    } else {
+        cursorY = 250;
     }
 
     // Logo (Circular Container & Larger)
