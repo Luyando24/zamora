@@ -243,7 +243,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         const cardWidth = 1300;
         const cardHeight = 1500; // Increased height for top/bottom padding
         const cardX = (WIDTH - cardWidth) / 2;
-        const cardY = cursorY + 50; // Use cursorY
+        const cardY = cursorY + 100; // Use cursorY
         const r = 100;
 
         // --- Gradient Glow Effect ---
@@ -350,7 +350,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     }
 
     // 5. Scan Instructions (Moved UP, below QR)
-    const instructionsY = cursorY + 120;
+    const instructionsY = cursorY + 200;
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 110px sans-serif';
     ctx.letterSpacing = '0px';
