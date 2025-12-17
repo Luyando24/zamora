@@ -1,8 +1,10 @@
 'use client';
 
 import { QRCodeCanvas } from 'qrcode.react';
-import { Copy, ExternalLink, X, Download, Share2, ScanLine, Smartphone, Building2, MapPin, Wifi, UtensilsCrossed } from 'lucide-react';
+import { Copy, ExternalLink, X, Download, Share2, ScanLine, Smartphone, Building2, MapPin, Wifi, UtensilsCrossed, Loader2 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
+import QRCode from 'qrcode';
+import JSZip from 'jszip';
 
 interface ShareMenuModalProps {
   isOpen: boolean;
@@ -17,6 +19,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
   const [locationType, setLocationType] = useState<'room' | 'table'>('room');
   const [locationValue, setLocationValue] = useState('');
   const [selectedPropertyId, setSelectedPropertyId] = useState(hotelId);
+  const [isDownloading, setIsDownloading] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
   
   // Close on Escape key
