@@ -32,20 +32,12 @@ export default function ServiceContractModal({ isOpen, onClose, onSign, userName
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <motion.div 
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: 1 }} 
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-            onClick={onClose}
-          />
-          
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm">
           <motion.div 
             initial={{ scale: 0.95, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
-            className="relative w-full max-w-7xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+            className="relative w-full h-full bg-white shadow-2xl overflow-hidden flex flex-col"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50">
@@ -68,7 +60,7 @@ export default function ServiceContractModal({ isOpen, onClose, onSign, userName
                 
                 {/* Contract Text */}
                 <div className="flex-1 overflow-y-auto p-8 border-b md:border-b-0 md:border-r border-slate-100 bg-slate-50/50">
-                    <div className="prose prose-sm prose-slate max-w-none">
+                    <div className="prose prose-sm prose-slate max-w-3xl mx-auto">
                         <h3>ZAMORA SERVICE AGREEMENT</h3>
                         <p className="text-xs text-slate-400 mb-4">Last Updated: {new Date().toLocaleDateString()}</p>
                         

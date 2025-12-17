@@ -245,6 +245,46 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
       <main className="max-w-7xl mx-auto px-1 md:px-6 relative z-10 pt-24 mb-20">
          
          {!activeRoom ? (
+           <div className="space-y-6">
+            {/* Hero Section */}
+            <div className="relative rounded-[2.5rem] overflow-hidden min-h-[50vh] flex items-end p-6 md:p-12 shadow-2xl shadow-slate-200/50 group">
+               {/* Background Image */}
+               <div className="absolute inset-0 transition-transform duration-1000 group-hover:scale-105">
+                  {property.cover_image_url ? (
+                     <img src={property.cover_image_url} alt={property.name} className="w-full h-full object-cover" />
+                  ) : (
+                     <div className="w-full h-full bg-slate-900 flex items-center justify-center">
+                        <Building2 className="text-slate-800 w-32 h-32" />
+                     </div>
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+               </div>
+               
+               {/* Content */}
+               <div className="relative z-10 text-white w-full">
+                  <div className="max-w-3xl">
+                    <h1 className="text-4xl md:text-7xl font-black mb-6 tracking-tighter leading-tight">
+                        {property.name}
+                    </h1>
+                    <p className="text-lg md:text-2xl text-slate-200 font-medium leading-relaxed mb-8 max-w-2xl">
+                        {property.description || "Experience the perfect blend of comfort and style. Your unforgettable stay begins here."}
+                    </p>
+                    
+                    {/* Quick Stats or Badges */}
+                    <div className="flex flex-wrap gap-3">
+                        <div className="px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-sm font-bold border border-white/20 flex items-center gap-2">
+                            <MapPin size={16} /> {property.address || "Premium Location"}
+                        </div>
+                        {property.amenities?.slice(0, 3).map((amenity: string) => (
+                            <span key={amenity} className="px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-sm font-bold border border-white/20">
+                            {amenity}
+                            </span>
+                        ))}
+                    </div>
+                  </div>
+               </div>
+            </div>
+
            <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/50 p-3 md:p-10 min-h-[60vh] border border-slate-100">
             
             {/* Filter Header */}
@@ -445,6 +485,7 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
               </div>
             )}
 
+           </div>
            </div>
          ) : (
             // Room Details View
