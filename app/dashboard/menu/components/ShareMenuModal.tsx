@@ -340,7 +340,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     }
 
     // 5. Scan Instructions (Moved UP, below QR)
-    const instructionsY = cursorY + 200;
+    const instructionsY = cursorY + 120;
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 110px sans-serif';
     ctx.letterSpacing = '0px';
@@ -359,7 +359,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     // @ts-ignore
     if (currentProperty.wifi_ssid) {
         // Adjust wifiY based on available space, or push it down
-        const wifiY = instructionsY + 700;
+        const wifiY = instructionsY + 500;
         
         // Draw Card Background
         const cardWidth = 1600;
