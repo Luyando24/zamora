@@ -292,7 +292,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         ctx.stroke();
         
         // Update cursor for next elements
-        cursorY = cardY + cardSize;
+        cursorY = cardY + cardHeight;
     }
 
     // 5. Scan Instructions (Moved UP, below QR)
