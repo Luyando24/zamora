@@ -155,12 +155,12 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         ctx.fillRect(0, 0, WIDTH, 1000);
 
         // 3. Text Configuration
-        ctx.textAlign = 'center';
-        ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ffffff';
 
-        let cursorY = 100;
+    let cursorY = 250;
 
-        // Logo (Circular Container & Larger)
+    // Logo (Circular Container & Larger)
         if (logoImg) {
             const logoSize = 400; // Larger size
             const centerX = WIDTH / 2;
@@ -230,7 +230,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
 
             // Draw a white card container for QR
             const cardWidth = 1300;
-            const cardHeight = 1400; // Increased height for top/bottom padding
+            const cardHeight = 1300; // Adjusted height
             const cardX = (WIDTH - cardWidth) / 2;
             // Push card down slightly
             const cardY = cursorY + 80;
@@ -337,7 +337,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         }
 
         // 5. Scan Instructions (Moved UP, below QR)
-        const instructionsY = cursorY + 200;
+        const instructionsY = cursorY + 150;
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 110px sans-serif';
         ctx.letterSpacing = '0px';
@@ -356,7 +356,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         // @ts-ignore
         if (currentProperty.wifi_ssid) {
             // Adjust wifiY based on available space, or push it down
-            const wifiY = instructionsY + 650;
+            const wifiY = instructionsY + 600;
             
             // Draw Card Background
             const cardWidth = 1600;
@@ -553,6 +553,30 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
                       Table
                   </button>
               </div>
+
+              {/* Indoor/Outdoor Toggle (Only for Table) */}
+              {locationType === 'table' && (
+                  <div className="flex bg-slate-900 p-1 rounded-lg border border-slate-800 animate-in fade-in slide-in-from-top-2 duration-200">
+                      <button 
+                          onClick={() => setTableType('indoor')}
+                          className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all ${tableType === 'indoor' ? 'bg-slate-800 text-white shadow-sm ring-1 ring-slate-700' : 'text-slate-500 hover:text-slate-300'}`}
+                      >
+                          <div className="flex items-center justify-center gap-2">
+                            <Armchair size={14} />
+                            <span>Indoor</span>
+                          </div>
+                      </button>
+                      <button 
+                          onClick={() => setTableType('outdoor')}
+                          className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all ${tableType === 'outdoor' ? 'bg-slate-800 text-white shadow-sm ring-1 ring-slate-700' : 'text-slate-500 hover:text-slate-300'}`}
+                      >
+                          <div className="flex items-center justify-center gap-2">
+                            <Sun size={14} />
+                            <span>Outdoor</span>
+                          </div>
+                      </button>
+                  </div>
+              )}
 
               {/* Number Input */}
               <div className="relative group">

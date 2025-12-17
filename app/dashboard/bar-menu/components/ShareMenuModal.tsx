@@ -174,7 +174,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     ctx.textAlign = 'center';
     ctx.fillStyle = '#ffffff';
 
-    let cursorY = 150;
+    let cursorY = 250;
 
     // Logo (Circular Container & Larger)
     if (logoImg) {
@@ -376,7 +376,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     // 6. Wifi Info (Restored for Printout)
     // @ts-ignore
     if (currentProperty.wifi_ssid) {
-        const wifiY = instructionsY + 650;
+        const wifiY = instructionsY + 600;
         
         // Draw Card Background
         const cardWidth = 1600;
@@ -572,6 +572,30 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
                       Table
                   </button>
               </div>
+
+              {/* Indoor/Outdoor Toggle (Only for Table) */}
+              {locationType === 'table' && (
+                  <div className="flex bg-slate-900 p-1 rounded-lg border border-slate-800 animate-in fade-in slide-in-from-top-2 duration-200">
+                      <button 
+                          onClick={() => setTableType('indoor')}
+                          className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all ${tableType === 'indoor' ? 'bg-slate-800 text-white shadow-sm ring-1 ring-slate-700' : 'text-slate-500 hover:text-slate-300'}`}
+                      >
+                          <div className="flex items-center justify-center gap-2">
+                            <Armchair size={14} />
+                            <span>Indoor</span>
+                          </div>
+                      </button>
+                      <button 
+                          onClick={() => setTableType('outdoor')}
+                          className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all ${tableType === 'outdoor' ? 'bg-slate-800 text-white shadow-sm ring-1 ring-slate-700' : 'text-slate-500 hover:text-slate-300'}`}
+                      >
+                          <div className="flex items-center justify-center gap-2">
+                            <Sun size={14} />
+                            <span>Outdoor</span>
+                          </div>
+                      </button>
+                  </div>
+              )}
 
               {/* Number Input */}
               <div className="relative group">
