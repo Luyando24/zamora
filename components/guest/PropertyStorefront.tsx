@@ -53,8 +53,8 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
         if (error) {
           console.error('Error checking availability:', error);
         } else {
-          const availableIds = new Set(
-            (data || []).filter((r: any) => r.available_rooms > 0).map((r: any) => r.room_type_id)
+          const availableIds = new Set<string>(
+            (data || []).filter((r: any) => r.available_rooms > 0).map((r: any) => r.room_type_id as string)
           );
           setAvailableRoomTypes(availableIds);
         }
