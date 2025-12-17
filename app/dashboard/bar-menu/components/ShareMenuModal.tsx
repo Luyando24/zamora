@@ -1,8 +1,10 @@
 'use client';
 
 import { QRCodeCanvas } from 'qrcode.react';
-import { Copy, ExternalLink, X, Download, Share2, ScanLine, Smartphone, Building2, MapPin, Wifi, UtensilsCrossed } from 'lucide-react';
+import { Copy, ExternalLink, X, Download, Share2, ScanLine, Smartphone, Building2, MapPin, Wifi, UtensilsCrossed, Loader2 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
+import QRCode from 'qrcode';
+import JSZip from 'jszip';
 
 interface ShareMenuModalProps {
   isOpen: boolean;
@@ -17,6 +19,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
   const [locationType, setLocationType] = useState<'room' | 'table'>('room');
   const [locationValue, setLocationValue] = useState('');
   const [selectedPropertyId, setSelectedPropertyId] = useState(hotelId);
+  const [isDownloading, setIsDownloading] = useState(false);
   const qrRef = useRef<HTMLDivElement>(null);
   
   // Close on Escape key
@@ -88,7 +91,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     ctx.closePath();
   };
 
-  const handleDownload = async () => {
+  const generateCanvas = async (targetLocValue: string): Promise<HTMLCanvasElement | null> => {
     // 1. Setup Canvas (A4 size @ 300dpi: 2480 x 3508 px)
     const canvas = document.createElement('canvas');
     const WIDTH = 2480;
@@ -97,7 +100,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     canvas.width = WIDTH;
     canvas.height = HEIGHT;
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) return null;
 
     // Load Logo if available
     let logoImg: HTMLImageElement | null = null;
@@ -116,6 +119,21 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
             console.error("Failed to load logo", e);
         }
     }
+
+    // Helper for Rounded Rect
+    const drawRoundedRect = (x: number, y: number, w: number, h: number, r: number) => {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+    };
 
     // 2. Background (Dark Theme: Slate 950 -> #020617)
     const gradient = ctx.createLinearGradient(0, 0, WIDTH, HEIGHT);
@@ -181,7 +199,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     ctx.letterSpacing = '15px';
     
     let subtitleText = 'VIEW FOOD & BAR MENU';
-    if (locationValue) {
+    if (targetLocValue) {
         subtitleText = locationType === 'room' ? 'FOOD DELIVERED TO YOUR ROOM' : 'ORDER DIRECTLY FROM YOUR TABLE';
     }
     
@@ -191,11 +209,27 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     cursorY += 100;
 
     // 4. Draw QR Code
-    const sourceCanvas = qrRef.current?.querySelector('canvas');
-    if (sourceCanvas) {
+    // Use the reusable function to get the URL for this specific location
+    const targetUrl = getMenuUrl(targetLocValue);
+    
+    try {
+        const qrUrl = await QRCode.toDataURL(targetUrl, {
+            width: 1000,
+            margin: 1,
+            color: {
+                dark: '#000000',
+                light: '#ffffff'
+            }
+        });
+        
+        const qrImg = new Image();
+        qrImg.src = qrUrl;
+        await new Promise((resolve) => { qrImg.onload = resolve; });
+
         // Draw a white card container for QR
-        const cardSize = 1300;
-        const cardX = (WIDTH - cardSize) / 2;
+        const cardWidth = 1300;
+        const cardHeight = 1500; // Increased height for top/bottom padding
+        const cardX = (WIDTH - cardWidth) / 2;
         const cardY = cursorY + 50; // Use cursorY
         const r = 100;
 
@@ -203,7 +237,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         // Simulating: bg-gradient-to-tr from-pink-500 via-purple-500 to-indigo-500
         
         // We use a strong blur to create a glow effect instead of a solid border
-        const glowGradient = ctx.createLinearGradient(cardX, cardY + cardSize, cardX + cardSize, cardY);
+        const glowGradient = ctx.createLinearGradient(cardX, cardY + cardHeight, cardX + cardWidth, cardY);
         glowGradient.addColorStop(0, '#ec4899'); // Pink 500
         glowGradient.addColorStop(0.5, '#a855f7'); // Purple 500
         glowGradient.addColorStop(1, '#6366f1'); // Indigo 500
@@ -213,21 +247,21 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         ctx.fillStyle = glowGradient;
         
         // Draw blurred rect behind (same size as card)
-        drawRoundedRect(ctx, cardX, cardY, cardSize, cardSize, r);
+        drawRoundedRect(cardX, cardY, cardWidth, cardHeight, r);
         ctx.fill();
         ctx.restore();
 
         // Draw White Card Inner (Solid, Sharp)
         ctx.fillStyle = '#ffffff';
-        drawRoundedRect(ctx, cardX, cardY, cardSize, cardSize, r);
+        drawRoundedRect(cardX, cardY, cardWidth, cardHeight, r);
         ctx.fill();
 
         // Draw QR centered in card
         const qrSize = 1000;
-        const qrX = cardX + (cardSize - qrSize) / 2;
-        const qrY = cardY + (cardSize - qrSize) / 2;
+        const qrX = cardX + (cardWidth - qrSize) / 2;
+        const qrY = cardY + (cardHeight - qrSize) / 2;
         
-        ctx.drawImage(sourceCanvas, qrX, qrY, qrSize, qrSize);
+        ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
 
         // Draw Center Overlay (Scan Icon)
         const overlaySize = 220;
@@ -293,6 +327,13 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         
         // Update cursor for next elements
         cursorY = cardY + cardHeight;
+
+    } catch (e) {
+        console.error("Error generating QR", e);
+        // Fallback text
+        ctx.fillStyle = '#000000';
+        ctx.font = '40px sans-serif';
+        ctx.fillText('Error generating QR Code', WIDTH/2, HEIGHT/2);
     }
 
     // 5. Scan Instructions (Moved UP, below QR)
@@ -309,7 +350,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     // Link
     ctx.fillStyle = '#94a3b8'; // Slate 400
     ctx.font = 'bold 50px sans-serif';
-    ctx.fillText(`or visit ${menuUrl}`, WIDTH / 2, instructionsY + 220);
+    ctx.fillText(`or visit ${targetUrl}`, WIDTH / 2, instructionsY + 220);
     
     // 6. Wifi Info (Restored for Printout)
     // @ts-ignore
@@ -326,7 +367,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
         ctx.lineWidth = 5;
         
-        drawRoundedRect(ctx, cardX, cardY, cardWidth, cardHeight, 60);
+        drawRoundedRect(cardX, cardY, cardWidth, cardHeight, 60);
         ctx.fill();
         ctx.stroke();
 
@@ -377,15 +418,64 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     ctx.fillStyle = '#475569'; // Slate 600
     ctx.font = 'bold 50px sans-serif';
     ctx.fillText('POWERED BY WWW.ZAMORAAPP.COM', WIDTH / 2, HEIGHT - 100);
+    
+    return canvas;
+  };
 
-    // 7. Download
-    const url = canvas.toDataURL('image/png');
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `menu-flyer-${currentHotelId}${locationValue ? `-${locationType}-${locationValue}` : ''}.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+  const handleDownload = async () => {
+    setIsDownloading(true);
+
+    try {
+        // Check for range input "1-17" (numbers only)
+        const rangeMatch = locationValue.trim().match(/^(\d+)\s*-\s*(\d+)$/);
+        
+        if (rangeMatch) {
+            const start = parseInt(rangeMatch[1]);
+            const end = parseInt(rangeMatch[2]);
+            
+            // Validation: Ensure valid range and not too large (e.g., max 100 items)
+            if (!isNaN(start) && !isNaN(end) && end >= start && (end - start) < 100) {
+                const zip = new JSZip();
+                
+                // Generate all canvases
+                for (let i = start; i <= end; i++) {
+                    const loc = i.toString();
+                    const canvas = await generateCanvas(loc);
+                    if (canvas) {
+                        const dataUrl = canvas.toDataURL('image/png');
+                        // Remove header to get base64 content
+                        const base64Data = dataUrl.replace(/^data:image\/png;base64,/, "");
+                        zip.file(`${locationType}-${loc}.png`, base64Data, {base64: true});
+                    }
+                }
+                
+                // Download zip
+                const content = await zip.generateAsync({type: "blob"});
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(content);
+                link.download = `${locationType}s-${start}-${end}.zip`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                return;
+            }
+        }
+
+        // Single item download
+        const canvas = await generateCanvas(locationValue);
+        if (canvas) {
+            const link = document.createElement('a');
+            link.download = `menu-flyer-${currentHotelId}${locationValue ? `-${locationType}-${locationValue}` : ''}.png`;
+            link.href = canvas.toDataURL('image/png');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    } catch (error) {
+        console.error('Error generating menu:', error);
+    } finally {
+        setIsDownloading(false);
+    }
   };
 
   return (
@@ -541,9 +631,18 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
           <div className="w-full space-y-3">
              <button 
                 onClick={handleDownload}
-                className="w-full py-3.5 bg-white text-black rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-pink-50 transition-colors shadow-lg shadow-pink-500/10 active:scale-[0.98]"
+                disabled={isDownloading}
+                className="w-full py-3.5 bg-white text-black rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-pink-50 transition-colors shadow-lg shadow-pink-500/10 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
              >
-                <Download size={16} /> Download Printable Card
+                {isDownloading ? (
+                    <>
+                        <Loader2 size={16} className="animate-spin" /> Generating...
+                    </>
+                ) : (
+                    <>
+                        <Download size={16} /> Download Printable Card
+                    </>
+                )}
              </button>
 
              <div className="flex gap-2">
