@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { X, Eraser, Check, PenTool } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Check, PenTool } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ServiceContractModalProps {
@@ -13,93 +13,20 @@ interface ServiceContractModalProps {
 
 export default function ServiceContractModal({ isOpen, onClose, onSign, userName }: ServiceContractModalProps) {
   const [printedName, setPrintedName] = useState(userName);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [hasSignature, setHasSignature] = useState(false);
+  const [accepted, setAccepted] = useState(false);
 
-  // Initialize canvas
+  // Reset state when modal opens
   useEffect(() => {
-    if (isOpen && canvasRef.current) {
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.lineWidth = 2;
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = '#000000';
-        
-        // Handle resize if needed, but for now fixed size is safer for simplicity
-        // canvas.width = canvas.offsetWidth;
-        // canvas.height = canvas.offsetHeight;
-      }
+    if (isOpen) {
+      setPrintedName(userName);
+      setAccepted(false);
     }
-  }, [isOpen]);
-
-  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    setIsDrawing(true);
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const rect = canvas.getBoundingClientRect();
-    let x, y;
-    
-    if ('touches' in e) {
-        x = e.touches[0].clientX - rect.left;
-        y = e.touches[0].clientY - rect.top;
-    } else {
-        x = (e as React.MouseEvent).clientX - rect.left;
-        y = (e as React.MouseEvent).clientY - rect.top;
-    }
-    
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-  };
-
-  const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
-    if (!isDrawing) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    const rect = canvas.getBoundingClientRect();
-    let x, y;
-    
-    if ('touches' in e) {
-        x = e.touches[0].clientX - rect.left;
-        y = e.touches[0].clientY - rect.top;
-    } else {
-        x = (e as React.MouseEvent).clientX - rect.left;
-        y = (e as React.MouseEvent).clientY - rect.top;
-    }
-    
-    ctx.lineTo(x, y);
-    ctx.stroke();
-    setHasSignature(true);
-  };
-
-  const stopDrawing = () => {
-    setIsDrawing(false);
-  };
-
-  const clearSignature = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    setHasSignature(false);
-  };
+  }, [isOpen, userName]);
 
   const handleAccept = () => {
-    if (!hasSignature || !printedName.trim()) return;
-    const canvas = canvasRef.current;
-    if (canvas) {
-        onSign(canvas.toDataURL(), printedName);
-    }
+    if (!accepted || !printedName.trim()) return;
+    // Pass a placeholder for signature data since we're using a digital acceptance
+    onSign('digital_consent_v1', printedName);
   };
 
   return (
@@ -118,7 +45,7 @@ export default function ServiceContractModal({ isOpen, onClose, onSign, userName
             initial={{ scale: 0.95, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
-            className="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+            className="relative w-full max-w-7xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50">
@@ -181,41 +108,40 @@ export default function ServiceContractModal({ isOpen, onClose, onSign, userName
                         />
                     </div>
 
-                    <div className="space-y-2 flex-1 flex flex-col">
-                        <div className="flex justify-between items-center">
-                            <label className="block text-sm font-bold text-slate-700">Signature</label>
-                            <button 
-                                onClick={clearSignature}
-                                className="text-xs text-slate-500 hover:text-red-500 flex items-center gap-1 transition-colors"
-                            >
-                                <Eraser size={14} /> Clear
-                            </button>
-                        </div>
-                        <div className="flex-1 border-2 border-dashed border-slate-200 rounded-xl overflow-hidden bg-slate-50 hover:bg-white hover:border-slate-300 transition-colors relative cursor-crosshair">
-                            <canvas
-                                ref={canvasRef}
-                                width={336}
-                                height={200}
-                                className="w-full h-full touch-none"
-                                onMouseDown={startDrawing}
-                                onMouseMove={draw}
-                                onMouseUp={stopDrawing}
-                                onMouseLeave={stopDrawing}
-                                onTouchStart={startDrawing}
-                                onTouchMove={draw}
-                                onTouchEnd={stopDrawing}
-                            />
-                            {!hasSignature && !isDrawing && (
-                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                    <p className="text-slate-300 font-medium">Sign Here</p>
-                                </div>
-                            )}
+                    <div className="space-y-2 flex-1 flex flex-col justify-center">
+                         <div 
+                            onClick={() => setAccepted(!accepted)}
+                            className={`
+                                cursor-pointer p-4 rounded-xl border-2 transition-all flex items-start gap-4
+                                ${accepted 
+                                    ? 'border-slate-900 bg-slate-50' 
+                                    : 'border-slate-200 hover:border-slate-300'
+                                }
+                            `}
+                        >
+                            <div className={`
+                                w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-colors
+                                ${accepted 
+                                    ? 'border-slate-900 bg-slate-900' 
+                                    : 'border-slate-300 bg-white'
+                                }
+                            `}>
+                                {accepted && <Check size={14} className="text-white" strokeWidth={3} />}
+                            </div>
+                            <div>
+                                <p className={`font-bold text-sm ${accepted ? 'text-slate-900' : 'text-slate-700'}`}>
+                                    I agree to the Terms of Service
+                                </p>
+                                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                                    By checking this box, I acknowledge that I have read and understood the service agreement and agree to be bound by its terms.
+                                </p>
+                            </div>
                         </div>
                     </div>
 
                     <button
                         onClick={handleAccept}
-                        disabled={!hasSignature || !printedName.trim()}
+                        disabled={!accepted || !printedName.trim()}
                         className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-lg hover:bg-black transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                     >
                         <Check size={20} /> Sign & Accept

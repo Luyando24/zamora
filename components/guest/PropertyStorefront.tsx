@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { createClient } from '@/utils/supabase/client';
 import { 
   ShoppingBag, Utensils, BedDouble, Search, Plus, Minus, X, 
   MapPin, Phone, Mail, Clock, CheckCircle, Star, 
@@ -34,6 +35,37 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
     phone: '', 
     specialRequests: '' 
   });
+  
+  const [availableRoomTypes, setAvailableRoomTypes] = useState<Set<string> | null>(null);
+  const [checkingAvailability, setCheckingAvailability] = useState(false);
+
+  useEffect(() => {
+    const checkAvailability = async () => {
+      if (bookingDates.checkIn && bookingDates.checkOut) {
+        setCheckingAvailability(true);
+        const supabase = createClient();
+        const { data, error } = await supabase.rpc('get_room_availability', {
+          p_property_id: property.id,
+          p_check_in: bookingDates.checkIn,
+          p_check_out: bookingDates.checkOut
+        });
+        
+        if (error) {
+          console.error('Error checking availability:', error);
+        } else {
+          const availableIds = new Set(
+            (data || []).filter((r: any) => r.available_rooms > 0).map((r: any) => r.room_type_id)
+          );
+          setAvailableRoomTypes(availableIds);
+        }
+        setCheckingAvailability(false);
+      } else {
+        setAvailableRoomTypes(null);
+      }
+    };
+    
+    checkAvailability();
+  }, [bookingDates, property.id]);
 
   const nights = bookingDates.checkIn && bookingDates.checkOut 
     ? Math.max(1, Math.ceil((new Date(bookingDates.checkOut).getTime() - new Date(bookingDates.checkIn).getTime()) / (1000 * 60 * 60 * 24)))
