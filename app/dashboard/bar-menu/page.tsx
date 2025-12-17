@@ -303,6 +303,16 @@ export default function BarMenuPage() {
         hotelId={selectedPropertyId || ''}
         properties={properties}
       />
+
+      <ExcelImportModal
+        isOpen={isImportOpen}
+        onClose={() => setIsImportOpen(false)}
+        type="bar"
+        propertyId={selectedPropertyId}
+        onSuccess={() => {
+            fetchItems();
+        }}
+      />
     </div>
   );
 }

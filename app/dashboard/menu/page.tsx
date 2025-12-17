@@ -9,7 +9,7 @@ import FoodCategoryManager from './components/CategoryManager';
 import BarCategoryManager from '../bar-menu/components/CategoryManager';
 import ShareMenuModal from './components/ShareMenuModal';
 import { generateMenuPdf } from '../bar-menu/utils/generateMenuPdf';
-import { Plus, Edit, Trash2, UtensilsCrossed, QrCode, Building2, FileText, Search, ChefHat, Sparkles, Wine, Martini } from 'lucide-react';
+import { Plus, Edit, Trash2, UtensilsCrossed, QrCode, Building2, FileText, Search, ChefHat, Sparkles, Wine, Martini, Upload } from 'lucide-react';
 import Link from 'next/link';
 
 export default function MenuPage() {
@@ -21,6 +21,7 @@ export default function MenuPage() {
   const [filter, setFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
   const supabase = createClient();
   
   // Categories
@@ -218,6 +219,16 @@ export default function MenuPage() {
 
               {activeTab === 'food' ? <FoodCategoryManager /> : <BarCategoryManager />}
               
+              {/* Import Button */}
+              <button 
+                  onClick={() => setIsImportOpen(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 hover:border-slate-300 hover:text-slate-900 transition-all font-bold text-sm shadow-sm"
+              >
+                  <Upload size={16} />
+                  <span className="hidden sm:inline">Import</span>
+              </button>
+
+              {/* Add New Button */}
               <Link
                 href={activeTab === 'food' ? "/dashboard/menu/new" : "/dashboard/bar-menu/new"}
                 className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
