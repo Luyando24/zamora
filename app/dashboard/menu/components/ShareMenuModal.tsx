@@ -183,21 +183,38 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         cursorY = 250;
     }
 
-    // Logo (Small)
+    // Logo (Circular Container & Larger)
     if (logoImg) {
-        const logoSize = 150; // Small logo
+        const logoSize = 400; // Larger size
+        const centerX = WIDTH / 2;
+        const centerY = cursorY + logoSize / 2;
+        const radius = logoSize / 2;
+        
+        // 1. Draw White Circle Background
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        
+        // 2. Draw Logo Centered (Contain)
+        // Fit within a slightly smaller box to give padding
+        const padding = 40;
+        const fitSize = (logoSize - padding * 2);
+        
         const aspect = logoImg.width / logoImg.height;
-        let lw = logoSize;
-        let lh = logoSize;
+        let lw = fitSize;
+        let lh = fitSize;
         
         if (aspect > 1) {
             lh = lw / aspect;
         } else {
             lw = lh * aspect;
         }
-
-        ctx.drawImage(logoImg, (WIDTH - lw) / 2, cursorY, lw, lh);
-        cursorY += lh + 50;
+        
+        // Draw centered
+        ctx.drawImage(logoImg, centerX - lw / 2, centerY - lh / 2, lw, lh);
+        
+        cursorY += logoSize + 50;
     } else {
         // If no logo, add a bit of spacing
         cursorY += 50;
@@ -208,7 +225,12 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     ctx.font = '500 70px sans-serif';
     ctx.fillStyle = '#94a3b8'; // Slate 400
     ctx.letterSpacing = '15px';
-    const subtitleText = locationType === 'room' ? 'FOOD DELIVERED TO YOUR ROOM' : 'ORDER DIRECTLY FROM YOUR TABLE';
+    
+    let subtitleText = 'VIEW FOOD & BAR MENU';
+    if (locationValue) {
+        subtitleText = locationType === 'room' ? 'FOOD DELIVERED TO YOUR ROOM' : 'ORDER DIRECTLY FROM YOUR TABLE';
+    }
+    
     ctx.fillText(subtitleText, WIDTH / 2, cursorY);
 
     // 4. Draw QR Code
