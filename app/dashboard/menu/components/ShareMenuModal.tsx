@@ -1,7 +1,7 @@
 'use client';
 
 import { QRCodeCanvas } from 'qrcode.react';
-import { Copy, ExternalLink, X, Download, Share2, ScanLine, Smartphone, Building2, MapPin, Wifi, UtensilsCrossed, Loader2 } from 'lucide-react';
+import { Copy, ExternalLink, X, Download, Share2, ScanLine, Smartphone, Building2, MapPin, Wifi, UtensilsCrossed, Loader2, Sun, Armchair } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import QRCode from 'qrcode';
 import JSZip from 'jszip';
@@ -17,6 +17,7 @@ interface ShareMenuModalProps {
 export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, properties = [] }: ShareMenuModalProps) {
   const [copied, setCopied] = useState(false);
   const [locationType, setLocationType] = useState<'room' | 'table'>('room');
+  const [tableType, setTableType] = useState<'indoor' | 'outdoor'>('indoor');
   const [locationValue, setLocationValue] = useState('');
   const [selectedPropertyId, setSelectedPropertyId] = useState(hotelId);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -34,6 +35,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
       setSelectedPropertyId(hotelId);
       setLocationValue('');
       setLocationType('room');
+      setTableType('indoor');
     }
     return () => {
       window.removeEventListener('keydown', handleEscape);
@@ -64,8 +66,14 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     if (typeof window === 'undefined') return '';
     
     const slug = (currentProperty as any).slug;
+    
+    let finalLocValue = locValue;
+    if (locationType === 'table' && tableType === 'outdoor' && locValue) {
+        finalLocValue = `Outdoor ${locValue}`;
+    }
+
     const queryParam = locValue 
-        ? (locationType === 'room' ? `?room=${encodeURIComponent(locValue)}` : `?table=${encodeURIComponent(locValue)}`)
+        ? (locationType === 'room' ? `?room=${encodeURIComponent(locValue)}` : `?table=${encodeURIComponent(finalLocValue)}`)
         : '';
 
     if (slug) {
@@ -150,7 +158,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         ctx.textAlign = 'center';
         ctx.fillStyle = '#ffffff';
 
-        let cursorY = 250;
+        let cursorY = 100;
 
         // Logo (Circular Container & Larger)
         if (logoImg) {
@@ -190,7 +198,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         }
 
         // Subtitle
-        cursorY += 100;
+        cursorY += 80;
         ctx.font = '500 70px sans-serif';
         ctx.fillStyle = '#94a3b8'; // Slate 400
         ctx.letterSpacing = '15px';
@@ -222,10 +230,10 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
 
             // Draw a white card container for QR
             const cardWidth = 1300;
-            const cardHeight = 1500; // Increased height for top/bottom padding
+            const cardHeight = 1400; // Increased height for top/bottom padding
             const cardX = (WIDTH - cardWidth) / 2;
             // Push card down slightly
-            const cardY = cursorY + 100;
+            const cardY = cursorY + 80;
             const r = 100;
 
             // --- Gradient Glow Effect ---
@@ -348,7 +356,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         // @ts-ignore
         if (currentProperty.wifi_ssid) {
             // Adjust wifiY based on available space, or push it down
-            const wifiY = instructionsY + 500;
+            const wifiY = instructionsY + 650;
             
             // Draw Card Background
             const cardWidth = 1600;
@@ -438,7 +446,8 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
                             const dataUrl = canvas.toDataURL('image/png');
                             // Remove header to get base64 content
                             const base64Data = dataUrl.replace(/^data:image\/png;base64,/, "");
-                            zip.file(`${locationType}-${loc}.png`, base64Data, {base64: true});
+                            const filePrefix = locationType === 'table' && tableType === 'outdoor' ? 'outdoor-table' : locationType;
+                            zip.file(`${filePrefix}-${loc}.png`, base64Data, {base64: true});
                         }
                     }
                     
@@ -446,7 +455,8 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
                     const content = await zip.generateAsync({type: "blob"});
                     const link = document.createElement('a');
                     link.href = URL.createObjectURL(content);
-                    link.download = `${locationType}s-${start}-${end}.zip`;
+                    const zipPrefix = locationType === 'table' && tableType === 'outdoor' ? 'outdoor-tables' : `${locationType}s`;
+                    link.download = `${zipPrefix}-${start}-${end}.zip`;
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
@@ -458,7 +468,8 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
             const canvas = await generateCanvas(locationValue);
             if (canvas) {
                 const link = document.createElement('a');
-                link.download = `menu-flyer-${currentHotelId}${locationValue ? `-${locationType}-${locationValue}` : ''}.png`;
+                const typeLabel = locationType === 'table' && tableType === 'outdoor' ? 'outdoor-table' : locationType;
+                link.download = `menu-flyer-${currentHotelId}${locationValue ? `-${typeLabel}-${locationValue}` : ''}.png`;
                 link.href = canvas.toDataURL('image/png');
                 document.body.appendChild(link);
                 link.click();
@@ -552,7 +563,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
                   )}
                   <input 
                       type="text"
-                      placeholder={locationType === 'room' ? "Room Number (Optional)" : "Table Number (Optional)"}
+                      placeholder={locationType === 'room' ? "Room Number (Optional)" : (tableType === 'outdoor' ? "Outdoor Table Number" : "Table Number (Optional)")}
                       value={locationValue}
                       onChange={(e) => setLocationValue(e.target.value)}
                       className="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-sm focus:ring-1 focus:ring-pink-500 focus:border-pink-500 outline-none placeholder:text-slate-600 hover:bg-slate-800 transition-colors"
