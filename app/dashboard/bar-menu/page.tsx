@@ -217,12 +217,12 @@ export default function BarMenuPage() {
         {filteredItems.map((item) => (
             <div key={item.id} className="group bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 hover:-translate-y-1">
             {/* Image Area */}
-            <div className="h-48 bg-white relative overflow-hidden flex items-center justify-center p-4">
+            <div className="aspect-square bg-slate-100 relative overflow-hidden">
                 {item.image_url ? (
                     <img 
                         src={item.image_url} 
                         alt={item.name} 
-                        className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110" 
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center bg-slate-50">

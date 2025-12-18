@@ -177,7 +177,7 @@ export default function FoodDetailsPage({ item, isOpen, onClose, onAddToCart, si
 
                    {/* You Also Like */}
                    <div>
-                      <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tight mb-6">You Also Like</h3>
+                      <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tight mb-6">You May Also Like</h3>
                       <div className="grid grid-cols-3 gap-3 md:gap-4">
                          {similarItems.slice(0, 6).map((similar) => (
                             <div key={similar.id} className="flex flex-col gap-2 group cursor-pointer">
