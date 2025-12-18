@@ -324,7 +324,7 @@ export default function OrdersPage() {
 
       // Subscribe to Food Orders
       const foodChannel = supabase
-        .channel('orders-changes')
+        .channel(`orders-food-list-${selectedPropertyId}`)
         .on(
           'postgres_changes',
           { event: '*', schema: 'public', table: 'orders', filter: `property_id=eq.${selectedPropertyId}` },
@@ -337,7 +337,7 @@ export default function OrdersPage() {
 
       // Subscribe to Bar Orders
       const barChannel = supabase
-        .channel('bar-orders-changes')
+        .channel(`orders-bar-list-${selectedPropertyId}`)
         .on(
           'postgres_changes',
           { event: '*', schema: 'public', table: 'bar_orders', filter: `property_id=eq.${selectedPropertyId}` },

@@ -230,7 +230,7 @@ export default function BarOrdersPage() {
       fetchOrders();
 
       const channel = supabase
-        .channel('bar-orders-changes')
+        .channel(`bar-orders-list-${selectedPropertyId}`)
         .on(
           'postgres_changes',
           { 
@@ -240,6 +240,7 @@ export default function BarOrdersPage() {
             filter: `property_id=eq.${selectedPropertyId}`
           },
           (payload) => {
+            console.log('Realtime update received:', payload);
             // Play sound on new order
             if (payload.eventType === 'INSERT') {
                 playNotificationSound();
@@ -247,7 +248,9 @@ export default function BarOrdersPage() {
             fetchOrders();
           }
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log('Subscription status:', status);
+        });
 
       return () => {
         supabase.removeChannel(channel);
