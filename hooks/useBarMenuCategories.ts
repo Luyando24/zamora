@@ -33,27 +33,12 @@ export function useBarMenuCategories(propertyId?: string | null) {
         query = query.or(`property_id.eq.${propertyId},property_id.is.null`);
       }
 
-      // Fetch hidden categories if propertyId is present
-      let hiddenIds: string[] = [];
-      if (propertyId) {
-        const { data: hiddenData } = await supabase
-          .from('hidden_bar_menu_categories')
-          .select('category_id')
-          .eq('property_id', propertyId);
-        
-        if (hiddenData) {
-          hiddenIds = hiddenData.map(h => h.category_id);
-        }
-      }
-
       const { data, error } = await Promise.race([query, timeout]) as any;
 
       if (error) throw error;
 
       if (data) {
-        // Filter out hidden categories
-        const visibleCategories = data.filter((c: any) => !hiddenIds.includes(c.id));
-        setCategories(visibleCategories);
+        setCategories(data);
       }
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -93,16 +78,8 @@ export function useBarMenuCategories(propertyId?: string | null) {
       // Check if it's a global category (no property_id)
       const category = categories.find(c => c.id === id);
       
-      if (!category?.property_id && propertyId) {
-        // It's a global category, "hide" it instead of deleting
-        const { error } = await supabase
-          .from('hidden_bar_menu_categories')
-          .insert({
-            property_id: propertyId,
-            category_id: id
-          });
-        
-        if (error) throw error;
+      if (!category?.property_id) {
+        throw new Error('System default categories cannot be deleted.');
       } else {
         // It's a custom category, delete it for real
         const { error, count } = await supabase
@@ -113,18 +90,7 @@ export function useBarMenuCategories(propertyId?: string | null) {
         if (error) throw error;
 
         if (count === 0) {
-          // Fallback: If we couldn't delete it (maybe permission issue), try hiding it
-          if (propertyId) {
-             const { error: hideError } = await supabase
-              .from('hidden_bar_menu_categories')
-              .insert({
-                property_id: propertyId,
-                category_id: id
-              });
-             if (hideError) throw new Error('Could not delete or hide category.');
-          } else {
-             throw new Error('Could not delete category.');
-          }
+           throw new Error('Could not delete category.');
         }
       }
 

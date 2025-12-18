@@ -78,13 +78,17 @@ export default function CategoryManager() {
               categories.map(cat => (
                 <div key={cat.id} className="p-3 flex justify-between items-center hover:bg-gray-50">
                   <span className="text-gray-900 font-medium">{cat.name}</span>
-                  <button
-                    onClick={() => handleDelete(cat.id)}
-                    className="text-gray-400 hover:text-red-600 p-1 rounded"
-                    title="Delete Category"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                  {cat.property_id ? (
+                    <button
+                      onClick={() => handleDelete(cat.id)}
+                      className="text-gray-400 hover:text-red-600 p-1 rounded"
+                      title="Delete Category"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  ) : (
+                    <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded cursor-help" title="System default category">Default</span>
+                  )}
                 </div>
               ))
             )}
