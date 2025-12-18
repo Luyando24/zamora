@@ -404,7 +404,22 @@ export default function BarOrdersPage() {
               <div className="p-6 border-b border-slate-100 flex justify-between items-start">
                 <div>
                   <h2 className="text-xl font-bold text-slate-900">Order Details</h2>
-                  <p className="text-slate-500 text-sm font-medium">Room {selectedOrder.guest_room_number} • {new Date(selectedOrder.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                  <div className="flex items-center gap-2 text-slate-500 text-sm font-medium">
+                    {selectedOrder.guest_room_number.toString().startsWith('Table Outdoor') ? (
+                        <>
+                        <Sun size={14} />
+                        <span>Table: {selectedOrder.guest_room_number.replace('Table Outdoor', '').trim()} (Outdoor)</span>
+                        </>
+                    ) : selectedOrder.guest_room_number.toString().startsWith('Table') ? (
+                        <>
+                        <Armchair size={14} />
+                        <span>Table: {selectedOrder.guest_room_number.replace('Table', '').trim()} (Indoor)</span>
+                        </>
+                    ) : (
+                        <span>Room {selectedOrder.guest_room_number}</span>
+                    )}
+                    <span>• {new Date(selectedOrder.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  </div>
                 </div>
                 <button 
                   onClick={() => setSelectedOrder(null)}
@@ -611,7 +626,21 @@ function OrderCard({ order, config, onStatusUpdate, onViewDetails, nextStatus, e
       <div className="p-4">
         <div className="flex justify-between items-start mb-3">
           <div>
-            <p className="font-bold text-slate-800">Room {order.guest_room_number}</p>
+            <div className="font-bold text-slate-800 flex items-center gap-2">
+              {order.guest_room_number.toString().startsWith('Table Outdoor') ? (
+                  <>
+                    <Sun size={16} className="text-amber-500" />
+                    <span>Table: {order.guest_room_number.replace('Table Outdoor', '').trim()} (Outdoor)</span>
+                  </>
+              ) : order.guest_room_number.toString().startsWith('Table') ? (
+                  <>
+                    <Armchair size={16} className="text-indigo-500" />
+                    <span>Table: {order.guest_room_number.replace('Table', '').trim()} (Indoor)</span>
+                  </>
+              ) : (
+                  <span>Room {order.guest_room_number}</span>
+              )}
+            </div>
             <p className="text-xs text-slate-500 font-medium">{order.guest_name}</p>
           </div>
           <div className="flex items-center gap-2">

@@ -7,7 +7,8 @@ import { useBarMenuCategories } from '@/hooks/useBarMenuCategories';
 import { generateMenuPdf } from './utils/generateMenuPdf';
 import CategoryManager from './components/CategoryManager';
 import ShareMenuModal from './components/ShareMenuModal';
-import { Plus, Edit, Trash2, UtensilsCrossed, QrCode, Building2, FileText, Wine, Beer, Martini, Search } from 'lucide-react';
+import ExcelImportModal from '../components/ExcelImportModal';
+import { Plus, Edit, Trash2, UtensilsCrossed, QrCode, Building2, FileText, Wine, Beer, Martini, Search, Upload } from 'lucide-react';
 import Link from 'next/link';
 
 export default function BarMenuPage() {
@@ -17,6 +18,7 @@ export default function BarMenuPage() {
   const [filter, setFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
   const supabase = createClient();
   
   // Independent categories
@@ -122,6 +124,15 @@ export default function BarMenuPage() {
                 title="Share Digital Menu"
               >
                 <QrCode size={18} /> <span className="hidden sm:inline">QR Code</span>
+              </button>
+
+              <button
+                  onClick={() => setIsImportOpen(true)}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 hover:border-slate-300 font-bold transition-colors"
+                  title="Import from Excel"
+              >
+                  <Upload size={18} />
+                  <span className="hidden sm:inline">Import</span>
               </button>
 
               <button

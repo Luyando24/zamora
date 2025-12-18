@@ -295,7 +295,17 @@ export default function DashboardPage() {
 
         // Process Food Orders
         foodOrders?.forEach(o => {
-            const location = o.guest_room_number ? `to Room ${o.guest_room_number}` : '';
+            let location = '';
+            if (o.guest_room_number) {
+                const roomNum = o.guest_room_number.toString();
+                if (roomNum.startsWith('Table Outdoor')) {
+                    location = `to Table: ${roomNum.replace('Table Outdoor', '').trim()} (Outdoor)`;
+                } else if (roomNum.startsWith('Table')) {
+                    location = `to Table: ${roomNum.replace('Table', '').trim()} (Indoor)`;
+                } else {
+                    location = `to Room ${roomNum}`;
+                }
+            }
             activities.push({
                 id: `food-${o.id}`,
                 title: 'Room Service',
@@ -309,7 +319,17 @@ export default function DashboardPage() {
 
         // Process Bar Orders
         barOrders?.forEach(o => {
-            const location = o.guest_room_number ? `to Room ${o.guest_room_number}` : '';
+            let location = '';
+            if (o.guest_room_number) {
+                const roomNum = o.guest_room_number.toString();
+                if (roomNum.startsWith('Table Outdoor')) {
+                    location = `to Table: ${roomNum.replace('Table Outdoor', '').trim()} (Outdoor)`;
+                } else if (roomNum.startsWith('Table')) {
+                    location = `to Table: ${roomNum.replace('Table', '').trim()} (Indoor)`;
+                } else {
+                    location = `to Room ${roomNum}`;
+                }
+            }
             activities.push({
                 id: `bar-${o.id}`,
                 title: 'Bar Service',
