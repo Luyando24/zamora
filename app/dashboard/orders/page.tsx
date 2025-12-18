@@ -200,17 +200,62 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | BarOrder | null>(null);
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const supabase = createClient();
 
-  // Sound effect
-  useEffect(() => {
-    audioRef.current = new Audio('/sounds/notification.mp3');
-  }, []);
+  const playNotificationSound = (text = "New order received") => {
+    if (!soundEnabled) return;
 
-  const playNotificationSound = () => {
-    if (soundEnabled && audioRef.current) {
-      audioRef.current.play().catch(e => console.error('Error playing sound:', e));
+    try {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        
+        let voices = window.speechSynthesis.getVoices();
+        
+        const selectVoice = () => {
+          const preferredVoice = voices.find(v => 
+            (v.name.includes('Google US English') || 
+             v.name.includes('Microsoft Zira') ||
+             v.name.includes('Samantha')) && 
+             v.lang.startsWith('en')
+          ) || voices.find(v => v.lang.startsWith('en'));
+
+          if (preferredVoice) utterance.voice = preferredVoice;
+          
+          utterance.rate = 1.0;
+          utterance.pitch = 1.0;
+          utterance.volume = 1.0;
+
+          window.speechSynthesis.speak(utterance);
+        };
+
+        if (voices.length === 0) {
+           window.speechSynthesis.onvoiceschanged = () => {
+              voices = window.speechSynthesis.getVoices();
+              selectVoice();
+           };
+        } else {
+           selectVoice();
+        }
+      } else {
+        // Fallback to simple beep
+        const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+        if (!AudioContext) return;
+        
+        const ctx = new AudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.5);
+      }
+    } catch (e) {
+      console.error('Audio play failed', e);
     }
   };
 
@@ -284,7 +329,7 @@ export default function OrdersPage() {
           'postgres_changes',
           { event: '*', schema: 'public', table: 'orders', filter: `property_id=eq.${selectedPropertyId}` },
           (payload) => {
-            if (payload.eventType === 'INSERT') playNotificationSound();
+            if (payload.eventType === 'INSERT') playNotificationSound('New food order received');
             fetchFoodOrders();
           }
         )
@@ -297,7 +342,7 @@ export default function OrdersPage() {
           'postgres_changes',
           { event: '*', schema: 'public', table: 'bar_orders', filter: `property_id=eq.${selectedPropertyId}` },
           (payload) => {
-            if (payload.eventType === 'INSERT') playNotificationSound();
+            if (payload.eventType === 'INSERT') playNotificationSound('New bar order received');
             fetchBarOrders();
           }
         )
@@ -431,7 +476,7 @@ export default function OrdersPage() {
             onClick={() => {
                 const newState = !soundEnabled;
                 setSoundEnabled(newState);
-                if (newState) playNotificationSound();
+                if (newState) playNotificationSound("Voice notifications enabled");
             }}
             className={`px-3 py-2 rounded-lg transition-all active:scale-95 flex items-center gap-2 font-semibold text-xs ${
                 soundEnabled 
