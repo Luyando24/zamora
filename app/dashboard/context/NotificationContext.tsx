@@ -6,7 +6,7 @@ import { useProperty } from './PropertyContext';
 
 export interface Notification {
   id: string;
-  type: 'food' | 'bar';
+  type: 'food' | 'bar' | 'booking';
   message: string;
   created_at: string;
   read: boolean;
@@ -104,7 +104,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     }
   };
 
-  const addNotification = (type: 'food' | 'bar', orderId: string, message: string) => {
+  const addNotification = (type: 'food' | 'bar' | 'booking', orderId: string, message: string) => {
     const newNotification: Notification = {
       id: crypto.randomUUID(),
       type,
@@ -132,7 +132,6 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'orders', filter: `property_id=eq.${selectedPropertyId}` },
         (payload) => {
-          console.log('Global Food Order:', payload);
           addNotification('food', payload.new.id, 'New food order received');
         }
       )
@@ -144,8 +143,18 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'bar_orders', filter: `property_id=eq.${selectedPropertyId}` },
         (payload) => {
-          console.log('Global Bar Order:', payload);
           addNotification('bar', payload.new.id, 'New bar order received');
+        }
+      )
+      .subscribe();
+
+    const bookingChannel = supabase
+      .channel(`global-bookings-${selectedPropertyId}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'bookings', filter: `property_id=eq.${selectedPropertyId}` },
+        (payload) => {
+          addNotification('booking', payload.new.id, 'New booking received');
         }
       )
       .subscribe();
@@ -153,6 +162,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     return () => {
       supabase.removeChannel(foodChannel);
       supabase.removeChannel(barChannel);
+      supabase.removeChannel(bookingChannel);
     };
   }, [selectedPropertyId, soundEnabled]); // Re-sub if property changes. Sound pref doesn't need re-sub but used in addNotification callback if closure issues.
 

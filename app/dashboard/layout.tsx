@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { PropertyProvider } from './context/PropertyContext';
 import { NotificationProvider } from './context/NotificationContext';
 import NotificationBell from '@/components/dashboard/NotificationBell';
+import FloatingActionPanel from '@/components/dashboard/FloatingActionPanel';
 
 export default function DashboardLayout({
   children,
@@ -88,6 +89,7 @@ export default function DashboardLayout({
     <PropertyProvider>
       <NotificationProvider>
       <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
+        {!isSetupPage && <FloatingActionPanel />}
         {!isSetupPage && (
           <header className="relative flex h-16 items-center justify-between bg-white/60 backdrop-blur-xl px-6 z-30 border-b border-slate-200 shrink-0">
           <div className="flex items-center gap-4 md:gap-12">
