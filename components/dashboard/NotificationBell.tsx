@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Bell, Volume2, VolumeX, Radio } from 'lucide-react';
+import { Bell, Volume2, VolumeX, Radio, Check } from 'lucide-react';
 import { useNotifications } from '@/app/dashboard/context/NotificationContext';
 import { useRouter } from 'next/navigation';
-import { useState, useRef, useEffect } from 'react';
 
 export default function NotificationBell() {
   const { notifications, unreadCount, markAllAsRead, markAsRead, soundEnabled, toggleSound, requestPushPermission } = useNotifications();
