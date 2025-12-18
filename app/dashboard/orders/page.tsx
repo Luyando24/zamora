@@ -239,7 +239,7 @@ export default function OrdersPage() {
         }
       } else {
         // Fallback to simple beep
-        const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+        const AudioContext = (window as any).AudioContext || (window as any).webkitAudioContext;
         if (!AudioContext) return;
         
         const ctx = new AudioContext();

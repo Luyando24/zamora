@@ -159,7 +159,7 @@ export default function BarOrdersPage() {
 
       } else {
         // Fallback to simple beep if TTS is not available
-        const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+        const AudioContext = (window as any).AudioContext || (window as any).webkitAudioContext;
         if (!AudioContext) return;
         
         const ctx = new AudioContext();
