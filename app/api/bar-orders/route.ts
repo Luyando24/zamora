@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/db/supabase-admin';
 import { notifyAdmin } from '@/lib/sms';
+import { sendPushNotificationToProperty } from '@/lib/push-notifications';
 import * as crypto from 'crypto';
 
 export async function POST(req: NextRequest) {
@@ -78,7 +79,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to create order items: ' + itemsError.message }, { status: 500 });
     }
 
-    // 5. Send SMS Notification
+    // 5. Send Notifications
     try {
       const { data: property } = await supabaseAdmin
         .from('properties')
@@ -87,9 +88,17 @@ export async function POST(req: NextRequest) {
         .single();
 
       const message = `New Bar Order #${barOrderId.slice(0, 8)} from ${locationString || 'N/A'}. Total: ${barGrandTotal}`;
+      
       await notifyAdmin(message, property?.admin_notification_phone);
-    } catch (smsError) {
-      console.error('Failed to send SMS notification:', smsError);
+
+      await sendPushNotificationToProperty(
+        propertyId,
+        'New Bar Order 🍸',
+        message,
+        `/dashboard/bar-orders?propertyId=${propertyId}`
+      );
+    } catch (error) {
+      console.error('Failed to send notifications:', error);
     }
 
     return NextResponse.json({ 

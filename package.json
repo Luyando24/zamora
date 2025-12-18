@@ -31,6 +31,7 @@
     "tailwind-merge": "^2.1.0",
     "twilio": "^5.10.7",
     "uuid": "^9.0.1",
+    "web-push": "^3.6.7",
     "xlsx": "^0.18.5",
     "zod": "^4.1.13"
   },
@@ -41,6 +42,7 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/uuid": "^9.0.7",
+    "@types/web-push": "^3.6.4",
     "autoprefixer": "^10.0.1",
     "eslint": "^8",
     "eslint-config-next": "^14.2.33",

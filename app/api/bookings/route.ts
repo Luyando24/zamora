@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { notifyAdmin } from '@/lib/sms';
+import { sendPushNotificationToProperty } from '@/lib/push-notifications';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!; 
@@ -108,7 +109,7 @@ export async function POST(req: NextRequest) {
 
     if (createBookingError) throw createBookingError;
 
-    // Notify via SMS
+    // Notify via SMS & Push
     try {
       const { data: property } = await supabase
         .from('properties')
@@ -116,12 +117,20 @@ export async function POST(req: NextRequest) {
         .eq('id', propertyId)
         .single();
 
-      await notifyAdmin(
-        `New Web Booking: ${guestDetails.firstName} ${guestDetails.lastName}. Check-in: ${checkIn}`,
-        property?.admin_notification_phone
+      const message = `New Web Booking: ${guestDetails.firstName} ${guestDetails.lastName}. Check-in: ${checkIn}`;
+
+      // SMS
+      await notifyAdmin(message, property?.admin_notification_phone);
+
+      // Push
+      await sendPushNotificationToProperty(
+        propertyId,
+        'New Booking 📅',
+        message,
+        `/dashboard/bookings?propertyId=${propertyId}`
       );
     } catch (e) {
-      console.error('SMS Notification Failed:', e);
+      console.error('Notification Failed:', e);
     }
 
     return NextResponse.json({ success: true, booking });

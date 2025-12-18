@@ -20,6 +20,7 @@ interface NotificationContextType {
   markAsRead: (id: string) => void;
   soundEnabled: boolean;
   toggleSound: () => void;
+  requestPushPermission: () => Promise<boolean>;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
@@ -45,6 +46,79 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     if (newState) {
       playNotificationSound("Voice notifications enabled");
     }
+  };
+
+  // Push Notification Subscription Logic
+  const subscribeToPush = async () => {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      
+      // Check if already subscribed
+      let subscription = await registration.pushManager.getSubscription();
+      
+      if (!subscription) {
+        const vapidPublicKey = 'BEO6-6HlAhJeC64bwpWmHQEPo77yyOc9imC4h0qbBrUumhbfcI-8WtClPrbEoNVI3Y4-VL5ZULrNlAgmryRnyBo';
+        const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: convertedVapidKey
+        });
+      }
+
+      // Send subscription to server
+      await fetch('/api/notifications/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(subscription)
+      });
+
+      console.log('Push subscription successful');
+    } catch (error) {
+      console.error('Push subscription failed:', error);
+    }
+  };
+
+  // Helper function for VAPID key conversion
+  function urlBase64ToUint8Array(base64String: string) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+      .replace(/\-/g, '+')
+      .replace(/_/g, '/');
+  
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+  
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  }
+
+  // Register SW on mount
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => {
+             console.log('Service Worker registered', reg);
+             // Attempt to subscribe if permission is already granted
+             if (Notification.permission === 'granted') {
+                subscribeToPush();
+             }
+        })
+        .catch(err => console.error('Service Worker registration failed', err));
+    }
+  }, [selectedPropertyId]); // Re-check if property changes? Mostly just once is fine.
+
+  const requestPushPermission = async () => {
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+          subscribeToPush();
+          return true;
+      }
+      return false;
   };
 
   const playNotificationSound = (text = "New order received") => {
@@ -184,7 +258,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         markAllAsRead,
         markAsRead,
         soundEnabled,
-        toggleSound
+        toggleSound,
+        requestPushPermission
       }}
     >
       {children}

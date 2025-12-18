@@ -129,6 +129,18 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
                 propertyId: property.id
             })
         }).catch(err => console.error('Failed to send SMS notification', err));
+
+        // Notify via Push
+        fetch('/api/notifications/push/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            propertyId: property.id,
+            title: 'New Food Order 🍔',
+            message: `Order #${foodOrderId.slice(0, 8)} from ${locationString || 'N/A'}. Total: K${foodGrandTotal}`,
+            url: `/dashboard/orders?propertyId=${property.id}`
+          })
+        }).catch(err => console.error('Failed to send push notification', err));
       }
 
       // 2. Process Bar Order

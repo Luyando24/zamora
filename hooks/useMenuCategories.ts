@@ -77,12 +77,17 @@ export function useMenuCategories(propertyId?: string | null) {
 
   const deleteCategory = async (id: string) => {
     try {
-      const { error } = await supabase
+      const { error, count } = await supabase
         .from('menu_categories')
-        .delete()
+        .delete({ count: 'exact' })
         .eq('id', id);
 
       if (error) throw error;
+
+      if (count === 0) {
+        throw new Error('Could not delete category. It may be a system category or you do not have permission.');
+      }
+
       setCategories(prev => prev.filter(c => c.id !== id));
       return { error: null };
     } catch (error: any) {

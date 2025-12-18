@@ -142,6 +142,18 @@ export default function NewBookingModal({ isOpen, onClose, onSuccess, propertyId
                 propertyId: propertyId
             })
         }).catch(err => console.error('Failed to send SMS notification', err));
+
+        // Notify via Push
+        fetch('/api/notifications/push/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            propertyId: propertyId,
+            title: 'New Booking 📅',
+            message: `${formData.firstName} ${formData.lastName} in Room ${roomNumber}. Check-in: ${formData.checkIn}`,
+            url: `/dashboard/bookings`
+          })
+        }).catch(err => console.error('Failed to send push notification', err));
       } else {
         throw new Error('Offline');
       }

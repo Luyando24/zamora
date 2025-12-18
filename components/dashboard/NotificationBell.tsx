@@ -1,15 +1,22 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Bell, Check, Trash2, Volume2, VolumeX } from 'lucide-react';
+import { Bell, Volume2, VolumeX, Radio } from 'lucide-react';
 import { useNotifications } from '@/app/dashboard/context/NotificationContext';
 import { useRouter } from 'next/navigation';
+import { useState, useRef, useEffect } from 'react';
 
 export default function NotificationBell() {
-  const { notifications, unreadCount, markAllAsRead, markAsRead, soundEnabled, toggleSound } = useNotifications();
+  const { notifications, unreadCount, markAllAsRead, markAsRead, soundEnabled, toggleSound, requestPushPermission } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  const handlePushEnable = async () => {
+    const granted = await requestPushPermission();
+    if (granted) alert('Notifications enabled!');
+    else alert('Permission denied. Please check your browser settings.');
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -54,6 +61,13 @@ export default function NotificationBell() {
           <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
             <h3 className="font-bold text-slate-900">Notifications</h3>
             <div className="flex gap-2">
+               <button
+                onClick={handlePushEnable}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                title="Enable Push Notifications"
+              >
+                <Radio size={16} />
+              </button>
                <button 
                 onClick={toggleSound}
                 className={`p-1.5 rounded-lg transition-colors ${soundEnabled ? 'text-blue-600 bg-blue-50 hover:bg-blue-100' : 'text-slate-400 hover:bg-slate-100'}`}
