@@ -116,7 +116,7 @@ export default function MenuStorefront({
 
       {/* 1. Navbar - Fixed Top */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-white/20 transition-all duration-300">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 h-20 flex items-center justify-center md:justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 h-20 flex items-center justify-center md:justify-between gap-4 relative">
             {/* Property Name/Logo */}
             <div className="flex flex-col md:flex-row md:items-center gap-0 md:gap-3 shrink-0 text-center md:text-left">
                 <div className="font-black text-2xl tracking-tighter leading-none text-slate-900">

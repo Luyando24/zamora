@@ -154,8 +154,33 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         ctx.fillStyle = topGlow;
         ctx.fillRect(0, 0, WIDTH, 1000);
 
+        // Draw Table/Room Number Top Right
+        if (targetLocValue) {
+            ctx.save();
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'top';
+            
+            // Label (Table/Room/Outdoor)
+            ctx.font = 'bold 60px sans-serif';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            let typeLabel = locationType === 'room' ? 'ROOM' : 'TABLE';
+            if (locationType === 'table' && tableType === 'outdoor') typeLabel = 'OUTDOOR';
+            
+            const rightMargin = 120;
+            const topMargin = 100;
+            
+            ctx.fillText(typeLabel, WIDTH - rightMargin, topMargin);
+            
+            // The Number
+            ctx.font = '900 200px sans-serif'; // Very bold and large
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(targetLocValue, WIDTH - rightMargin, topMargin + 80);
+            
+            ctx.restore();
+        }
+
         // 3. Text Configuration
-    ctx.textAlign = 'center';
+        ctx.textAlign = 'center';
     ctx.fillStyle = '#ffffff';
 
     let cursorY = 250;
