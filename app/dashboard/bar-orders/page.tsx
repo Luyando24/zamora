@@ -5,7 +5,7 @@ import { createClient } from '@/utils/supabase/client';
 import { useProperty } from '../context/PropertyContext';
 import { 
   Clock, CheckCircle2, ChefHat, Truck, AlertCircle, 
-  RefreshCw, Building2, Wine, XCircle, Volume2, VolumeX, Eye, X, Sun, Armchair
+  RefreshCw, Building2, Wine, XCircle, Eye, X, Sun, Armchair
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -112,72 +112,7 @@ export default function BarOrdersPage() {
   const { selectedPropertyId } = useProperty();
   const [orders, setOrders] = useState<BarOrder[]>([]);
   const [loading, setLoading] = useState(true);
-  const [soundEnabled, setSoundEnabled] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<BarOrder | null>(null);
-
-  // Sound Player using Web Speech API (TTS)
-  const playNotificationSound = (text = "New bar order received") => {
-    if (!soundEnabled) return;
-
-    try {
-      if ('speechSynthesis' in window) {
-        // Cancel any currently playing speech
-        window.speechSynthesis.cancel();
-
-        const utterance = new SpeechSynthesisUtterance(text);
-        
-        // Try to get a smooth, realistic English voice
-        // Wait for voices to load if they haven't yet (though usually they have by now)
-        let voices = window.speechSynthesis.getVoices();
-        
-        const selectVoice = () => {
-          // Priority list for "realistic" voices
-          const preferredVoice = voices.find(v => 
-            (v.name.includes('Google US English') || 
-             v.name.includes('Microsoft Zira') ||
-             v.name.includes('Samantha')) && 
-             v.lang.startsWith('en')
-          ) || voices.find(v => v.lang.startsWith('en'));
-
-          if (preferredVoice) utterance.voice = preferredVoice;
-          
-          utterance.rate = 1.0; // Normal speed
-          utterance.pitch = 1.0; // Normal pitch
-          utterance.volume = 1.0;
-
-          window.speechSynthesis.speak(utterance);
-        };
-
-        if (voices.length === 0) {
-           window.speechSynthesis.onvoiceschanged = () => {
-              voices = window.speechSynthesis.getVoices();
-              selectVoice();
-           };
-        } else {
-           selectVoice();
-        }
-
-      } else {
-        // Fallback to simple beep if TTS is not available
-        const AudioContext = (window as any).AudioContext || (window as any).webkitAudioContext;
-        if (!AudioContext) return;
-        
-        const ctx = new AudioContext();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(880, ctx.currentTime);
-        gain.gain.setValueAtTime(0.1, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.5);
-      }
-    } catch (e) {
-      console.error('Audio play failed', e);
-    }
-  };
 
   const fetchOrders = async () => {
     if (!selectedPropertyId) return;
@@ -241,10 +176,6 @@ export default function BarOrdersPage() {
           },
           (payload) => {
             console.log('Realtime update received:', payload);
-            // Play sound on new order
-            if (payload.eventType === 'INSERT') {
-                playNotificationSound();
-            }
             fetchOrders();
           }
         )
@@ -256,7 +187,7 @@ export default function BarOrdersPage() {
         supabase.removeChannel(channel);
       };
     }
-  }, [selectedPropertyId, soundEnabled]);
+  }, [selectedPropertyId]);
 
   const updateStatus = async (orderId: string, newStatus: string) => {
     try {
@@ -332,23 +263,6 @@ export default function BarOrdersPage() {
         </div>
         
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => {
-                const newState = !soundEnabled;
-                setSoundEnabled(newState);
-                if (newState) playNotificationSound("Voice notifications enabled");
-            }}
-            className={`px-3 py-2 rounded-lg transition-all active:scale-95 flex items-center gap-2 font-semibold text-xs ${
-                soundEnabled 
-                ? 'bg-blue-100 text-blue-700 hover:bg-blue-200/70' 
-                : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
-            }`}
-            title={soundEnabled ? 'Mute Notifications' : 'Enable Notifications'}
-          >
-            {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
-            <span className="hidden sm:inline">{soundEnabled ? 'Sound On' : 'Sound Off'}</span>
-          </button>
-
           <button 
             onClick={fetchOrders}
             className="p-2.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-700 transition-all active:scale-95"

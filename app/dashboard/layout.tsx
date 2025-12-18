@@ -8,6 +8,8 @@ import { Search, Bell, Moon, AlertTriangle, ArrowRight, Menu, X } from 'lucide-r
 import { createClient } from '@/utils/supabase/client';
 import Link from 'next/link';
 import { PropertyProvider } from './context/PropertyContext';
+import { NotificationProvider } from './context/NotificationContext';
+import NotificationBell from '@/components/dashboard/NotificationBell';
 
 export default function DashboardLayout({
   children,
@@ -84,6 +86,7 @@ export default function DashboardLayout({
 
   return (
     <PropertyProvider>
+      <NotificationProvider>
       <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
         {!isSetupPage && (
           <header className="relative flex h-16 items-center justify-between bg-white/60 backdrop-blur-xl px-6 z-30 border-b border-slate-200 shrink-0">
@@ -122,9 +125,7 @@ export default function DashboardLayout({
           </div>
 
           <div className="flex items-center gap-2">
-            <button className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors">
-              <Bell size={20} />
-            </button>
+            <NotificationBell />
             <button className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors">
               <Moon size={20} />
             </button>
@@ -207,6 +208,7 @@ export default function DashboardLayout({
       </div>
       <BottomNav />
     </div>
+    </NotificationProvider>
     </PropertyProvider>
   );
 }
