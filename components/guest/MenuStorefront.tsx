@@ -229,9 +229,9 @@ export default function MenuStorefront({
                         className="group bg-white rounded-2xl md:rounded-3xl border border-slate-100 hover:border-slate-300 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full cursor-pointer"
                     >
                         {/* Image Area */}
-                        <div className="h-32 md:h-56 relative overflow-hidden bg-slate-100">
+                        <div className="h-32 md:h-56 relative overflow-hidden bg-white flex items-center justify-center p-4">
                             {item.image_url ? (
-                                <img src={item.image_url} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                <img src={item.image_url} alt={item.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-slate-300">
                                     <Utensils size={32} className="md:w-10 md:h-10" />
@@ -412,9 +412,9 @@ export default function MenuStorefront({
               ) : (
                 cart.map(item => (
                   <div key={item.id} className="flex gap-4 items-center group">
-                    <div className="w-20 h-20 bg-slate-100 rounded-2xl overflow-hidden flex-shrink-0 border border-slate-100">
+                    <div className="w-20 h-20 bg-white rounded-2xl overflow-hidden flex-shrink-0 border border-slate-100 flex items-center justify-center p-2">
                        {item.image_url ? (
-                         <img src={item.image_url} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                         <img src={item.image_url} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" />
                        ) : (
                          <div className="w-full h-full flex items-center justify-center text-slate-300"><Utensils size={24} /></div>
                        )}

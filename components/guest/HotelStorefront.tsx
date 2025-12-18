@@ -127,9 +127,9 @@ export default function HotelStorefront({ hotel, roomTypes, menuItems, categorie
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {filteredMenu.map(item => (
                 <div key={item.id} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex gap-4">
-                  <div className="w-24 h-24 bg-gray-100 rounded-lg flex-shrink-0 relative overflow-hidden">
+                  <div className="w-24 h-24 bg-white rounded-lg flex-shrink-0 relative overflow-hidden flex items-center justify-center p-2 border border-gray-100">
                     {item.image_url ? (
-                      <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                      <img src={item.image_url} alt={item.name} className="w-full h-full object-contain" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-300">
                         <Utensils size={24} />
