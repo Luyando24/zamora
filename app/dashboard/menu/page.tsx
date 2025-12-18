@@ -8,6 +8,7 @@ import { useBarMenuCategories } from '@/hooks/useBarMenuCategories';
 import FoodCategoryManager from './components/CategoryManager';
 import BarCategoryManager from '../bar-menu/components/CategoryManager';
 import ShareMenuModal from './components/ShareMenuModal';
+import ExcelImportModal from '../components/ExcelImportModal';
 import { generateMenuPdf } from '../bar-menu/utils/generateMenuPdf';
 import { Plus, Edit, Trash2, UtensilsCrossed, QrCode, Building2, FileText, Search, ChefHat, Sparkles, Wine, Martini, Upload } from 'lucide-react';
 import Link from 'next/link';
@@ -222,7 +223,8 @@ export default function MenuPage() {
               {/* Import Button */}
               <button 
                   onClick={() => setIsImportOpen(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 hover:border-slate-300 hover:text-slate-900 transition-all font-bold text-sm shadow-sm"
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 hover:border-slate-300 hover:text-slate-900 transition-all font-bold text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!selectedPropertyId || selectedPropertyId === 'all'}
               >
                   <Upload size={16} />
                   <span className="hidden sm:inline">Import</span>
@@ -452,6 +454,16 @@ export default function MenuPage() {
         hotelId={selectedPropertyId || ''}
         hotelName={properties.find(p => p.id === selectedPropertyId)?.name}
         properties={properties}
+      />
+
+      <ExcelImportModal
+        isOpen={isImportOpen}
+        onClose={() => setIsImportOpen(false)}
+        type={activeTab}
+        propertyId={selectedPropertyId || ''}
+        onSuccess={() => {
+            fetchItems();
+        }}
       />
     </div>
   );

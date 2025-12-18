@@ -128,8 +128,9 @@ export default function BarMenuPage() {
 
               <button
                   onClick={() => setIsImportOpen(true)}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 hover:border-slate-300 font-bold transition-colors"
+                  className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 hover:border-slate-300 font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Import from Excel"
+                  disabled={!selectedPropertyId || selectedPropertyId === 'all'}
               >
                   <Upload size={18} />
                   <span className="hidden sm:inline">Import</span>
@@ -319,7 +320,7 @@ export default function BarMenuPage() {
         isOpen={isImportOpen}
         onClose={() => setIsImportOpen(false)}
         type="bar"
-        propertyId={selectedPropertyId}
+        propertyId={selectedPropertyId || ''}
         onSuccess={() => {
             fetchItems();
         }}
