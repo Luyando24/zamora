@@ -23,7 +23,7 @@ export function useMenuCategories(propertyId?: string | null) {
       // Timeout race (5s)
       const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Categories timeout')), 5000));
 
-      // Fetch categories. RLS will handle filtering (user's own + global public ones)
+      // Fetch categories
       let query = supabase
         .from('menu_categories')
         .select('*')
@@ -33,12 +33,27 @@ export function useMenuCategories(propertyId?: string | null) {
         query = query.or(`property_id.eq.${propertyId},property_id.is.null`);
       }
 
+      // Fetch hidden categories if propertyId is present
+      let hiddenIds: string[] = [];
+      if (propertyId) {
+        const { data: hiddenData } = await supabase
+          .from('hidden_menu_categories')
+          .select('category_id')
+          .eq('property_id', propertyId);
+        
+        if (hiddenData) {
+          hiddenIds = hiddenData.map(h => h.category_id);
+        }
+      }
+
       const { data, error } = await Promise.race([query, timeout]) as any;
 
       if (error) throw error;
 
       if (data) {
-        setCategories(data);
+        // Filter out hidden categories
+        const visibleCategories = data.filter((c: any) => !hiddenIds.includes(c.id));
+        setCategories(visibleCategories);
       }
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -51,8 +66,6 @@ export function useMenuCategories(propertyId?: string | null) {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
-      // Independent categories - no property_id needed. 
-      // RLS assigns created_by automatically to the current user.
       const payload: any = { name };
       if (user) {
           payload.created_by = user.id;
@@ -77,15 +90,42 @@ export function useMenuCategories(propertyId?: string | null) {
 
   const deleteCategory = async (id: string) => {
     try {
-      const { error, count } = await supabase
-        .from('menu_categories')
-        .delete({ count: 'exact' })
-        .eq('id', id);
+      // Check if it's a global category (no property_id)
+      const category = categories.find(c => c.id === id);
+      
+      if (!category?.property_id && propertyId) {
+        // It's a global category, "hide" it instead of deleting
+        const { error } = await supabase
+          .from('hidden_menu_categories')
+          .insert({
+            property_id: propertyId,
+            category_id: id
+          });
+        
+        if (error) throw error;
+      } else {
+        // It's a custom category, delete it for real
+        const { error, count } = await supabase
+          .from('menu_categories')
+          .delete({ count: 'exact' })
+          .eq('id', id);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      if (count === 0) {
-        throw new Error('Could not delete category. It may be a system category or you do not have permission.');
+        if (count === 0) {
+           // Fallback: If we couldn't delete it (maybe permission issue), try hiding it
+           if (propertyId) {
+              const { error: hideError } = await supabase
+               .from('hidden_menu_categories')
+               .insert({
+                 property_id: propertyId,
+                 category_id: id
+               });
+              if (hideError) throw new Error('Could not delete or hide category.');
+           } else {
+              throw new Error('Could not delete category.');
+           }
+        }
       }
 
       setCategories(prev => prev.filter(c => c.id !== id));
