@@ -5,7 +5,7 @@ import { createClient } from '@/utils/supabase/client';
 import { useProperty } from '../context/PropertyContext';
 import { 
   Clock, CheckCircle2, ChefHat, Truck, AlertCircle, 
-  RefreshCw, Building2, Wine, XCircle, Volume2, VolumeX, Eye, X
+  RefreshCw, Building2, Wine, XCircle, Volume2, VolumeX, Eye, X, Sun, Armchair
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
