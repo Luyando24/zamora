@@ -28,7 +28,7 @@ export default function FloatingActionPanel() {
   };
 
   return (
-    <div className="fixed bottom-6 left-6 md:left-80 z-50 flex flex-col-reverse items-start gap-4">
+    <div className="fixed bottom-6 right-6 z-50 flex flex-col-reverse items-end gap-4">
       {/* Main Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
