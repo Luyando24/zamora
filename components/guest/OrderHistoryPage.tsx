@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { 
   X, Clock, CheckCircle2, ChefHat, Truck, AlertCircle, 
-  ShoppingBag, ChevronRight, RefreshCw, Calendar
+  ShoppingBag, ChevronRight, RefreshCw, Calendar, Wine, Utensils
 } from 'lucide-react';
 
 interface OrderHistoryPageProps {
@@ -255,7 +255,7 @@ export default function OrderHistoryPage({ isOpen, onClose, propertyId }: OrderH
                                 <img src={item.details?.image_url || item.item_image_url} className="w-full h-full object-cover" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-slate-300">
-                                    <ShoppingBag size={14} />
+                                    {order.type === 'bar' ? <Wine size={14} /> : <Utensils size={14} />}
                                 </div>
                             )}
                           </div>

@@ -301,15 +301,17 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
       <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
         <label className="block text-base font-bold text-slate-900 mb-4">Main Drink Image</label>
         <div className="flex flex-col items-center justify-center">
-            <div className="w-full max-w-xs aspect-[4/5] bg-white rounded-xl shadow-sm border-2 border-dashed border-slate-300 overflow-hidden relative group hover:border-pink-400 transition-colors">
+            <div className="w-full max-w-xs aspect-square bg-white rounded-xl shadow-sm border-2 border-dashed border-slate-300 overflow-hidden relative group hover:border-pink-400 transition-colors">
                 <ImageUpload
                     value={formData.image_url}
                     onChange={(url) => setFormData({ ...formData, image_url: url })}
+                    className="h-full"
+                    showLabel={false}
                   />
             </div>
             <p className="text-sm text-slate-500 mt-4 text-center">
-                Upload a high-quality vertical photo of the drink.<br/>
-                Recommended size: 800x1000px.
+                Upload a high-quality photo of the drink.<br/>
+                Recommended size: 1000x1000px (Square).
             </p>
         </div>
       </div>

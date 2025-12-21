@@ -51,12 +51,24 @@ export default async function BookingPage({ params }: { params: Promise<{ proper
     .or(`created_by.eq.${property?.created_by},created_by.is.null`)
     .order('name');
 
+  // 5. Fetch Bar Menu Items
+  const { data: barMenuItems } = await supabase
+    .from('bar_menu_items')
+    .select('*, bar_menu_item_properties!inner(property_id)')
+    .eq('bar_menu_item_properties.property_id', resolvedPropertyId)
+    .eq('is_available', true);
+
+  // 6. Fetch Bar Categories
+  const uniqueBarCategories = Array.from(new Set((barMenuItems || []).map((item: any) => item.category).filter(Boolean))).sort();
+
   return (
     <PropertyStorefront
       property={property}
       roomTypes={roomTypes || []}
       menuItems={menuItems || []}
       categories={categories?.map(c => c.name) || []}
+      barMenuItems={barMenuItems || []}
+      barCategories={uniqueBarCategories}
     />
   );
 }

@@ -117,8 +117,8 @@ export default function SignupPage() {
     <div className="min-h-screen bg-[#030712] text-white flex overflow-hidden relative">
       {/* Background Effects */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-zambia-green/20 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-zambia-blue/20 rounded-full blur-[120px] animate-pulse delay-1000" />
+        <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-pink-600/20 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-600/20 rounded-full blur-[120px] animate-pulse delay-1000" />
       </div>
 
       {/* Left Side - Visuals (Hidden on Mobile) */}
@@ -130,11 +130,11 @@ export default function SignupPage() {
           className="max-w-lg"
         >
           <div className="mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-zambia-green to-zambia-blue flex items-center justify-center font-bold text-3xl shadow-lg shadow-zambia-green/20 mb-6">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-pink-600 to-purple-600 flex items-center justify-center font-bold text-3xl shadow-lg shadow-pink-600/20 mb-6">
               Z
             </div>
             <h1 className="text-5xl font-bold tracking-tight leading-tight mb-6">
-              Join the future of <span className="text-transparent bg-clip-text bg-gradient-to-r from-zambia-green to-zambia-blue">Hospitality</span>
+              Join the future of <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-purple-600">Hospitality</span>
             </h1>
             <p className="text-gray-400 text-lg leading-relaxed">
               Start your 14-day free trial. No credit card required. Setup your hotel in minutes.
@@ -143,7 +143,7 @@ export default function SignupPage() {
           
           <div className="space-y-4">
             <div className="flex items-center gap-4 p-4 bg-white/5 backdrop-blur-lg rounded-xl border border-white/10">
-              <div className="p-3 bg-zambia-green/20 rounded-lg text-zambia-green">
+              <div className="p-3 bg-pink-600/20 rounded-lg text-pink-600">
                 <Building2 size={24} />
               </div>
               <div>
@@ -152,7 +152,7 @@ export default function SignupPage() {
               </div>
             </div>
             <div className="flex items-center gap-4 p-4 bg-white/5 backdrop-blur-lg rounded-xl border border-white/10">
-              <div className="p-3 bg-zambia-blue/20 rounded-lg text-zambia-blue">
+              <div className="p-3 bg-purple-600/20 rounded-lg text-purple-600">
                 <User size={24} />
               </div>
               <div>
@@ -175,18 +175,18 @@ export default function SignupPage() {
           {/* Step Indicator */}
           <div className="mb-8">
             <div className="flex space-x-2 mb-3">
-              <div className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${step >= 1 ? 'bg-zambia-green' : 'bg-white/10'}`} />
-              <div className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${step >= 2 ? 'bg-zambia-green' : 'bg-white/10'}`} />
-              <div className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${step >= 3 ? 'bg-zambia-green' : 'bg-white/10'}`} />
+              <div className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${step >= 1 ? 'bg-pink-600' : 'bg-white/10'}`} />
+              <div className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${step >= 2 ? 'bg-pink-600' : 'bg-white/10'}`} />
+              <div className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${step >= 3 ? 'bg-pink-600' : 'bg-white/10'}`} />
             </div>
             <div className="flex justify-between px-1">
-              <span className={`text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${step >= 1 ? 'text-zambia-green' : 'text-gray-500'}`}>
+              <span className={`text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${step >= 1 ? 'text-pink-600' : 'text-gray-500'}`}>
                 Personal
               </span>
-              <span className={`text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${step >= 2 ? 'text-zambia-green' : 'text-gray-500'}`}>
+              <span className={`text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${step >= 2 ? 'text-pink-600' : 'text-gray-500'}`}>
                 Security
               </span>
-              <span className={`text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${step >= 3 ? 'text-zambia-green' : 'text-gray-500'}`}>
+              <span className={`text-xs font-medium uppercase tracking-wider transition-colors duration-300 ${step >= 3 ? 'text-pink-600' : 'text-gray-500'}`}>
                 Contract
               </span>
             </div>
@@ -218,7 +218,7 @@ export default function SignupPage() {
                       <input
                         type="text"
                         required
-                        className="block w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-zambia-green focus:border-transparent transition-all"
+                        className="block w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-600 focus:border-transparent transition-all"
                         placeholder="John"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
@@ -230,7 +230,7 @@ export default function SignupPage() {
                       <input
                         type="text"
                         required
-                        className="block w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-zambia-green focus:border-transparent transition-all"
+                        className="block w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-600 focus:border-transparent transition-all"
                         placeholder="Doe"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
@@ -258,7 +258,7 @@ export default function SignupPage() {
                       <input
                         type="email"
                         required
-                        className="block w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-zambia-green focus:border-transparent transition-all"
+                        className="block w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-600 focus:border-transparent transition-all"
                         placeholder="name@company.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
@@ -276,7 +276,7 @@ export default function SignupPage() {
                       <input
                         type="password"
                         required
-                        className="block w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-zambia-green focus:border-transparent transition-all"
+                        className="block w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-600 focus:border-transparent transition-all"
                         placeholder="••••••••"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
@@ -304,12 +304,12 @@ export default function SignupPage() {
                     </p>
                     
                     {contractAgreed ? (
-                        <div className="flex items-center gap-4 p-4 bg-zambia-green/10 border border-zambia-green/20 rounded-xl">
-                            <div className="w-10 h-10 bg-zambia-green rounded-full flex items-center justify-center text-white shrink-0">
+                        <div className="flex items-center gap-4 p-4 bg-pink-600/10 border border-pink-600/20 rounded-xl">
+                            <div className="w-10 h-10 bg-pink-600 rounded-full flex items-center justify-center text-white shrink-0">
                                 <Check size={20} />
                             </div>
                             <div>
-                                <p className="font-bold text-zambia-green">Contract Signed</p>
+                                <p className="font-bold text-pink-600">Contract Signed</p>
                                 <p className="text-xs text-gray-400">Signed by {signerName}</p>
                             </div>
                             <button 
@@ -324,10 +324,10 @@ export default function SignupPage() {
                         <button
                             type="button"
                             onClick={() => setIsContractModalOpen(true)}
-                            className="w-full py-4 border-2 border-dashed border-white/20 hover:border-zambia-green/50 hover:bg-zambia-green/5 rounded-xl flex flex-col items-center justify-center gap-2 transition-all group"
+                            className="w-full py-4 border-2 border-dashed border-white/20 hover:border-pink-600/50 hover:bg-pink-600/5 rounded-xl flex flex-col items-center justify-center gap-2 transition-all group"
                         >
-                            <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center group-hover:bg-zambia-green/20 transition-colors">
-                                <PenTool className="text-gray-400 group-hover:text-zambia-green" size={24} />
+                            <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center group-hover:bg-pink-600/20 transition-colors">
+                                <PenTool className="text-gray-400 group-hover:text-pink-600" size={24} />
                             </div>
                             <span className="font-bold text-gray-300 group-hover:text-white">Review & Sign Contract</span>
                         </button>
@@ -365,7 +365,7 @@ export default function SignupPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 flex items-center justify-center gap-2 py-3.5 px-4 bg-zambia-green hover:bg-zambia-green/90 text-white font-bold rounded-xl transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-zambia-green/25"
+                className="flex-1 flex items-center justify-center gap-2 py-3.5 px-4 bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-xl transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-pink-600/25"
               >
                 {loading ? <Loader2 className="animate-spin h-5 w-5" /> : (
                   <>
@@ -380,7 +380,7 @@ export default function SignupPage() {
           <div className="mt-8 text-center">
             <p className="text-gray-400 text-sm">
               Already have an account?{' '}
-              <Link href="/login" className="text-zambia-green hover:text-green-400 font-medium transition-colors">
+              <Link href="/login" className="text-pink-600 hover:text-pink-400 font-medium transition-colors">
                 Sign in here
               </Link>
             </p>

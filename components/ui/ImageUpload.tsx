@@ -9,9 +9,10 @@ export interface ImageUploadProps {
   value: string;
   onChange: (url: string) => void;
   bucket?: string;
+  className?: string;
 }
 
-export default function ImageUpload({ value, onChange, bucket = 'menu-images' }: ImageUploadProps) {
+export default function ImageUpload({ value, onChange, bucket = 'menu-images', className }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -55,31 +56,30 @@ export default function ImageUpload({ value, onChange, bucket = 'menu-images' }:
   };
 
   return (
-    <div className="space-y-4">
-      <label className="block text-sm font-medium text-gray-700">Item Image</label>
+    <div className={`space-y-4 ${className || ''}`}>
+      {showLabel && <label className="block text-sm font-medium text-gray-700">Item Image</label>}
       
       {!value ? (
         <div 
           onClick={() => fileInputRef.current?.click()}
-          className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-zambia-green hover:bg-green-50 transition-colors group"
+          className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-zambia-green hover:bg-green-50 transition-colors group w-full h-full min-h-[12rem]"
         >
-          <div className="space-y-1 text-center">
+          <div className="space-y-1 text-center self-center">
             {uploading ? (
               <Loader2 className="mx-auto h-12 w-12 text-gray-400 animate-spin" />
             ) : (
               <Upload className="mx-auto h-12 w-12 text-gray-400 group-hover:text-zambia-green" />
             )}
-            <div className="flex text-sm text-gray-600">
+            <div className="flex text-sm text-gray-600 justify-center">
               <span className="relative font-medium text-zambia-green rounded-md focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-zambia-green">
                 Upload a file
               </span>
-              <p className="pl-1">or drag and drop</p>
             </div>
             <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
           </div>
         </div>
       ) : (
-        <div className="relative mt-1 w-full h-48 rounded-md overflow-hidden border border-gray-200 group">
+        <div className="relative mt-1 w-full h-full min-h-[12rem] rounded-md overflow-hidden border border-gray-200 group">
            <img src={value} alt="Uploaded" className="w-full h-full object-cover" />
            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
              <button

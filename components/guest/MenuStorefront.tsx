@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { 
   ShoppingBag, Utensils, Search, Plus, Minus, X, 
   MapPin, Phone, Clock, Star, ArrowRight, CheckCircle,
-  Instagram, Facebook, Twitter, ChefHat, Coffee, Mail, Home
+  Instagram, Facebook, Twitter, ChefHat, Coffee, Mail, Home, Wine
 } from 'lucide-react';
 import Image from 'next/image';
 import FoodDetailsPage from './FoodDetailsPage';
@@ -234,7 +234,7 @@ export default function MenuStorefront({
                                 <img src={item.image_url} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-slate-300">
-                                    <Utensils size={32} className="md:w-10 md:h-10" />
+                                    {activeTab === 'bar' ? <Wine size={32} className="md:w-10 md:h-10" /> : <Utensils size={32} className="md:w-10 md:h-10" />}
                                 </div>
                             )}
                             
@@ -414,9 +414,11 @@ export default function MenuStorefront({
                   <div key={item.id} className="flex gap-4 items-center group">
                     <div className="w-20 h-20 bg-white rounded-2xl overflow-hidden flex-shrink-0 border border-slate-100 flex items-center justify-center p-2">
                        {item.image_url ? (
-                         <img src={item.image_url} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" />
+                         <img src={item.image_url} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                        ) : (
-                         <div className="w-full h-full flex items-center justify-center text-slate-300"><Utensils size={24} /></div>
+                         <div className="w-full h-full flex items-center justify-center text-slate-300">
+                            {item.type === 'bar' ? <Wine size={24} className="opacity-50" /> : <Utensils size={24} className="opacity-50" />}
+                         </div>
                        )}
                     </div>
                     <div className="flex-1">
@@ -480,7 +482,8 @@ export default function MenuStorefront({
         isOpen={!!selectedItem} 
         onClose={() => setSelectedItem(null)} 
         onAddToCart={addToCart}
-        similarItems={menuItems.filter(i => i.id !== selectedItem?.id)}
+        similarItems={currentItems.filter(i => i.id !== selectedItem?.id)}
+        type={activeTab}
       />
 
       <CheckoutPage 

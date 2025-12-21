@@ -37,12 +37,12 @@ export default function ServiceContractModal({ isOpen, onClose, onSign, userName
             initial={{ scale: 0.95, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
-            className="relative w-full h-full bg-white shadow-2xl overflow-hidden flex flex-col"
+            className="relative w-full max-w-7xl h-[90vh] bg-white shadow-2xl overflow-hidden flex flex-col rounded-3xl"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-slate-50">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white">
+                    <div className="w-10 h-10 bg-pink-600 rounded-xl flex items-center justify-center text-white">
                         <PenTool size={20} />
                     </div>
                     <div>
@@ -95,7 +95,7 @@ export default function ServiceContractModal({ isOpen, onClose, onSign, userName
                             type="text" 
                             value={printedName}
                             onChange={(e) => setPrintedName(e.target.value)}
-                            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all"
+                            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium focus:ring-2 focus:ring-pink-600 focus:border-transparent outline-none transition-all"
                             placeholder="Full Name"
                         />
                     </div>
@@ -106,7 +106,7 @@ export default function ServiceContractModal({ isOpen, onClose, onSign, userName
                             className={`
                                 cursor-pointer p-4 rounded-xl border-2 transition-all flex items-start gap-4
                                 ${accepted 
-                                    ? 'border-slate-900 bg-slate-50' 
+                                    ? 'border-pink-600 bg-pink-50' 
                                     : 'border-slate-200 hover:border-slate-300'
                                 }
                             `}
@@ -114,14 +114,14 @@ export default function ServiceContractModal({ isOpen, onClose, onSign, userName
                             <div className={`
                                 w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-colors
                                 ${accepted 
-                                    ? 'border-slate-900 bg-slate-900' 
+                                    ? 'border-pink-600 bg-pink-600' 
                                     : 'border-slate-300 bg-white'
                                 }
                             `}>
                                 {accepted && <Check size={14} className="text-white" strokeWidth={3} />}
                             </div>
                             <div>
-                                <p className={`font-bold text-sm ${accepted ? 'text-slate-900' : 'text-slate-700'}`}>
+                                <p className={`font-bold text-sm ${accepted ? 'text-pink-600' : 'text-slate-700'}`}>
                                     I agree to the Terms of Service
                                 </p>
                                 <p className="text-xs text-slate-500 mt-1 leading-relaxed">
@@ -134,7 +134,7 @@ export default function ServiceContractModal({ isOpen, onClose, onSign, userName
                     <button
                         onClick={handleAccept}
                         disabled={!accepted || !printedName.trim()}
-                        className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-lg hover:bg-black transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                        className="w-full py-4 bg-pink-600 text-white rounded-xl font-bold text-lg hover:bg-pink-500 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                     >
                         <Check size={20} /> Sign & Accept
                     </button>

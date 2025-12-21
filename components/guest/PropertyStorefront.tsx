@@ -5,7 +5,7 @@ import { createClient } from '@/utils/supabase/client';
 import { 
   ShoppingBag, Utensils, BedDouble, Search, Plus, Minus, X, 
   MapPin, Phone, Mail, Clock, CheckCircle, Star, 
-  ChevronRight, ArrowRight, Instagram, Facebook, Twitter, Building2, ArrowLeft, Calendar, Info, Home, Coffee, User
+  ChevronRight, ArrowRight, Instagram, Facebook, Twitter, Building2, ArrowLeft, Calendar, Info, Home, Coffee, User, Wine
 } from 'lucide-react';
 
 interface PropertyStorefrontProps {
@@ -13,10 +13,12 @@ interface PropertyStorefrontProps {
   roomTypes: any[];
   menuItems: any[];
   categories: any[];
+  barMenuItems?: any[];
+  barCategories?: any[];
 }
 
-export default function PropertyStorefront({ property, roomTypes, menuItems, categories }: PropertyStorefrontProps) {
-  const [activeTab, setActiveTab] = useState<'rooms' | 'food' | 'amenities'>('rooms');
+export default function PropertyStorefront({ property, roomTypes, menuItems, categories, barMenuItems = [], barCategories = [] }: PropertyStorefrontProps) {
+  const [activeTab, setActiveTab] = useState<'rooms' | 'food' | 'bar' | 'amenities'>('rooms');
   const [activeRoom, setActiveRoom] = useState<any>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -72,7 +74,7 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
     : 1;
 
   // -- Cart Logic --
-  const addToCart = (item: any, type: 'room' | 'food') => {
+  const addToCart = (item: any, type: 'room' | 'food' | 'bar') => {
     setCart(prev => {
       // For rooms, we treat each booking configuration as unique if dates are involved
       const itemWithDetails = type === 'room' ? { 
@@ -84,10 +86,10 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
       } : item;
 
       // Simple implementation for food items
-      if (type === 'food') {
-         const existing = prev.find(i => i.id === item.id && i.type === 'food');
+      if (type === 'food' || type === 'bar') {
+         const existing = prev.find(i => i.id === item.id && i.type === type);
          if (existing) {
-             return prev.map(i => i.id === item.id && i.type === 'food' ? { ...i, quantity: i.quantity + 1 } : i);
+             return prev.map(i => i.id === item.id && i.type === type ? { ...i, quantity: i.quantity + 1 } : i);
          }
          return [...prev, { ...itemWithDetails, type, quantity: 1 }];
       }
@@ -129,6 +131,13 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
   });
 
   const filteredFood = menuItems.filter(item => {
+    const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
+    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          item.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
+  const filteredBarItems = barMenuItems.filter(item => {
     const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           item.description?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -215,7 +224,7 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
                       <input
                           ref={searchInputRef}
                           type="text"
-                          placeholder={activeTab === 'rooms' ? "Search rooms..." : activeTab === 'food' ? "Search menu..." : "Search amenities..."}
+                          placeholder={activeTab === 'rooms' ? "Search rooms..." : activeTab === 'food' ? "Search menu..." : activeTab === 'bar' ? "Search drinks..." : "Search amenities..."}
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
                           className="w-full pl-11 pr-4 py-2.5 bg-slate-100/50 border border-slate-200 rounded-full focus:outline-none focus:border-black/30 focus:bg-white focus:ring-4 focus:ring-black/5 transition-all font-medium placeholder:text-slate-400 text-sm"
@@ -335,10 +344,10 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
             <div className="flex flex-col md:flex-row gap-6 justify-between items-center mb-6 md:mb-10 pb-4 md:pb-8 border-b border-slate-100">
                 <div className="flex items-center gap-4">
                     {/* Tab Switcher */}
-                    <div className="flex bg-slate-100 p-1 rounded-full">
+                    <div className="flex bg-slate-100 p-1 rounded-full overflow-x-auto scrollbar-hide">
                         <button
                             onClick={() => { setActiveTab('rooms'); setSearchQuery(''); }}
-                            className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
+                            className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${
                                 activeTab === 'rooms' 
                                 ? 'bg-white text-black shadow-md' 
                                 : 'text-slate-500 hover:text-slate-700'
@@ -348,17 +357,27 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
                         </button>
                         <button
                             onClick={() => { setActiveTab('food'); setSearchQuery(''); }}
-                            className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
+                            className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${
                                 activeTab === 'food' 
                                 ? 'bg-white text-black shadow-md' 
                                 : 'text-slate-500 hover:text-slate-700'
                             }`}
                         >
-                            Food & Drink
+                            Dining
+                        </button>
+                        <button
+                            onClick={() => { setActiveTab('bar'); setSearchQuery(''); }}
+                            className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${
+                                activeTab === 'bar' 
+                                ? 'bg-white text-black shadow-md' 
+                                : 'text-slate-500 hover:text-slate-700'
+                            }`}
+                        >
+                            Bar
                         </button>
                         <button
                             onClick={() => { setActiveTab('amenities'); setSearchQuery(''); }}
-                            className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
+                            className={`px-6 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${
                                 activeTab === 'amenities' 
                                 ? 'bg-white text-black shadow-md' 
                                 : 'text-slate-500 hover:text-slate-700'
@@ -369,10 +388,10 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
                     </div>
                 </div>
 
-                {/* Categories (Only for Food) */}
-                {activeTab === 'food' && (
+                {/* Categories (Only for Food & Bar) */}
+                {(activeTab === 'food' || activeTab === 'bar') && (
                   <div className="flex overflow-x-auto gap-2 w-full md:w-auto pb-2 md:pb-0 scrollbar-hide mask-linear-fade [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-                      {['All', ...categories].map(cat => (
+                      {['All', ...(activeTab === 'food' ? categories : barCategories)].map(cat => (
                           <button
                               key={cat}
                               onClick={() => setSelectedCategory(cat)}
@@ -399,7 +418,7 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
                         className="group bg-white rounded-2xl md:rounded-3xl border border-slate-100 hover:border-slate-300 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full cursor-pointer"
                     >
                         {/* Image Area */}
-                        <div className="h-48 md:h-64 relative overflow-hidden bg-slate-100">
+                        <div className="aspect-square relative overflow-hidden bg-slate-100">
                             {room.image_url ? (
                                 <img src={room.image_url} alt={room.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                             ) : (
@@ -503,6 +522,68 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
                     <div className="col-span-full text-center py-20 text-slate-400">
                         <Utensils size={48} className="mx-auto mb-4 opacity-20" />
                         <p>No food items found.</p>
+                    </div>
+                )}
+              </div>
+            )}
+
+            {/* BAR GRID */}
+            {activeTab === 'bar' && (
+              <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-6 animate-in fade-in duration-500">
+                {filteredBarItems.map(item => (
+                    <div 
+                        key={item.id} 
+                        className="group bg-white rounded-2xl md:rounded-3xl border border-slate-100 hover:border-slate-300 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full cursor-pointer"
+                    >
+                        {/* Image Area */}
+                        <div className="h-32 md:h-56 relative overflow-hidden bg-slate-100">
+                            {item.image_url ? (
+                                <img src={item.image_url} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center text-slate-300">
+                                    <Wine size={32} className="md:w-10 md:h-10" />
+                                </div>
+                            )}
+                            
+                            <div className="absolute top-2 right-2 md:top-4 md:right-4 bg-white/95 backdrop-blur-md px-2 py-1 md:px-4 md:py-2 rounded-full shadow-lg z-10">
+                                <span className="font-black text-slate-900 text-sm md:text-lg">K{item.price}</span>
+                            </div>
+
+                             {item.discount_badge && (
+                                <div className="absolute top-2 left-2 md:top-4 md:left-4 z-10">
+                                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 bg-red-500 text-white rounded-md shadow-md animate-pulse-slow">
+                                        {item.discount_badge}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                        
+                        {/* Content */}
+                        <div className="p-3 md:p-6 flex-1 flex flex-col">
+                            <div className="flex justify-between items-start mb-2">
+                                <h3 className="font-bold text-sm md:text-xl text-slate-900 leading-tight group-hover:text-slate-700 transition-colors line-clamp-2">{item.name}</h3>
+                            </div>
+                            
+                            <p className="text-slate-500 text-xs md:text-sm leading-relaxed mb-2 md:mb-4 line-clamp-2 md:line-clamp-3 flex-1">{item.description}</p>
+                            
+                            <div className="mt-auto pt-2 md:pt-4">
+                                <button 
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        addToCart(item, 'bar');
+                                    }}
+                                    className="w-full py-2 bg-white border border-slate-200 text-slate-900 rounded-xl flex items-center justify-center gap-2 font-bold text-xs md:text-sm shadow-sm hover:bg-slate-50 active:scale-[0.98] transition-all"
+                                >
+                                    <Plus size={14} /> Add
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+                {filteredBarItems.length === 0 && (
+                    <div className="col-span-full text-center py-20 text-slate-400">
+                        <Wine size={48} className="mx-auto mb-4 opacity-20" />
+                        <p>No bar items found.</p>
                     </div>
                 )}
               </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Plus, Minus, ArrowLeft, Heart, Share2, Star, Check } from 'lucide-react';
+import { X, Plus, Minus, ArrowLeft, Heart, Share2, Star, Check, Wine, Utensils } from 'lucide-react';
 
 interface FoodDetailsPageProps {
   item: any;
@@ -9,9 +9,10 @@ interface FoodDetailsPageProps {
   onClose: () => void;
   onAddToCart: (item: any, quantity: number, options: any) => void;
   similarItems: any[];
+  type?: 'food' | 'bar';
 }
 
-export default function FoodDetailsPage({ item, isOpen, onClose, onAddToCart, similarItems }: FoodDetailsPageProps) {
+export default function FoodDetailsPage({ item, isOpen, onClose, onAddToCart, similarItems, type = 'food' }: FoodDetailsPageProps) {
   const [quantity, setQuantity] = useState(1);
   const [selectedOptions, setSelectedOptions] = useState<Set<string>>(new Set());
   const [isClosing, setIsClosing] = useState(false);
@@ -86,8 +87,12 @@ export default function FoodDetailsPage({ item, isOpen, onClose, onAddToCart, si
            {item.image_url ? (
              <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
            ) : (
-             <div className="w-full h-full flex items-center justify-center text-slate-300">
-                No Image
+             <div className="w-full h-full flex items-center justify-center text-slate-300 bg-slate-50">
+                {type === 'bar' ? (
+                    <Wine size={64} className="opacity-20" />
+                ) : (
+                    <Utensils size={64} className="opacity-20" />
+                )}
              </div>
            )}
            
@@ -181,9 +186,15 @@ export default function FoodDetailsPage({ item, isOpen, onClose, onAddToCart, si
                       <div className="grid grid-cols-3 gap-3 md:gap-4">
                          {similarItems.slice(0, 6).map((similar) => (
                             <div key={similar.id} className="flex flex-col gap-2 group cursor-pointer">
-                               <div className="aspect-square rounded-2xl bg-slate-100 relative overflow-hidden">
-                                  {similar.image_url && <img src={similar.image_url} alt={similar.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />}
-                                  <div className="absolute top-2 left-2 flex flex-col gap-1">
+                              <div className="aspect-square rounded-2xl bg-slate-100 relative overflow-hidden">
+                                 {similar.image_url ? (
+                                   <img src={similar.image_url} alt={similar.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                 ) : (
+                                   <div className="w-full h-full flex items-center justify-center text-slate-300">
+                                      {type === 'bar' ? <Wine size={24} className="opacity-50" /> : <Utensils size={24} className="opacity-50" />}
+                                   </div>
+                                 )}
+                                 <div className="absolute top-2 left-2 flex flex-col gap-1">
                                     <span className="bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm">K{similar.price}</span>
                                  </div>
                                  {similar.dietary_info && (

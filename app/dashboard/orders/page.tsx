@@ -587,11 +587,17 @@ export default function OrdersPage() {
                                             {item.quantity}x
                                         </span>
 
-                                        {itemImage && (
-                                            <div className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden shrink-0">
+                                        <div className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden shrink-0 flex items-center justify-center border border-slate-200">
+                                            {itemImage ? (
                                                 <img src={itemImage} alt={itemName} className="w-full h-full object-cover" />
-                                            </div>
-                                        )}
+                                            ) : (
+                                                activeTab === 'bar' ? (
+                                                    <Wine className="text-slate-300 w-6 h-6 opacity-50" />
+                                                ) : (
+                                                    <Utensils className="text-slate-300 w-6 h-6 opacity-50" />
+                                                )
+                                            )}
+                                        </div>
 
                                         <div className="flex-1">
                                             <div className="flex justify-between items-start">

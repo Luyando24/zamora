@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { 
   X, ArrowLeft, CreditCard, Wallet, Banknote, 
   MapPin, Phone, MessageSquare, CheckCircle2,
-  Loader2, Utensils, Smartphone
+  Loader2, Utensils, Smartphone, Wine
 } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 
@@ -245,7 +245,7 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
                                     <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-slate-300">
-                                        <Utensils size={16} />
+                                        {item.type === 'bar' ? <Wine size={16} /> : <Utensils size={16} />}
                                     </div>
                                 )}
                             </div>
