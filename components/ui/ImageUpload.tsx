@@ -10,9 +10,10 @@ export interface ImageUploadProps {
   onChange: (url: string) => void;
   bucket?: string;
   className?: string;
+  showLabel?: boolean;
 }
 
-export default function ImageUpload({ value, onChange, bucket = 'menu-images', className }: ImageUploadProps) {
+export default function ImageUpload({ value, onChange, bucket = 'menu-images', className, showLabel = true }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
