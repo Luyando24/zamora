@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { FileText, TrendingUp, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { FileText, TrendingUp, AlertCircle, CheckCircle2, Trash2 } from 'lucide-react';
 import { format, subDays } from 'date-fns';
 import { useProperty } from '../context/PropertyContext';
 
@@ -68,6 +68,34 @@ export default function ZraDashboard() {
       });
     }
     setLoading(false);
+  };
+
+  const deleteTransaction = async (id: string) => {
+    if (!confirm('Are you sure you want to permanently delete this transaction? This action cannot be undone.')) return;
+    
+    try {
+      const { error } = await supabase
+        .from('zra_transactions')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      const updatedTransactions = transactions.filter(t => t.id !== id);
+      setTransactions(updatedTransactions);
+      
+      const totalSales = updatedTransactions.reduce((sum, tx: any) => sum + (tx.folios?.total_amount || 0), 0);
+      setStats({
+        totalSales,
+        vatLiability: totalSales * (16 / 116),
+        tourismLevy: totalSales * 0.015,
+        fiscalizedCount: updatedTransactions.length
+      });
+
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
+      alert('Failed to delete transaction');
+    }
   };
 
   return (

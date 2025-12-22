@@ -6,7 +6,7 @@ import { createClient } from '@/utils/supabase/client';
 import {
   LayoutDashboard, CalendarDays, BedDouble, FileText,
   Settings, LogOut, DoorOpen, Utensils, Building2,
-  ChevronRight, User, Wine, Users
+  ChevronRight, User, Wine, Users, History
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
