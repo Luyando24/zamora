@@ -180,6 +180,40 @@ export default function EditBookingModal({ isOpen, onClose, onSuccess, booking, 
     }
   };
 
+  const handleDeleteBooking = async () => {
+    if (!confirm('Are you sure you want to permanently delete this booking? This action cannot be undone.')) return;
+    setLoading(true);
+
+    try {
+      if (navigator.onLine) {
+        const { error } = await supabase
+          .from('bookings')
+          .delete()
+          .eq('id', booking.id);
+
+        if (error) throw error;
+      } else {
+        await addToSyncQueue({
+          id: uuidv4(),
+          table: 'bookings',
+          action: 'DELETE',
+          payload: { 
+            id: booking.id
+          },
+          timestamp: Date.now()
+        });
+        alert('Deletion saved locally.');
+      }
+
+      onSuccess();
+      onClose();
+    } catch (error: any) {
+      alert('Error deleting booking: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleCancelBooking = async () => {
     if (!confirm('Are you sure you want to cancel this booking?')) return;
     setLoading(true);
@@ -340,13 +374,22 @@ export default function EditBookingModal({ isOpen, onClose, onSuccess, booking, 
         </div>
 
         <div className="flex justify-between pt-4">
-          <button
-            type="button"
-            onClick={handleCancelBooking}
-            className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-          >
-            Cancel Booking
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={handleDeleteBooking}
+              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-900 hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-900"
+            >
+              Delete
+            </button>
+            <button
+              type="button"
+              onClick={handleCancelBooking}
+              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            >
+              Cancel Booking
+            </button>
+          </div>
           
           <div className="flex gap-2">
             <button

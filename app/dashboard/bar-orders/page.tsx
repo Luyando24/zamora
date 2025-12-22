@@ -240,6 +240,25 @@ export default function BarOrdersPage() {
     return `${hours}h ${minutes % 60}m`;
   };
 
+  const deleteOrder = async (orderId: string) => {
+    if (!confirm('Are you sure you want to permanently delete this order? This action cannot be undone.')) return;
+    
+    try {
+      const { error } = await supabase
+        .from('bar_orders')
+        .delete()
+        .eq('id', orderId);
+
+      if (error) throw error;
+
+      setOrders(prev => prev.filter(o => o.id !== orderId));
+      setSelectedOrder(null);
+    } catch (error) {
+      console.error('Error deleting order:', error);
+      alert('Failed to delete order');
+    }
+  };
+
   // Group orders by status
   const groupedOrders = {
     pending: orders.filter(o => o.status === 'pending'),
@@ -477,6 +496,13 @@ export default function BarOrdersPage() {
                     <p className="text-2xl font-black text-slate-900">K{selectedOrder.total_amount.toFixed(2)}</p>
                  </div>
                  <div className="flex gap-3">
+                     <button 
+                       onClick={() => deleteOrder(selectedOrder.id)}
+                       className="px-4 py-2.5 bg-red-50 border border-red-100 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-colors text-sm active:scale-95 flex items-center gap-2"
+                     >
+                        <Trash2 size={16} />
+                        Delete
+                     </button>
                      <button 
                        onClick={() => setSelectedOrder(null)}
                        className="px-5 py-2.5 bg-slate-800 border border-slate-800 text-white font-bold rounded-xl hover:bg-slate-700 transition-colors text-sm active:scale-95 shadow-lg shadow-slate-800/10"

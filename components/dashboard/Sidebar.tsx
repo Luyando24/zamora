@@ -25,6 +25,7 @@ export const navigationGroups = [
     items: [
       { name: 'Room Bookings', href: '/dashboard/inventory', icon: CalendarDays },
       { name: 'Food & Bar Orders', href: '/dashboard/orders', icon: Utensils },
+      { name: 'Order History', href: '/dashboard/order-history', icon: History },
       { name: 'Food & Bar Menu', href: '/dashboard/menu', icon: Utensils },
       { name: 'Housekeeping', href: '/housekeeping', icon: BedDouble },
     ]

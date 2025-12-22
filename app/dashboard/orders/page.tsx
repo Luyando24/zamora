@@ -368,6 +368,30 @@ export default function OrdersPage() {
     fetchBarOrders();
   };
 
+  const deleteOrder = async (orderId: string, type: 'food' | 'bar') => {
+    if (!confirm('Are you sure you want to permanently delete this order? This action cannot be undone.')) return;
+    
+    try {
+      const table = type === 'food' ? 'orders' : 'bar_orders';
+      const { error } = await supabase
+        .from(table)
+        .delete()
+        .eq('id', orderId);
+
+      if (error) throw error;
+
+      if (type === 'food') {
+        setFoodOrders(prev => prev.filter(o => o.id !== orderId));
+      } else {
+        setBarOrders(prev => prev.filter(o => o.id !== orderId));
+      }
+      setSelectedOrder(null);
+    } catch (error) {
+      console.error('Error deleting order:', error);
+      alert('Failed to delete order');
+    }
+  };
+
   return (
     <div className="h-screen flex flex-col bg-slate-50 font-sans antialiased">
       {/* Header */}
@@ -649,6 +673,13 @@ export default function OrdersPage() {
                     <p className="text-2xl font-black text-slate-900">K{selectedOrder.total_amount.toFixed(2)}</p>
                  </div>
                  <div className="flex gap-3">
+                     <button 
+                       onClick={() => deleteOrder(selectedOrder.id, activeTab)}
+                       className="px-4 py-2.5 bg-red-50 border border-red-100 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-colors text-sm active:scale-95 flex items-center gap-2"
+                     >
+                        <Trash2 size={16} />
+                        Delete
+                     </button>
                      <button 
                        onClick={() => setSelectedOrder(null)}
                        className="px-5 py-2.5 bg-slate-800 border border-slate-800 text-white font-bold rounded-xl hover:bg-slate-700 transition-colors text-sm active:scale-95 shadow-lg shadow-slate-800/10"
