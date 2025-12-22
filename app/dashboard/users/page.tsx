@@ -22,7 +22,8 @@ export default function TeamPage() {
     email: '',
     firstName: '',
     lastName: '',
-    role: 'staff'
+    role: 'staff',
+    password: ''
   });
   const [inviting, setInviting] = useState(false);
 
@@ -84,9 +85,9 @@ export default function TeamPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
-      toast.success('Invitation sent successfully');
+      toast.success('Member added successfully');
       setIsInviteOpen(false);
-      setFormData({ email: '', firstName: '', lastName: '', role: 'staff' });
+      setFormData({ email: '', firstName: '', lastName: '', role: 'staff', password: '' });
       fetchTeam(); // Refresh list
     } catch (error: any) {
       toast.error(error.message);
@@ -112,7 +113,7 @@ export default function TeamPage() {
           className="px-4 py-2 bg-black text-white rounded-xl hover:bg-slate-800 font-bold shadow-lg shadow-slate-900/10 flex items-center gap-2 transition-all active:scale-95"
         >
           <Plus size={18} />
-          Invite Member
+          Add Member
         </button>
       </div>
 
@@ -174,11 +175,11 @@ export default function TeamPage() {
         )}
       </div>
 
-      {/* Invite Modal */}
+      {/* Add Member Modal */}
       <Modal
         isOpen={isInviteOpen}
         onClose={() => setIsInviteOpen(false)}
-        title="Invite Team Member"
+        title="Add Team Member"
       >
         <form onSubmit={handleInvite} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
@@ -203,17 +204,29 @@ export default function TeamPage() {
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
-            <input
-              type="email"
-              required
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-black/5 outline-none text-slate-900"
-              value={formData.email}
-              onChange={e => setFormData({...formData, email: e.target.value})}
-            />
-          </div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
+              <input
+                type="email"
+                required
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-black/5 outline-none text-slate-900"
+                value={formData.email}
+                onChange={e => setFormData({...formData, email: e.target.value})}
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+              <input
+                type="password"
+                required
+                minLength={6}
+                className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-black/5 outline-none text-slate-900"
+                value={formData.password}
+                onChange={e => setFormData({...formData, password: e.target.value})}
+              />
+            </div>
 
-          <div>
+            <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Role</label>
             <div className="grid grid-cols-3 gap-3">
               {['admin', 'manager', 'staff'].map((role) => (
@@ -250,7 +263,7 @@ export default function TeamPage() {
               disabled={inviting}
               className="flex-1 px-4 py-2 bg-black text-white rounded-xl font-bold hover:bg-slate-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              {inviting ? <Loader2 className="animate-spin" /> : 'Send Invite'}
+              {inviting ? <Loader2 className="animate-spin" /> : 'Add Member'}
             </button>
           </div>
         </form>

@@ -12,9 +12,9 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { email, firstName, lastName, role, propertyId } = body;
+    const { email, firstName, lastName, role, propertyId, password } = body;
 
-    if (!email || !role || !propertyId) {
+    if (!email || !role || !propertyId || !password) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -25,15 +25,25 @@ export async function POST(req: NextRequest) {
       .eq('id', user.id)
       .single();
 
-    if (!requesterProfile || requesterProfile.property_id !== propertyId || !['admin', 'manager'].includes(requesterProfile.role)) {
-       return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
+    if (!requesterProfile) {
+        // Fallback: Check if user is super_admin (which might not have a profile linked to this property directly but has access)
+        const { data: superAdmin } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+        if (superAdmin?.role !== 'super_admin') {
+             return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
+        }
+    } else if ((requesterProfile.property_id !== propertyId) && requesterProfile.role !== 'super_admin') {
+         // Allow if property matches OR if super_admin
+         return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 });
     }
 
     const adminClient = getSupabaseAdmin();
 
-    // 1. Invite User
-    const { data: authData, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(email, {
-        data: {
+    // 1. Create User directly
+    const { data: authData, error: createError } = await adminClient.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true, // Auto-confirm email since admin is adding them
+        user_metadata: {
             first_name: firstName,
             last_name: lastName,
             property_id: propertyId,
@@ -41,8 +51,8 @@ export async function POST(req: NextRequest) {
         }
     });
 
-    if (inviteError) {
-        return NextResponse.json({ error: inviteError.message }, { status: 500 });
+    if (createError) {
+        return NextResponse.json({ error: createError.message }, { status: 500 });
     }
     
     // 2. Create/Update Profile
