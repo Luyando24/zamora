@@ -1,10 +1,13 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { ArrowRight, CheckCircle2, BarChart3, ShieldCheck, Zap, Smartphone } from 'lucide-react';
+import { ArrowRight, CheckCircle2, BarChart3, ShieldCheck, Zap, Smartphone, Menu, X } from 'lucide-react';
+import { useState } from 'react';
 
 export default function LandingPage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-[#030712] text-white overflow-x-hidden selection:bg-pink-600 selection:text-white">
       
@@ -15,7 +18,7 @@ export default function LandingPage() {
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-600 to-pink-400 flex items-center justify-center font-bold text-xl shadow-lg shadow-pink-600/20">
               Z
             </div>
-            <span className="font-bold text-xl tracking-tight">ZAMORA</span>
+            <span className="font-bold text-xl tracking-tight uppercase">ZAMORA</span>
           </div>
           
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-300">
@@ -42,13 +45,72 @@ export default function LandingPage() {
             </Link>
             <Link
               href="/dashboard"
-              className="group relative px-6 py-2.5 bg-white text-[#030712] rounded-full font-bold text-sm hover:bg-gray-100 transition-all active:scale-95"
+              className="group relative px-6 py-2.5 bg-white text-[#030712] rounded-full font-bold text-sm hover:bg-gray-100 transition-all active:scale-95 hidden sm:block"
             >
               Get Started
               <span className="absolute inset-0 rounded-full ring-2 ring-white/50 group-hover:ring-white/80 transition-all animate-pulse"></span>
             </Link>
+
+            {/* Mobile Menu Button */}
+            <button 
+              className="md:hidden p-2 text-gray-300 hover:text-white"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X /> : <Menu />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden bg-[#030712] border-b border-white/10 overflow-hidden"
+            >
+              <div className="px-6 py-8 flex flex-col gap-6">
+                <Link 
+                  href="#features" 
+                  className="text-lg font-medium text-gray-300 hover:text-white"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Features
+                </Link>
+                <Link 
+                  href="#compliance" 
+                  className="text-lg font-medium text-gray-300 hover:text-white"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Compliance
+                </Link>
+                <Link 
+                  href="#pricing" 
+                  className="text-lg font-medium text-gray-300 hover:text-white"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Pricing
+                </Link>
+                <div className="h-px bg-white/10 my-2"></div>
+                <Link 
+                  href="/dashboard" 
+                  className="text-lg font-medium text-gray-300 hover:text-white"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className="text-center px-6 py-3 bg-white text-[#030712] rounded-full font-bold text-lg hover:bg-gray-100 transition-all active:scale-95"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Get Started
+                </Link>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
 
       {/* Hero Section */}
@@ -106,13 +168,12 @@ export default function LandingPage() {
                 </Link>
               </motion.div>
               
-              <motion.button 
-                whileHover={{ scale: 1.05 }} 
-                whileTap={{ scale: 0.95 }}
-                className="w-full sm:w-auto px-8 py-4 bg-white/5 text-white border border-white/10 rounded-full font-bold text-lg hover:bg-white/10 transition-all backdrop-blur-sm"
-              >
-                Book Demo
-              </motion.button>
+                <Link 
+                  href="/dashboard"
+                  className="w-full sm:w-auto px-8 py-4 bg-white/5 text-white border border-white/10 rounded-full font-bold text-lg hover:bg-white/10 transition-all backdrop-blur-sm flex items-center justify-center"
+                >
+                  Book Demo
+                </Link>
             </motion.div>
           </div>
 
@@ -219,7 +280,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center font-bold text-sm">Z</div>
-            <span className="font-bold tracking-tight">ZAMORA</span>
+            <span className="font-bold tracking-tight uppercase">ZAMORA</span>
           </div>
           <div className="text-sm text-gray-500">
             © 2025 Zamora Systems. Built for Zambia 🇿🇲

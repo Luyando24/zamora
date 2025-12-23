@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import PropertyStorefront from '@/components/guest/PropertyStorefront';
+import ModernPropertyDetails from '@/components/guest/ModernPropertyDetails';
 import { validate as isUuid } from 'uuid';
 
 // Force dynamic rendering
@@ -62,7 +62,7 @@ export default async function BookingPage({ params }: { params: Promise<{ proper
   const uniqueBarCategories = Array.from(new Set((barMenuItems || []).map((item: any) => item.category).filter(Boolean))).sort();
 
   return (
-    <PropertyStorefront
+    <ModernPropertyDetails
       property={property}
       roomTypes={roomTypes || []}
       menuItems={menuItems || []}
