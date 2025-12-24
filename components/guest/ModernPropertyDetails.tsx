@@ -8,7 +8,8 @@ import {
   ShoppingBag, Utensils, BedDouble, Search, Plus, Minus, X, 
   MapPin, Phone, Mail, Clock, CheckCircle, Star, 
   ChevronRight, ArrowRight, Instagram, Facebook, Twitter, Building2, ArrowLeft, Calendar, Info, Home, Coffee, User, Wine, Image as ImageIcon,
-  Share, Heart, ChevronLeft
+  Share, Heart, ChevronLeft,
+  BadgeCheck, Wifi, Wind, Tv
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
@@ -277,83 +278,139 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
             </button>
         </div>
 
-        {/* Gallery Grid Overlay - Desktop Only */}
-        {displayImages.length > 0 && (
-            <div className="hidden md:block absolute top-24 right-6 lg:right-12 z-20 w-[400px] lg:w-[480px]">
-                <div className="relative grid grid-cols-3 gap-3">
-                    
-                    {/* Navigation Buttons */}
-                    {displayImages.length > 4 && (
-                        <>
-                            <button 
-                                onClick={prevGallery}
-                                className="absolute -left-12 top-1/2 -translate-y-1/2 p-2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white transition-colors z-30"
-                            >
-                                <ChevronLeft size={24} />
-                            </button>
-                            <button 
-                                onClick={nextGallery}
-                                className="absolute -right-12 top-1/2 -translate-y-1/2 p-2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white transition-colors z-30"
-                            >
-                                <ChevronRight size={24} />
-                            </button>
-                        </>
-                    )}
-
-                    <AnimatePresence mode="popLayout">
-                        {/* First 3 images */}
-                        {currentGalleryImages.slice(0, 3).map((img: string, i: number) => (
-                            <div key={`small-${i}`} className="aspect-square relative bg-slate-200 border-8 border-white shadow-2xl overflow-hidden">
-                                <motion.div
-                                    key={`${galleryPage}-${i}`}
-                                    initial={{ rotateY: 90, opacity: 0 }}
-                                    animate={{ rotateY: 0, opacity: 1 }}
-                                    exit={{ rotateY: -90, opacity: 0 }}
-                                    transition={{ duration: 0.5, ease: "easeInOut", delay: i * 0.1 }}
-                                    className="absolute inset-0"
-                                >
-                                    <img src={img} alt={`Gallery ${i+1}`} className="w-full h-full object-cover" />
-                                </motion.div>
+        {/* Overlay Content Wrapper - Aligned with Max Width */}
+        <div className="absolute inset-0 pointer-events-none z-20">
+            <div className="max-w-7xl mx-auto px-6 md:px-12 h-full relative">
+                
+                {/* Check Availability Form - Left Side */}
+                <div className="hidden md:block absolute top-1/2 -translate-y-1/2 left-6 md:left-12 lg:left-0 pointer-events-auto w-[380px] bg-white rounded-3xl p-6 shadow-2xl animate-in slide-in-from-left-10 duration-700">
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                        <div className="border border-slate-200 rounded-2xl p-3 hover:border-slate-400 transition-colors bg-slate-50">
+                            <label className="text-[10px] font-black text-slate-400 uppercase block mb-1 tracking-wider">Check-in</label>
+                            <div className="flex items-center gap-2">
+                                <input 
+                                    type="date" 
+                                    className="w-full text-sm font-bold text-slate-900 bg-transparent outline-none"
+                                    value={bookingDates.checkIn}
+                                    onChange={(e) => setBookingDates(prev => ({ ...prev, checkIn: e.target.value }))}
+                                />
                             </div>
-                        ))}
-                        
-                        {/* 4th large image */}
-                        {currentGalleryImages.length > 3 && (
-                            <div className="col-span-3 aspect-[2.5/1] relative bg-slate-200 border-8 border-white shadow-2xl overflow-hidden">
-                                <motion.div
-                                    key={`${galleryPage}-large`}
-                                    initial={{ rotateY: 90, opacity: 0 }}
-                                    animate={{ rotateY: 0, opacity: 1 }}
-                                    exit={{ rotateY: -90, opacity: 0 }}
-                                    transition={{ duration: 0.5, ease: "easeInOut", delay: 0.3 }}
-                                    className="absolute inset-0"
-                                >
-                                    <img src={currentGalleryImages[3]} alt="Gallery 4" className="w-full h-full object-cover" />
-                                </motion.div>
+                        </div>
+                        <div className="border border-slate-200 rounded-2xl p-3 hover:border-slate-400 transition-colors bg-slate-50">
+                            <label className="text-[10px] font-black text-slate-400 uppercase block mb-1 tracking-wider">Check-out</label>
+                            <div className="flex items-center gap-2">
+                                <input 
+                                    type="date" 
+                                    className="w-full text-sm font-bold text-slate-900 bg-transparent outline-none"
+                                    value={bookingDates.checkOut}
+                                    min={bookingDates.checkIn}
+                                    onChange={(e) => setBookingDates(prev => ({ ...prev, checkOut: e.target.value }))}
+                                />
                             </div>
-                        )}
-                    </AnimatePresence>
+                        </div>
+                    </div>
+                    <button 
+                        onClick={() => scrollToSection(roomsRef, 'rooms')}
+                        className="w-full py-4 bg-zambia-red hover:bg-red-700 text-white font-bold rounded-2xl transition-all shadow-lg hover:shadow-xl active:scale-95 text-lg"
+                    >
+                        Check Availability
+                    </button>
                 </div>
+
+                {/* Gallery Grid Overlay - Desktop Only */}
+                {displayImages.length > 0 && (
+                    <div className="hidden xl:block absolute top-24 right-6 md:right-12 lg:right-0 pointer-events-auto w-[400px] lg:w-[480px]">
+                        <div className="relative grid grid-cols-3 gap-3">
+                            
+                            {/* Navigation Buttons */}
+                            {displayImages.length > 4 && (
+                                <>
+                                    <button 
+                                        onClick={prevGallery}
+                                        className="absolute -left-12 top-1/2 -translate-y-1/2 p-2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white transition-colors z-30"
+                                    >
+                                        <ChevronLeft size={24} />
+                                    </button>
+                                    <button 
+                                        onClick={nextGallery}
+                                        className="absolute -right-12 top-1/2 -translate-y-1/2 p-2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white transition-colors z-30"
+                                    >
+                                        <ChevronRight size={24} />
+                                    </button>
+                                </>
+                            )}
+
+                            <AnimatePresence mode="popLayout">
+                                {/* First 3 images */}
+                                {currentGalleryImages.slice(0, 3).map((img: string, i: number) => (
+                                    <div key={`small-${i}`} className="aspect-square relative bg-slate-200 border-8 border-white shadow-2xl overflow-hidden">
+                                        <motion.div
+                                            key={`${galleryPage}-${i}`}
+                                            initial={{ rotateY: 90, opacity: 0 }}
+                                            animate={{ rotateY: 0, opacity: 1 }}
+                                            exit={{ rotateY: -90, opacity: 0 }}
+                                            transition={{ duration: 0.5, ease: "easeInOut", delay: i * 0.1 }}
+                                            className="absolute inset-0"
+                                        >
+                                            <img src={img} alt={`Gallery ${i+1}`} className="w-full h-full object-cover" />
+                                        </motion.div>
+                                    </div>
+                                ))}
+                                
+                                {/* 4th large image */}
+                                {currentGalleryImages.length > 3 && (
+                                    <div className="col-span-3 aspect-[2.5/1] relative bg-slate-200 border-8 border-white shadow-2xl overflow-hidden">
+                                        <motion.div
+                                            key={`${galleryPage}-large`}
+                                            initial={{ rotateY: 90, opacity: 0 }}
+                                            animate={{ rotateY: 0, opacity: 1 }}
+                                            exit={{ rotateY: -90, opacity: 0 }}
+                                            transition={{ duration: 0.5, ease: "easeInOut", delay: 0.3 }}
+                                            className="absolute inset-0"
+                                        >
+                                            <img src={currentGalleryImages[3]} alt="Gallery 4" className="w-full h-full object-cover" />
+                                        </motion.div>
+                                    </div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    </div>
+                )}
             </div>
-        )}
+        </div>
 
         <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12">
             <div className="max-w-7xl mx-auto">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-md border border-white/30 rounded-full text-white text-xs font-bold uppercase tracking-wider mb-4">
-                    <Star size={14} className="fill-white" />
-                    <span>Luxury Stay</span>
-                </div>
-                <h1 className="text-4xl md:text-6xl font-black text-white mb-2 tracking-tight">{property.name}</h1>
-                <div className="flex items-center gap-4 text-white/90 font-medium text-sm md:text-base">
-                    <div className="flex items-center gap-1">
-                        <MapPin size={18} />
-                        {property.city}, {property.country}
+                <div className="flex items-end justify-between">
+                    <div>
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-md border border-white/30 rounded-full text-white text-xs font-bold uppercase tracking-wider mb-4">
+                            <Star size={14} className="fill-white" />
+                            <span>Luxury Stay</span>
+                        </div>
+                        <h1 className="text-4xl md:text-6xl font-black text-white mb-2 tracking-tight">{property.name}</h1>
+                        <div className="flex items-center gap-4 text-white/90 font-medium text-sm md:text-base">
+                            <div className="flex items-center gap-1">
+                                <MapPin size={18} />
+                                {property.city}, {property.country}
+                            </div>
+                            <span>•</span>
+                            <div className="flex items-center gap-1">
+                                <Star size={18} className="fill-yellow-400 text-yellow-400" />
+                                4.9 (128 Reviews)
+                            </div>
+                        </div>
                     </div>
-                    <span>•</span>
-                    <div className="flex items-center gap-1">
-                        <Star size={18} className="fill-yellow-400 text-yellow-400" />
-                        4.9 (128 Reviews)
-                    </div>
+                    
+                    {/* Property Logo */}
+                    {property.logo_url && (
+                        <div className="hidden md:block w-32 h-32 bg-white rounded-2xl p-2 shadow-2xl rotate-3 transition-transform hover:rotate-0">
+                            <img 
+                                src={property.logo_url} 
+                                alt={`${property.name} logo`} 
+                                className="w-full h-full object-contain rounded-xl"
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
@@ -446,49 +503,55 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
                   <div className="space-y-6">
                       {roomTypes.map(room => {
                           const isAvailable = availableRoomTypes ? availableRoomTypes.has(room.id) : true;
+                          const queryParams = bookingDates.checkIn && bookingDates.checkOut 
+                              ? `?checkIn=${bookingDates.checkIn}&checkOut=${bookingDates.checkOut}` 
+                              : '';
+                              
                           return (
-                            <div key={room.id} className="group border border-slate-200 rounded-3xl overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col md:flex-row bg-white">
-                                <div className="md:w-2/5 relative h-64 md:h-auto overflow-hidden">
+                            <div key={room.id} className="group border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col md:flex-row bg-white h-auto md:h-52">
+                                <div className="md:w-1/3 relative h-48 md:h-full overflow-hidden">
                                     {room.image_url ? (
                                         <img src={room.image_url} alt={room.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                                     ) : (
                                         <div className="w-full h-full bg-slate-100 flex items-center justify-center">
-                                            <BedDouble size={40} className="text-slate-300" />
+                                            <BedDouble size={32} className="text-slate-300" />
                                         </div>
                                     )}
                                 </div>
-                                <div className="flex-1 p-6 md:p-8 flex flex-col">
-                                    <div className="flex justify-between items-start mb-4">
+                                <div className="flex-1 p-4 flex flex-col justify-between">
+                                    <div className="flex justify-between items-start">
                                         <div>
-                                            <h3 className="text-xl font-bold text-slate-900 mb-1">{room.name}</h3>
-                                            <div className="flex items-center gap-4 text-sm text-slate-500">
-                                                <span className="flex items-center gap-1"><User size={16} /> Max {room.capacity}</span>
-                                                <span className="flex items-center gap-1"><BedDouble size={16} /> {room.bed_type || 'King Bed'}</span>
+                                            <h3 className="text-lg font-bold text-slate-900 mb-1">{room.name}</h3>
+                                            <div className="flex items-center gap-3 text-xs text-slate-500">
+                                                <span className="flex items-center gap-1"><User size={14} /> Max {room.capacity}</span>
+                                                <span className="flex items-center gap-1"><BedDouble size={14} /> {room.bed_type || 'King Bed'}</span>
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-2xl font-black text-slate-900">K{room.base_price}</p>
-                                            <p className="text-xs text-slate-500">/ night</p>
+                                            <p className="text-xl font-black text-slate-900">K{room.base_price}</p>
+                                            <p className="text-[10px] text-slate-500">/ night</p>
                                         </div>
                                     </div>
                                     
-                                    <p className="text-slate-600 text-sm mb-6 line-clamp-2">{room.description}</p>
+                                    <p className="text-slate-600 text-xs line-clamp-2 my-2">{room.description}</p>
                                     
-                                    <div className="mt-auto flex items-center justify-between">
-                                        <button className="text-sm font-bold text-slate-900 underline hover:text-slate-600">
+                                    <div className="flex items-center justify-between mt-1">
+                                        <Link 
+                                            href={`/book/${property.slug || property.id}/room/${room.id}${queryParams}`}
+                                            className="text-xs font-bold text-slate-900 underline hover:text-slate-600"
+                                        >
                                             View Details
-                                        </button>
-                                        <button 
-                                            onClick={() => addToCart(room, 'room')}
-                                            disabled={!isAvailable}
-                                            className={`px-6 py-3 rounded-full font-bold text-sm transition-all ${
+                                        </Link>
+                                        <Link 
+                                            href={`/book/${property.slug || property.id}/room/${room.id}${queryParams}`}
+                                            className={`px-4 py-2 rounded-lg font-bold text-sm transition-all transform active:scale-95 ${
                                                 isAvailable 
-                                                ? 'bg-slate-900 text-white hover:bg-black hover:scale-105' 
-                                                : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                                    ? 'bg-slate-900 text-white hover:bg-black shadow-md hover:shadow-lg' 
+                                                    : 'bg-slate-100 text-slate-400 cursor-not-allowed pointer-events-none'
                                             }`}
                                         >
-                                            {isAvailable ? 'Book Now' : 'Sold Out'}
-                                        </button>
+                                            {isAvailable ? 'Book Now' : 'Unavailable'}
+                                        </Link>
                                     </div>
                                 </div>
                             </div>
