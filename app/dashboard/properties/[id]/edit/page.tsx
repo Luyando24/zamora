@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import ImageUpload from '@/components/ui/ImageUpload';
@@ -56,8 +56,8 @@ const AMENITIES_BY_TYPE: Record<string, string[]> = {
   ]
 };
 
-export default function EditPropertyPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function EditPropertyPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);

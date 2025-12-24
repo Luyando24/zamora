@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/utils/supabase/client';
 import GuestNavbar from './GuestNavbar';
 import { 
   ShoppingBag, Utensils, BedDouble, Search, Plus, Minus, X, 
   MapPin, Phone, Mail, Clock, CheckCircle, Star, 
   ChevronRight, ArrowRight, Instagram, Facebook, Twitter, Building2, ArrowLeft, Calendar, Info, Home, Coffee, User, Wine, Image as ImageIcon,
-  Share, Heart
+  Share, Heart, ChevronLeft
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
@@ -25,6 +26,7 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
   // -- State --
   const [activeSection, setActiveSection] = useState('overview');
   const [isScrolled, setIsScrolled] = useState(false);
+  const [galleryPage, setGalleryPage] = useState(0);
   
   // Cart & Booking State
   const [cart, setCart] = useState<any[]>([]);
@@ -107,6 +109,24 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
   }, [bookingDates, property.id]);
 
   // -- Helpers --
+  const galleryImages = property.gallery_urls?.length 
+    ? property.gallery_urls 
+    : (property.images?.length ? property.images : []);
+    
+  const displayImages = galleryImages.length > 0 
+     ? galleryImages 
+     : roomTypes.flatMap((r: any) => r.gallery_urls || (r.images || (r.image_url ? [r.image_url] : []))).filter(Boolean);
+
+  const galleryPageCount = Math.ceil(displayImages.length / 4);
+  const currentGalleryImages = Array.from({ length: 4 }).map((_, i) => {
+      // Use modulo to cycle through images if we have enough
+      if (displayImages.length === 0) return null;
+      return displayImages[(galleryPage * 4 + i) % displayImages.length];
+  }).filter(Boolean);
+
+  const nextGallery = () => setGalleryPage(p => p + 1);
+  const prevGallery = () => setGalleryPage(p => p - 1 < 0 ? galleryPageCount - 1 : p - 1);
+
   const scrollToSection = (ref: React.RefObject<HTMLDivElement>, id: string) => {
     setActiveSection(id);
     ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -205,37 +225,12 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
   };
 
   return (
-    <div className="min-h-screen bg-white font-sans text-slate-900">
+    <div className="min-h-screen bg-white font-sans text-slate-900 pt-16 md:pt-20">
       
-      {/* 1. Header (Transparent -> Solid) */}
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-md py-4' : 'bg-transparent py-6'}`}>
-        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm transition-colors ${isScrolled ? 'bg-zambia-red text-white' : 'bg-white text-slate-900'}`}>Z</div>
-            <span className={`text-xl font-bold tracking-tight uppercase ${isScrolled ? 'text-zambia-red' : 'text-white'}`}>ZAMORA</span>
-          </Link>
-          
-          <div className="flex items-center gap-4">
-            <button className={`p-2 rounded-full transition-colors ${isScrolled ? 'hover:bg-slate-100 text-slate-900' : 'bg-white/10 hover:bg-white/20 text-white backdrop-blur-md'}`}>
-               <Share size={20} />
-            </button>
-            <button className={`p-2 rounded-full transition-colors ${isScrolled ? 'hover:bg-slate-100 text-slate-900' : 'bg-white/10 hover:bg-white/20 text-white backdrop-blur-md'}`}>
-               <Heart size={20} />
-            </button>
-            <button 
-                onClick={() => setIsCartOpen(true)}
-                className={`relative p-2 rounded-full transition-colors ${isScrolled ? 'hover:bg-slate-100 text-slate-900' : 'bg-white/10 hover:bg-white/20 text-white backdrop-blur-md'}`}
-            >
-                <ShoppingBag size={20} />
-                {cart.length > 0 && (
-                    <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full">
-                        {cart.reduce((a, b) => a + b.quantity, 0)}
-                    </span>
-                )}
-            </button>
-          </div>
-        </div>
-      </header>
+      <GuestNavbar 
+        cartCount={cart.reduce((a, b) => a + b.quantity, 0)} 
+        onCartClick={() => setIsCartOpen(true)} 
+      />
 
       {/* 2. Hero Section */}
       <div className="relative h-[60vh] md:h-[70vh] w-full overflow-hidden">
@@ -248,6 +243,75 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/30" />
         
+        <div className="absolute top-6 right-6 flex items-center gap-4 z-10">
+            <button className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition-colors">
+               <Share size={20} />
+            </button>
+            <button className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition-colors">
+               <Heart size={20} />
+            </button>
+        </div>
+
+        {/* Gallery Grid Overlay - Desktop Only */}
+        {displayImages.length > 0 && (
+            <div className="hidden md:block absolute top-24 right-6 lg:right-12 z-20 w-[500px] lg:w-[600px]">
+                <div className="relative grid grid-cols-3 gap-4">
+                    
+                    {/* Navigation Buttons */}
+                    {displayImages.length > 4 && (
+                        <>
+                            <button 
+                                onClick={prevGallery}
+                                className="absolute -left-12 top-1/2 -translate-y-1/2 p-2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white transition-colors z-30"
+                            >
+                                <ChevronLeft size={24} />
+                            </button>
+                            <button 
+                                onClick={nextGallery}
+                                className="absolute -right-12 top-1/2 -translate-y-1/2 p-2 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white transition-colors z-30"
+                            >
+                                <ChevronRight size={24} />
+                            </button>
+                        </>
+                    )}
+
+                    <AnimatePresence mode="popLayout">
+                        {/* First 3 images */}
+                        {currentGalleryImages.slice(0, 3).map((img: string, i: number) => (
+                            <div key={`small-${i}`} className="aspect-square relative bg-slate-200 border-8 border-white shadow-2xl overflow-hidden">
+                                <motion.div
+                                    key={`${galleryPage}-${i}`}
+                                    initial={{ rotateY: 90, opacity: 0 }}
+                                    animate={{ rotateY: 0, opacity: 1 }}
+                                    exit={{ rotateY: -90, opacity: 0 }}
+                                    transition={{ duration: 0.5, ease: "easeInOut", delay: i * 0.1 }}
+                                    className="absolute inset-0"
+                                >
+                                    <img src={img} alt={`Gallery ${i+1}`} className="w-full h-full object-cover" />
+                                </motion.div>
+                            </div>
+                        ))}
+                        
+                        {/* 4th large image */}
+                        {currentGalleryImages.length > 3 && (
+                            <div className="col-span-3 aspect-[2.5/1] relative bg-slate-200 border-8 border-white shadow-2xl overflow-hidden">
+                                <motion.div
+                                    key={`${galleryPage}-large`}
+                                    initial={{ rotateY: 90, opacity: 0 }}
+                                    animate={{ rotateY: 0, opacity: 1 }}
+                                    exit={{ rotateY: -90, opacity: 0 }}
+                                    transition={{ duration: 0.5, ease: "easeInOut", delay: 0.3 }}
+                                    className="absolute inset-0"
+                                >
+                                    <img src={currentGalleryImages[3]} alt="Gallery 4" className="w-full h-full object-cover" />
+                                </motion.div>
+                            </div>
+                        )}
+                    </AnimatePresence>
+                </div>
+            </div>
+        )}
+
         <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12">
             <div className="max-w-7xl mx-auto">
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-md border border-white/30 rounded-full text-white text-xs font-bold uppercase tracking-wider mb-4">

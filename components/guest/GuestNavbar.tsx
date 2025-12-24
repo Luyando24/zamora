@@ -61,6 +61,21 @@ export default function GuestNavbar({ cartCount, onCartClick }: GuestNavbarProps
          <Link href="/dashboard" className="text-sm font-bold hover:bg-slate-100 px-4 py-2 rounded-full transition-colors hidden md:block">
             List Your Property
          </Link>
+         
+         {onCartClick && (
+            <button 
+                onClick={onCartClick}
+                className="relative p-3 hover:bg-slate-100 rounded-full transition-colors text-slate-900"
+            >
+                <ShoppingBag size={20} />
+                {cartCount !== undefined && cartCount > 0 && (
+                    <span className="absolute top-0 right-0 h-4 w-4 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full">
+                        {cartCount}
+                    </span>
+                )}
+            </button>
+         )}
+
          <button 
            className="p-3 hover:bg-slate-100 rounded-full transition-colors"
            onClick={() => toast('Language & Currency selection coming soon!', { icon: '🌍' })}
