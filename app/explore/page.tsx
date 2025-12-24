@@ -203,6 +203,7 @@ const MOCK_PLACES: Place[] = [
 
 export default function ExplorePage() {
   const [properties, setProperties] = useState<Property[]>([]);
+  const [places, setPlaces] = useState<Place[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [checkIn, setCheckIn] = useState('');
@@ -252,8 +253,29 @@ export default function ExplorePage() {
     setLoading(false);
   };
 
+  const fetchPlaces = async () => {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from('places')
+      .select('*')
+      .order('average_rating', { ascending: false });
+
+    if (!error && data) {
+      setPlaces(data.map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        location: p.city || p.address,
+        type: p.type || p.category,
+        rating: p.average_rating || 0,
+        image_url: p.cover_image_url,
+        open_hours: p.opening_hours || '9 AM - 5 PM'
+      })));
+    }
+  };
+
   useEffect(() => {
     fetchProperties();
+    fetchPlaces();
 
     // Check user session
     const supabase = createClient();
@@ -716,11 +738,11 @@ export default function ExplorePage() {
                         <button className="text-sm font-bold text-slate-900 underline hover:text-slate-600">Show all</button>
                     </div>
                     <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4 -mx-6 px-6 md:mx-0 md:px-0 snap-x">
-                        {MOCK_PLACES.slice(0, 4).map((place) => (
+                        {places.slice(0, 4).map((place) => (
                             <div key={place.id} className="group block cursor-pointer w-[280px] md:w-[320px] flex-none snap-start">
                                 <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-slate-100 mb-3">
                                     <img 
-                                        src={place.image_url} 
+                                        src={place.image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=800'} 
                                         alt={place.name} 
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                     />
@@ -757,11 +779,11 @@ export default function ExplorePage() {
                 <section>
                     <h2 className="text-2xl font-bold text-slate-900 mb-6">Explore Shopping & Dining</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-6 gap-y-10">
-                        {MOCK_PLACES.map((place) => (
+                        {places.map((place) => (
                             <div key={place.id} className="group block cursor-pointer">
                                 <div className="relative aspect-square overflow-hidden rounded-xl bg-slate-100 mb-3">
                                     <img 
-                                        src={place.image_url} 
+                                        src={place.image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=800'} 
                                         alt={place.name} 
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                     />

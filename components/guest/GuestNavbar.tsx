@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Menu, User, Building2, Tent, ShoppingBag, LogIn, UserPlus } from 'lucide-react';
+import { Menu, User, Building2, Tent, ShoppingBag, LogIn, UserPlus, LogOut, MessageSquare, Map, Heart, UserCircle } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
+import { createClient } from '@/utils/supabase/client';
+import { useRouter } from 'next/navigation';
 
 interface GuestNavbarProps {
   cartCount?: number;
@@ -12,7 +14,9 @@ interface GuestNavbarProps {
 
 export default function GuestNavbar({ cartCount, onCartClick }: GuestNavbarProps) {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
   
   // Tabs Configuration
   const tabs = [
@@ -22,6 +26,14 @@ export default function GuestNavbar({ cartCount, onCartClick }: GuestNavbarProps
   ];
 
   useEffect(() => {
+    // Check auth status
+    const checkAuth = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    checkAuth();
+
     // Close menu when clicking outside
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -32,6 +44,14 @@ export default function GuestNavbar({ cartCount, onCartClick }: GuestNavbarProps
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setUser(null);
+    toast.success('Logged out successfully');
+    router.refresh();
+  };
 
   return (
     <header className="fixed top-0 w-full z-50 bg-white border-b border-slate-100 h-16 md:h-20 px-4 md:px-12 flex items-center justify-between">
@@ -90,19 +110,55 @@ export default function GuestNavbar({ cartCount, onCartClick }: GuestNavbarProps
 
             {userMenuOpen && (
                <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden py-2 animate-in fade-in zoom-in-95 duration-200">
-                  <Link href="/login" className="px-4 py-3 hover:bg-slate-50 flex items-center gap-3 font-semibold text-slate-700">
-                     <LogIn size={18} /> Log in
-                  </Link>
-                  <Link href="/signup" className="px-4 py-3 hover:bg-slate-50 flex items-center gap-3 font-semibold text-slate-700">
-                     <UserPlus size={18} /> Sign up
-                  </Link>
-                  <div className="h-px bg-slate-100 my-2"></div>
-                  <Link href="/dashboard" className="px-4 py-3 hover:bg-slate-50 block text-sm text-slate-600">
-                     List your property
-                  </Link>
-                  <Link href="#" className="px-4 py-3 hover:bg-slate-50 block text-sm text-slate-600">
-                     Help Center
-                  </Link>
+                  {user ? (
+                    <>
+                      <div className="px-4 py-3 border-b border-slate-100">
+                        <p className="text-sm font-semibold text-slate-900 truncate">
+                           {user.user_metadata?.first_name 
+                              ? `Hi, ${user.user_metadata.first_name}` 
+                              : user.email}
+                        </p>
+                        <p className="text-xs text-slate-500 truncate">{user.email}</p>
+                      </div>
+                      
+                      <Link href="/account" className="px-4 py-3 hover:bg-slate-50 flex items-center gap-3 font-semibold text-slate-700">
+                         <UserCircle size={18} /> Account
+                      </Link>
+                      <Link href="/dashboard" className="px-4 py-3 hover:bg-slate-50 flex items-center gap-3 font-semibold text-slate-700">
+                         <Building2 size={18} /> My Properties
+                      </Link>
+                      <div className="h-px bg-slate-100 my-2"></div>
+                      <Link href="/dashboard" className="px-4 py-3 hover:bg-slate-50 block text-sm text-slate-600">
+                         List your property
+                      </Link>
+                      <Link href="#" className="px-4 py-3 hover:bg-slate-50 block text-sm text-slate-600">
+                         Help Center
+                      </Link>
+                      <div className="h-px bg-slate-100 my-2"></div>
+                      <button 
+                         onClick={handleLogout}
+                         className="w-full text-left px-4 py-3 hover:bg-slate-50 flex items-center gap-3 font-semibold text-red-600"
+                      >
+                         <LogOut size={18} /> Log out
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link href="/login" className="px-4 py-3 hover:bg-slate-50 flex items-center gap-3 font-semibold text-slate-700">
+                         <LogIn size={18} /> Log in
+                      </Link>
+                      <Link href="/signup" className="px-4 py-3 hover:bg-slate-50 flex items-center gap-3 font-semibold text-slate-700">
+                         <UserPlus size={18} /> Sign up
+                      </Link>
+                      <div className="h-px bg-slate-100 my-2"></div>
+                      <Link href="/dashboard" className="px-4 py-3 hover:bg-slate-50 block text-sm text-slate-600">
+                         List your property
+                      </Link>
+                      <Link href="#" className="px-4 py-3 hover:bg-slate-50 block text-sm text-slate-600">
+                         Help Center
+                      </Link>
+                    </>
+                  )}
                </div>
             )}
          </div>
