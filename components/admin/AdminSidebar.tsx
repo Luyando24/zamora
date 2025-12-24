@@ -1,7 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { createClient } from '@/utils/supabase/client';
+import { toast } from 'react-hot-toast';
 import { 
   LayoutDashboard, Building2, Users, CreditCard, 
   Settings, LogOut, BarChart3, ShieldCheck 
@@ -18,6 +20,14 @@ const navigation = [
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    toast.success('Logged out successfully');
+    router.push('/login');
+  };
 
   return (
     <div className="flex h-full w-64 flex-col bg-slate-900 text-white shadow-xl">
@@ -53,7 +63,10 @@ export default function AdminSidebar() {
       </nav>
 
       <div className="border-t border-white/10 p-4">
-        <button className="group flex w-full items-center rounded-md px-3 py-2 text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
+        <button 
+          onClick={handleLogout}
+          className="group flex w-full items-center rounded-md px-3 py-2 text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-colors"
+        >
           <LogOut className="mr-3 h-5 w-5 text-slate-500 group-hover:text-white" />
           Sign Out
         </button>

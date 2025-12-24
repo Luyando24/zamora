@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { Search, MapPin, Star, Menu, User, Globe, SlidersHorizontal, Heart, Building2, ChevronRight, ChevronLeft, Calendar, Users, LogIn, UserPlus, Coffee, ShoppingBag, Tent, Clock, Camera, Palmtree, Utensils } from 'lucide-react';
+import { Search, MapPin, Star, Menu, User, Globe, SlidersHorizontal, Heart, Building2, ChevronRight, ChevronLeft, Calendar, Users, LogIn, UserPlus, Coffee, ShoppingBag, Tent, Clock, Camera, Palmtree, Utensils, LogOut, MessageSquare, Map, UserCircle } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { toast } from 'react-hot-toast';
