@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Search, MoreVertical, Shield, CheckCircle, XCircle, User } from 'lucide-react';
+import { Search, MoreVertical, Shield, CheckCircle, XCircle, User, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
+import { toast } from 'react-hot-toast';
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<any[]>([]);

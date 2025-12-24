@@ -210,6 +210,7 @@ export default function ExplorePage() {
   const [guestCount, setGuestCount] = useState(1);
   const [activeTab, setActiveTab] = useState('Accommodation');
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   
   // Tabs Configuration
