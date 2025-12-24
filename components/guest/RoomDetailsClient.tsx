@@ -136,8 +136,12 @@ export default function RoomDetailsClient({ property, room }: RoomDetailsClientP
                             <span>{room.bed_type || 'King Bed'}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Star size={20} className="text-yellow-400 fill-yellow-400" />
-                            <span>4.9 (24 Reviews)</span>
+                            <Star size={20} className={property.review_count > 0 ? "text-yellow-400 fill-yellow-400" : "text-slate-300"} />
+                            {property.review_count > 0 ? (
+                                <span>{property.average_rating} ({property.review_count} Reviews)</span>
+                            ) : (
+                                <span>New</span>
+                            )}
                         </div>
                     </div>
                 </div>

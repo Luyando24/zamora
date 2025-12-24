@@ -3,13 +3,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/utils/supabase/client';
+import Modal from '@/components/ui/Modal';
 import GuestNavbar from './GuestNavbar';
 import { 
   ShoppingBag, Utensils, BedDouble, Search, Plus, Minus, X, 
   MapPin, Phone, Mail, Clock, CheckCircle, Star, 
   ChevronRight, ArrowRight, Instagram, Facebook, Twitter, Building2, ArrowLeft, Calendar, Info, Home, Coffee, User, Wine, Image as ImageIcon,
   Share, Heart, ChevronLeft,
-  BadgeCheck, Wifi, Wind, Tv
+  BadgeCheck, Wifi, Wind, Tv, Bookmark
 } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
@@ -29,6 +30,16 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
   const [isScrolled, setIsScrolled] = useState(false);
   const [galleryPage, setGalleryPage] = useState(0);
   const [photosIndex, setPhotosIndex] = useState(0);
+  const [showFullMenu, setShowFullMenu] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
+  
+  // Review Form State
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [newRating, setNewRating] = useState(0);
+  const [newComment, setNewComment] = useState('');
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   
   // Cart & Booking State
   const [cart, setCart] = useState<any[]>([]);
@@ -112,7 +123,143 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
     checkAvailability();
   }, [bookingDates, property.id]);
 
+  const fetchReviews = async () => {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from('reviews')
+      .select(`
+        *,
+        profiles:user_id (
+          first_name,
+          last_name,
+          avatar_url
+        )
+      `)
+      .eq('property_id', property.id)
+      .order('created_at', { ascending: false });
+    
+    if (!error && data) {
+      setReviews(data);
+    }
+    setReviewsLoading(false);
+  };
+
+  useEffect(() => {
+    fetchReviews();
+  }, [property.id]);
+
+  useEffect(() => {
+    const checkSavedStatus = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from('saved_properties')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('property_id', property.id)
+          .single();
+        setIsSaved(!!data);
+      }
+    };
+    checkSavedStatus();
+  }, [property.id]);
+
+  const handleSave = async () => {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      toast.error('Please log in to save this property');
+      return;
+    }
+
+    if (isSaved) {
+      const { error } = await supabase
+        .from('saved_properties')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('property_id', property.id);
+      
+      if (error) {
+        toast.error('Failed to unsave property');
+      } else {
+        setIsSaved(false);
+        toast.success('Property removed from saved items');
+      }
+    } else {
+      const { error } = await supabase
+        .from('saved_properties')
+        .insert({ user_id: user.id, property_id: property.id });
+      
+      if (error) {
+        toast.error('Failed to save property');
+      } else {
+        setIsSaved(true);
+        toast.success('Property saved to your profile');
+      }
+    }
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: property.name,
+          text: `Check out ${property.name} on Zamora!`,
+          url: window.location.href,
+        });
+      } catch (error) {
+        console.log('Error sharing:', error);
+      }
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast.success('Link copied to clipboard!');
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      toast.error('Please log in to leave a review');
+      return;
+    }
+
+    if (newRating === 0) {
+      toast.error('Please select a rating');
+      return;
+    }
+
+    setIsSubmittingReview(true);
+    const { error } = await supabase
+      .from('reviews')
+      .insert({
+        property_id: property.id,
+        user_id: user.id,
+        rating: newRating,
+        comment: newComment
+      });
+
+    if (error) {
+      console.error('Error submitting review:', error);
+      toast.error('Failed to submit review');
+    } else {
+      toast.success('Review submitted successfully!');
+      setIsReviewModalOpen(false);
+      setNewRating(0);
+      setNewComment('');
+      fetchReviews();
+    }
+    setIsSubmittingReview(false);
+  };
+
   // -- Helpers --
+  const minPrice = roomTypes.length > 0 
+    ? Math.min(...roomTypes.map((r: any) => r.base_price)) 
+    : 0;
+
   const galleryImages = property.gallery_urls?.length 
     ? property.gallery_urls 
     : (property.images?.length ? property.images : []);
@@ -270,17 +417,58 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/30" />
         
         <div className="absolute top-6 right-6 flex items-center gap-4 z-10">
-            <button className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition-colors">
+            <button 
+                onClick={handleShare}
+                className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition-colors"
+            >
                <Share size={20} />
             </button>
-            <button className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition-colors">
-               <Heart size={20} />
+            <button 
+                onClick={handleSave}
+                className={`p-2 rounded-full backdrop-blur-md transition-colors ${
+                    isSaved ? 'bg-white text-zambia-red' : 'bg-white/10 hover:bg-white/20 text-white'
+                }`}
+            >
+               <Bookmark size={20} className={isSaved ? 'fill-current' : ''} />
             </button>
+        </div>
+
+        {/* Mobile Search Form - Bottom Position */}
+        <div className="md:hidden absolute bottom-6 left-4 right-4 z-30 animate-in slide-in-from-bottom-4 duration-700">
+             <div className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl shadow-lg">
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                    <div className="bg-white/90 backdrop-blur-sm rounded-xl p-2.5">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Check-in</label>
+                        <input 
+                            type="date" 
+                            className="w-full text-xs font-bold text-slate-900 bg-transparent outline-none p-0"
+                            value={bookingDates.checkIn}
+                            onChange={(e) => setBookingDates(prev => ({ ...prev, checkIn: e.target.value }))}
+                        />
+                    </div>
+                    <div className="bg-white/90 backdrop-blur-sm rounded-xl p-2.5">
+                        <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Check-out</label>
+                        <input 
+                            type="date" 
+                            className="w-full text-xs font-bold text-slate-900 bg-transparent outline-none p-0"
+                            value={bookingDates.checkOut}
+                            min={bookingDates.checkIn}
+                            onChange={(e) => setBookingDates(prev => ({ ...prev, checkOut: e.target.value }))}
+                        />
+                    </div>
+                </div>
+                <button 
+                    onClick={() => scrollToSection(roomsRef, 'rooms')}
+                    className="w-full py-3 bg-zambia-red text-white font-bold rounded-xl shadow-lg active:scale-95 transition-all text-sm"
+                >
+                    Check Availability
+                </button>
+             </div>
         </div>
 
         {/* Overlay Content Wrapper - Aligned with Max Width */}
         <div className="absolute inset-0 pointer-events-none z-20">
-            <div className="max-w-7xl mx-auto px-6 md:px-12 h-full relative">
+            <div className="max-w-7xl mx-auto px-4 md:px-6 h-full relative">
                 
                 {/* Check Availability Form - Left Side */}
                 <div className="hidden md:block absolute top-1/2 -translate-y-1/2 left-6 md:left-12 lg:left-0 pointer-events-auto w-[380px] bg-white rounded-3xl p-6 shadow-2xl animate-in slide-in-from-left-10 duration-700">
@@ -379,7 +567,7 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
             </div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12">
+        <div className="absolute top-24 md:top-auto md:bottom-0 left-0 right-0 p-4 md:p-12 z-20">
             <div className="max-w-7xl mx-auto">
                 <div className="flex items-end justify-between">
                     <div>
@@ -391,15 +579,20 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
                         <div className="flex items-center gap-4 text-white/90 font-medium text-sm md:text-base">
                             <div className="flex items-center gap-1">
                                 <MapPin size={18} />
-                                {property.city}, {property.country}
+                                {property.city || property.address?.split(',')[0]}, {property.country || 'Zambia'}
                             </div>
                             <span>•</span>
                             <div className="flex items-center gap-1">
-                                <Star size={18} className="fill-yellow-400 text-yellow-400" />
-                                4.9 (128 Reviews)
+                                <Star size={18} className={property.review_count > 0 ? "fill-yellow-400 text-yellow-400" : "text-slate-300"} />
+                                {property.review_count > 0 ? (
+                                    <span>{property.average_rating} ({property.review_count} Reviews)</span>
+                                ) : (
+                                    <span>New</span>
+                                )}
                             </div>
                         </div>
                     </div>
+
                     
                     {/* Property Logo */}
                     {property.logo_url && (
@@ -418,8 +611,8 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
 
       {/* 3. Sticky Sub-Nav */}
       <div className="sticky top-16 md:top-20 z-40 bg-white border-b border-slate-100 shadow-sm">
-         <div className="max-w-7xl mx-auto px-6 overflow-x-auto scrollbar-hide">
-             <div className="flex gap-8">
+         <div className="max-w-7xl mx-auto px-4 md:px-6 overflow-x-auto scrollbar-hide">
+             <div className="flex gap-6 md:gap-8">
                  {[
                      { id: 'overview', label: 'Overview', ref: overviewRef },
                      { id: 'photos', label: 'Photos', ref: photosRef },
@@ -441,7 +634,7 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
       </div>
 
       {/* 4. Main Content Grid */}
-      <main className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
+      <main className="max-w-7xl mx-auto px-4 py-8 md:px-6 md:py-12 grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
           
           {/* Left Column: Content */}
           <div className="lg:col-span-2 space-y-16">
@@ -474,7 +667,7 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
               {/* Photos */}
               <section id="photos" ref={photosRef} className="space-y-6 scroll-mt-32 md:scroll-mt-40">
                   <h2 className="text-2xl font-bold text-slate-900">Photos</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="flex md:grid md:grid-cols-3 gap-4 overflow-x-auto snap-x snap-mandatory pb-4 md:pb-0 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
                       {(() => {
                         // Calculate visible images with wrapping
                         const visibleImages = [];
@@ -485,7 +678,7 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
                             }
                         }
                         return visibleImages.map((img: string, i: number) => (
-                          <div key={`${photosIndex}-${i}`} className="aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 group cursor-pointer">
+                          <div key={`${photosIndex}-${i}`} className="flex-none w-[85vw] md:w-auto snap-center aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 group cursor-pointer">
                               <img src={img} alt={`Property ${i+1}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                           </div>
                         ));
@@ -566,7 +759,7 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
                       <h2 className="text-2xl font-bold text-slate-900">Dining & Drinks</h2>
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          {[...menuItems, ...barMenuItems].slice(0, 4).map(item => (
+                          {[...menuItems, ...barMenuItems].slice(0, showFullMenu ? undefined : 4).map(item => (
                               <div key={item.id} className="flex gap-4 p-4 rounded-2xl border border-slate-100 hover:border-slate-200 transition-colors bg-white">
                                   <div className="w-24 h-24 rounded-xl overflow-hidden bg-slate-100 flex-shrink-0">
                                       {item.image_url ? (
@@ -585,19 +778,19 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
                                           </div>
                                           <p className="text-xs text-slate-500 mt-1 line-clamp-2">{item.description}</p>
                                       </div>
-                                      <button 
-                                          onClick={() => addToCart(item, item.category ? 'food' : 'bar')}
-                                          className="self-end text-xs font-bold text-white bg-slate-900 px-3 py-1.5 rounded-full hover:bg-black transition-colors"
-                                      >
-                                          Add to Order
-                                      </button>
+                                      <span className="self-end text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded-md uppercase tracking-wide">
+                                          Order on-site
+                                      </span>
                                   </div>
                               </div>
                           ))}
                       </div>
                       
-                      <button className="w-full py-3 border border-slate-200 rounded-xl font-bold text-slate-900 hover:bg-slate-50 transition-colors">
-                          View Full Menu
+                      <button 
+                          onClick={() => setShowFullMenu(!showFullMenu)}
+                          className="w-full py-3 border border-slate-200 rounded-xl font-bold text-slate-900 hover:bg-slate-50 transition-colors"
+                      >
+                          {showFullMenu ? 'Show Less' : 'View Full Menu'}
                       </button>
                   </section>
               )}
@@ -616,7 +809,7 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
               </section>
 
               {/* Location */}
-              <section id="location" ref={locationRef} className="space-y-6 scroll-mt-32 md:scroll-mt-40 pb-20">
+              <section id="location" ref={locationRef} className="space-y-6 scroll-mt-32 md:scroll-mt-40">
                   <h2 className="text-2xl font-bold text-slate-900">Location</h2>
                   <div className="aspect-video bg-slate-100 rounded-3xl flex items-center justify-center relative overflow-hidden group">
                       <MapPin size={48} className="text-slate-300 mb-2" />
@@ -629,6 +822,125 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
                   <p className="text-slate-600">{property.address}, {property.city}, {property.country}</p>
               </section>
 
+              {/* Reviews */}
+              <section className="space-y-8 pb-20">
+                  <div className="flex items-center justify-between">
+                      <h2 className="text-2xl font-bold text-slate-900">Reviews</h2>
+                      <button
+                          onClick={() => setIsReviewModalOpen(true)}
+                          className="px-4 py-2 bg-slate-900 text-white text-sm font-bold rounded-xl hover:bg-black transition-colors"
+                      >
+                          Write a Review
+                      </button>
+                  </div>
+                  {reviewsLoading ? (
+                      <div className="flex justify-center p-8">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-900"></div>
+                      </div>
+                  ) : reviews.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {reviews.map((review) => (
+                              <div key={review.id} className="bg-slate-50 p-6 rounded-3xl">
+                                  <div className="flex items-center gap-4 mb-4">
+                                      <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-slate-400 overflow-hidden">
+                                          {review.profiles?.avatar_url ? (
+                                              <img src={review.profiles.avatar_url} alt="User" className="w-full h-full object-cover" />
+                                          ) : (
+                                              <User size={24} />
+                                          )}
+                                      </div>
+                                      <div>
+                                          <p className="font-bold text-slate-900">
+                                              {review.profiles?.first_name || 'Guest'} {review.profiles?.last_name || ''}
+                                          </p>
+                                          <div className="flex items-center gap-1 text-xs">
+                                              {Array.from({ length: 5 }).map((_, i) => (
+                                                  <Star 
+                                                      key={i} 
+                                                      size={12} 
+                                                      className={i < review.rating ? "fill-yellow-400 text-yellow-400" : "text-slate-300"} 
+                                                  />
+                                              ))}
+                                              <span className="text-slate-400 ml-2">
+                                                  {new Date(review.created_at).toLocaleDateString()}
+                                              </span>
+                                          </div>
+                                      </div>
+                                  </div>
+                                  <p className="text-slate-600 text-sm leading-relaxed">{review.comment}</p>
+                              </div>
+                          ))}
+                      </div>
+                  ) : (
+                      <div className="text-center p-8 bg-slate-50 rounded-3xl">
+                          <p className="text-slate-500 font-medium mb-4">No reviews yet. Be the first to review!</p>
+                          <button
+                              onClick={() => setIsReviewModalOpen(true)}
+                              className="px-6 py-2 bg-white border border-slate-200 text-slate-900 font-bold rounded-xl hover:bg-slate-100 transition-colors"
+                          >
+                              Write a Review
+                          </button>
+                      </div>
+                  )}
+              </section>
+
+              {/* Review Modal */}
+              <Modal
+                  isOpen={isReviewModalOpen}
+                  onClose={() => setIsReviewModalOpen(false)}
+                  title="Write a Review"
+              >
+                  <div className="space-y-6">
+                      <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">Rating</label>
+                          <div className="flex gap-2">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                  <button
+                                      key={star}
+                                      onClick={() => setNewRating(star)}
+                                      className="focus:outline-none transition-transform active:scale-95 hover:scale-110"
+                                  >
+                                      <Star
+                                          size={32}
+                                          className={`${
+                                              star <= newRating
+                                                  ? 'fill-yellow-400 text-yellow-400'
+                                                  : 'text-slate-300'
+                                          } transition-colors`}
+                                      />
+                                  </button>
+                              ))}
+                          </div>
+                      </div>
+
+                      <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">Comment</label>
+                          <textarea
+                              value={newComment}
+                              onChange={(e) => setNewComment(e.target.value)}
+                              rows={4}
+                              className="w-full p-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 bg-slate-50"
+                              placeholder="Share your experience..."
+                          />
+                      </div>
+
+                      <button
+                          onClick={handleSubmitReview}
+                          disabled={isSubmittingReview}
+                          className="w-full py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-black transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                          {isSubmittingReview ? (
+                              <>
+                                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                                  Submitting...
+                              </>
+                          ) : (
+                              'Submit Review'
+                          )}
+                      </button>
+                  </div>
+              </Modal>
+
           </div>
 
           {/* Right Column: Sticky Booking Widget */}
@@ -636,8 +948,9 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
               <div className="sticky top-28 space-y-6" id="booking-widget">
                   <div className="bg-white p-6 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100">
                       <div className="mb-6">
-                          <span className="text-2xl font-black text-slate-900">K{property.min_price || '---'}</span>
-                          <span className="text-slate-500"> / night</span>
+                          <span className="text-sm text-slate-500 font-bold block mb-1">From</span>
+                          <span className="text-3xl font-black text-slate-900">K{minPrice}</span>
+                          <span className="text-slate-500 font-medium"> / night</span>
                       </div>
 
                       <div className="space-y-4">
@@ -678,12 +991,18 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
 
                   {/* Host Info */}
                   <div className="bg-white p-6 rounded-[2rem] border border-slate-100 flex items-center gap-4">
-                      <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center">
+                      <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center relative">
                           <User size={24} className="text-slate-400" />
+                          <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-0.5 border-2 border-white">
+                              <BadgeCheck size={12} className="text-white fill-blue-500" />
+                          </div>
                       </div>
                       <div>
-                          <p className="font-bold text-slate-900">Hosted by Zamora</p>
-                          <p className="text-xs text-slate-500">Superhost • 2 years hosting</p>
+                          <div className="flex items-center gap-2">
+                              <p className="font-bold text-slate-900">Verified by Zamora</p>
+                              <BadgeCheck size={16} className="text-blue-500 fill-blue-500/10" />
+                          </div>
+                          <p className="text-xs text-slate-400 font-medium">Official partner</p>
                       </div>
                   </div>
               </div>
@@ -693,8 +1012,11 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
       {/* Mobile Booking Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-4 md:hidden z-50 flex justify-between items-center safe-area-bottom">
           <div>
-              <p className="text-lg font-black text-slate-900">K{property.min_price || '---'}</p>
-              <p className="text-xs text-slate-500">/ night</p>
+              <p className="text-[10px] font-bold text-slate-500 uppercase">From</p>
+              <div className="flex items-baseline gap-1">
+                  <p className="text-xl font-black text-slate-900">K{minPrice}</p>
+                  <p className="text-xs text-slate-500 font-medium">/ night</p>
+              </div>
           </div>
           <button 
               onClick={() => document.getElementById('rooms')?.scrollIntoView({ behavior: 'smooth' })}
@@ -709,7 +1031,7 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
         <div className="fixed inset-0 z-[60] flex justify-end">
             <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" onClick={() => setIsCartOpen(false)} />
             <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
-                <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
+                <div className="p-4 md:p-6 border-b border-slate-100 flex justify-between items-center bg-white">
                     <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
                         <ShoppingBag size={20} /> Your Cart
                     </h2>
@@ -718,7 +1040,7 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
                     </button>
                 </div>
                 
-                <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50">
+                <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 bg-slate-50">
                     {cart.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full text-slate-400 space-y-4">
                             <ShoppingBag size={64} className="opacity-20" />

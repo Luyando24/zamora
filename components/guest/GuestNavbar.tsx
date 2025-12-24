@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Menu, User, Globe, Building2, Tent, ShoppingBag, LogIn, UserPlus } from 'lucide-react';
+import { Menu, User, Building2, Tent, ShoppingBag, LogIn, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 
@@ -35,9 +35,9 @@ export default function GuestNavbar({ cartCount, onCartClick }: GuestNavbarProps
 
   return (
     <header className="fixed top-0 w-full z-50 bg-white border-b border-slate-100 h-16 md:h-20 px-4 md:px-12 flex items-center justify-between">
-      <Link href="/" className="flex items-center gap-2 text-zambia-red hover:opacity-80 transition-opacity">
+      <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
          <div className="w-7 h-7 md:w-8 md:h-8 bg-zambia-red rounded-lg flex items-center justify-center text-white font-black text-sm md:text-base">Z</div>
-         <span className="text-xl font-bold tracking-tight text-zambia-red hidden md:block uppercase">ZAMORA</span>
+         <span className="text-xl font-bold tracking-tight text-black uppercase">ZAMORA</span>
       </Link>
 
       {/* Center Tabs - Navigation */}
@@ -76,12 +76,6 @@ export default function GuestNavbar({ cartCount, onCartClick }: GuestNavbarProps
             </button>
          )}
 
-         <button 
-           className="p-3 hover:bg-slate-100 rounded-full transition-colors"
-           onClick={() => toast('Language & Currency selection coming soon!', { icon: '🌍' })}
-         >
-            <Globe size={18} />
-         </button>
          
          <div className="relative" ref={menuRef}>
             <button 

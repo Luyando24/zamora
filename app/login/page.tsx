@@ -47,12 +47,15 @@ function LoginContent() {
 
         if (role === 'super_admin') {
           router.push('/admin');
+        } else if (role === 'user') {
+          router.push('/explore');
         } else {
           router.push('/dashboard');
         }
         router.refresh();
       }
     } catch (err: any) {
+      console.error('Login error:', err);
       setError(err.message || 'Failed to sign in');
     } finally {
       setLoading(false);

@@ -25,6 +25,25 @@ export default function AdminHotelsPage() {
     setLoading(false);
   };
 
+  const handleDelete = async (id: string, name: string) => {
+    if (!window.confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    const { error } = await supabase
+      .from('properties')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error deleting property:', error);
+      toast.error('Failed to delete property: ' + error.message);
+    } else {
+      setHotels(prev => prev.filter(h => h.id !== id));
+      toast.success('Property deleted successfully');
+    }
+  };
+
   const filteredHotels = hotels.filter(h => 
     h.name.toLowerCase().includes(search.toLowerCase()) ||
     h.email?.toLowerCase().includes(search.toLowerCase())

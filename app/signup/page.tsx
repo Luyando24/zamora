@@ -102,15 +102,15 @@ export default function SignupPage() {
 
       if (authError) throw authError;
 
-      // Direct redirect to dashboard or login, skipping email verification screen
-      if (authData.session) {
-        router.push('/dashboard');
-      } else {
-         // Even if no session (verification technically required by Supabase),
-         // we treat it as successful and redirect to login or dashboard.
-         // We remove the specific /verify-email page requirement.
-         router.push('/login?message=Account created successfully. Please sign in.');
-      } 
+         // Direct redirect to dashboard or login, skipping email verification screen
+         if (authData.session) {
+           router.push('/explore');
+         } else {
+            // Since we are auto-confirming, we can redirect to login with a success message
+            // or if the session was created (which it might not be if auto-confirm happens in DB but Supabase doesn't return session immediately),
+            // we ask them to login.
+            router.push('/login?message=Account created successfully. Please sign in.');
+         } 
       
     } catch (err: any) {
       setError(err.message || 'Failed to sign up');

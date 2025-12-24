@@ -5,7 +5,7 @@ import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 import { 
   User, Calendar, MapPin, CreditCard, LogOut, 
-  Settings, ChevronRight, BedDouble, Clock, CheckCircle, XCircle 
+  Settings, ChevronRight, BedDouble, Clock, CheckCircle, XCircle, Bookmark
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -119,9 +119,12 @@ export default function AccountPage() {
                  <button className="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl text-slate-500 hover:text-slate-900 font-bold text-sm transition-colors">
                     <CreditCard size={20} /> Payments
                  </button>
-                 <button className="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl text-slate-500 hover:text-slate-900 font-bold text-sm transition-colors">
+                 <button className="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl text-slate-500 hover:text-slate-900 font-bold text-sm transition-colors w-full text-left">
                     <User size={20} /> Personal Info
                  </button>
+                 <Link href="/account/saved" className="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl text-slate-500 hover:text-slate-900 font-bold text-sm transition-colors w-full text-left">
+                    <Bookmark size={20} /> Saved Items
+                 </Link>
                </div>
             </div>
           </div>

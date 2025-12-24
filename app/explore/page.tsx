@@ -19,6 +19,7 @@ interface Property {
   base_price?: number;
   slug?: string;
   min_price?: number;
+  average_rating?: number;
 }
 
 interface Activity {
@@ -326,19 +327,61 @@ export default function ExplorePage() {
 
               {userMenuOpen && (
                  <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-xl border border-slate-100 overflow-hidden py-2 animate-in fade-in zoom-in-95 duration-200">
-                    <Link href="/login" className="px-4 py-3 hover:bg-slate-50 flex items-center gap-3 font-semibold text-slate-700">
-                       <LogIn size={18} /> Log in
-                    </Link>
-                    <Link href="/signup" className="px-4 py-3 hover:bg-slate-50 flex items-center gap-3 font-semibold text-slate-700">
-                       <UserPlus size={18} /> Sign up
-                    </Link>
-                    <div className="h-px bg-slate-100 my-2"></div>
-                    <Link href="/dashboard" className="px-4 py-3 hover:bg-slate-50 block text-sm text-slate-600">
-                       List your property
-                    </Link>
-                    <Link href="#" className="px-4 py-3 hover:bg-slate-50 block text-sm text-slate-600">
-                       Help Center
-                    </Link>
+                    {user ? (
+                      <>
+                        <div className="px-4 py-3 border-b border-slate-100">
+                          <p className="text-sm font-semibold text-slate-900 truncate">
+                             {user.user_metadata?.first_name 
+                                ? `Hi, ${user.user_metadata.first_name}` 
+                                : user.email}
+                          </p>
+                          <p className="text-xs text-slate-500 truncate">{user.email}</p>
+                        </div>
+                        
+                        <Link href="/messages" className="px-4 py-3 hover:bg-slate-50 flex items-center gap-3 font-semibold text-slate-700">
+                           <MessageSquare size={18} /> Messages
+                        </Link>
+                        <Link href="/trips" className="px-4 py-3 hover:bg-slate-50 flex items-center gap-3 font-semibold text-slate-700">
+                           <Map size={18} /> Trips
+                        </Link>
+                        <Link href="/wishlists" className="px-4 py-3 hover:bg-slate-50 flex items-center gap-3 font-semibold text-slate-700">
+                           <Heart size={18} /> Wishlists
+                        </Link>
+                         <Link href="/account" className="px-4 py-3 hover:bg-slate-50 flex items-center gap-3 font-semibold text-slate-700">
+                           <UserCircle size={18} /> Account
+                        </Link>
+                        <div className="h-px bg-slate-100 my-2"></div>
+                        <Link href="/dashboard" className="px-4 py-3 hover:bg-slate-50 block text-sm text-slate-600">
+                           List your property
+                        </Link>
+                        <Link href="#" className="px-4 py-3 hover:bg-slate-50 block text-sm text-slate-600">
+                           Help Center
+                        </Link>
+                        <div className="h-px bg-slate-100 my-2"></div>
+                        <button 
+                           onClick={handleLogout}
+                           className="w-full text-left px-4 py-3 hover:bg-slate-50 flex items-center gap-3 font-semibold text-red-600"
+                        >
+                           <LogOut size={18} /> Log out
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <Link href="/login" className="px-4 py-3 hover:bg-slate-50 flex items-center gap-3 font-semibold text-slate-700">
+                           <LogIn size={18} /> Log in
+                        </Link>
+                        <Link href="/signup" className="px-4 py-3 hover:bg-slate-50 flex items-center gap-3 font-semibold text-slate-700">
+                           <UserPlus size={18} /> Sign up
+                        </Link>
+                        <div className="h-px bg-slate-100 my-2"></div>
+                        <Link href="/dashboard" className="px-4 py-3 hover:bg-slate-50 block text-sm text-slate-600">
+                           List your property
+                        </Link>
+                        <Link href="#" className="px-4 py-3 hover:bg-slate-50 block text-sm text-slate-600">
+                           Help Center
+                        </Link>
+                      </>
+                    )}
                  </div>
               )}
            </div>
@@ -460,8 +503,8 @@ export default function ExplorePage() {
                                    <div className="flex justify-between items-start">
                                       <h3 className="font-bold text-slate-900 truncate text-lg">{property.name}</h3>
                                       <div className="flex items-center gap-1 text-sm font-bold">
-                                         <Star size={14} className="fill-slate-900 text-slate-900" />
-                                         <span>4.9</span>
+                                         <Star size={14} className={property.average_rating ? "fill-slate-900 text-slate-900" : "text-slate-300"} />
+                                         <span>{property.average_rating || 'New'}</span>
                                       </div>
                                    </div>
                                    <p className="text-slate-500 text-sm truncate">
@@ -510,8 +553,8 @@ export default function ExplorePage() {
                                    <div className="flex justify-between items-start">
                                       <h3 className="font-bold text-slate-900 truncate">{property.name}</h3>
                                       <div className="flex items-center gap-1 text-sm">
-                                         <Star size={14} className="fill-slate-900 text-slate-900" />
-                                         <span>4.8</span>
+                                         <Star size={14} className={property.average_rating ? "fill-slate-900 text-slate-900" : "text-slate-300"} />
+                                         <span>{property.average_rating || 'New'}</span>
                                       </div>
                                    </div>
                                    <p className="text-slate-500 text-sm truncate">
