@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/client';
-import { Search, MoreVertical, Shield, Ban, CheckCircle, ExternalLink } from 'lucide-react';
+import { Search, MoreVertical, Shield, Ban, CheckCircle, ExternalLink, Trash2 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 export default function AdminHotelsPage() {
   const [hotels, setHotels] = useState<any[]>([]);
