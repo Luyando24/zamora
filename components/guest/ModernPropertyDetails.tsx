@@ -51,6 +51,7 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
   const diningRef = useRef<HTMLDivElement>(null);
   const amenitiesRef = useRef<HTMLDivElement>(null);
   const locationRef = useRef<HTMLDivElement>(null);
+  const photosRef = useRef<HTMLDivElement>(null);
 
   // -- Effects --
   useEffect(() => {
@@ -59,6 +60,7 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
       // Update active section based on scroll position
       const sections = [
         { id: 'overview', ref: overviewRef },
+        { id: 'photos', ref: photosRef },
         { id: 'rooms', ref: roomsRef },
         { id: 'dining', ref: diningRef },
         { id: 'amenities', ref: amenitiesRef },
@@ -126,6 +128,17 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
 
   const nextGallery = () => setGalleryPage(p => p + 1);
   const prevGallery = () => setGalleryPage(p => p - 1 < 0 ? galleryPageCount - 1 : p - 1);
+
+  // Auto-transition for gallery
+  useEffect(() => {
+    if (displayImages.length <= 4) return;
+    
+    const interval = setInterval(() => {
+        nextGallery();
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [displayImages.length]);
 
   const scrollToSection = (ref: React.RefObject<HTMLDivElement>, id: string) => {
     setActiveSection(id);
@@ -254,8 +267,8 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
 
         {/* Gallery Grid Overlay - Desktop Only */}
         {displayImages.length > 0 && (
-            <div className="hidden md:block absolute top-24 right-6 lg:right-12 z-20 w-[500px] lg:w-[600px]">
-                <div className="relative grid grid-cols-3 gap-4">
+            <div className="hidden md:block absolute top-24 right-6 lg:right-12 z-20 w-[400px] lg:w-[480px]">
+                <div className="relative grid grid-cols-3 gap-3">
                     
                     {/* Navigation Buttons */}
                     {displayImages.length > 4 && (
@@ -340,6 +353,7 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
              <div className="flex gap-8">
                  {[
                      { id: 'overview', label: 'Overview', ref: overviewRef },
+                     { id: 'photos', label: 'Photos', ref: photosRef },
                      { id: 'rooms', label: 'Rooms', ref: roomsRef },
                      { id: 'dining', label: 'Dining', ref: diningRef },
                      { id: 'amenities', label: 'Amenities', ref: amenitiesRef },
@@ -385,6 +399,18 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
                               <p className="font-bold text-slate-900">11:00</p>
                           </div>
                       </div>
+                  </div>
+              </section>
+
+              {/* Photos */}
+              <section id="photos" ref={photosRef} className="space-y-6 scroll-mt-32 md:scroll-mt-40">
+                  <h2 className="text-2xl font-bold text-slate-900">Photos</h2>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {displayImages.map((img: string, i: number) => (
+                          <div key={i} className="aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 group cursor-pointer">
+                              <img src={img} alt={`Property ${i+1}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                          </div>
+                      ))}
                   </div>
               </section>
 

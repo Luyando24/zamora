@@ -139,10 +139,10 @@ export default function PropertyDetailsPage({ params }: { params: Promise<{ id: 
             <h3 className="text-lg font-bold text-slate-900 mb-4">Amenities & Features</h3>
             {property.amenities && property.amenities.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {property.amenities.map((amenity: string, index: number) => (
+                {property.amenities.map((amenity: any, index: number) => (
                   <div key={index} className="flex items-center gap-2 text-slate-700">
                     <CheckCircle size={16} className="text-zambia-green flex-shrink-0" />
-                    <span className="text-sm">{amenity}</span>
+                    <span className="text-sm">{typeof amenity === 'object' ? amenity.name : amenity}</span>
                   </div>
                 ))}
               </div>

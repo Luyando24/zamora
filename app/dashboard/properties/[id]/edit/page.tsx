@@ -102,7 +102,9 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
         website_url: data.website_url || '',
         cover_image_url: data.cover_image_url || '',
         gallery_urls: data.gallery_urls || [],
-        amenities: data.amenities || [],
+        amenities: Array.isArray(data.amenities) 
+          ? data.amenities.map((a: any) => typeof a === 'object' ? a.name : a)
+          : [],
       });
     }
     setLoading(false);
@@ -209,7 +211,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 bg-white"
               />
             </div>
             
@@ -285,7 +287,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
                   name="address"
                   value={formData.address}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 bg-white"
                   placeholder="Street address, City"
                 />
               </div>
@@ -301,7 +303,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 bg-white"
                 />
               </div>
             </div>
@@ -315,7 +317,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 bg-white"
                 />
               </div>
             </div>
@@ -329,7 +331,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
                   name="website_url"
                   value={formData.website_url}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 bg-white"
                   placeholder="https://"
                 />
               </div>
@@ -369,7 +371,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
                 value={newAmenity}
                 onChange={(e) => setNewAmenity(e.target.value)}
                 placeholder="e.g. Helipad"
-                className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 bg-white"
                 onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomAmenity())}
               />
               <button
