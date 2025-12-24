@@ -27,6 +27,7 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
   const [activeSection, setActiveSection] = useState('overview');
   const [isScrolled, setIsScrolled] = useState(false);
   const [galleryPage, setGalleryPage] = useState(0);
+  const [photosIndex, setPhotosIndex] = useState(0);
   
   // Cart & Booking State
   const [cart, setCart] = useState<any[]>([]);
@@ -135,6 +136,17 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
     
     const interval = setInterval(() => {
         nextGallery();
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [displayImages.length]);
+
+  // Auto-transition for photos section
+  useEffect(() => {
+    if (displayImages.length <= 3) return;
+    
+    const interval = setInterval(() => {
+        setPhotosIndex(prev => (prev + 1) % displayImages.length);
     }, 3000);
 
     return () => clearInterval(interval);
@@ -405,12 +417,22 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
               {/* Photos */}
               <section id="photos" ref={photosRef} className="space-y-6 scroll-mt-32 md:scroll-mt-40">
                   <h2 className="text-2xl font-bold text-slate-900">Photos</h2>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {displayImages.map((img: string, i: number) => (
-                          <div key={i} className="aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 group cursor-pointer">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {(() => {
+                        // Calculate visible images with wrapping
+                        const visibleImages = [];
+                        const count = displayImages.length;
+                        if (count > 0) {
+                            for (let i = 0; i < Math.min(count, 3); i++) {
+                                visibleImages.push(displayImages[(photosIndex + i) % count]);
+                            }
+                        }
+                        return visibleImages.map((img: string, i: number) => (
+                          <div key={`${photosIndex}-${i}`} className="aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 group cursor-pointer">
                               <img src={img} alt={`Property ${i+1}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                           </div>
-                      ))}
+                        ));
+                      })()}
                   </div>
               </section>
 
