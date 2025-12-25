@@ -121,11 +121,17 @@ export default function GuestNavbar({ cartCount, onCartClick }: GuestNavbarProps
                         <p className="text-xs text-slate-500 truncate">{user.email}</p>
                       </div>
                       
+                      <Link href="/messages" className="px-4 py-3 hover:bg-slate-50 flex items-center gap-3 font-semibold text-slate-700">
+                         <MessageSquare size={18} /> Messages
+                      </Link>
+                      <Link href="/trips" className="px-4 py-3 hover:bg-slate-50 flex items-center gap-3 font-semibold text-slate-700">
+                         <Map size={18} /> Trips
+                      </Link>
+                      <Link href="/wishlists" className="px-4 py-3 hover:bg-slate-50 flex items-center gap-3 font-semibold text-slate-700">
+                         <Heart size={18} /> Wishlists
+                      </Link>
                       <Link href="/account" className="px-4 py-3 hover:bg-slate-50 flex items-center gap-3 font-semibold text-slate-700">
                          <UserCircle size={18} /> Account
-                      </Link>
-                      <Link href="/dashboard" className="px-4 py-3 hover:bg-slate-50 flex items-center gap-3 font-semibold text-slate-700">
-                         <Building2 size={18} /> My Properties
                       </Link>
                       <div className="h-px bg-slate-100 my-2"></div>
                       <Link href="/dashboard" className="px-4 py-3 hover:bg-slate-50 block text-sm text-slate-600">

@@ -245,7 +245,6 @@ export default function NewPlacePage() {
             <ImageUpload 
               value={formData.cover_image_url}
               onChange={(url) => setFormData({...formData, cover_image_url: url})}
-              onRemove={() => setFormData({...formData, cover_image_url: ''})}
             />
           </div>
         </section>
