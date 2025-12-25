@@ -22,6 +22,9 @@ export async function POST(request: Request) {
             .single();
         
         targetPhone = property?.admin_notification_phone;
+        console.log(`[SMS] Resolved property phone for ${propertyId}:`, targetPhone || 'Not set');
+    } else {
+        console.log(`[SMS] Using provided phone or falling back to default. Provided: ${phone ? 'Yes' : 'No'}`);
     }
 
     const result = await notifyAdmin(message, targetPhone);
