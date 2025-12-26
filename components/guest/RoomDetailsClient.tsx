@@ -1,14 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { 
   ArrowLeft, BedDouble, User, CheckCircle, Star, 
-  Wifi, Coffee, Wind, Tv, Calendar, MessageCircle
+  Wifi, Coffee, Wind, Tv, Calendar, MessageCircle, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import GuestNavbar from './GuestNavbar';
 import { toast } from 'react-hot-toast';
+import { format, addDays } from 'date-fns';
 
 interface RoomDetailsClientProps {
   property: any;
@@ -17,12 +18,37 @@ interface RoomDetailsClientProps {
 
 export default function RoomDetailsClient({ property, room }: RoomDetailsClientProps) {
   const router = useRouter();
+  const bookingFormRef = useRef<HTMLDivElement>(null);
   
   // Booking State
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
   const [guests, setGuests] = useState(1);
   const [isBooking, setIsBooking] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const images = [room.image_url, ...(room.gallery_urls || [])].filter(Boolean);
+
+  const handleCheckInChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDate = e.target.value;
+    setCheckIn(newDate);
+    if (newDate) {
+       const nextDay = addDays(new Date(newDate), 1);
+       setCheckOut(format(nextDay, 'yyyy-MM-dd'));
+    }
+  };
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  const scrollToBooking = () => {
+    bookingFormRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   // Calculate nights and price
   const nights = checkIn && checkOut 
@@ -108,18 +134,43 @@ export default function RoomDetailsClient({ property, room }: RoomDetailsClientP
             <div className="lg:col-span-2 space-y-8">
                 
                 {/* Image Gallery */}
-                <div className="rounded-3xl overflow-hidden aspect-video bg-slate-100 relative shadow-lg">
-                    {room.image_url ? (
-                        <img src={room.image_url} alt={room.name} className="w-full h-full object-cover" />
-                    ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                            <BedDouble size={64} className="text-slate-300" />
+                <div className="space-y-4 -mx-6 md:mx-0">
+                    <div className="md:rounded-2xl overflow-hidden aspect-video relative shadow-sm group">
+                        {images.length > 0 ? (
+                            <img 
+                                src={images[currentImageIndex]} 
+                                alt={room.name} 
+                                className="w-full h-full object-cover transition-transform duration-500" 
+                            />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-slate-100">
+                                <BedDouble size={64} className="text-slate-300" />
+                            </div>
+                        )}
+                        {/* Badge */}
+                        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm">
+                            {room.bed_type || 'King Bed'}
+                        </div>
+                    </div>
+
+                    {/* Thumbnails */}
+                    {images.length > 1 && (
+                        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide px-6 md:px-0">
+                            {images.map((img, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => setCurrentImageIndex(idx)}
+                                    className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                                        idx === currentImageIndex 
+                                            ? 'border-slate-900 ring-2 ring-slate-900/20' 
+                                            : 'border-transparent opacity-70 hover:opacity-100'
+                                    }`}
+                                >
+                                    <img src={img} alt={`View ${idx + 1}`} className="w-full h-full object-cover" />
+                                </button>
+                            ))}
                         </div>
                     )}
-                    {/* Badge */}
-                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm">
-                        {room.bed_type || 'King Bed'}
-                    </div>
                 </div>
 
                 {/* Title & Stats */}
@@ -181,7 +232,7 @@ export default function RoomDetailsClient({ property, room }: RoomDetailsClientP
             </div>
 
             {/* Right Column: Booking Widget */}
-            <div className="relative">
+            <div className="relative" ref={bookingFormRef}>
                 <div className="sticky top-24 bg-white border border-slate-200 rounded-3xl p-6 shadow-xl">
                     <div className="flex justify-between items-end mb-6">
                         <div>
@@ -196,16 +247,16 @@ export default function RoomDetailsClient({ property, room }: RoomDetailsClientP
                                 <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Check-in</label>
                                 <input 
                                     type="date" 
-                                    className="w-full outline-none font-bold text-slate-900 bg-transparent"
+                                    className="w-full outline-none font-bold text-slate-900 bg-transparent min-h-[24px] text-sm md:text-base"
                                     value={checkIn}
-                                    onChange={(e) => setCheckIn(e.target.value)}
+                                    onChange={handleCheckInChange}
                                 />
                             </div>
                             <div className="border border-slate-300 rounded-xl p-3 focus-within:border-black focus-within:ring-1 focus-within:ring-black transition-all">
                                 <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Check-out</label>
                                 <input 
                                     type="date" 
-                                    className="w-full outline-none font-bold text-slate-900 bg-transparent"
+                                    className="w-full outline-none font-bold text-slate-900 bg-transparent min-h-[24px] text-sm md:text-base"
                                     value={checkOut}
                                     min={checkIn}
                                     onChange={(e) => setCheckOut(e.target.value)}
@@ -216,7 +267,7 @@ export default function RoomDetailsClient({ property, room }: RoomDetailsClientP
                         <div className="border border-slate-300 rounded-xl p-3 focus-within:border-black focus-within:ring-1 focus-within:ring-black transition-all">
                             <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Guests</label>
                             <select 
-                                className="w-full outline-none font-bold text-slate-900 bg-transparent"
+                                className="w-full outline-none font-bold text-slate-900 bg-transparent min-h-[24px] text-sm md:text-base"
                                 value={guests}
                                 onChange={(e) => setGuests(Number(e.target.value))}
                             >
@@ -251,7 +302,10 @@ export default function RoomDetailsClient({ property, room }: RoomDetailsClientP
                                     return;
                                 }
 
-                                const message = `Hello, I found this on Zamora and I'm interested in booking the ${room.name} at ${property.name}.\n\nIs this room available for booking from ${checkIn} to ${checkOut} (${nights} nights)?\n\nDetails:\n- Guests: ${guests}\n- Total Price: K${totalPrice}\n\nLooking forward to your response!`;
+                                const formattedCheckIn = format(new Date(checkIn), 'd MMMM yyyy');
+                                const formattedCheckOut = format(new Date(checkOut), 'd MMMM yyyy');
+
+                                const message = `Hello, I found this on Zamora and I'm interested in booking the ${room.name} at ${property.name}.\n\nIs this room available for booking from ${formattedCheckIn} to ${formattedCheckOut} (${nights} nights)?\n\nDetails:\n- Guests: ${guests}\n- Total Price: K${totalPrice}\n\nLooking forward to your response!`;
                                 
                                 const encodedMessage = encodeURIComponent(message);
                                 const cleanPhone = property.whatsapp_booking_phone.replace(/[^0-9]/g, '');
@@ -278,10 +332,82 @@ export default function RoomDetailsClient({ property, room }: RoomDetailsClientP
                         You won't be charged yet
                     </p>
                 </div>
+
+                {/* Amenities - Moved from left column */}
+                <div className="mt-8">
+                    <h2 className="text-xl font-bold mb-4">Room Amenities</h2>
+                    <div className="grid grid-cols-1 gap-4">
+                        {[
+                            { icon: Wifi, label: 'Free High-Speed Wifi' },
+                            { icon: Tv, label: 'Smart TV' },
+                            { icon: Wind, label: 'Air Conditioning' },
+                            { icon: Coffee, label: 'Coffee Maker' },
+                            { icon: CheckCircle, label: 'En-suite Bathroom' },
+                            { icon: CheckCircle, label: 'Daily Housekeeping' }
+                        ].map((item, i) => (
+                            <div key={i} className="flex items-center gap-3 text-slate-600">
+                                <item.icon size={20} />
+                                <span>{item.label}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
 
         </div>
       </main>
+
+      {/* Mobile Sticky Footer */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50">
+        <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col">
+                <span className="text-sm font-medium text-slate-500">Total for {nights} nights</span>
+                <span className="text-xl font-black text-slate-900">K{totalPrice}</span>
+            </div>
+            
+            {property.whatsapp_booking_phone ? (
+                <button 
+                    onClick={() => {
+                        if (!checkIn || !checkOut) {
+                            scrollToBooking();
+                            toast.error('Please select dates first');
+                            return;
+                        }
+
+                        const formattedCheckIn = format(new Date(checkIn), 'd MMMM yyyy');
+                        const formattedCheckOut = format(new Date(checkOut), 'd MMMM yyyy');
+
+                        const message = `Hello, I found this on Zamora and I'm interested in booking the ${room.name} at ${property.name}.\n\nIs this room available for booking from ${formattedCheckIn} to ${formattedCheckOut} (${nights} nights)?\n\nDetails:\n- Guests: ${guests}\n- Total Price: K${totalPrice}\n\nLooking forward to your response!`;
+                        
+                        const encodedMessage = encodeURIComponent(message);
+                        const cleanPhone = property.whatsapp_booking_phone.replace(/[^0-9]/g, '');
+                        const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
+                        
+                        window.open(whatsappUrl, '_blank');
+                    }}
+                    className="px-6 py-3 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold rounded-xl transition-all active:scale-95 shadow-lg flex items-center gap-2"
+                >
+                    <MessageCircle size={20} />
+                    <span>Book</span>
+                </button>
+            ) : (
+                <button 
+                    onClick={() => {
+                        if (!checkIn || !checkOut) {
+                            scrollToBooking();
+                            toast.error('Please select dates first');
+                            return;
+                        }
+                        handleBook();
+                    }}
+                    disabled={isBooking}
+                    className="px-6 py-3 bg-zambia-red hover:bg-red-700 text-white font-bold rounded-xl transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                >
+                    {isBooking ? 'Processing...' : 'Reserve'}
+                </button>
+            )}
+        </div>
+      </div>
     </div>
   );
 }
