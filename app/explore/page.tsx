@@ -20,6 +20,8 @@ interface Property {
   slug?: string;
   min_price?: number;
   average_rating?: number;
+  display_image?: string;
+  type?: string;
 }
 
 interface Activity {
@@ -147,15 +149,6 @@ const MOCK_PLACES: Place[] = [
   },
   {
     id: '3',
-    name: 'The Quorum',
-    location: 'Mass Media',
-    type: 'Fine Dining & Business',
-    rating: 4.9,
-    image_url: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=800',
-    open_hours: '07:00 - 23:00'
-  },
-  {
-    id: '4',
     name: '37d Gallery',
     location: 'Kabulonga',
     type: 'Contemporary Art',
@@ -164,7 +157,28 @@ const MOCK_PLACES: Place[] = [
     open_hours: '09:00 - 17:00'
   },
   {
-    id: '5',
+    id: '4',
+    name: 'Manda Hill Mall',
+    location: 'Great East Road',
+    type: 'Shopping Center',
+    rating: 4.5,
+    image_url: 'https://images.unsplash.com/photo-1567449303078-57a57ea269e9?auto=format&fit=crop&q=80&w=800',
+    open_hours: '09:00 - 21:00'
+  }
+];
+
+const MOCK_FOOD: Place[] = [
+  {
+    id: '1',
+    name: 'The Quorum',
+    location: 'Mass Media',
+    type: 'Fine Dining',
+    rating: 4.9,
+    image_url: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=800',
+    open_hours: '07:00 - 23:00'
+  },
+  {
+    id: '2',
     name: 'Chicago\'s Reloaded',
     location: 'East Park Mall',
     type: 'Steakhouse & Bar',
@@ -173,16 +187,7 @@ const MOCK_PLACES: Place[] = [
     open_hours: '11:00 - 02:00'
   },
   {
-    id: '6',
-    name: 'Manda Hill Mall',
-    location: 'Great East Road',
-    type: 'Shopping Center',
-    rating: 4.5,
-    image_url: 'https://images.unsplash.com/photo-1567449303078-57a57ea269e9?auto=format&fit=crop&q=80&w=800',
-    open_hours: '09:00 - 21:00'
-  },
-  {
-    id: '7',
+    id: '3',
     name: 'The Hussar Grill',
     location: 'East Park Mall',
     type: 'Premium Steakhouse',
@@ -191,13 +196,31 @@ const MOCK_PLACES: Place[] = [
     open_hours: '12:00 - 22:00'
   },
   {
-    id: '8',
+    id: '4',
     name: 'Mint Lounge',
     location: 'Acacia Park',
     type: 'Café & Bistro',
     rating: 4.6,
     image_url: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80&w=800',
     open_hours: '07:30 - 21:00'
+  },
+  {
+    id: '5',
+    name: 'Sugarbush Café & Farm',
+    location: 'Leopard\'s Hill',
+    type: 'Farm-to-Table',
+    rating: 4.8,
+    image_url: 'https://images.unsplash.com/photo-1595855749364-77f68c3b7a2d?auto=format&fit=crop&q=80&w=800',
+    open_hours: '08:00 - 17:00'
+  },
+  {
+    id: '6',
+    name: 'Marlin Restaurant',
+    location: 'Lusaka Club',
+    type: 'Premium Steaks',
+    rating: 4.7,
+    image_url: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&q=80&w=800',
+    open_hours: '12:00 - 22:00'
   }
 ];
 
@@ -218,7 +241,8 @@ export default function ExplorePage() {
   const tabs = [
     { name: 'Accommodation', icon: Building2 },
     { name: 'Activities', icon: Tent },
-    { name: 'Places', icon: ShoppingBag }, // Shopping malls, restaurants etc
+    { name: 'Food', icon: Utensils },
+    { name: 'Places', icon: ShoppingBag }, // Shopping malls, etc
   ];
 
 
@@ -226,6 +250,8 @@ export default function ExplorePage() {
   const fetchProperties = async () => {
     setLoading(true);
     const supabase = createClient();
+    
+    let propertiesData: any[] = [];
     
     // Call the search RPC function
     const { data, error } = await supabase.rpc('search_properties', {
@@ -235,23 +261,80 @@ export default function ExplorePage() {
       p_search_query: searchQuery
     });
       
-    if (error) {
-      console.error('Error fetching properties:', error);
-      // Fallback to basic fetch if RPC fails
+    if (error || !data || data.length === 0) {
+      if (error) console.error('Error fetching properties (RPC):', error);
+      
+      // Fallback to basic fetch
       const { data: fallbackData } = await supabase.from('public_properties').select('*');
       if (fallbackData) {
           // Client-side filter as fallback
-          const filtered = fallbackData.filter((p: any) => 
+          propertiesData = fallbackData.filter((p: any) => 
             p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
             p.city?.toLowerCase().includes(searchQuery.toLowerCase())
           );
-          setProperties(filtered);
       }
     } else {
-      setProperties(data || []);
+      propertiesData = data;
     }
+
+    // Enhance with room prices/images regardless of source
+    if (propertiesData.length > 0) {
+        const propertyIds = propertiesData.map((p: any) => p.id);
+        
+        // Parallel fetch for rooms and menu categories
+        const [roomTypesResult, menuCategoriesResult] = await Promise.all([
+          supabase
+            .from('room_types')
+            .select('property_id, image_url, base_price')
+            .in('property_id', propertyIds),
+          supabase
+            .from('menu_categories')
+            .select('property_id')
+            .in('property_id', propertyIds)
+        ]);
+
+        const roomTypes = roomTypesResult.data || [];
+        const menuCategories = menuCategoriesResult.data || [];
+
+        const enhancedProperties = propertiesData.map((p: any) => {
+            const pRooms = roomTypes.filter((r: any) => r.property_id === p.id);
+            const pMenus = menuCategories.filter((m: any) => m.property_id === p.id);
+            
+            // Heuristic for type if missing
+            let inferredType = p.type;
+            if (!inferredType) {
+               if (pRooms.length > 0) {
+                  inferredType = 'hotel'; // or lodge, etc.
+               } else if (pMenus.length > 0) {
+                  inferredType = 'restaurant';
+               } else {
+                  inferredType = 'hotel'; // Default fallback
+               }
+            }
+
+            // Sort by price ascending to find the lowest room
+            pRooms.sort((a: any, b: any) => a.base_price - b.base_price);
+            const bestRoom = pRooms[0];
+            
+            return {
+                ...p,
+                type: inferredType,
+                // Use room image if available, else fallback to property cover
+                display_image: bestRoom?.image_url || p.cover_image_url, 
+                // Ensure min_price is accurate from room types if needed
+                min_price: bestRoom?.base_price || p.min_price
+            };
+        });
+        setProperties(enhancedProperties);
+    } else {
+        setProperties([]);
+    }
+    
     setLoading(false);
   };
+
+  const accommodationProperties = properties.filter(p => p.type?.trim().toLowerCase() !== 'restaurant');
+  const restaurantProperties = properties.filter(p => p.type?.trim().toLowerCase() === 'restaurant');
 
   const fetchPlaces = async () => {
     const supabase = createClient();
@@ -525,12 +608,12 @@ export default function ExplorePage() {
                           <button className="text-sm font-bold text-slate-900 underline hover:text-slate-600">Show all</button>
                        </div>
                        <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4 -mx-6 px-6 md:mx-0 md:px-0 snap-x">
-                          {properties.slice(0, 6).map((property) => (
+                          {accommodationProperties.slice(0, 6).map((property) => (
                              <Link href={`/book/${property.slug || property.id}`} key={`popular-${property.id}`} className="group block cursor-pointer w-[280px] md:w-[320px] flex-none snap-start">
                                 <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-slate-100 mb-3">
-                                   {property.cover_image_url ? (
+                                   {property.display_image || property.cover_image_url ? (
                                       <img 
-                                         src={property.cover_image_url} 
+                                         src={property.display_image || property.cover_image_url} 
                                          alt={property.name} 
                                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                       />
@@ -560,7 +643,7 @@ export default function ExplorePage() {
                                   <div className="flex items-baseline gap-1 mt-1">
                                      {property.min_price ? (
                                         <span className="font-bold text-slate-900 text-sm">
-                                           from K{property.min_price}/night
+                                           from K{property.min_price}
                                         </span>
                                      ) : (
                                         <span className="font-bold text-slate-500 text-sm">View Details</span>
@@ -576,12 +659,12 @@ export default function ExplorePage() {
                     <section>
                        <h2 className="text-2xl font-bold text-slate-900 mb-6">Explore Accommodation</h2>
                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-6 gap-y-10">
-                          {properties.map((property) => (
+                          {accommodationProperties.map((property) => (
                              <Link href={`/book/${property.slug || property.id}`} key={property.id} className="group block cursor-pointer">
                                 <div className="relative aspect-square overflow-hidden rounded-xl bg-slate-100 mb-3">
-                                   {property.cover_image_url ? (
+                                   {property.display_image || property.cover_image_url ? (
                                       <img 
-                                         src={property.cover_image_url} 
+                                         src={property.display_image || property.cover_image_url} 
                                          alt={property.name} 
                                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                       />
@@ -610,7 +693,7 @@ export default function ExplorePage() {
                                   <div className="flex items-baseline gap-1 mt-1">
                                      {property.min_price ? (
                                         <span className="font-bold text-slate-900 text-sm">
-                                           from K{property.min_price}/night
+                                           from K{property.min_price}
                                         </span>
                                      ) : (
                                         <span className="font-bold text-slate-500 text-sm">View Details</span>
@@ -722,6 +805,126 @@ export default function ExplorePage() {
                                     </div>
                                 </div>
                             </div>
+                        ))}
+                    </div>
+                </section>
+            </div>
+         )}
+
+         {/* Food Content */}
+         {activeTab === 'Food' && (
+            <div className="space-y-12">
+                {/* Popular Food Section */}
+                <section>
+                    <div className="flex justify-between items-end mb-6">
+                        <h2 className="text-2xl font-bold text-slate-900">Popular Dining</h2>
+                        <button className="text-sm font-bold text-slate-900 underline hover:text-slate-600">Show all</button>
+                    </div>
+                    <div className="flex gap-6 overflow-x-auto scrollbar-hide pb-4 -mx-6 px-6 md:mx-0 md:px-0 snap-x">
+                        {restaurantProperties.length > 0 ? restaurantProperties.slice(0, 4).map((place: any) => (
+                            <Link href={`/food/${place.slug || place.id}`} key={place.id} className="group block cursor-pointer w-[280px] md:w-[320px] flex-none snap-start">
+                                <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-slate-100 mb-3">
+                                    <img 
+                                        src={place.display_image || place.cover_image_url} 
+                                        alt={place.name} 
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                    />
+                                    <div className="absolute top-3 left-3 bg-white/95 backdrop-blur px-3 py-1 rounded-full shadow-md text-xs font-bold text-slate-900 border border-white/20">
+                                        Restaurant
+                                    </div>
+                                    <button className="absolute top-3 right-3 p-2 hover:scale-110 transition-transform z-10 bg-black/10 hover:bg-black/20 rounded-full backdrop-blur-sm">
+                                        <Heart size={20} className="text-white fill-black/50 hover:fill-zambia-red hover:text-zambia-red transition-colors" />
+                                    </button>
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="flex justify-between items-start">
+                                        <h3 className="font-bold text-slate-900 truncate text-lg">{place.name}</h3>
+                                        <div className="flex items-center gap-1 text-sm font-bold">
+                                            <Star size={14} className={place.average_rating ? "fill-slate-900 text-slate-900" : "text-slate-300"} />
+                                            <span>{place.average_rating || 'New'}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-slate-500 text-sm">
+                                        <MapPin size={14} />
+                                        <span>{[place.city, place.country].filter(Boolean).join(', ') || place.address}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-slate-500 text-sm mt-1">
+                                        <Clock size={14} />
+                                        <span className="text-green-600 font-medium">Open {place.settings?.opening_hours || 'Daily'}</span>
+                                    </div>
+                                </div>
+                            </Link>
+                        )) : MOCK_FOOD.slice(0, 4).map((place) => (
+                            <div key={place.id} className="group block cursor-pointer w-[280px] md:w-[320px] flex-none snap-start">
+                                <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-slate-100 mb-3">
+                                    <img 
+                                        src={place.image_url} 
+                                        alt={place.name} 
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                    />
+                                    <div className="absolute top-3 left-3 bg-white/95 backdrop-blur px-3 py-1 rounded-full shadow-md text-xs font-bold text-slate-900 border border-white/20">
+                                        {place.type}
+                                    </div>
+                                    <button className="absolute top-3 right-3 p-2 hover:scale-110 transition-transform z-10 bg-black/10 hover:bg-black/20 rounded-full backdrop-blur-sm">
+                                        <Heart size={20} className="text-white fill-black/50 hover:fill-zambia-red hover:text-zambia-red transition-colors" />
+                                    </button>
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="flex justify-between items-start">
+                                        <h3 className="font-bold text-slate-900 truncate text-lg">{place.name}</h3>
+                                        <div className="flex items-center gap-1 text-sm font-bold">
+                                            <Star size={14} className="fill-slate-900 text-slate-900" />
+                                            <span>{place.rating}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-slate-500 text-sm">
+                                        <MapPin size={14} />
+                                        <span>{place.location}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-slate-500 text-sm mt-1">
+                                        <Clock size={14} />
+                                        <span className="text-green-600 font-medium">Open {place.open_hours}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+                {/* All Food Grid */}
+                <section>
+                    <h2 className="text-2xl font-bold text-slate-900 mb-6">Explore Food & Drink</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-6 gap-y-10">
+                        {restaurantProperties.map((place: any) => (
+                            <Link href={`/food/${place.slug || place.id}`} key={place.id} className="group block cursor-pointer">
+                                <div className="relative aspect-square overflow-hidden rounded-xl bg-slate-100 mb-3">
+                                    <img 
+                                        src={place.cover_image_url} 
+                                        alt={place.name} 
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                    />
+                                    <button className="absolute top-3 right-3 p-2 hover:scale-110 transition-transform z-10">
+                                        <Heart size={24} className="text-white fill-black/50 hover:fill-zambia-red hover:text-zambia-red transition-colors" />
+                                    </button>
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="flex justify-between items-start">
+                                        <h3 className="font-bold text-slate-900 truncate">{place.name}</h3>
+                                        <div className="flex items-center gap-1 text-sm">
+                                            <Star size={14} className="fill-slate-900 text-slate-900" />
+                                            <span>{place.average_rating || 'New'}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-1 text-slate-500 text-sm">
+                                        <MapPin size={14} />
+                                        <span className="truncate">{place.address}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-slate-500 text-sm mt-1">
+                                        <Clock size={14} />
+                                        <span className="text-green-600 font-medium">Open {place.settings?.opening_hours || 'Daily'}</span>
+                                    </div>
+                                </div>
+                            </Link>
                         ))}
                     </div>
                 </section>

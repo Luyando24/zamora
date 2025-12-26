@@ -28,6 +28,11 @@ const AMENITIES_BY_TYPE: Record<string, string[]> = {
     'Room Service', 'Free Parking', 'Airport Shuttle', 'Spa', 'Conference Rooms',
     '24-hour Front Desk', 'Air Conditioning', 'Laundry Service', 'Concierge'
   ],
+  restaurant: [
+    'Free Wi-Fi', 'Outdoor Seating', 'Live Music', 'Bar / Lounge', 'Private Dining',
+    'Takeout', 'Delivery', 'Wheelchair Accessible', 'Parking', 'Kids Menu',
+    'Vegetarian Options', 'Vegan Options', 'Halal', 'Breakfast', 'Lunch', 'Dinner'
+  ],
   lodge: [
     'Game Drives', 'Guided Walks', 'Swimming Pool', 'Outdoor Fireplace', 'Bar / Lounge',
     'Restaurant', 'Mosquito Nets', 'Airport Shuttle', 'Free Parking', 'Viewing Deck',

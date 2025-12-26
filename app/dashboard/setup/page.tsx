@@ -25,13 +25,15 @@ import {
   Plus,
   X,
   ListPlus,
-  Check
+  Check,
+  Utensils
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useProperty } from '../context/PropertyContext';
 
 const PROPERTY_TYPES = [
   { id: 'hotel', label: 'Hotel', icon: Building2, description: 'Standard hotel services' },
+  { id: 'restaurant', label: 'Restaurant', icon: Utensils, description: 'Dining establishment' },
   { id: 'lodge', label: 'Lodge', icon: Home, description: 'Nature-focused accommodation' },
   { id: 'guest_house', label: 'Guest House', icon: BedDouble, description: 'Small, home-like setting' },
   { id: 'apartment', label: 'Apartment', icon: Building, description: 'Self-catering units' },
@@ -45,6 +47,11 @@ const AMENITIES_BY_TYPE: Record<string, string[]> = {
     'Free Wi-Fi', 'Swimming Pool', 'Gym / Fitness Center', 'Restaurant', 'Bar / Lounge',
     'Room Service', 'Free Parking', 'Airport Shuttle', 'Spa', 'Conference Rooms',
     '24-hour Front Desk', 'Air Conditioning', 'Laundry Service', 'Concierge'
+  ],
+  restaurant: [
+    'Free Wi-Fi', 'Outdoor Seating', 'Live Music', 'Bar / Lounge', 'Private Dining',
+    'Takeout', 'Delivery', 'Wheelchair Accessible', 'Parking', 'Kids Menu',
+    'Vegetarian Options', 'Vegan Options', 'Halal', 'Breakfast', 'Lunch', 'Dinner'
   ],
   lodge: [
     'Game Drives', 'Guided Walks', 'Swimming Pool', 'Outdoor Fireplace', 'Bar / Lounge',
@@ -74,6 +81,25 @@ const AMENITIES_BY_TYPE: Record<string, string[]> = {
   ]
 };
 
+const CUISINE_OPTIONS = [
+  { value: 'zambian', label: 'Zambian' },
+  { value: 'italian', label: 'Italian' },
+  { value: 'chinese', label: 'Chinese' },
+  { value: 'indian', label: 'Indian' },
+  { value: 'american', label: 'American' },
+  { value: 'grill', label: 'Grill' },
+  { value: 'cafe', label: 'Cafe' },
+  { value: 'bakery', label: 'Bakery' },
+  { value: 'seafood', label: 'Seafood' },
+  { value: 'steakhouse', label: 'Steakhouse' },
+  { value: 'fast_food', label: 'Fast Food' },
+  { value: 'pizza', label: 'Pizza' },
+  { value: 'sushi', label: 'Sushi' },
+  { value: 'fusion', label: 'Fusion' },
+  { value: 'pub', label: 'Pub / Bar' },
+  { value: 'other', label: 'Other' },
+];
+
 export default function PropertySetupPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -88,6 +114,12 @@ export default function PropertySetupPage() {
     cover_image_url: '',
     gallery_urls: [] as string[],
     amenities: [] as string[],
+    // Restaurant specific fields
+    cuisine_type: [] as string[],
+    opening_hours: '',
+    delivery_radius: '',
+    delivery_contact: '',
+    online_ordering_link: ''
   });
   const [newAmenity, setNewAmenity] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -124,19 +156,21 @@ export default function PropertySetupPage() {
     }
   };
 
+  const isRestaurant = formData.type === 'restaurant';
+
   const handleNext = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
     if (step === 1) {
       if (!formData.name.trim()) {
-        setError('Property Name is required.');
+        setError(`${isRestaurant ? 'Restaurant' : 'Property'} Name is required.`);
         return;
       }
       setStep(2);
     } else if (step === 2) {
       if (!formData.cover_image_url) {
-        setError('Please upload a cover image for your property.');
+        setError(`Please upload a cover image for your ${isRestaurant ? 'restaurant' : 'property'}.`);
         return;
       }
       setStep(3);
@@ -169,10 +203,14 @@ export default function PropertySetupPage() {
       if (!user) throw new Error('Not authenticated');
 
       // 1. Create the Property
+      const { cuisine_type, opening_hours, delivery_radius, delivery_contact, online_ordering_link, ...baseData } = formData;
+      const settings = { cuisine_type, opening_hours, delivery_radius, delivery_contact, online_ordering_link };
+
       const { data: hotel, error: hotelError } = await supabase
         .from('properties')
         .insert([{
-          ...formData,
+          ...baseData,
+          settings,
           subscription_plan: 'trial',
           subscription_status: 'active'
         }])
@@ -186,11 +224,11 @@ export default function PropertySetupPage() {
       
       const { error: staffError } = await supabase
         .from('property_staff')
-        .insert({
+        .upsert({
             property_id: hotel.id,
             user_id: user.id,
             role: 'admin' // Creator is admin of the property
-        });
+        }, { onConflict: 'property_id,user_id' });
 
       if (staffError) throw staffError;
 
@@ -219,7 +257,7 @@ export default function PropertySetupPage() {
       }, 2000);
 
     } catch (error: any) {
-      alert('Error setting up property: ' + error.message);
+      alert(`Error setting up ${isRestaurant ? 'restaurant' : 'property'}: ` + error.message);
       setLoading(false);
     }
   };
@@ -232,7 +270,7 @@ export default function PropertySetupPage() {
             <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6 animate-bounce">
               <CheckCircle className="h-8 w-8 text-zambia-green" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Property Created!</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">{isRestaurant ? 'Restaurant Created!' : 'Property Created!'}</h2>
             <p className="text-gray-500">Setting up your dashboard...</p>
             <div className="mt-6 flex justify-center">
               <Loader2 className="h-6 w-6 text-zambia-green animate-spin" />
@@ -248,13 +286,13 @@ export default function PropertySetupPage() {
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-zambia-green shadow-lg mb-6 transform rotate-3 hover:rotate-0 transition-transform duration-300">
-            <Building2 className="h-8 w-8 text-white" />
+            {isRestaurant ? <Utensils className="h-8 w-8 text-white" /> : <Building2 className="h-8 w-8 text-white" />}
           </div>
           <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
             Welcome to Zamora
           </h1>
           <p className="mt-3 text-xl text-gray-500 max-w-2xl mx-auto">
-            Let's get your property set up. It only takes a minute.
+            Let's get your {isRestaurant ? 'restaurant' : 'property'} set up. It only takes a minute.
           </p>
         </div>
 
@@ -298,11 +336,11 @@ export default function PropertySetupPage() {
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <h3 className="text-xl font-bold text-gray-900 mb-6">Property Details</h3>
+                    <h3 className="text-xl font-bold text-gray-900 mb-6">{isRestaurant ? 'Restaurant Details' : 'Property Details'}</h3>
                     <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
                       <div className="sm:col-span-2">
                         <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                          Property Name
+                          {isRestaurant ? 'Restaurant Name' : 'Property Name'}
                         </label>
                         <div className="relative">
                           <input
@@ -313,14 +351,14 @@ export default function PropertySetupPage() {
                             value={formData.name}
                             onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                             className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-zambia-green focus:border-transparent transition-all text-gray-900"
-                            placeholder="e.g. The Royal Zambezi Lodge"
+                            placeholder={isRestaurant ? "e.g. The Mint Cafe" : "e.g. The Royal Zambezi Lodge"}
                           />
                         </div>
                       </div>
 
                       <div className="sm:col-span-2">
                         <label className="block text-sm font-medium text-gray-700 mb-3">
-                          Property Type
+                          {isRestaurant ? 'Establishment Type' : 'Property Type'}
                         </label>
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                           {PROPERTY_TYPES.map((type) => {
@@ -346,6 +384,77 @@ export default function PropertySetupPage() {
                           })}
                         </div>
                       </div>
+
+                      {isRestaurant && (
+                        <div className="sm:col-span-2 space-y-6 pt-4 border-t border-gray-100">
+                          <h4 className="text-base font-semibold text-gray-900">Restaurant Details</h4>
+                          
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="sm:col-span-2">
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Cuisine Type
+                              </label>
+                              <div className="flex flex-wrap gap-2">
+                                {CUISINE_OPTIONS.map((cuisine) => {
+                                  // Ensure array
+                                  const currentCuisines = Array.isArray(formData.cuisine_type) 
+                                    ? formData.cuisine_type 
+                                    : (formData.cuisine_type ? [formData.cuisine_type] : []);
+
+                                  const isSelected = currentCuisines.includes(cuisine.value);
+                                  return (
+                                    <button
+                                      key={cuisine.value}
+                                      type="button"
+                                      onClick={() => {
+                                        const newCuisines = isSelected
+                                          ? currentCuisines.filter((c: string) => c !== cuisine.value)
+                                          : [...currentCuisines, cuisine.value];
+                                        setFormData(prev => ({ ...prev, cuisine_type: newCuisines }));
+                                      }}
+                                      className={`
+                                        px-3 py-1.5 rounded-lg text-sm font-medium border transition-all duration-200
+                                        ${isSelected 
+                                          ? 'bg-zambia-green text-white border-zambia-green shadow-sm' 
+                                          : 'bg-white text-gray-600 border-gray-200 hover:border-zambia-green hover:text-zambia-green'}
+                                      `}
+                                    >
+                                      {cuisine.label}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                              <p className="mt-2 text-xs text-gray-400">Select all that apply.</p>
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Opening Hours
+                              </label>
+                              <input
+                                type="text"
+                                placeholder="e.g. 08:00 - 22:00"
+                                value={formData.opening_hours}
+                                onChange={(e) => setFormData(prev => ({ ...prev, opening_hours: e.target.value }))}
+                                className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-zambia-green focus:border-transparent text-gray-900"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Delivery Radius (km)
+                              </label>
+                              <input
+                                type="number"
+                                placeholder="e.g. 10"
+                                value={formData.delivery_radius}
+                                onChange={(e) => setFormData(prev => ({ ...prev, delivery_radius: e.target.value }))}
+                                className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-zambia-green focus:border-transparent text-gray-900"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </motion.div>
                 )}
@@ -364,7 +473,11 @@ export default function PropertySetupPage() {
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Cover Image
                         </label>
-                        <p className="text-sm text-gray-500 mb-3">This will be the main image shown on your booking page.</p>
+                        <p className="text-sm text-gray-500 mb-3">
+                          {isRestaurant 
+                            ? "This will be the main image shown on your profile." 
+                            : "This will be the main image shown on your booking page."}
+                        </p>
                         <ImageUpload 
                           value={formData.cover_image_url}
                           onChange={(url) => setFormData(prev => ({ ...prev, cover_image_url: url }))}
@@ -376,7 +489,11 @@ export default function PropertySetupPage() {
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Gallery Images
                         </label>
-                        <p className="text-sm text-gray-500 mb-3">Add photos of your property, rooms, and amenities.</p>
+                        <p className="text-sm text-gray-500 mb-3">
+                          {isRestaurant
+                            ? "Add photos of your dining area, food, and atmosphere."
+                            : "Add photos of your property, rooms, and amenities."}
+                        </p>
                         <MultiImageUpload 
                           values={formData.gallery_urls}
                           onChange={(urls) => setFormData(prev => ({ ...prev, gallery_urls: urls }))}
@@ -395,8 +512,12 @@ export default function PropertySetupPage() {
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">Property Amenities</h3>
-                    <p className="text-gray-500 mb-6">Select features available at your property.</p>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">{isRestaurant ? 'Restaurant Features' : 'Property Amenities'}</h3>
+                    <p className="text-gray-500 mb-6">
+                      {isRestaurant 
+                        ? "Select features available at your restaurant." 
+                        : "Select features available at your property."}
+                    </p>
                     
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
                       {(AMENITIES_BY_TYPE[formData.type] || AMENITIES_BY_TYPE.hotel).map((amenity) => {
@@ -560,6 +681,36 @@ export default function PropertySetupPage() {
                           />
                         </div>
                       </div>
+
+                      {isRestaurant && (
+                        <>
+                          <div className="sm:col-span-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Delivery Contact <span className="text-gray-400 font-normal">(Optional)</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={formData.delivery_contact}
+                              onChange={(e) => setFormData(prev => ({ ...prev, delivery_contact: e.target.value }))}
+                              className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-zambia-green focus:border-transparent text-gray-900"
+                              placeholder="+260..."
+                            />
+                          </div>
+
+                          <div className="sm:col-span-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Online Ordering Link <span className="text-gray-400 font-normal">(Optional)</span>
+                            </label>
+                            <input
+                              type="text"
+                              value={formData.online_ordering_link}
+                              onChange={(e) => setFormData(prev => ({ ...prev, online_ordering_link: e.target.value }))}
+                              className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-zambia-green focus:border-transparent text-gray-900"
+                              placeholder="https://..."
+                            />
+                          </div>
+                        </>
+                      )}
                     </div>
                   </motion.div>
                 )}
@@ -598,7 +749,7 @@ export default function PropertySetupPage() {
                   {loading ? (
                     <>
                       <Loader2 className="animate-spin -ml-1 mr-3 h-5 w-5" />
-                      Creating Property...
+                      Creating {isRestaurant ? 'Restaurant' : 'Property'}...
                     </>
                   ) : (
                     <>

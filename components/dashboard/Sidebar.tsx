@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
+import { useProperty } from '@/app/dashboard/context/PropertyContext';
 import {
   LayoutDashboard, CalendarDays, BedDouble, FileText,
   Settings, LogOut, DoorOpen, Utensils, Building2,
@@ -53,6 +54,7 @@ export default function Sidebar({ onLinkClick }: { onLinkClick?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
+  const { selectedProperty } = useProperty();
   const [userEmail, setUserEmail] = useState<string>('User');
   const [userRole, setUserRole] = useState<string>('staff');
 
@@ -92,39 +94,52 @@ export default function Sidebar({ onLinkClick }: { onLinkClick?: () => void }) {
       <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-8 custom-scrollbar">
         {navigationGroups
           .filter(group => group.roles.includes(userRole))
-          .map((group) => (
-            <div key={group.title}>
-              <h3 className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
-                {group.title}
-              </h3>
-              <div className="space-y-1">
-                {group.items.map((item) => {
-                  const isActive = pathname === item.href;
-                  return (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      onClick={onLinkClick}
-                      className={`group flex items-center justify-between rounded-xl px-4 py-3 text-sm font-bold transition-all duration-200 ${isActive
-                        ? 'bg-slate-900 text-white shadow-md shadow-slate-900/10'
-                        : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
-                        }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <item.icon
-                          className={`h-5 w-5 flex-shrink-0 transition-colors ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'
-                            }`}
-                          strokeWidth={isActive ? 2.5 : 2}
-                        />
-                        {item.name}
-                      </div>
-                      {isActive && <ChevronRight size={14} className="text-white/50" />}
-                    </Link>
-                  );
-                })}
+          .map((group) => {
+            // Filter items based on property type
+            const filteredItems = group.items.filter(item => {
+              if (selectedProperty?.type === 'restaurant') {
+                const hotelOnlyItems = ['Room Bookings', 'Housekeeping', 'Rooms Setup', 'ZRA Reports'];
+                return !hotelOnlyItems.includes(item.name);
+              }
+              return true;
+            });
+
+            if (filteredItems.length === 0) return null;
+
+            return (
+              <div key={group.title}>
+                <h3 className="px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                  {group.title}
+                </h3>
+                <div className="space-y-1">
+                  {filteredItems.map((item) => {
+                    const isActive = pathname === item.href;
+                    return (
+                      <Link
+                        key={item.name}
+                        href={item.href}
+                        onClick={onLinkClick}
+                        className={`group flex items-center justify-between rounded-xl px-4 py-3 text-sm font-bold transition-all duration-200 ${isActive
+                          ? 'bg-slate-900 text-white shadow-md shadow-slate-900/10'
+                          : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                          }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <item.icon
+                            className={`h-5 w-5 flex-shrink-0 transition-colors ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'
+                              }`}
+                            strokeWidth={isActive ? 2.5 : 2}
+                          />
+                          {item.name}
+                        </div>
+                        {isActive && <ChevronRight size={14} className="text-white/50" />}
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
       </nav>
 
       {/* User Profile */}
