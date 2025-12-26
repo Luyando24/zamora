@@ -196,39 +196,6 @@ export default function RoomDetailsClient({ property, room }: RoomDetailsClientP
                         </div>
                     </div>
                 </div>
-
-                <div className="h-px bg-slate-100" />
-
-                {/* Description */}
-                <div>
-                    <h2 className="text-xl font-bold mb-3">Room Description</h2>
-                    <p className="text-slate-600 leading-relaxed text-lg">
-                        {room.description || "Experience comfort and luxury in our meticulously designed room. Perfect for relaxation after a day of exploring."}
-                    </p>
-                </div>
-
-                <div className="h-px bg-slate-100" />
-
-                {/* Amenities */}
-                <div>
-                    <h2 className="text-xl font-bold mb-4">Room Amenities</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {[
-                            { icon: Wifi, label: 'Free High-Speed Wifi' },
-                            { icon: Tv, label: 'Smart TV' },
-                            { icon: Wind, label: 'Air Conditioning' },
-                            { icon: Coffee, label: 'Coffee Maker' },
-                            { icon: CheckCircle, label: 'En-suite Bathroom' },
-                            { icon: CheckCircle, label: 'Daily Housekeeping' }
-                        ].map((item, i) => (
-                            <div key={i} className="flex items-center gap-3 text-slate-600">
-                                <item.icon size={20} />
-                                <span>{item.label}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
             </div>
 
             {/* Right Column: Booking Widget */}
@@ -333,20 +300,20 @@ export default function RoomDetailsClient({ property, room }: RoomDetailsClientP
                     </p>
                 </div>
 
-                {/* Amenities - Moved from left column */}
-                <div className="mt-8">
+                {/* Amenities - Moved from left column (Mobile Only) */}
+                <div className="mt-8 lg:hidden">
                     <h2 className="text-xl font-bold mb-4">Room Amenities</h2>
-                    <div className="grid grid-cols-1 gap-4">
+                    <div className="grid grid-cols-2 gap-4">
                         {[
-                            { icon: Wifi, label: 'Free High-Speed Wifi' },
+                            { icon: Wifi, label: 'Free Wifi' },
                             { icon: Tv, label: 'Smart TV' },
-                            { icon: Wind, label: 'Air Conditioning' },
-                            { icon: Coffee, label: 'Coffee Maker' },
-                            { icon: CheckCircle, label: 'En-suite Bathroom' },
-                            { icon: CheckCircle, label: 'Daily Housekeeping' }
+                            { icon: Wind, label: 'AC' },
+                            { icon: Coffee, label: 'Coffee' },
+                            { icon: CheckCircle, label: 'En-suite' },
+                            { icon: CheckCircle, label: 'Cleaning' }
                         ].map((item, i) => (
-                            <div key={i} className="flex items-center gap-3 text-slate-600">
-                                <item.icon size={20} />
+                            <div key={i} className="flex items-center gap-2 text-slate-600 text-sm font-medium">
+                                <item.icon size={16} />
                                 <span>{item.label}</span>
                             </div>
                         ))}
