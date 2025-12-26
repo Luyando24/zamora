@@ -21,8 +21,8 @@ export default function RoomDetailsClient({ property, room }: RoomDetailsClientP
   const bookingFormRef = useRef<HTMLDivElement>(null);
   
   // Booking State
-  const [checkIn, setCheckIn] = useState('');
-  const [checkOut, setCheckOut] = useState('');
+  const [checkIn, setCheckIn] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [checkOut, setCheckOut] = useState(format(addDays(new Date(), 1), 'yyyy-MM-dd'));
   const [guests, setGuests] = useState(1);
   const [isBooking, setIsBooking] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -115,7 +115,7 @@ export default function RoomDetailsClient({ property, room }: RoomDetailsClientP
   };
 
   return (
-    <div className="min-h-screen bg-white font-sans text-slate-900 pt-20">
+    <div className="min-h-screen bg-white font-sans text-slate-900 pt-20 pb-48">
       <GuestNavbar />
 
       <main className="max-w-7xl mx-auto px-6 py-8">
@@ -194,6 +194,26 @@ export default function RoomDetailsClient({ property, room }: RoomDetailsClientP
                                 <span>New</span>
                             )}
                         </div>
+                    </div>
+                </div>
+
+                {/* Amenities - Desktop Only */}
+                <div className="hidden lg:block pt-8 border-t border-slate-200">
+                    <h2 className="text-xl font-bold mb-4">Room Amenities</h2>
+                    <div className="grid grid-cols-3 gap-4">
+                        {[
+                            { icon: Wifi, label: 'Free Wifi' },
+                            { icon: Tv, label: 'Smart TV' },
+                            { icon: Wind, label: 'AC' },
+                            { icon: Coffee, label: 'Coffee' },
+                            { icon: CheckCircle, label: 'En-suite' },
+                            { icon: CheckCircle, label: 'Cleaning' }
+                        ].map((item, i) => (
+                            <div key={i} className="flex items-center gap-2 text-slate-600 font-medium">
+                                <item.icon size={18} />
+                                <span>{item.label}</span>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
