@@ -41,10 +41,11 @@ export async function middleware(request: NextRequest) {
   
   // 1. Landing Page (get.zamoraapp.com)
   if (subdomain === 'get') {
-      // No rewrite needed if mapping to root, but we ensure we serve the landing page.
-      // If the user visits /dashboard on get.zamoraapp.com, they get the dashboard?
-      // "get.zamoraapp.com for the landing page" implies it should acts as the marketing site.
-      // We assume the root app/page.tsx and associated marketing routes are accessible.
+      // Rewrite /signup to /business-signup for property owners
+      if (url.pathname === '/signup') {
+          rewrittenUrl.pathname = '/business-signup';
+      }
+      // No rewrite needed for other paths if mapping to root
   } 
   
   // 2. Partner Dashboard (app.zamoraapp.com)
