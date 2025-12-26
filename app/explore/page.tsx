@@ -6,6 +6,7 @@ import { Search, MapPin, Star, Menu, User, Globe, SlidersHorizontal, Heart, Buil
 import Link from 'next/link';
 import Image from 'next/image';
 import { toast } from 'react-hot-toast';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 
 interface Property {
   id: string;
@@ -520,6 +521,7 @@ export default function ExplorePage() {
 
       {/* Main Content Area */}
       <main className="pt-24 md:pt-28 px-4 md:px-12 max-w-[1600px] mx-auto space-y-8 md:space-y-12">
+         <Breadcrumb items={[{ label: 'Explore' }]} />
          
          {/* Search Hero Section */}
          <div className="flex flex-col items-center justify-center space-y-6 md:space-y-8">

@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/utils/supabase/client';
 import Modal from '@/components/ui/Modal';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 import GuestNavbar from './GuestNavbar';
 import { 
   ShoppingBag, Utensils, BedDouble, Search, Plus, Minus, X, 
@@ -404,6 +405,13 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
         cartCount={cart.reduce((a, b) => a + b.quantity, 0)} 
         onCartClick={() => setIsCartOpen(true)} 
       />
+
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-4">
+          <Breadcrumb items={[
+            { label: 'Explore', href: '/explore' },
+            { label: property.name }
+          ]} />
+      </div>
 
       {/* 2. Hero Section */}
       <div className="relative h-[60vh] md:h-[70vh] w-full overflow-hidden">

@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
+import Image from 'next/image';
 
 export interface ImageUploadProps {
   value: string;
@@ -81,7 +82,7 @@ export default function ImageUpload({ value, onChange, bucket = 'menu-images', c
         </div>
       ) : (
         <div className="relative mt-1 w-full h-full min-h-[12rem] rounded-md overflow-hidden border border-gray-200 group">
-           <img src={value} alt="Uploaded" className="w-full h-full object-cover" />
+           <Image src={value} alt="Uploaded" fill className="object-cover" unoptimized />
            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
              <button
                type="button"

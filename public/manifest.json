@@ -1,15 +1,25 @@
 {
   "name": "Zamora HMS",
   "short_name": "Zamora",
+  "description": "Cloud-first, Offline-first Hotel Management System for Zambia",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#198a00",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "/icon.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
-  ]
+  ],
+  "categories": ["business", "productivity", "utilities"]
 }

@@ -111,7 +111,18 @@ export async function middleware(request: NextRequest) {
 
   // Run Auth/Session Logic
   // We pass our rewrite response so cookies are set on it.
-  return await updateSession(request, response)
+  const finalResponse = await updateSession(request, response)
+
+  // Add CORS headers for Mobile API
+  if (url.pathname.startsWith('/api/mobile')) {
+    finalResponse.headers.set('Access-Control-Allow-Origin', '*');
+    finalResponse.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    finalResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Client-Info');
+    // Ensure credentials are NOT set when Origin is *
+    finalResponse.headers.delete('Access-Control-Allow-Credentials');
+  }
+
+  return finalResponse
 }
 
 export const config = {

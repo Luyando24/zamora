@@ -3,11 +3,13 @@
 import { useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { 
   ArrowLeft, BedDouble, User, CheckCircle, Star, MapPin,
   Wifi, Coffee, Wind, Tv, Calendar, MessageCircle, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import GuestNavbar from './GuestNavbar';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 import { toast } from 'react-hot-toast';
 import { format, addDays } from 'date-fns';
 
@@ -119,14 +121,14 @@ export default function RoomDetailsClient({ property, room }: RoomDetailsClientP
       <GuestNavbar />
 
       <main className="max-w-7xl mx-auto px-6 py-8">
-        {/* Back Button */}
-        <Link 
-            href={`/book/${property.slug || property.id}`}
-            className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-900 mb-6 font-bold transition-colors"
-        >
-            <ArrowLeft size={20} />
-            Back to {property.name}
-        </Link>
+        {/* Breadcrumb */}
+        <div className="mb-6">
+            <Breadcrumb items={[
+                { label: 'Explore', href: '/explore' },
+                { label: property.name, href: `/book/${property.slug || property.id}` },
+                { label: room.name }
+            ]} />
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             
@@ -137,10 +139,12 @@ export default function RoomDetailsClient({ property, room }: RoomDetailsClientP
                 <div className="space-y-4 -mx-6 md:mx-0">
                     <div className="md:rounded-2xl overflow-hidden aspect-video relative shadow-sm group">
                         {images.length > 0 ? (
-                            <img 
+                            <Image 
                                 src={images[currentImageIndex]} 
                                 alt={room.name} 
-                                className="w-full h-full object-cover transition-transform duration-500" 
+                                fill
+                                className="object-cover transition-transform duration-500"
+                                unoptimized
                             />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center bg-slate-100">
@@ -166,7 +170,7 @@ export default function RoomDetailsClient({ property, room }: RoomDetailsClientP
                                             : 'border-transparent opacity-70 hover:opacity-100'
                                     }`}
                                 >
-                                    <img src={img} alt={`View ${idx + 1}`} className="w-full h-full object-cover" />
+                                    <Image src={img} alt={`View ${idx + 1}`} fill className="object-cover" unoptimized />
                                 </button>
                             ))}
                         </div>
@@ -326,7 +330,7 @@ export default function RoomDetailsClient({ property, room }: RoomDetailsClientP
                     )}
                     
                     <p className="text-center text-xs text-slate-400 mt-4">
-                        You won't be charged yet
+                        You won&apos;t be charged yet
                     </p>
                 </div>
 

@@ -4,18 +4,23 @@ import { useState, useRef, useEffect } from 'react';
 import GuestNavbar from './GuestNavbar';
 import { 
   ShoppingBag, Utensils, Search, Plus, Minus, X, ArrowRight,
-  MapPin, Clock, Share2, Heart
+  MapPin, Clock, Share2, Heart, CheckCircle, Info, Image as ImageIcon
 } from 'lucide-react';
+import Image from 'next/image';
 import { toast } from 'react-hot-toast';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 
 interface RestaurantDetailsProps {
   property: any;
   menuItems: any[];
   categories: string[];
+  barMenuItems?: any[];
+  barCategories?: string[];
 }
 
-export default function RestaurantDetails({ property, menuItems, categories }: RestaurantDetailsProps) {
+export default function RestaurantDetails({ property, menuItems, categories, barMenuItems = [], barCategories = [] }: RestaurantDetailsProps) {
   // Menu State
+  const [activeTab, setActiveTab] = useState<'food' | 'bar' | 'amenities' | 'photos'>('food');
   const [activeCategory, setActiveCategory] = useState(categories[0] || 'All');
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -68,8 +73,17 @@ export default function RestaurantDetails({ property, menuItems, categories }: R
 
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
+  // Determine current data source
+  const currentItems = activeTab === 'food' ? menuItems : barMenuItems;
+  const currentCategories = activeTab === 'food' ? categories : barCategories;
+
+  // Reset category when tab changes
+  useEffect(() => {
+    setActiveCategory('All');
+  }, [activeTab]);
+
   // Filter items
-  const filteredItems = menuItems.filter(item => {
+  const filteredItems = currentItems.filter(item => {
     const matchesCategory = activeCategory === 'All' || item.category === activeCategory;
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           item.description?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -85,6 +99,12 @@ export default function RestaurantDetails({ property, menuItems, categories }: R
       <GuestNavbar cartCount={cart.reduce((a, b) => a + b.quantity, 0)} onCartClick={() => setIsCartOpen(true)} />
       
       <main className="pt-24 md:pt-28 relative z-10">
+        <div className="max-w-7xl mx-auto px-1 md:px-6 mb-4">
+          <Breadcrumb items={[
+            { label: 'Explore', href: '/explore' },
+            { label: property.name }
+          ]} />
+        </div>
         
         {/* Content Layout - Single Column for Menu */}
         <div className="max-w-7xl mx-auto px-1 md:px-6">
@@ -110,7 +130,7 @@ export default function RestaurantDetails({ property, menuItems, categories }: R
                                 </div>
                             </div>
                             
-                            <div className="flex gap-3">
+                            <div className="flex gap-3 self-end md:self-auto">
                                 <button 
                                     onClick={() => {
                                         setIsSaved(!isSaved);
@@ -148,21 +168,50 @@ export default function RestaurantDetails({ property, menuItems, categories }: R
                                 {/* Menu Type Switcher */}
                                 <div className="flex bg-slate-100 p-1 rounded-full">
                                     <button
-                                        onClick={() => { /* No Bar data yet, just visual toggle or filter if implemented */ }}
-                                        className={`px-6 py-2 rounded-full text-sm font-bold transition-all bg-white text-black shadow-md`}
+                                        onClick={() => setActiveTab('food')}
+                                        className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
+                                            activeTab === 'food'
+                                            ? 'bg-white text-black shadow-md'
+                                            : 'text-slate-500 hover:text-slate-700'
+                                        }`}
                                     >
                                         Food
                                     </button>
                                     <button
-                                        onClick={() => { toast('Bar menu coming soon') }}
-                                        className={`px-6 py-2 rounded-full text-sm font-bold transition-all text-slate-500 hover:text-slate-700`}
+                                        onClick={() => setActiveTab('bar')}
+                                        className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
+                                            activeTab === 'bar'
+                                            ? 'bg-white text-black shadow-md'
+                                            : 'text-slate-500 hover:text-slate-700'
+                                        }`}
                                     >
-                                        Bar
+                                        Drinks
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab('amenities')}
+                                        className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
+                                            activeTab === 'amenities'
+                                            ? 'bg-white text-black shadow-md'
+                                            : 'text-slate-500 hover:text-slate-700'
+                                        }`}
+                                    >
+                                        Amenities
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab('photos')}
+                                        className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${
+                                            activeTab === 'photos'
+                                            ? 'bg-white text-black shadow-md'
+                                            : 'text-slate-500 hover:text-slate-700'
+                                        }`}
+                                    >
+                                        Photos
                                     </button>
                                 </div>
                             </div>
 
                             {/* Categories */}
+                            {(activeTab === 'food' || activeTab === 'bar') && (
                             <div className="flex overflow-x-auto gap-2 w-full md:w-auto pb-2 md:pb-0 scrollbar-hide mask-linear-fade [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
                                 <button
                                     onClick={() => setActiveCategory('All')}
@@ -174,7 +223,7 @@ export default function RestaurantDetails({ property, menuItems, categories }: R
                                 >
                                     All
                                 </button>
-                                {categories.map(cat => (
+                                {currentCategories.map(cat => (
                                     <button
                                         key={cat}
                                         onClick={() => setActiveCategory(cat)}
@@ -188,9 +237,12 @@ export default function RestaurantDetails({ property, menuItems, categories }: R
                                     </button>
                                 ))}
                             </div>
+                            )}
                         </div>
 
                         {/* Menu Grid - Card Based */}
+                        {(activeTab === 'food' || activeTab === 'bar') && (
+                        <>
                         <div className="grid grid-cols-2 gap-3 md:gap-6">
                             {filteredItems.map(item => (
                                 <div 
@@ -201,7 +253,13 @@ export default function RestaurantDetails({ property, menuItems, categories }: R
                                     {/* Image Area */}
                                     <div className="aspect-square relative overflow-hidden bg-slate-100">
                                         {item.image_url ? (
-                                            <img src={item.image_url} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                            <Image 
+                                                src={item.image_url} 
+                                                alt={item.name} 
+                                                fill
+                                                className="object-cover group-hover:scale-110 transition-transform duration-700" 
+                                                unoptimized
+                                            />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-slate-300">
                                                 <Utensils size={32} className="md:w-10 md:h-10" />
@@ -257,13 +315,62 @@ export default function RestaurantDetails({ property, menuItems, categories }: R
                                     <Utensils size={32} />
                                 </div>
                                 <h3 className="text-xl font-bold text-slate-900 mb-2">No items found</h3>
-                                <p className="text-slate-500 max-w-xs mx-auto">We couldn&apos;t find any dishes matching your search or category.</p>
+                                <p className="text-slate-500 max-w-xs mx-auto">We couldn&apos;t find any items matching your search or category.</p>
                                 <button 
                                     onClick={() => { setActiveCategory('All'); setSearchQuery(''); }}
                                     className="mt-6 px-6 py-2 bg-black text-white rounded-full text-sm font-bold hover:bg-slate-800 transition-colors shadow-lg"
                                 >
                                     Clear Filters
                                 </button>
+                            </div>
+                        )}
+                        </>
+                        )}
+
+                        {/* Amenities Grid */}
+                        {activeTab === 'amenities' && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 animate-in fade-in duration-500">
+                                {property.amenities && property.amenities.length > 0 ? (
+                                    property.amenities.map((amenity: any, index: number) => (
+                                        <div key={index} className="flex items-center gap-4 p-4 md:p-6 bg-white rounded-2xl md:rounded-3xl border border-slate-100 hover:border-slate-300 shadow-sm hover:shadow-lg transition-all group">
+                                            <div className="w-10 h-10 md:w-12 md:h-12 bg-slate-50 rounded-full flex items-center justify-center text-slate-900 shadow-inner group-hover:bg-slate-900 group-hover:text-white transition-colors">
+                                                <CheckCircle size={20} className="md:w-6 md:h-6" />
+                                            </div>
+                                            <span className="font-bold text-slate-700 group-hover:text-slate-900 text-sm md:text-base">
+                                                {typeof amenity === 'string' ? amenity : amenity.name}
+                                            </span>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="col-span-full text-center py-20 text-slate-400">
+                                        <Info size={48} className="mx-auto mb-4 opacity-20" />
+                                        <p>No amenities listed.</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Photos Grid */}
+                        {activeTab === 'photos' && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-in fade-in duration-500">
+                                {property.gallery_urls && property.gallery_urls.length > 0 ? (
+                                    property.gallery_urls.map((url: string, index: number) => (
+                                        <div key={index} className="aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 border border-slate-100 shadow-sm hover:shadow-lg transition-all cursor-pointer group relative">
+                                            <Image 
+                                                src={url} 
+                                                alt={`${property.name} photo ${index + 1}`} 
+                                                fill
+                                                className="object-cover group-hover:scale-110 transition-transform duration-700" 
+                                                unoptimized
+                                            />
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="col-span-full text-center py-20 text-slate-400">
+                                        <ImageIcon size={48} className="mx-auto mb-4 opacity-20" />
+                                        <p>No photos available.</p>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
@@ -325,9 +432,15 @@ export default function RestaurantDetails({ property, menuItems, categories }: R
               ) : (
                 cart.map(item => (
                   <div key={item.id} className="flex gap-4 items-center group">
-                    <div className="w-20 h-20 bg-white rounded-2xl overflow-hidden flex-shrink-0 border border-slate-100 flex items-center justify-center p-2">
+                    <div className="w-20 h-20 bg-white rounded-2xl overflow-hidden flex-shrink-0 border border-slate-100 flex items-center justify-center p-2 relative">
                        {item.image_url ? (
-                         <img src={item.image_url} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                         <Image 
+                             src={item.image_url} 
+                             alt={item.name} 
+                             fill
+                             className="object-cover group-hover:scale-110 transition-transform duration-500 rounded-xl" 
+                             unoptimized
+                         />
                        ) : (
                          <div className="w-full h-full flex items-center justify-center text-slate-300">
                             <Utensils size={24} className="opacity-50" />

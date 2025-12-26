@@ -11,6 +11,7 @@ import { PropertyProvider } from './context/PropertyContext';
 import { NotificationProvider } from './context/NotificationContext';
 import NotificationBell from '@/components/dashboard/NotificationBell';
 import FloatingActionPanel from '@/components/dashboard/FloatingActionPanel';
+import DashboardBreadcrumb from '@/components/dashboard/DashboardBreadcrumb';
 
 export default function DashboardLayout({
   children,
@@ -184,6 +185,7 @@ export default function DashboardLayout({
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto p-6 bg-slate-100 pb-20 md:pb-6">
+          <DashboardBreadcrumb />
           {!hasHotel && !isSetupPage && (
             <div className="bg-orange-50 border-l-4 border-orange-500 p-4 mb-6 shadow-sm rounded-r-lg">
               <div className="flex items-center justify-between flex-wrap gap-4">

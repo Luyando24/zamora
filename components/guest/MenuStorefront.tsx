@@ -7,6 +7,7 @@ import {
   Instagram, Facebook, Twitter, ChefHat, Coffee, Mail, Home, Wine
 } from 'lucide-react';
 import Image from 'next/image';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 import FoodDetailsPage from './FoodDetailsPage';
 import CheckoutPage from './CheckoutPage';
 import OrderHistoryPage from './OrderHistoryPage';
@@ -172,6 +173,12 @@ export default function MenuStorefront({
 
       {/* 3. Main Content - Adjusted spacing since Hero is removed */}
       <main className="max-w-7xl mx-auto px-1 md:px-6 relative z-10 pt-24 mb-20">
+         <div className="mb-4 px-2">
+            <Breadcrumb items={[
+                { label: 'Explore', href: '/explore' },
+                { label: property.name }
+            ]} />
+         </div>
          <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/50 p-3 md:p-10 min-h-[60vh] border border-slate-100">
             
             {/* Filter Header (Search removed from here) */}
@@ -197,7 +204,7 @@ export default function MenuStorefront({
                                 : 'text-slate-500 hover:text-slate-700'
                             }`}
                         >
-                            Bar
+                            Drinks
                         </button>
                     </div>
                 </div>
@@ -231,7 +238,13 @@ export default function MenuStorefront({
                         {/* Image Area */}
                         <div className="aspect-square relative overflow-hidden bg-slate-100">
                             {item.image_url ? (
-                                <img src={item.image_url} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                <Image 
+                                    src={item.image_url} 
+                                    alt={item.name} 
+                                    fill
+                                    className="object-cover group-hover:scale-110 transition-transform duration-700" 
+                                    unoptimized
+                                />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-slate-300">
                                     {activeTab === 'bar' ? <Wine size={32} className="md:w-10 md:h-10" /> : <Utensils size={32} className="md:w-10 md:h-10" />}
@@ -412,9 +425,15 @@ export default function MenuStorefront({
               ) : (
                 cart.map(item => (
                   <div key={item.id} className="flex gap-4 items-center group">
-                    <div className="w-20 h-20 bg-white rounded-2xl overflow-hidden flex-shrink-0 border border-slate-100 flex items-center justify-center p-2">
+                    <div className="w-20 h-20 bg-white rounded-2xl overflow-hidden flex-shrink-0 border border-slate-100 flex items-center justify-center p-2 relative">
                        {item.image_url ? (
-                         <img src={item.image_url} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                         <Image 
+                             src={item.image_url} 
+                             alt={item.name} 
+                             fill
+                             className="object-cover group-hover:scale-110 transition-transform duration-500 rounded-xl" 
+                             unoptimized
+                         />
                        ) : (
                          <div className="w-full h-full flex items-center justify-center text-slate-300">
                             {item.type === 'bar' ? <Wine size={24} className="opacity-50" /> : <Utensils size={24} className="opacity-50" />}

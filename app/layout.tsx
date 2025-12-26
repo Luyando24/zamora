@@ -11,6 +11,18 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Zamora HMS",
   description: "Cloud-first, Offline-first Hotel Management System for Zambia",
+  manifest: '/manifest.json',
+  themeColor: '#198a00',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Zamora HMS',
+  },
 };
 
 export default function RootLayout({

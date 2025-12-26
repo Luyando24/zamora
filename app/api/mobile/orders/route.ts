@@ -1,0 +1,199 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getSupabaseAdmin } from '@/lib/db/supabase-admin';
+import { notifyAdmin } from '@/lib/sms';
+import { sendPushNotificationToProperty } from '@/lib/push-notifications';
+import * as crypto from 'crypto';
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { foodCart, barCart, formData, propertyId } = body;
+
+    if ((!foodCart || foodCart.length === 0) && (!barCart || barCart.length === 0)) {
+      return NextResponse.json({ error: 'Cart is empty' }, { status: 400 });
+    }
+
+    if (!propertyId) {
+      return NextResponse.json({ error: 'Property ID is required' }, { status: 400 });
+    }
+
+    // Use Admin Client to bypass RLS and ensure reliability
+    const supabaseAdmin = getSupabaseAdmin();
+
+    // Determine location string
+    const locationString = formData.tableNumber 
+        ? `Table ${formData.tableNumber}` 
+        : formData.roomNumber;
+
+    const newOrderIds: string[] = [];
+    const errors: string[] = [];
+
+    // --- 1. Process Food Order ---
+    if (foodCart && foodCart.length > 0) {
+      try {
+        const foodTotal = foodCart.reduce((sum: number, i: any) => sum + (i.price || i.base_price) * i.quantity, 0);
+        const foodServiceCharge = foodTotal * 0.10;
+        const foodGrandTotal = foodTotal + foodServiceCharge;
+        const foodOrderId = crypto.randomUUID();
+
+        // Insert Order
+        const { error: orderError } = await supabaseAdmin
+          .from('orders')
+          .insert({
+            id: foodOrderId,
+            property_id: propertyId,
+            status: 'pending',
+            total_amount: foodGrandTotal,
+            payment_method: formData.paymentMethod,
+            guest_name: formData.name,
+            guest_phone: formData.phone,
+            guest_room_number: locationString,
+            notes: formData.notes,
+            // Snapshot fields
+            item_name: foodCart.map((i: any) => `${i.quantity}x ${i.name}`).join(', '),
+            item_description: foodCart.map((i: any) => i.description).filter(Boolean).join('; '),
+            item_ingredients: foodCart.map((i: any) => i.ingredients).filter(Boolean).join('; '),
+            item_image_url: foodCart[0]?.image_url,
+            weight: foodCart.map((i: any) => i.weight).filter(Boolean).join(', '),
+            category: foodCart[0]?.category,
+            options: JSON.stringify(foodCart.flatMap((i: any) => i.selectedOptions || [])),
+            extras: JSON.stringify([])
+          });
+
+        if (orderError) throw orderError;
+
+        // Insert Items
+        const orderItems = foodCart.map((item: any) => ({
+          order_id: foodOrderId,
+          menu_item_id: item.id,
+          quantity: item.quantity,
+          unit_price: item.price || item.base_price,
+          total_price: (item.price || item.base_price) * item.quantity,
+          notes: item.selectedOptions?.join(', '),
+          // Snapshot fields
+          item_name: item.name,
+          item_description: item.description,
+          item_ingredients: item.ingredients,
+          item_image_url: item.image_url,
+          weight: item.weight,
+          category: item.category,
+          options: item.selectedOptions ? JSON.stringify(item.selectedOptions) : JSON.stringify([])
+        }));
+
+        const { error: itemsError } = await supabaseAdmin
+          .from('order_items')
+          .insert(orderItems);
+
+        if (itemsError) throw itemsError;
+
+        newOrderIds.push(foodOrderId);
+
+        // Notifications
+        const message = `New Food Order #${foodOrderId.slice(0, 8)} from ${locationString || 'N/A'}. Total: K${foodGrandTotal}`;
+        
+        // SMS (Fire and forget)
+        notifyAdmin(message, undefined).catch(e => console.error('SMS Error:', e));
+
+        // Push
+        sendPushNotificationToProperty(
+            propertyId,
+            'New Food Order 🍔',
+            message,
+            `/dashboard/orders?propertyId=${propertyId}`
+        ).catch(e => console.error('Push Error:', e));
+
+      } catch (err: any) {
+        console.error('Food Order Failed:', err);
+        errors.push(`Food Order Failed: ${err.message}`);
+      }
+    }
+
+    // --- 2. Process Bar Order ---
+    if (barCart && barCart.length > 0) {
+      try {
+        const barTotal = barCart.reduce((sum: number, i: any) => sum + (i.price || i.base_price) * i.quantity, 0);
+        const barServiceCharge = barTotal * 0.10;
+        const barGrandTotal = barTotal + barServiceCharge;
+        const barOrderId = crypto.randomUUID();
+
+        // Insert Order
+        const { error: orderError } = await supabaseAdmin
+          .from('bar_orders')
+          .insert({
+            id: barOrderId,
+            property_id: propertyId,
+            status: 'pending',
+            total_amount: barGrandTotal,
+            payment_method: formData.paymentMethod,
+            guest_name: formData.name,
+            guest_phone: formData.phone,
+            guest_room_number: locationString,
+            notes: formData.notes,
+          });
+
+        if (orderError) throw orderError;
+
+        // Insert Items
+        const orderItems = barCart.map((item: any) => ({
+          order_id: barOrderId,
+          bar_menu_item_id: item.id,
+          quantity: item.quantity,
+          unit_price: item.price || item.base_price,
+          total_price: (item.price || item.base_price) * item.quantity,
+          notes: item.selectedOptions?.join(', '),
+          // Snapshot fields
+          item_name: item.name,
+          item_description: item.description,
+          item_ingredients: item.ingredients,
+          item_image_url: item.image_url,
+          weight: item.weight,
+          options: item.selectedOptions ? JSON.stringify(item.selectedOptions) : JSON.stringify([])
+        }));
+
+        const { error: itemsError } = await supabaseAdmin
+          .from('bar_order_items')
+          .insert(orderItems);
+
+        if (itemsError) throw itemsError;
+
+        newOrderIds.push(barOrderId);
+
+        // Notifications
+        const { data: property } = await supabaseAdmin
+            .from('properties')
+            .select('admin_notification_phone')
+            .eq('id', propertyId)
+            .single();
+
+        const message = `New Bar Order #${barOrderId.slice(0, 8)} from ${locationString || 'N/A'}. Total: K${barGrandTotal}`;
+        
+        notifyAdmin(message, property?.admin_notification_phone).catch(e => console.error('SMS Error:', e));
+
+        sendPushNotificationToProperty(
+            propertyId,
+            'New Bar Order 🍸',
+            message,
+            `/dashboard/bar-orders?propertyId=${propertyId}`
+        ).catch(e => console.error('Push Error:', e));
+
+      } catch (err: any) {
+        console.error('Bar Order Failed:', err);
+        errors.push(`Bar Order Failed: ${err.message}`);
+      }
+    }
+
+    if (newOrderIds.length === 0 && errors.length > 0) {
+        return NextResponse.json({ error: 'All orders failed', details: errors }, { status: 500 });
+    }
+
+    return NextResponse.json({ 
+        success: true, 
+        orderIds: newOrderIds,
+        errors: errors.length > 0 ? errors : undefined
+    });
+
+  } catch (error: any) {
+    console.error('Mobile Order Error:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
