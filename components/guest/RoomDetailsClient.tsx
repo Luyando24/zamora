@@ -237,8 +237,11 @@ export default function RoomDetailsClient({ property, room }: RoomDetailsClientP
                             <div className="border border-slate-300 rounded-xl p-3 focus-within:border-black focus-within:ring-1 focus-within:ring-black transition-all">
                                 <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Check-in</label>
                                 <input 
-                                    type="date" 
-                                    className="w-full outline-none font-bold text-slate-900 bg-transparent min-h-[24px] text-sm md:text-base"
+                                    type={checkIn ? 'date' : 'text'}
+                                    placeholder="Add date"
+                                    onFocus={(e) => e.target.type = 'date'}
+                                    onBlur={(e) => { if (!e.target.value) e.target.type = 'text'; }}
+                                    className="w-full outline-none font-bold text-slate-900 bg-transparent min-h-[24px] text-sm md:text-base placeholder:text-slate-400 placeholder:font-normal"
                                     value={checkIn}
                                     onChange={handleCheckInChange}
                                 />
@@ -246,8 +249,11 @@ export default function RoomDetailsClient({ property, room }: RoomDetailsClientP
                             <div className="border border-slate-300 rounded-xl p-3 focus-within:border-black focus-within:ring-1 focus-within:ring-black transition-all">
                                 <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">Check-out</label>
                                 <input 
-                                    type="date" 
-                                    className="w-full outline-none font-bold text-slate-900 bg-transparent min-h-[24px] text-sm md:text-base"
+                                    type={checkOut ? 'date' : 'text'}
+                                    placeholder="Add date"
+                                    onFocus={(e) => e.target.type = 'date'}
+                                    onBlur={(e) => { if (!e.target.value) e.target.type = 'text'; }}
+                                    className="w-full outline-none font-bold text-slate-900 bg-transparent min-h-[24px] text-sm md:text-base placeholder:text-slate-400 placeholder:font-normal"
                                     value={checkOut}
                                     min={checkIn}
                                     onChange={(e) => setCheckOut(e.target.value)}

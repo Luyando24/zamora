@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { Building2, Save, Globe, Mail, Phone, Facebook, Instagram, Twitter, Wifi, ChevronDown, Plus } from 'lucide-react';
+import { Building2, Save, Globe, Mail, Phone, Facebook, Instagram, Twitter, Wifi, ChevronDown, Plus, Baby } from 'lucide-react';
 import ImageUpload from '@/components/ui/ImageUpload';
 import Link from 'next/link';
 import { useProperty } from '../context/PropertyContext';
@@ -63,7 +63,9 @@ export default function SettingsPage() {
             wifi_ssid: '',
             wifi_password: '',
             admin_notification_phone: '',
-            whatsapp_booking_phone: ''
+            whatsapp_booking_phone: '',
+            allows_children: false,
+            max_children: 0
           });
           // We don't change selectedPropertyId here, just the form state
       } else {
