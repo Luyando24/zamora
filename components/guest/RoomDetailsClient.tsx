@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { 
-  ArrowLeft, BedDouble, User, CheckCircle, Star, 
+  ArrowLeft, BedDouble, User, CheckCircle, Star, MapPin,
   Wifi, Coffee, Wind, Tv, Calendar, MessageCircle, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import GuestNavbar from './GuestNavbar';
@@ -193,6 +193,10 @@ export default function RoomDetailsClient({ property, room }: RoomDetailsClientP
                             ) : (
                                 <span>New</span>
                             )}
+                        </div>
+                        <div className="flex items-center gap-2 text-slate-500">
+                            <MapPin size={20} />
+                            <span>{property.city || property.address || 'Zambia'}</span>
                         </div>
                     </div>
                 </div>
