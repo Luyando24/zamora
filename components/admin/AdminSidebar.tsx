@@ -6,11 +6,12 @@ import { createClient } from '@/utils/supabase/client';
 import { toast } from 'react-hot-toast';
 import { 
   LayoutDashboard, Building2, Users, CreditCard, 
-  Settings, LogOut, BarChart3, ShieldCheck 
+  Settings, LogOut, BarChart3, ShieldCheck, Activity 
 } from 'lucide-react';
 
 const navigation = [
   { name: 'Overview', href: '/admin', icon: LayoutDashboard },
+  { name: 'Analytics', href: '/admin/analytics', icon: Activity },
   { name: 'Properties', href: '/admin/hotels', icon: Building2 },
   { name: 'Users', href: '/admin/users', icon: Users },
   { name: 'Revenue', href: '/admin/revenue', icon: CreditCard },
