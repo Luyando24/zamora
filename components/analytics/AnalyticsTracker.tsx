@@ -55,12 +55,13 @@ export default function AnalyticsTracker() {
           referrer: document.referrer || null,
           device_type: getDeviceType(),
           browser: getBrowser(),
-          session_id: sessionId,
-          user_agent: navigator.userAgent
+          session_id: sessionId
         });
 
         if (error) {
           console.error('Error logging analytics:', error);
+        } else {
+          console.log('Analytics recorded:', fullPath);
         }
       } catch (err) {
         // Fail silently to not impact user experience
@@ -68,12 +69,7 @@ export default function AnalyticsTracker() {
       }
     };
 
-    // Delay slightly to ensure page load
-    const timeoutId = setTimeout(() => {
-        logPageView();
-    }, 500);
-
-    return () => clearTimeout(timeoutId);
+    logPageView();
     
   }, [pathname, searchParams, supabase]);
 
