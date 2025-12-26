@@ -28,7 +28,8 @@ export default function SettingsPage() {
     twitter_url: '',
     wifi_ssid: '',
     wifi_password: '',
-    admin_notification_phone: ''
+    admin_notification_phone: '',
+    whatsapp_booking_phone: ''
   });
 
   useEffect(() => {
@@ -61,7 +62,8 @@ export default function SettingsPage() {
             twitter_url: '',
             wifi_ssid: '',
             wifi_password: '',
-            admin_notification_phone: ''
+            admin_notification_phone: '',
+            whatsapp_booking_phone: ''
           });
           // We don't change selectedPropertyId here, just the form state
       } else {
@@ -289,6 +291,23 @@ export default function SettingsPage() {
                   onChange={e => setHotel({ ...hotel, phone: e.target.value })}
                 />
               </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">WhatsApp Booking Number</label>
+              <div className="relative mt-1">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Phone className="h-4 w-4 text-gray-400" />
+                </div>
+                <input
+                  type="tel"
+                  className="block w-full pl-10 rounded-md border-gray-300 shadow-sm focus:border-zambia-green focus:ring-zambia-green px-3 py-2 border text-gray-900 bg-white"
+                  value={hotel.whatsapp_booking_phone || ''}
+                  onChange={e => setHotel({ ...hotel, whatsapp_booking_phone: e.target.value })}
+                  placeholder="+260..."
+                />
+              </div>
+              <p className="mt-1 text-xs text-gray-500">If set, guests will book via WhatsApp instead of the online system.</p>
             </div>
 
             <div>

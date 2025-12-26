@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { 
   ArrowLeft, BedDouble, User, CheckCircle, Star, 
-  Wifi, Coffee, Wind, Tv, Calendar
+  Wifi, Coffee, Wind, Tv, Calendar, MessageCircle
 } from 'lucide-react';
 import GuestNavbar from './GuestNavbar';
 import { toast } from 'react-hot-toast';
@@ -243,13 +243,36 @@ export default function RoomDetailsClient({ property, room }: RoomDetailsClientP
                         </div>
                     </div>
 
-                    <button 
-                        onClick={handleBook}
-                        disabled={isBooking}
-                        className="w-full py-4 bg-zambia-red hover:bg-red-700 text-white font-bold rounded-xl transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-                    >
-                        {isBooking ? 'Processing...' : 'Reserve Room'}
-                    </button>
+                    {property.whatsapp_booking_phone ? (
+                        <button 
+                            onClick={() => {
+                                if (!checkIn || !checkOut) {
+                                    toast.error('Please select check-in and check-out dates');
+                                    return;
+                                }
+
+                                const message = `Hello, I found this on Zamora and I'm interested in booking the ${room.name} at ${property.name}.\n\nIs this room available for booking from ${checkIn} to ${checkOut} (${nights} nights)?\n\nDetails:\n- Guests: ${guests}\n- Total Price: K${totalPrice}\n\nLooking forward to your response!`;
+                                
+                                const encodedMessage = encodeURIComponent(message);
+                                const cleanPhone = property.whatsapp_booking_phone.replace(/[^0-9]/g, '');
+                                const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
+                                
+                                window.open(whatsappUrl, '_blank');
+                            }}
+                            className="w-full py-4 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold rounded-xl transition-all active:scale-95 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                        >
+                            <MessageCircle size={20} />
+                            Book via WhatsApp
+                        </button>
+                    ) : (
+                        <button 
+                            onClick={handleBook}
+                            disabled={isBooking}
+                            className="w-full py-4 bg-zambia-red hover:bg-red-700 text-white font-bold rounded-xl transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                        >
+                            {isBooking ? 'Processing...' : 'Reserve Room'}
+                        </button>
+                    )}
                     
                     <p className="text-center text-xs text-slate-400 mt-4">
                         You won't be charged yet
