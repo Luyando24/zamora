@@ -15,14 +15,14 @@ import { useEffect, useState, useCallback } from 'react';
 export const navigationGroups = [
   {
     title: 'Main',
-    roles: ['admin', 'manager', 'staff'],
+    roles: ['admin', 'manager', 'staff', 'waiter'],
     items: [
       { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
     ]
   },
   {
     title: 'Operations',
-    roles: ['admin', 'manager', 'staff'],
+    roles: ['admin', 'manager', 'staff', 'waiter'],
     items: [
       { name: 'Room Bookings', href: '/dashboard/inventory', icon: CalendarDays },
       { name: 'Food & Bar Orders', href: '/dashboard/orders', icon: Utensils },

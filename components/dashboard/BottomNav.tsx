@@ -37,9 +37,10 @@ export default function BottomNav() {
     }, [getRole]);
 
     const navItems = [
-        { name: 'Overview', href: '/dashboard', icon: LayoutDashboard, roles: ['admin', 'manager', 'staff'] },
+        { name: 'Overview', href: '/dashboard', icon: LayoutDashboard, roles: ['admin', 'manager', 'staff', 'waiter'] },
+        { name: 'Orders', href: '/dashboard/orders', icon: Utensils, roles: ['admin', 'manager', 'staff', 'waiter'] },
         { name: 'Bookings', href: '/dashboard/inventory', icon: CalendarDays, roles: ['admin', 'manager', 'staff'] },
-        { name: 'Menu', href: '/dashboard/menu', icon: Utensils, roles: ['admin', 'manager', 'staff'] },
+        { name: 'Menu', href: '/dashboard/menu', icon: Utensils, roles: ['admin', 'manager', 'staff', 'waiter'] },
         { name: 'Cleaning', href: '/housekeeping', icon: BedDouble, roles: ['admin', 'manager', 'staff'] },
     ];
 

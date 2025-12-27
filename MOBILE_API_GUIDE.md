@@ -218,3 +218,87 @@ async function createBooking(bookingData) {
   return await response.json();
 }
 ```
+
+---
+
+## 5. Restaurant Owner API (Protected)
+
+These endpoints are designed for the **Restaurant Owner Mobile App**. They allow owners to view orders, update statuses, and manage availability.
+
+**Authentication Required**:
+You must include the `Authorization` header with a valid Supabase Access Token (JWT) obtained after logging in via Supabase Auth.
+
+`Authorization: Bearer <your-access-token>`
+
+### 5.1 Fetch Active Orders
+Retrieves a unified list of recent Food and Bar orders for all properties owned by the authenticated user.
+
+- **Endpoint**: `/api/mobile/owner/orders`
+- **Method**: `GET`
+
+**Response:**
+```json
+{
+  "orders": [
+    {
+      "id": "order-uuid",
+      "type": "food", // or "bar"
+      "status": "pending", // pending, preparing, ready, delivered, cancelled
+      "total_amount": 150,
+      "guest_name": "Guest Name",
+      "guest_room_number": "Table 5",
+      "created_at": "2024-...",
+      "items": [
+        { "name": "Burger", "quantity": 1, "notes": "No onions" }
+      ]
+    },
+    // ...
+  ]
+}
+```
+
+### 5.2 Update Order Status
+Updates the status of a specific order (e.g., move from 'pending' to 'preparing').
+
+- **Endpoint**: `/api/mobile/owner/orders`
+- **Method**: `PATCH`
+- **Body**:
+```json
+{
+  "orderId": "uuid-of-order",
+  "type": "food", // "food" or "bar" (Required to target correct table)
+  "status": "preparing" // pending | preparing | ready | delivered | cancelled
+}
+```
+
+### 5.3 Owner Dashboard Stats
+Returns simple daily statistics for the owner's dashboard.
+
+- **Endpoint**: `/api/mobile/owner/stats`
+- **Method**: `GET`
+
+**Response:**
+```json
+{
+  "totalOrders": 12,
+  "pendingOrders": 3,
+  "totalRevenue": 4500,
+  "properties": 1
+}
+```
+
+### 5.4 Manage Menu Availability
+Toggle availability of items (e.g., mark "Sold Out").
+
+- **Endpoint**: `/api/mobile/owner/menu`
+- **Method**: `GET` (Fetch all items)
+- **Method**: `POST` (Update availability)
+
+**POST Body:**
+```json
+{
+  "itemId": "uuid-menu-item",
+  "type": "food", // "food" or "bar"
+  "isAvailable": false
+}
+```
