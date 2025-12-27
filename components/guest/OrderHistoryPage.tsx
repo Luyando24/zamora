@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { createClient } from '@/utils/supabase/client';
-import { 
-  X, Clock, CheckCircle2, ChefHat, Truck, AlertCircle, 
+import {
+  X, Clock, CheckCircle2, ChefHat, Truck, AlertCircle,
   ShoppingBag, ChevronRight, RefreshCw, Calendar, Wine, Utensils
 } from 'lucide-react';
 
@@ -15,38 +15,38 @@ interface OrderHistoryPageProps {
 }
 
 const STATUS_CONFIG: Record<string, any> = {
-  pending: { 
-    label: 'Order Placed', 
-    icon: AlertCircle, 
-    color: 'text-rose-600', 
+  pending: {
+    label: 'Order Placed',
+    icon: AlertCircle,
+    color: 'text-rose-600',
     bg: 'bg-rose-50',
     border: 'border-rose-200'
   },
-  preparing: { 
-    label: 'Kitchen Preparing', 
-    icon: ChefHat, 
-    color: 'text-amber-600', 
+  preparing: {
+    label: 'Kitchen Preparing',
+    icon: ChefHat,
+    color: 'text-amber-600',
     bg: 'bg-amber-50',
     border: 'border-amber-200'
   },
-  ready: { 
-    label: 'Ready to Serve', 
-    icon: CheckCircle2, 
-    color: 'text-emerald-600', 
+  ready: {
+    label: 'Ready to Serve',
+    icon: CheckCircle2,
+    color: 'text-emerald-600',
     bg: 'bg-emerald-50',
     border: 'border-emerald-200'
   },
-  delivered: { 
-    label: 'Delivered', 
-    icon: Truck, 
-    color: 'text-slate-600', 
+  delivered: {
+    label: 'Delivered',
+    icon: Truck,
+    color: 'text-slate-600',
     bg: 'bg-slate-50',
     border: 'border-slate-200'
   },
-  cancelled: { 
-    label: 'Cancelled', 
-    icon: X, 
-    color: 'text-slate-400', 
+  cancelled: {
+    label: 'Cancelled',
+    icon: X,
+    color: 'text-slate-400',
     bg: 'bg-slate-50',
     border: 'border-slate-200'
   },
@@ -60,7 +60,7 @@ export default function OrderHistoryPage({ isOpen, onClose, propertyId }: OrderH
   const fetchOrders = useCallback(async () => {
     setLoading(true);
     const savedOrderIds = JSON.parse(localStorage.getItem('zamora_guest_order_ids') || '[]');
-    
+
     if (savedOrderIds.length === 0) {
       setOrders([]);
       setLoading(false);
@@ -99,7 +99,7 @@ export default function OrderHistoryPage({ isOpen, onClose, propertyId }: OrderH
 
       // Combine and Sort
       const allOrders = [
-        ...(foodRes.data || []).map(o => ({ ...o, type: 'food' })), 
+        ...(foodRes.data || []).map(o => ({ ...o, type: 'food' })),
         ...(barRes.data || []).map(o => ({ ...o, type: 'bar' }))
       ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
@@ -116,10 +116,10 @@ export default function OrderHistoryPage({ isOpen, onClose, propertyId }: OrderH
 
     if (isOpen) {
       fetchOrders();
-      
+
       // Set up Realtime Subscription
       const savedOrderIds = JSON.parse(localStorage.getItem('zamora_guest_order_ids') || '[]');
-      
+
       if (savedOrderIds.length > 0) {
         channel = supabase
           .channel('guest_orders_tracking')
@@ -133,10 +133,10 @@ export default function OrderHistoryPage({ isOpen, onClose, propertyId }: OrderH
             },
             (payload) => {
               if (savedOrderIds.includes(payload.new.id)) {
-                setOrders((prev) => 
-                  prev.map((order) => 
-                    order.id === payload.new.id 
-                      ? { ...order, ...payload.new } 
+                setOrders((prev) =>
+                  prev.map((order) =>
+                    order.id === payload.new.id
+                      ? { ...order, ...payload.new }
                       : order
                   )
                 );
@@ -153,10 +153,10 @@ export default function OrderHistoryPage({ isOpen, onClose, propertyId }: OrderH
             },
             (payload) => {
               if (savedOrderIds.includes(payload.new.id)) {
-                setOrders((prev) => 
-                  prev.map((order) => 
-                    order.id === payload.new.id 
-                      ? { ...order, ...payload.new } 
+                setOrders((prev) =>
+                  prev.map((order) =>
+                    order.id === payload.new.id
+                      ? { ...order, ...payload.new }
                       : order
                   )
                 );
@@ -179,14 +179,14 @@ export default function OrderHistoryPage({ isOpen, onClose, propertyId }: OrderH
   return (
     <div className="fixed inset-0 z-[100] flex justify-end">
       {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity animate-in fade-in duration-300" 
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity animate-in fade-in duration-300"
         onClick={onClose}
       />
 
       {/* Slide-over Panel */}
       <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
-        
+
         {/* Header */}
         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-white shrink-0">
           <h2 className="font-black text-2xl flex items-center gap-2 tracking-tight text-slate-900">
@@ -212,10 +212,10 @@ export default function OrderHistoryPage({ isOpen, onClose, propertyId }: OrderH
               <div>
                 <h3 className="text-xl font-bold text-slate-900">No Past Orders</h3>
                 <p className="text-slate-500 mt-2 max-w-[200px] mx-auto">
-                You haven&apos;t placed any orders at this property yet.
-              </p>
+                  You haven&apos;t placed any orders at this property yet.
+                </p>
               </div>
-              <button 
+              <button
                 onClick={onClose}
                 className="px-8 py-3 bg-black text-white rounded-xl font-bold hover:bg-slate-800 transition-colors shadow-lg"
               >
@@ -253,11 +253,11 @@ export default function OrderHistoryPage({ isOpen, onClose, propertyId }: OrderH
                         <div key={item.id} className="flex gap-3 items-center">
                           <div className="w-10 h-10 bg-slate-100 rounded-lg overflow-hidden shrink-0 relative">
                             {item.details?.image_url || item.item_image_url ? (
-                                <Image src={item.details?.image_url || item.item_image_url} alt={item.details?.name || item.item_name || 'Order Item'} fill className="object-cover" unoptimized />
+                              <Image src={item.details?.image_url || item.item_image_url} alt={item.details?.name || item.item_name || 'Order Item'} fill className="object-cover" unoptimized />
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center text-slate-300">
-                                    {order.type === 'bar' ? <Wine size={14} /> : <Utensils size={14} />}
-                                </div>
+                              <div className="w-full h-full flex items-center justify-center text-slate-300">
+                                {order.type === 'bar' ? <Wine size={14} /> : <Utensils size={14} />}
+                              </div>
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
@@ -265,7 +265,7 @@ export default function OrderHistoryPage({ isOpen, onClose, propertyId }: OrderH
                               {item.quantity}x {item.details?.name || item.item_name || 'Unknown Item'}
                             </p>
                             {item.notes && (
-                                <p className="text-xs text-slate-400 truncate">{item.notes}</p>
+                              <p className="text-xs text-slate-400 truncate">{item.notes}</p>
                             )}
                           </div>
                           <span className="text-xs font-medium text-slate-500">

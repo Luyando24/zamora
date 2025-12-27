@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useProperty } from '../context/PropertyContext';
-import { 
-  Trash2, RefreshCw, Utensils, Wine, Search, 
-  CalendarDays, Filter, Eye, X, CheckCircle2, XCircle 
+import {
+  Trash2, RefreshCw, Utensils, Wine, Search,
+  CalendarDays, Filter, Eye, X, CheckCircle2, XCircle
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -45,7 +45,7 @@ export default function OrderHistoryPage() {
   const fetchOrders = useCallback(async () => {
     if (!selectedPropertyId) return;
     setLoading(true);
-    
+
     try {
       const table = activeTab === 'food' ? 'orders' : 'bar_orders';
       const itemsTable = activeTab === 'food' ? 'order_items' : 'bar_order_items';
@@ -80,7 +80,7 @@ export default function OrderHistoryPage() {
 
   const deleteOrder = async (orderId: string) => {
     if (!confirm('Are you sure you want to permanently delete this record? This action cannot be undone.')) return;
-    
+
     try {
       const table = activeTab === 'food' ? 'orders' : 'bar_orders';
       const { error } = await supabase
@@ -119,29 +119,27 @@ export default function OrderHistoryPage() {
           <div className="bg-white border border-slate-200 rounded-lg p-1 flex">
             <button
               onClick={() => setActiveTab('food')}
-              className={`px-4 py-2 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${
-                activeTab === 'food' 
-                  ? 'bg-slate-900 text-white shadow-sm' 
+              className={`px-4 py-2 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'food'
+                  ? 'bg-slate-900 text-white shadow-sm'
                   : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
-              }`}
+                }`}
             >
               <Utensils size={16} />
               Food
             </button>
             <button
               onClick={() => setActiveTab('bar')}
-              className={`px-4 py-2 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${
-                activeTab === 'bar' 
-                  ? 'bg-purple-900 text-white shadow-sm' 
+              className={`px-4 py-2 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'bar'
+                  ? 'bg-purple-900 text-white shadow-sm'
                   : 'text-slate-500 hover:text-purple-900 hover:bg-purple-50'
-              }`}
+                }`}
             >
               <Wine size={16} />
               Bar
             </button>
           </div>
 
-          <button 
+          <button
             onClick={fetchOrders}
             className="p-2.5 bg-white border border-slate-200 hover:bg-slate-50 rounded-lg text-slate-500 transition-colors"
           >
@@ -201,7 +199,7 @@ export default function OrderHistoryPage() {
                   const items = activeTab === 'food' ? order.order_items : order.bar_order_items;
                   const itemCount = items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
                   const itemSummary = items?.slice(0, 2).map(i => i.item_name || (activeTab === 'food' ? i.menu_items?.name : i.bar_menu_items?.name)).join(', ');
-                  
+
                   return (
                     <tr key={order.id} className="hover:bg-slate-50 transition-colors group">
                       <td className="px-6 py-4 text-sm text-slate-600">
@@ -234,11 +232,10 @@ export default function OrderHistoryPage() {
                         K{order.total_amount.toFixed(2)}
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold capitalize gap-1.5 ${
-                          order.status === 'delivered' 
-                            ? 'bg-emerald-100 text-emerald-700' 
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold capitalize gap-1.5 ${order.status === 'delivered'
+                            ? 'bg-emerald-100 text-emerald-700'
                             : 'bg-slate-100 text-slate-500'
-                        }`}>
+                          }`}>
                           {order.status === 'delivered' ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
                           {order.status === 'delivered' ? 'Completed' : 'Cancelled'}
                         </span>
@@ -291,30 +288,30 @@ export default function OrderHistoryPage() {
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                        <p className="text-xs text-slate-500 uppercase font-bold">Guest</p>
-                        <p className="font-semibold text-slate-900">{selectedOrder.guest_name}</p>
+                      <p className="text-xs text-slate-500 uppercase font-bold">Guest</p>
+                      <p className="font-semibold text-slate-900">{selectedOrder.guest_name}</p>
                     </div>
                     <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                        <p className="text-xs text-slate-500 uppercase font-bold">Room/Table</p>
-                        <p className="font-semibold text-slate-900">{selectedOrder.guest_room_number}</p>
+                      <p className="text-xs text-slate-500 uppercase font-bold">Room/Table</p>
+                      <p className="font-semibold text-slate-900">{selectedOrder.guest_room_number}</p>
                     </div>
                   </div>
 
                   <div>
                     <h4 className="font-bold text-slate-900 mb-2 text-sm">Items</h4>
                     <div className="space-y-2 border-t border-slate-100 pt-2">
-                        {(activeTab === 'food' ? selectedOrder.order_items : selectedOrder.bar_order_items)?.map((item, i) => (
-                            <div key={i} className="flex justify-between text-sm py-1">
-                                <span className="text-slate-600">
-                                    <span className="font-bold text-slate-900 mr-2">{item.quantity}x</span>
-                                    {item.item_name || (activeTab === 'food' ? item.menu_items?.name : item.bar_menu_items?.name)}
-                                </span>
-                                <span className="font-medium">K{item.total_price.toFixed(2)}</span>
-                            </div>
-                        ))}
+                      {(activeTab === 'food' ? selectedOrder.order_items : selectedOrder.bar_order_items)?.map((item, i) => (
+                        <div key={i} className="flex justify-between text-sm py-1">
+                          <span className="text-slate-600">
+                            <span className="font-bold text-slate-900 mr-2">{item.quantity}x</span>
+                            {item.item_name || (activeTab === 'food' ? item.menu_items?.name : item.bar_menu_items?.name)}
+                          </span>
+                          <span className="font-medium">K{item.total_price.toFixed(2)}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                  
+
                   <div className="flex justify-between items-center pt-4 border-t border-slate-100">
                     <span className="font-bold text-slate-500">Total Amount</span>
                     <span className="text-xl font-black text-slate-900">K{selectedOrder.total_amount.toFixed(2)}</span>
@@ -322,13 +319,13 @@ export default function OrderHistoryPage() {
                 </div>
               </div>
               <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-2">
-                 <button
-                    onClick={() => deleteOrder(selectedOrder.id)}
-                    className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-sm font-bold transition-colors flex items-center gap-2"
-                 >
-                    <Trash2 size={16} />
-                    Delete Record
-                 </button>
+                <button
+                  onClick={() => deleteOrder(selectedOrder.id)}
+                  className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-sm font-bold transition-colors flex items-center gap-2"
+                >
+                  <Trash2 size={16} />
+                  Delete Record
+                </button>
               </div>
             </motion.div>
           </div>

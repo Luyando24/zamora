@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { createClient } from '@/utils/supabase/client';
 import { useProperty } from '../context/PropertyContext';
-import { 
-  Clock, CheckCircle2, ChefHat, Truck, AlertCircle, 
+import {
+  Clock, CheckCircle2, ChefHat, Truck, AlertCircle,
   RefreshCw, Building2, Utensils, XCircle, Eye, X, Wine, Sun, Armchair, Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -88,50 +88,50 @@ interface BarOrder {
 }
 
 const FOOD_STATUS_CONFIG = {
-  pending: { 
-    label: 'New Orders', 
-    icon: AlertCircle, 
-    color: 'text-blue-600', 
+  pending: {
+    label: 'New Orders',
+    icon: AlertCircle,
+    color: 'text-blue-600',
     bg: 'bg-blue-50',
     border: 'border-blue-200',
     accent: 'border-l-blue-500',
     badge: 'bg-blue-100 text-blue-700',
     button: 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200'
   },
-  preparing: { 
-    label: 'Preparing', 
-    icon: ChefHat, 
-    color: 'text-amber-600', 
+  preparing: {
+    label: 'Preparing',
+    icon: ChefHat,
+    color: 'text-amber-600',
     bg: 'bg-amber-50',
     border: 'border-amber-200',
     accent: 'border-l-amber-500',
     badge: 'bg-amber-100 text-amber-800',
     button: 'bg-amber-500 hover:bg-amber-600 text-white shadow-amber-200'
   },
-  ready: { 
-    label: 'Ready for Pickup', 
-    icon: CheckCircle2, 
-    color: 'text-emerald-600', 
+  ready: {
+    label: 'Ready for Pickup',
+    icon: CheckCircle2,
+    color: 'text-emerald-600',
     bg: 'bg-emerald-50',
     border: 'border-emerald-200',
     accent: 'border-l-emerald-500',
     badge: 'bg-emerald-100 text-emerald-700',
     button: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200'
   },
-  delivered: { 
-    label: 'Completed', 
-    icon: Truck, 
-    color: 'text-slate-600', 
+  delivered: {
+    label: 'Completed',
+    icon: Truck,
+    color: 'text-slate-600',
     bg: 'bg-slate-100',
     border: 'border-slate-200',
     accent: 'border-l-slate-400',
     badge: 'bg-slate-200 text-slate-600',
     button: 'bg-slate-800 hover:bg-slate-900 text-white'
   },
-  cancelled: { 
-    label: 'Cancelled', 
-    icon: XCircle, 
-    color: 'text-slate-500', 
+  cancelled: {
+    label: 'Cancelled',
+    icon: XCircle,
+    color: 'text-slate-500',
     bg: 'bg-slate-100',
     border: 'border-slate-200',
     accent: 'border-l-slate-300',
@@ -141,50 +141,50 @@ const FOOD_STATUS_CONFIG = {
 };
 
 const BAR_STATUS_CONFIG = {
-  pending: { 
-    label: 'New Orders', 
-    icon: AlertCircle, 
-    color: 'text-purple-600', 
+  pending: {
+    label: 'New Orders',
+    icon: AlertCircle,
+    color: 'text-purple-600',
     bg: 'bg-purple-50',
     border: 'border-purple-200',
     accent: 'border-l-purple-500',
     badge: 'bg-purple-100 text-purple-700',
     button: 'bg-purple-600 hover:bg-purple-700 text-white shadow-purple-200'
   },
-  preparing: { 
-    label: 'Preparing', 
-    icon: ChefHat, 
-    color: 'text-amber-600', 
+  preparing: {
+    label: 'Preparing',
+    icon: ChefHat,
+    color: 'text-amber-600',
     bg: 'bg-amber-50',
     border: 'border-amber-200',
     accent: 'border-l-amber-500',
     badge: 'bg-amber-100 text-amber-800',
     button: 'bg-amber-500 hover:bg-amber-600 text-white shadow-amber-200'
   },
-  ready: { 
-    label: 'Ready for Pickup', 
-    icon: CheckCircle2, 
-    color: 'text-emerald-600', 
+  ready: {
+    label: 'Ready for Pickup',
+    icon: CheckCircle2,
+    color: 'text-emerald-600',
     bg: 'bg-emerald-50',
     border: 'border-emerald-200',
     accent: 'border-l-emerald-500',
     badge: 'bg-emerald-100 text-emerald-700',
     button: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200'
   },
-  delivered: { 
-    label: 'Completed', 
-    icon: Truck, 
-    color: 'text-slate-600', 
+  delivered: {
+    label: 'Completed',
+    icon: Truck,
+    color: 'text-slate-600',
     bg: 'bg-slate-100',
     border: 'border-slate-200',
     accent: 'border-l-slate-400',
     badge: 'bg-slate-200 text-slate-600',
     button: 'bg-slate-800 hover:bg-slate-900 text-white'
   },
-  cancelled: { 
-    label: 'Cancelled', 
-    icon: XCircle, 
-    color: 'text-slate-500', 
+  cancelled: {
+    label: 'Cancelled',
+    icon: XCircle,
+    color: 'text-slate-500',
     bg: 'bg-slate-100',
     border: 'border-slate-200',
     accent: 'border-l-slate-300',
@@ -305,29 +305,29 @@ export default function OrdersPage() {
         .eq('id', orderId);
 
       if (error) throw error;
-      
+
       // Send SMS Notification
       const orderList = type === 'food' ? foodOrders : barOrders;
       const order = orderList.find(o => o.id === orderId);
-      
+
       if (order && order.guest_phone) {
-          const statusMessages: Record<string, string> = {
-            preparing: `Your order is being prepared! 👨‍🍳`,
-            ready: `Your order is ready! 🎉`,
-            delivered: `Your order has been delivered. Enjoy! 🍽️`,
-            cancelled: `Your order has been cancelled. Please contact staff.`
-          };
-          const msg = statusMessages[newStatus];
-          if (msg) {
-             fetch('/api/notifications/sms', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    message: `Zamora: ${msg}`,
-                    phone: order.guest_phone
-                })
-             }).catch(err => console.error('Failed to send SMS:', err));
-          }
+        const statusMessages: Record<string, string> = {
+          preparing: `Your order is being prepared! 👨‍🍳`,
+          ready: `Your order is ready! 🎉`,
+          delivered: `Your order has been delivered. Enjoy! 🍽️`,
+          cancelled: `Your order has been cancelled. Please contact staff.`
+        };
+        const msg = statusMessages[newStatus];
+        if (msg) {
+          fetch('/api/notifications/sms', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              message: `Zamora: ${msg}`,
+              phone: order.guest_phone
+            })
+          }).catch(err => console.error('Failed to send SMS:', err));
+        }
       }
 
       if (type === 'food') {
@@ -371,7 +371,7 @@ export default function OrdersPage() {
 
   const deleteOrder = async (orderId: string, type: 'food' | 'bar') => {
     if (!confirm('Are you sure you want to permanently delete this order? This action cannot be undone.')) return;
-    
+
     try {
       const table = type === 'food' ? 'orders' : 'bar_orders';
       const { error } = await supabase
@@ -400,7 +400,7 @@ export default function OrdersPage() {
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-4">
             <div className={`p-3 rounded-lg text-white shadow-lg transition-colors ${activeTab === 'food' ? 'bg-slate-900 shadow-slate-900/10' : 'bg-purple-900 shadow-purple-900/10'}`}>
-               {activeTab === 'food' ? <Utensils size={22} /> : <Wine size={22} />}
+              {activeTab === 'food' ? <Utensils size={22} /> : <Wine size={22} />}
             </div>
             <div>
               <h1 className="text-lg font-bold text-slate-800 tracking-tight">Orders Management</h1>
@@ -410,33 +410,33 @@ export default function OrdersPage() {
 
           {/* Tab Switcher */}
           <div className="bg-slate-100 p-1 rounded-lg flex items-center">
-             <button 
-               onClick={() => setActiveTab('food')}
-               className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'food' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-             >
-               Food Orders
-               {activeFoodCount > 0 && (
-                 <span className="flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[10px] font-bold rounded-full bg-red-500 text-white shadow-sm">
-                   {activeFoodCount}
-                 </span>
-               )}
-             </button>
-             <button 
-               onClick={() => setActiveTab('bar')}
-               className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'bar' ? 'bg-white text-purple-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-             >
-               Bar Orders
-               {activeBarCount > 0 && (
-                 <span className="flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[10px] font-bold rounded-full bg-red-500 text-white shadow-sm">
-                   {activeBarCount}
-                 </span>
-               )}
-             </button>
+            <button
+              onClick={() => setActiveTab('food')}
+              className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'food' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              Food Orders
+              {activeFoodCount > 0 && (
+                <span className="flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[10px] font-bold rounded-full bg-red-500 text-white shadow-sm">
+                  {activeFoodCount}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab('bar')}
+              className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'bar' ? 'bg-white text-purple-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              Bar Orders
+              {activeBarCount > 0 && (
+                <span className="flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[10px] font-bold rounded-full bg-red-500 text-white shadow-sm">
+                  {activeBarCount}
+                </span>
+              )}
+            </button>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3">
-          
+
           {/* Property Selector */}
           <div className="relative group">
             <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
@@ -456,7 +456,7 @@ export default function OrdersPage() {
             </div>
           </div>
 
-          <button 
+          <button
             onClick={refreshOrders}
             className="p-2.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-700 transition-all active:scale-95"
             title="Refresh Orders"
@@ -469,10 +469,10 @@ export default function OrdersPage() {
       {/* Kanban Board */}
       <main className="flex-1 overflow-x-auto overflow-y-hidden p-6">
         <div className="flex gap-6 h-full min-w-[1400px]">
-          
-          <Column 
-            title="New Orders" 
-            orders={groupedOrders.pending} 
+
+          <Column
+            title="New Orders"
+            orders={groupedOrders.pending}
             config={currentConfig.pending}
             onStatusUpdate={(id, status) => updateStatus(id, status, activeTab)}
             onViewDetails={setSelectedOrder}
@@ -480,9 +480,9 @@ export default function OrdersPage() {
             elapsedTime={getElapsedTime}
           />
 
-          <Column 
-            title="Preparing" 
-            orders={groupedOrders.preparing} 
+          <Column
+            title="Preparing"
+            orders={groupedOrders.preparing}
             config={currentConfig.preparing}
             onStatusUpdate={(id, status) => updateStatus(id, status, activeTab)}
             onViewDetails={setSelectedOrder}
@@ -490,9 +490,9 @@ export default function OrdersPage() {
             elapsedTime={getElapsedTime}
           />
 
-          <Column 
-            title="Ready for Pickup" 
-            orders={groupedOrders.ready} 
+          <Column
+            title="Ready for Pickup"
+            orders={groupedOrders.ready}
             config={currentConfig.ready}
             onStatusUpdate={(id, status) => updateStatus(id, status, activeTab)}
             onViewDetails={setSelectedOrder}
@@ -500,13 +500,13 @@ export default function OrdersPage() {
             elapsedTime={getElapsedTime}
           />
 
-          <Column 
-            title="Completed" 
-            orders={groupedOrders.completed} 
+          <Column
+            title="Completed"
+            orders={groupedOrders.completed}
             config={currentConfig.delivered}
             onStatusUpdate={(id, status) => updateStatus(id, status, activeTab)}
             onViewDetails={setSelectedOrder}
-            nextStatus="" 
+            nextStatus=""
             elapsedTime={getElapsedTime}
             isCompletedColumn
           />
@@ -524,7 +524,7 @@ export default function OrdersPage() {
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
               className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[90vh] border border-slate-200/50"
-              onClick={(e) => e.stopPropagation()} 
+              onClick={(e) => e.stopPropagation()}
             >
               {/* Modal Header */}
               <div className="p-6 border-b border-slate-100 flex justify-between items-start">
@@ -532,22 +532,22 @@ export default function OrdersPage() {
                   <h2 className="text-xl font-bold text-slate-900">Order Details</h2>
                   <div className="flex items-center gap-2 text-slate-500 text-sm font-medium">
                     {selectedOrder.guest_room_number.toString().startsWith('Table Outdoor') ? (
-                        <>
+                      <>
                         <Sun size={14} />
                         <span>Table: {selectedOrder.guest_room_number.replace('Table Outdoor', '').trim()} (Outdoor)</span>
-                        </>
+                      </>
                     ) : selectedOrder.guest_room_number.toString().startsWith('Table') ? (
-                        <>
+                      <>
                         <Armchair size={14} />
                         <span>Table: {selectedOrder.guest_room_number.replace('Table', '').trim()} (Indoor)</span>
-                        </>
+                      </>
                     ) : (
-                        <span>Room {selectedOrder.guest_room_number}</span>
+                      <span>Room {selectedOrder.guest_room_number}</span>
                     )}
                     <span>• {new Date(selectedOrder.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                   </div>
                 </div>
-                <button 
+                <button
                   onClick={() => setSelectedOrder(null)}
                   className="p-1.5 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors"
                 >
@@ -557,137 +557,137 @@ export default function OrdersPage() {
 
               {/* Modal Content */}
               <div className="p-6 overflow-y-auto space-y-6 bg-slate-50/50">
-                 {/* Guest Info */}
-                 <div className="bg-white p-4 rounded-xl border border-slate-200/80 space-y-3">
+                {/* Guest Info */}
+                <div className="bg-white p-4 rounded-xl border border-slate-200/80 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500 text-sm font-medium">Guest Name</span>
+                    <span className="text-slate-900 font-semibold">{selectedOrder.guest_name}</span>
+                  </div>
+                  {selectedOrder.guest_phone && (
                     <div className="flex justify-between items-center">
-                        <span className="text-slate-500 text-sm font-medium">Guest Name</span>
-                        <span className="text-slate-900 font-semibold">{selectedOrder.guest_name}</span>
+                      <span className="text-slate-500 text-sm font-medium">Phone</span>
+                      <span className="text-slate-900 font-semibold">{selectedOrder.guest_phone}</span>
                     </div>
-                    {selectedOrder.guest_phone && (
-                        <div className="flex justify-between items-center">
-                            <span className="text-slate-500 text-sm font-medium">Phone</span>
-                            <span className="text-slate-900 font-semibold">{selectedOrder.guest_phone}</span>
-                        </div>
-                    )}
-                    <div className="flex justify-between items-center">
-                        <span className="text-slate-500 text-sm font-medium">Payment</span>
-                        <span className="text-slate-900 font-semibold capitalize">{selectedOrder.payment_method?.replace('_', ' ') || 'Room Charge'}</span>
-                    </div>
-                 </div>
+                  )}
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500 text-sm font-medium">Payment</span>
+                    <span className="text-slate-900 font-semibold capitalize">{selectedOrder.payment_method?.replace('_', ' ') || 'Room Charge'}</span>
+                  </div>
+                </div>
 
-                 {/* Order Items */}
-                 <div className="bg-white p-4 rounded-xl border border-slate-200/80">
-                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Items</h3>
-                    <div className="space-y-3">
-                        {((selectedOrder as Order).order_items || (selectedOrder as BarOrder).bar_order_items || []).map((item: any, i: number) => {
-                             const itemName = item.item_name || item.menu_items?.name || item.bar_menu_items?.name;
-                             const itemImage = item.item_image_url || item.menu_items?.image_url || item.bar_menu_items?.image_url;
-                             const description = item.item_description || item.menu_items?.description || item.bar_menu_items?.description;
-                             const ingredients = item.item_ingredients || item.menu_items?.ingredients || item.bar_menu_items?.ingredients;
- 
-                             if (!itemName) {
-                                return (
-                                    <div key={i} className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-                                        <div className="flex items-center gap-3">
-                                            <span className="bg-slate-200 text-slate-600 font-bold w-7 h-7 rounded-md flex items-center justify-center text-xs shrink-0 border border-slate-300">
-                                                {item.quantity}x
-                                            </span>
-                                            <div className="flex-1">
-                                                <p className="font-semibold text-slate-600">Menu item data is unavailable</p>
-                                                {item.notes && (
-                                                    <div className="mt-1.5 text-amber-600 text-xs font-medium bg-amber-50 px-2 py-1 rounded border border-amber-100 inline-block">
-                                                        Note: {item.notes}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            }
+                {/* Order Items */}
+                <div className="bg-white p-4 rounded-xl border border-slate-200/80">
+                  <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Items</h3>
+                  <div className="space-y-3">
+                    {((selectedOrder as Order).order_items || (selectedOrder as BarOrder).bar_order_items || []).map((item: any, i: number) => {
+                      const itemName = item.item_name || item.menu_items?.name || item.bar_menu_items?.name;
+                      const itemImage = item.item_image_url || item.menu_items?.image_url || item.bar_menu_items?.image_url;
+                      const description = item.item_description || item.menu_items?.description || item.bar_menu_items?.description;
+                      const ingredients = item.item_ingredients || item.menu_items?.ingredients || item.bar_menu_items?.ingredients;
 
-                            return (
-                                <div key={i} className="flex justify-between items-start pb-3 border-b border-slate-100 last:border-0 last:pb-0">
-                                    <div className="flex gap-3 w-full">
-                                        <span className="bg-slate-100 text-slate-700 font-bold w-7 h-7 rounded-md flex items-center justify-center text-xs shrink-0 border border-slate-200 mt-1">
-                                            {item.quantity}x
-                                        </span>
+                      if (!itemName) {
+                        return (
+                          <div key={i} className="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                            <div className="flex items-center gap-3">
+                              <span className="bg-slate-200 text-slate-600 font-bold w-7 h-7 rounded-md flex items-center justify-center text-xs shrink-0 border border-slate-300">
+                                {item.quantity}x
+                              </span>
+                              <div className="flex-1">
+                                <p className="font-semibold text-slate-600">Menu item data is unavailable</p>
+                                {item.notes && (
+                                  <div className="mt-1.5 text-amber-600 text-xs font-medium bg-amber-50 px-2 py-1 rounded border border-amber-100 inline-block">
+                                    Note: {item.notes}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
 
-                                        <div className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden shrink-0 flex items-center justify-center border border-slate-200">
-                                            {itemImage ? (
-                                                <Image src={itemImage} alt={itemName} fill className="object-cover" unoptimized />
-                                            ) : (
-                                                activeTab === 'bar' ? (
-                                                    <Wine className="text-slate-300 w-6 h-6 opacity-50" />
-                                                ) : (
-                                                    <Utensils className="text-slate-300 w-6 h-6 opacity-50" />
-                                                )
-                                            )}
-                                        </div>
+                      return (
+                        <div key={i} className="flex justify-between items-start pb-3 border-b border-slate-100 last:border-0 last:pb-0">
+                          <div className="flex gap-3 w-full">
+                            <span className="bg-slate-100 text-slate-700 font-bold w-7 h-7 rounded-md flex items-center justify-center text-xs shrink-0 border border-slate-200 mt-1">
+                              {item.quantity}x
+                            </span>
 
-                                        <div className="flex-1">
-                                            <div className="flex justify-between items-start">
-                                                <p className="font-bold text-slate-800 text-sm">{itemName}</p>
-                                                <p className="font-bold text-slate-900 text-sm">K{item.total_price?.toFixed(2) || '0.00'}</p>
-                                            </div>
-                                            
-                                            {description && (
-                                                <p className="text-slate-500 text-xs mt-0.5 line-clamp-2">
-                                                    {description}
-                                                </p>
-                                            )}
-                                            
-                                            {ingredients && (
-                                                <p className="text-slate-500 text-xs mt-0.5 line-clamp-2 italic">
-                                                    <span className="font-medium not-italic text-slate-400 mr-1">Ingredients:</span>
-                                                    {ingredients}
-                                                </p>
-                                            )}
+                            <div className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden shrink-0 flex items-center justify-center border border-slate-200">
+                              {itemImage ? (
+                                <Image src={itemImage} alt={itemName} fill className="object-cover" unoptimized />
+                              ) : (
+                                activeTab === 'bar' ? (
+                                  <Wine className="text-slate-300 w-6 h-6 opacity-50" />
+                                ) : (
+                                  <Utensils className="text-slate-300 w-6 h-6 opacity-50" />
+                                )
+                              )}
+                            </div>
 
-                                            {item.notes && (
-                                                <div className="mt-1.5 text-amber-600 text-xs font-medium bg-amber-50 px-2 py-1 rounded border border-amber-100 inline-block">
-                                                    Note: {item.notes}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
+                            <div className="flex-1">
+                              <div className="flex justify-between items-start">
+                                <p className="font-bold text-slate-800 text-sm">{itemName}</p>
+                                <p className="font-bold text-slate-900 text-sm">K{item.total_price?.toFixed(2) || '0.00'}</p>
+                              </div>
+
+                              {description && (
+                                <p className="text-slate-500 text-xs mt-0.5 line-clamp-2">
+                                  {description}
+                                </p>
+                              )}
+
+                              {ingredients && (
+                                <p className="text-slate-500 text-xs mt-0.5 line-clamp-2 italic">
+                                  <span className="font-medium not-italic text-slate-400 mr-1">Ingredients:</span>
+                                  {ingredients}
+                                </p>
+                              )}
+
+                              {item.notes && (
+                                <div className="mt-1.5 text-amber-600 text-xs font-medium bg-amber-50 px-2 py-1 rounded border border-amber-100 inline-block">
+                                  Note: {item.notes}
                                 </div>
-                            );
-                        })}
-                    </div>
-                 </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
 
-                 {/* Kitchen Notes (Order Level) */}
-                 {selectedOrder.notes && (
-                    <div className="bg-white border border-slate-200/80 p-4 rounded-xl">
-                        <h3 className="text-amber-600 font-bold text-sm mb-2 flex items-center gap-2">
-                            <AlertCircle size={16} /> Special Instructions
-                        </h3>
-                        <p className="text-slate-600 font-medium text-sm leading-relaxed">{selectedOrder.notes}</p>
-                    </div>
-                 )}
+                {/* Kitchen Notes (Order Level) */}
+                {selectedOrder.notes && (
+                  <div className="bg-white border border-slate-200/80 p-4 rounded-xl">
+                    <h3 className="text-amber-600 font-bold text-sm mb-2 flex items-center gap-2">
+                      <AlertCircle size={16} /> Special Instructions
+                    </h3>
+                    <p className="text-slate-600 font-medium text-sm leading-relaxed">{selectedOrder.notes}</p>
+                  </div>
+                )}
               </div>
 
               {/* Modal Footer */}
               <div className="p-5 border-t border-slate-100 bg-white flex justify-between items-center">
-                 <div>
-                    <p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Total</p>
-                    <p className="text-2xl font-black text-slate-900">K{selectedOrder.total_amount.toFixed(2)}</p>
-                 </div>
-                 <div className="flex gap-3">
-                     <button 
-                       onClick={() => deleteOrder(selectedOrder.id, activeTab)}
-                       className="px-4 py-2.5 bg-red-50 border border-red-100 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-colors text-sm active:scale-95 flex items-center gap-2"
-                     >
-                        <Trash2 size={16} />
-                        Delete
-                     </button>
-                     <button 
-                       onClick={() => setSelectedOrder(null)}
-                       className="px-5 py-2.5 bg-slate-800 border border-slate-800 text-white font-bold rounded-xl hover:bg-slate-700 transition-colors text-sm active:scale-95 shadow-lg shadow-slate-800/10"
-                     >
-                        Done
-                     </button>
-                 </div>
+                <div>
+                  <p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Total</p>
+                  <p className="text-2xl font-black text-slate-900">K{selectedOrder.total_amount.toFixed(2)}</p>
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => deleteOrder(selectedOrder.id, activeTab)}
+                    className="px-4 py-2.5 bg-red-50 border border-red-100 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-colors text-sm active:scale-95 flex items-center gap-2"
+                  >
+                    <Trash2 size={16} />
+                    Delete
+                  </button>
+                  <button
+                    onClick={() => setSelectedOrder(null)}
+                    className="px-5 py-2.5 bg-slate-800 border border-slate-800 text-white font-bold rounded-xl hover:bg-slate-700 transition-colors text-sm active:scale-95 shadow-lg shadow-slate-800/10"
+                  >
+                    Done
+                  </button>
+                </div>
               </div>
             </motion.div>
           </div>
@@ -723,9 +723,9 @@ function Column({ title, orders, config, onStatusUpdate, onViewDetails, nextStat
       <div className={`flex-1 overflow-y-auto bg-white border-x border-b rounded-b-xl ${config.border} shadow-sm`}>
         <div className="p-4 space-y-4">
           {orders.map(order => (
-            <OrderCard 
-              key={order.id} 
-              order={order} 
+            <OrderCard
+              key={order.id}
+              order={order}
               config={config}
               onStatusUpdate={onStatusUpdate}
               onViewDetails={onViewDetails}
@@ -755,7 +755,7 @@ function OrderCard({ order, config, onStatusUpdate, onViewDetails, nextStatus, e
   const totalItems = items.reduce((sum: number, item: any) => sum + item.quantity, 0);
 
   return (
-    <motion.div 
+    <motion.div
       layout
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -768,17 +768,17 @@ function OrderCard({ order, config, onStatusUpdate, onViewDetails, nextStatus, e
           <div>
             <div className="font-bold text-slate-800 flex items-center gap-2">
               {order.guest_room_number.toString().startsWith('Table Outdoor') ? (
-                  <>
-                    <Sun size={16} className="text-amber-500" />
-                    <span>Table: {order.guest_room_number.replace('Table Outdoor', '').trim()} (Outdoor)</span>
-                  </>
+                <>
+                  <Sun size={16} className="text-amber-500" />
+                  <span>Table: {order.guest_room_number.replace('Table Outdoor', '').trim()} (Outdoor)</span>
+                </>
               ) : order.guest_room_number.toString().startsWith('Table') ? (
-                  <>
-                    <Armchair size={16} className="text-indigo-500" />
-                    <span>Table: {order.guest_room_number.replace('Table', '').trim()} (Indoor)</span>
-                  </>
+                <>
+                  <Armchair size={16} className="text-indigo-500" />
+                  <span>Table: {order.guest_room_number.replace('Table', '').trim()} (Indoor)</span>
+                </>
               ) : (
-                  <span>Room {order.guest_room_number}</span>
+                <span>Room {order.guest_room_number}</span>
               )}
             </div>
             <p className="text-xs text-slate-500 font-medium">{order.guest_name}</p>
@@ -813,7 +813,7 @@ function OrderCard({ order, config, onStatusUpdate, onViewDetails, nextStatus, e
         )}
 
         {!isCompleted && nextStatus && (
-          <button 
+          <button
             onClick={() => onStatusUpdate(order.id, nextStatus)}
             className={`w-full text-center py-2.5 rounded-lg font-bold text-sm transition-all duration-200 shadow-lg ${config.button} hover:shadow-xl active:scale-95`}
           >
