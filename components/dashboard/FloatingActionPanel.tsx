@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import { useNotifications } from '@/app/dashboard/context/NotificationContext';
-import { Bell, X, Calendar, Utensils, Wine } from 'lucide-react';
+import { useProperty } from '@/app/dashboard/context/PropertyContext';
+import { Bell, X, Calendar, Utensils, Wine, ClipboardList } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function FloatingActionPanel() {
   const { notifications, unreadCount, markAsRead } = useNotifications();
+  const { selectedProperty } = useProperty();
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
 
@@ -45,6 +47,17 @@ export default function FloatingActionPanel() {
           </span>
         )}
       </button>
+
+      {/* Take Order Button (Restaurant Only) */}
+      {selectedProperty?.type === 'restaurant' && !isOpen && (
+        <button
+          onClick={() => router.push(`/menu/${selectedProperty.id}`)}
+          className="relative flex items-center justify-center w-14 h-14 rounded-full shadow-2xl transition-all duration-300 bg-orange-600 hover:bg-orange-700 hover:scale-110 text-white"
+          title="Take Order"
+        >
+          <ClipboardList size={24} />
+        </button>
+      )}
 
       {/* Expanded Panel */}
       <AnimatePresence>

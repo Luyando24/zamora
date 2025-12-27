@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useProperty } from '../context/PropertyContext';
+import Image from 'next/image';
 import { useMenuCategories } from '@/hooks/useMenuCategories';
 import { useBarMenuCategories } from '@/hooks/useBarMenuCategories';
 import FoodCategoryManager from './components/CategoryManager';
@@ -33,7 +34,7 @@ export default function MenuPage() {
       setSelectedPropertyId(e.target.value);
   };
 
-  const fetchItems = async () => {
+  const fetchItems = useCallback(async () => {
     if (!selectedPropertyId) return;
     setLoading(true);
     try {
@@ -71,11 +72,11 @@ export default function MenuPage() {
     } finally {
         setLoading(false);
     }
-  };
+  }, [selectedPropertyId, supabase]);
 
   useEffect(() => {
     fetchItems();
-  }, [selectedPropertyId]);
+  }, [fetchItems]);
 
   const handleDelete = async (id: string) => {
     const isFood = activeTab === 'food';
@@ -141,10 +142,13 @@ export default function MenuPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div className="flex items-center gap-4">
                 {selectedProperty?.logo_url && selectedPropertyId !== 'all' ? (
-                    <img 
+                    <Image 
                         src={selectedProperty.logo_url} 
                         alt={selectedProperty.name} 
-                        className="h-16 w-16 object-contain rounded-xl border border-slate-100 p-1 bg-white" 
+                        width={64}
+                        height={64}
+                        className="object-contain rounded-xl border border-slate-100 p-1 bg-white" 
+                        unoptimized
                     />
                 ) : (
                     <div className="h-16 w-16 bg-pink-50 rounded-xl flex items-center justify-center border border-pink-100">
@@ -347,10 +351,12 @@ export default function MenuPage() {
             {/* Image Area */}
             <div className="aspect-square bg-slate-100 relative overflow-hidden">
                 {item.image_url ? (
-                    <img 
+                    <Image 
                         src={item.image_url} 
                         alt={item.name} 
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110" 
+                        unoptimized
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center bg-slate-50">

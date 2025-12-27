@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { createClient } from '@/utils/supabase/client';
 import { useProperty } from '../context/PropertyContext';
 import { 
@@ -205,7 +206,7 @@ export default function OrdersPage() {
     setSelectedPropertyId(e.target.value);
   };
 
-  const fetchFoodOrders = async () => {
+  const fetchFoodOrders = useCallback(async () => {
     if (!selectedPropertyId) return;
     setLoading(true);
     try {
@@ -231,9 +232,9 @@ export default function OrdersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedPropertyId, supabase]);
 
-  const fetchBarOrders = async () => {
+  const fetchBarOrders = useCallback(async () => {
     if (!selectedPropertyId) return;
     setLoading(true);
     try {
@@ -256,7 +257,7 @@ export default function OrdersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedPropertyId, supabase]);
 
   useEffect(() => {
     if (selectedPropertyId) {
@@ -293,7 +294,7 @@ export default function OrdersPage() {
         supabase.removeChannel(barChannel);
       };
     }
-  }, [selectedPropertyId]);
+  }, [selectedPropertyId, fetchFoodOrders, fetchBarOrders, supabase]);
 
   const updateStatus = async (orderId: string, newStatus: string, type: 'food' | 'bar') => {
     try {
@@ -613,7 +614,7 @@ export default function OrdersPage() {
 
                                         <div className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden shrink-0 flex items-center justify-center border border-slate-200">
                                             {itemImage ? (
-                                                <img src={itemImage} alt={itemName} className="w-full h-full object-cover" />
+                                                <Image src={itemImage} alt={itemName} fill className="object-cover" unoptimized />
                                             ) : (
                                                 activeTab === 'bar' ? (
                                                     <Wine className="text-slate-300 w-6 h-6 opacity-50" />

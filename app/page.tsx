@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight, CheckCircle2, BarChart3, ShieldCheck, Zap, Smartphone, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 
@@ -140,7 +141,7 @@ export default function LandingPage() {
               className="text-5xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-8 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/50"
             >
               Manage your hotel like <br />
-              <span className="text-white">it's 2050.</span>
+              <span className="text-white">it&apos;s 2050.</span>
             </motion.h1>
 
             <motion.p
@@ -192,10 +193,13 @@ export default function LandingPage() {
                 <div className="w-3 h-3 rounded-full bg-yellow-500/50"></div>
                 <div className="w-3 h-3 rounded-full bg-green-500/50"></div>
               </div>
-              <img 
+              <Image 
                 src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop" 
                 alt="Dashboard Preview" 
+                width={2070}
+                height={1200}
                 className="w-full h-auto opacity-80"
+                unoptimized
               />
               <div className="absolute inset-0 flex items-center justify-center">
                  <p className="text-white/50 font-mono text-sm">Interactive Dashboard Preview</p>
@@ -209,7 +213,7 @@ export default function LandingPage() {
       <section id="features" className="py-24 bg-[#030712] relative">
         <div className="max-w-7xl mx-auto px-6">
           <div className="mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold mb-4">Everything you need. <br /><span className="text-gray-500">Nothing you don't.</span></h2>
+            <h2 className="text-3xl lg:text-4xl font-bold mb-4">Everything you need. <br /><span className="text-gray-500">Nothing you don&apos;t.</span></h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -242,6 +246,9 @@ export default function LandingPage() {
               transition={{ duration: 0.3 }}
               className="md:col-span-2 bg-gradient-to-br from-white/5 to-transparent p-8 rounded-3xl border border-white/10 hover:bg-white/5 transition-colors group"
             >
+              <div className="mb-6 p-3 bg-white/5 rounded-2xl w-fit group-hover:scale-110 transition-transform duration-300">
+                <CheckCircle2 className="w-8 h-8 text-pink-500" />
+              </div>
               <h3 className="text-2xl font-bold mb-4 group-hover:text-pink-500 transition-colors">Integrated Food & Beverage</h3>
               <p className="text-gray-400 mb-8 max-w-md group-hover:text-gray-300 transition-colors">
                 Seamlessly manage your restaurant and bar. Orders are automatically linked to guest folios for a unified billing experience.

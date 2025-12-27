@@ -309,7 +309,7 @@ export default function MenuStorefront({
                         <Coffee size={32} />
                     </div>
                     <h3 className="text-xl font-bold text-slate-900 mb-2">No items found</h3>
-                    <p className="text-slate-500 max-w-xs mx-auto">We couldn't find any dishes matching your search or category.</p>
+                    <p className="text-slate-500 max-w-xs mx-auto">We couldn&apos;t find any dishes matching your search or category.</p>
                     <button 
                         onClick={() => { setSelectedCategory('All'); setSearchQuery(''); }}
                         className="mt-6 px-6 py-2 bg-black text-white rounded-full text-sm font-bold hover:bg-slate-800 transition-colors shadow-lg"

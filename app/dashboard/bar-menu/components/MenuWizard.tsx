@@ -54,7 +54,7 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
         }
     };
     init();
-  }, [initialData, selectedPropertyId]);
+  }, [initialData, selectedPropertyId, supabase, selectedPropertyIds.length]);
   
   const [formData, setFormData] = useState({
     name: initialData?.name || '',

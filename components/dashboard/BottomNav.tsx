@@ -9,7 +9,7 @@ import {
     BedDouble,
     User
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 
 export default function BottomNav() {
@@ -17,23 +17,24 @@ export default function BottomNav() {
     const supabase = createClient();
     const [userRole, setUserRole] = useState<string>('staff');
 
-    useEffect(() => {
-        const getRole = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('role')
-                    .eq('id', user.id)
-                    .single();
+    const getRole = useCallback(async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', user.id)
+                .single();
 
-                if (profile?.role) {
-                    setUserRole(profile.role);
-                }
+            if (profile?.role) {
+                setUserRole(profile.role);
             }
-        };
+        }
+    }, [supabase]);
+
+    useEffect(() => {
         getRole();
-    }, []);
+    }, [getRole]);
 
     const navItems = [
         { name: 'Overview', href: '/dashboard', icon: LayoutDashboard, roles: ['admin', 'manager', 'staff'] },

@@ -70,7 +70,7 @@ export default function EditPlacePage({ params }: { params: { id: string } }) {
     };
 
     fetchPlace();
-  }, [params.id]);
+  }, [params.id, supabase]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

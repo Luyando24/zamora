@@ -25,7 +25,7 @@ export default function EditMenuItemPage({ params }: { params: { id: string } })
     };
 
     fetchItem();
-  }, [params.id]);
+  }, [params.id, supabase]);
 
   if (loading) {
     return (

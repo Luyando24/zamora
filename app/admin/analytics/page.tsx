@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
@@ -37,32 +37,7 @@ export default function AnalyticsPage() {
   
   const supabase = createClient();
 
-  useEffect(() => {
-    fetchData();
-    
-    // Set up Realtime subscriptions
-    const channel = supabase.channel('admin-analytics')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
-        fetchCounts(); // Refresh counts on change
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'properties' }, () => {
-        fetchCounts();
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => {
-        fetchCounts();
-        fetchBookingHistory(); // Refresh chart
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'analytics_events' }, () => {
-        fetchWebAnalytics(); // Refresh web analytics
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
-  const fetchCounts = async () => {
+  const fetchCounts = useCallback(async () => {
     // Parallel fetching for speed
     const [
       { count: userCount },
@@ -80,9 +55,9 @@ export default function AnalyticsPage() {
       properties: propertyCount || 0,
       bookings: bookingCount || 0
     }));
-  };
+  }, [supabase]);
 
-  const fetchBookingHistory = async () => {
+  const fetchBookingHistory = useCallback(async () => {
     // Get bookings from last 30 days
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -121,9 +96,9 @@ export default function AnalyticsPage() {
       setBookingHistory(chartData);
       setMetrics(prev => ({ ...prev, revenue: totalRev }));
     }
-  };
+  }, [supabase]);
 
-  const fetchWebAnalytics = async () => {
+  const fetchWebAnalytics = useCallback(async () => {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     
@@ -189,13 +164,38 @@ export default function AnalyticsPage() {
       
       setAnalyticsData({ totalViews, uniqueSessions, activeUsers, topPages, devices, viewsHistory });
     }
-  };
+  }, [supabase]);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     await Promise.all([fetchCounts(), fetchBookingHistory(), fetchWebAnalytics()]);
     setLoading(false);
-  };
+  }, [fetchCounts, fetchBookingHistory, fetchWebAnalytics]);
+
+  useEffect(() => {
+    fetchData();
+    
+    // Set up Realtime subscriptions
+    const channel = supabase.channel('admin-analytics')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
+        fetchCounts(); // Refresh counts on change
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'properties' }, () => {
+        fetchCounts();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => {
+        fetchCounts();
+        fetchBookingHistory(); // Refresh chart
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'analytics_events' }, () => {
+        fetchWebAnalytics(); // Refresh web analytics
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [supabase, fetchData, fetchCounts, fetchBookingHistory, fetchWebAnalytics]);
 
   return (
     <div className="space-y-8">

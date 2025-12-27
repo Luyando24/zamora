@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { createClient } from '@/utils/supabase/client';
 import { useProperty } from '../context/PropertyContext';
 import Modal from '@/components/ui/Modal';
@@ -45,11 +46,7 @@ export default function RoomsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editItem, setEditItem] = useState<Room | null>(null);
 
-  useEffect(() => {
-    fetchData();
-  }, [selectedPropertyId]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (!selectedPropertyId) return;
     setLoading(true);
     
@@ -68,7 +65,11 @@ export default function RoomsPage() {
     if (rData) setRooms(rData);
     if (tData) setRoomTypes(tData);
     setLoading(false);
-  };
+  }, [selectedPropertyId, supabase]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleAddClick = (type: 'type' | 'unit') => {
     if (!selectedPropertyId) {
@@ -162,7 +163,7 @@ export default function RoomsPage() {
             <div key={type.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col hover:shadow-md transition-shadow group">
               <div className="h-48 bg-slate-100 flex items-center justify-center relative overflow-hidden">
                  {type.image_url ? (
-                   <img src={type.image_url} alt={type.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                   <Image src={type.image_url} alt={type.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" unoptimized />
                  ) : (
                    <BedDouble className="text-slate-300" size={48} />
                  )}
@@ -302,7 +303,7 @@ function RoomsTable({ rooms, onEdit, onDelete }: RoomsTableProps) {
             {room.notes && (
               <div className="mt-4 pt-3 border-t border-slate-50">
                 <p className="text-xs text-slate-500 line-clamp-2 italic">
-                  "{room.notes}"
+                  &quot;{room.notes}&quot;
                 </p>
               </div>
             )}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import ImageUpload from '@/components/ui/ImageUpload';
@@ -80,11 +80,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
   const [newAmenity, setNewAmenity] = useState('');
   const supabase = createClient();
 
-  useEffect(() => {
-    fetchProperty();
-  }, [id]);
-
-  const fetchProperty = async () => {
+  const fetchProperty = useCallback(async () => {
     if (!id) return;
     
     const { data, error } = await supabase
@@ -113,7 +109,11 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
       });
     }
     setLoading(false);
-  };
+  }, [id, supabase, router]);
+
+  useEffect(() => {
+    fetchProperty();
+  }, [fetchProperty]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;

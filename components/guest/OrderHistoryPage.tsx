@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { createClient } from '@/utils/supabase/client';
 import { 
   X, Clock, CheckCircle2, ChefHat, Truck, AlertCircle, 
@@ -55,6 +56,60 @@ export default function OrderHistoryPage({ isOpen, onClose, propertyId }: OrderH
   const supabase = createClient();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const fetchOrders = useCallback(async () => {
+    setLoading(true);
+    const savedOrderIds = JSON.parse(localStorage.getItem('zamora_guest_order_ids') || '[]');
+    
+    if (savedOrderIds.length === 0) {
+      setOrders([]);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Fetch Food Orders
+      const foodQuery = supabase
+        .from('orders')
+        .select(`
+          *,
+          items:order_items (
+            *
+          )
+        `)
+        .in('id', savedOrderIds)
+        .eq('property_id', propertyId);
+
+      // Fetch Bar Orders
+      const barQuery = supabase
+        .from('bar_orders')
+        .select(`
+          *,
+          items:bar_order_items (
+            *
+          )
+        `)
+        .in('id', savedOrderIds)
+        .eq('property_id', propertyId);
+
+      const [foodRes, barRes] = await Promise.all([foodQuery, barQuery]);
+
+      if (foodRes.error) throw foodRes.error;
+      if (barRes.error) throw barRes.error;
+
+      // Combine and Sort
+      const allOrders = [
+        ...(foodRes.data || []).map(o => ({ ...o, type: 'food' })), 
+        ...(barRes.data || []).map(o => ({ ...o, type: 'bar' }))
+      ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+      setOrders(allOrders);
+    } catch (err) {
+      console.error('Error fetching history:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [propertyId, supabase]);
 
   useEffect(() => {
     let channel: any;
@@ -117,61 +172,7 @@ export default function OrderHistoryPage({ isOpen, onClose, propertyId }: OrderH
         supabase.removeChannel(channel);
       }
     };
-  }, [isOpen, propertyId]);
-
-  const fetchOrders = async () => {
-    setLoading(true);
-    const savedOrderIds = JSON.parse(localStorage.getItem('zamora_guest_order_ids') || '[]');
-    
-    if (savedOrderIds.length === 0) {
-      setOrders([]);
-      setLoading(false);
-      return;
-    }
-
-    try {
-      // Fetch Food Orders
-      const foodQuery = supabase
-        .from('orders')
-        .select(`
-          *,
-          items:order_items (
-            *
-          )
-        `)
-        .in('id', savedOrderIds)
-        .eq('property_id', propertyId);
-
-      // Fetch Bar Orders
-      const barQuery = supabase
-        .from('bar_orders')
-        .select(`
-          *,
-          items:bar_order_items (
-            *
-          )
-        `)
-        .in('id', savedOrderIds)
-        .eq('property_id', propertyId);
-
-      const [foodRes, barRes] = await Promise.all([foodQuery, barQuery]);
-
-      if (foodRes.error) throw foodRes.error;
-      if (barRes.error) throw barRes.error;
-
-      // Combine and Sort
-      const allOrders = [
-        ...(foodRes.data || []).map(o => ({ ...o, type: 'food' })), 
-        ...(barRes.data || []).map(o => ({ ...o, type: 'bar' }))
-      ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-
-      setOrders(allOrders);
-    } catch (err) {
-      console.error('Error fetching history:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [isOpen, propertyId, fetchOrders, supabase]);
 
   if (!isOpen) return null;
 
@@ -211,8 +212,8 @@ export default function OrderHistoryPage({ isOpen, onClose, propertyId }: OrderH
               <div>
                 <h3 className="text-xl font-bold text-slate-900">No Past Orders</h3>
                 <p className="text-slate-500 mt-2 max-w-[200px] mx-auto">
-                  You haven't placed any orders at this property yet.
-                </p>
+                You haven&apos;t placed any orders at this property yet.
+              </p>
               </div>
               <button 
                 onClick={onClose}
@@ -250,9 +251,9 @@ export default function OrderHistoryPage({ isOpen, onClose, propertyId }: OrderH
                     <div className="space-y-3">
                       {order.items?.map((item: any) => (
                         <div key={item.id} className="flex gap-3 items-center">
-                          <div className="w-10 h-10 bg-slate-100 rounded-lg overflow-hidden shrink-0">
+                          <div className="w-10 h-10 bg-slate-100 rounded-lg overflow-hidden shrink-0 relative">
                             {item.details?.image_url || item.item_image_url ? (
-                                <img src={item.details?.image_url || item.item_image_url} className="w-full h-full object-cover" />
+                                <Image src={item.details?.image_url || item.item_image_url} alt={item.details?.name || item.item_name || 'Order Item'} fill className="object-cover" unoptimized />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-slate-300">
                                     {order.type === 'bar' ? <Wine size={14} /> : <Utensils size={14} />}

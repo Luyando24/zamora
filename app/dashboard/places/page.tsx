@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { createClient } from '@/utils/supabase/client';
 import { 
   Plus, Search, MapPin, Edit, Trash2, Loader2, 
@@ -18,11 +19,7 @@ export default function PlacesPage() {
 
   const supabase = createClient();
 
-  useEffect(() => {
-    fetchPlaces();
-  }, []);
-
-  const fetchPlaces = async () => {
+  const fetchPlaces = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -38,7 +35,11 @@ export default function PlacesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase]);
+
+  useEffect(() => {
+    fetchPlaces();
+  }, [fetchPlaces]);
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this place?')) return;
@@ -136,9 +137,15 @@ export default function PlacesPage() {
                 <tr key={place.id} className="hover:bg-slate-50 transition-colors group">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-slate-100 overflow-hidden flex-shrink-0">
+                      <div className="w-10 h-10 rounded-lg bg-slate-100 overflow-hidden flex-shrink-0 relative">
                         {place.cover_image_url ? (
-                          <img src={place.cover_image_url} alt={place.name} className="w-full h-full object-cover" />
+                          <Image 
+                            src={place.cover_image_url} 
+                            alt={place.name} 
+                            fill 
+                            className="object-cover" 
+                            unoptimized 
+                          />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-slate-300">
                             <Store size={18} />

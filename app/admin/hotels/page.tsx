@@ -1,10 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/client';
 import { Search, MoreVertical, Shield, Ban, CheckCircle, ExternalLink, Trash2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+
+import Image from 'next/image';
 
 export default function AdminHotelsPage() {
   const [hotels, setHotels] = useState<any[]>([]);
@@ -12,11 +14,7 @@ export default function AdminHotelsPage() {
   const [search, setSearch] = useState('');
   const supabase = createClient();
 
-  useEffect(() => {
-    fetchHotels();
-  }, []);
-
-  const fetchHotels = async () => {
+  const fetchHotels = useCallback(async () => {
     const { data } = await supabase
       .from('properties')
       .select('*')
@@ -24,7 +22,11 @@ export default function AdminHotelsPage() {
     
     if (data) setHotels(data);
     setLoading(false);
-  };
+  }, [supabase]);
+
+  useEffect(() => {
+    fetchHotels();
+  }, [fetchHotels]);
 
   const handleDelete = async (id: string, name: string) => {
     if (!window.confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
@@ -104,7 +106,14 @@ export default function AdminHotelsPage() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       {hotel.logo_url ? (
-                        <img src={hotel.logo_url} alt="" className="w-10 h-10 rounded-lg object-cover border border-slate-200" />
+                        <Image 
+                          src={hotel.logo_url} 
+                          alt="" 
+                          width={40} 
+                          height={40} 
+                          className="rounded-lg object-cover border border-slate-200" 
+                          unoptimized 
+                        />
                       ) : (
                         <div className="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg">
                           {hotel.name.charAt(0)}

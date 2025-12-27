@@ -9,7 +9,7 @@ import {
   Settings, LogOut, DoorOpen, Utensils, Building2,
   ChevronRight, User, Wine, Users, History
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 // Grouped Navigation
 export const navigationGroups = [
@@ -58,28 +58,29 @@ export default function Sidebar({ onLinkClick }: { onLinkClick?: () => void }) {
   const [userEmail, setUserEmail] = useState<string>('User');
   const [userRole, setUserRole] = useState<string>('staff');
 
-  useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        if (user.email) {
-          setUserEmail(user.email.split('@')[0]); // Simple display name
-        }
-
-        // Fetch role
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
-
-        if (profile?.role) {
-          setUserRole(profile.role);
-        }
+  const getUser = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      if (user.email) {
+        setUserEmail(user.email.split('@')[0]); // Simple display name
       }
-    };
+
+      // Fetch role
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (profile?.role) {
+        setUserRole(profile.role);
+      }
+    }
+  }, [supabase]);
+
+  useEffect(() => {
     getUser();
-  }, []);
+  }, [getUser]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();

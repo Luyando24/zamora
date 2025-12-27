@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { createClient } from '@/utils/supabase/client';
 import { useProperty } from '../context/PropertyContext';
 import { useBarMenuCategories } from '@/hooks/useBarMenuCategories';
@@ -28,7 +29,7 @@ export default function BarMenuPage() {
       setSelectedPropertyId(e.target.value);
   };
 
-  const fetchItems = async () => {
+  const fetchItems = useCallback(async () => {
     if (!selectedPropertyId) return;
     setLoading(true);
     try {
@@ -56,11 +57,11 @@ export default function BarMenuPage() {
     } finally {
         setLoading(false);
     }
-  };
+  }, [selectedPropertyId, supabase]);
 
   useEffect(() => {
     fetchItems();
-  }, [selectedPropertyId]);
+  }, [fetchItems]);
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this bar menu item?')) return;
@@ -219,10 +220,12 @@ export default function BarMenuPage() {
             {/* Image Area */}
             <div className="aspect-square bg-slate-100 relative overflow-hidden">
                 {item.image_url ? (
-                    <img 
+                    <Image 
                         src={item.image_url} 
                         alt={item.name} 
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        unoptimized
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center bg-slate-50">

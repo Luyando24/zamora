@@ -6,7 +6,7 @@ import {
   Utensils, Wine, DollarSign, BarChart3
 } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { formatDistanceToNow, startOfWeek, startOfMonth, subDays, format, isSameDay, parseISO, differenceInDays } from 'date-fns';
 import Link from 'next/link';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
@@ -32,15 +32,16 @@ export default function DashboardPage() {
 
   const supabase = createClient();
 
+  const getUser = useCallback(async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user?.user_metadata?.first_name) {
+      setUserName(user.user_metadata.first_name);
+    } else if (user?.email) {
+      setUserName(user.email.split('@')[0]);
+    }
+  }, [supabase]);
+
   useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user?.user_metadata?.first_name) {
-        setUserName(user.user_metadata.first_name);
-      } else if (user?.email) {
-        setUserName(user.email.split('@')[0]);
-      }
-    };
     getUser();
 
     const fetchFinancials = async () => {
@@ -361,7 +362,7 @@ export default function DashboardPage() {
     return () => {
         supabase.removeChannel(channels);
     };
-  }, [selectedPropertyId]);
+  }, [getUser, selectedPropertyId, supabase]);
 
   return (
     <div className="space-y-6">

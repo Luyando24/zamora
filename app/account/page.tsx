@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 import { 
   User, Calendar, MapPin, CreditCard, LogOut, 
-  Settings, ChevronRight, BedDouble, Clock, CheckCircle, XCircle, Bookmark
+  Settings, ChevronRight, BedDouble, Clock, CheckCircle, XCircle, Bookmark, ArrowLeft
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -30,6 +30,16 @@ export default function AccountPage() {
   const router = useRouter();
   const supabase = createClient();
 
+  const fetchBookings = useCallback(async (email: string) => {
+    const { data, error } = await supabase.rpc('get_my_bookings', { p_email: email });
+    if (error) {
+      console.error('Error fetching bookings:', error);
+    } else {
+      setBookings(data || []);
+    }
+    setLoading(false);
+  }, [supabase]);
+
   useEffect(() => {
     const checkUser = async () => {
       const { data: { user }, error } = await supabase.auth.getUser();
@@ -42,17 +52,7 @@ export default function AccountPage() {
     };
 
     checkUser();
-  }, [router]);
-
-  const fetchBookings = async (email: string) => {
-    const { data, error } = await supabase.rpc('get_my_bookings', { p_email: email });
-    if (error) {
-      console.error('Error fetching bookings:', error);
-    } else {
-      setBookings(data || []);
-    }
-    setLoading(false);
-  };
+  }, [router, supabase, fetchBookings]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -201,7 +201,13 @@ function BookingCard({ booking, isPast }: { booking: Booking, isPast?: boolean }
     <div className={`bg-white p-4 md:p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row gap-6 ${isPast ? 'opacity-75 hover:opacity-100' : ''}`}>
        <div className="w-full md:w-32 h-32 bg-slate-100 rounded-2xl overflow-hidden relative shrink-0">
           {booking.property_cover_image ? (
-            <img src={booking.property_cover_image} className="w-full h-full object-cover" alt={booking.property_name} />
+            <Image 
+                src={booking.property_cover_image} 
+                className="object-cover" 
+                alt={booking.property_name} 
+                fill
+                unoptimized
+            />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-slate-300">
                <BedDouble size={32} />

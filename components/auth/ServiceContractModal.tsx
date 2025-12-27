@@ -65,7 +65,7 @@ export default function ServiceContractModal({ isOpen, onClose, onSign, userName
                         <p className="text-xs text-slate-400 mb-4">Last Updated: {new Date().toLocaleDateString()}</p>
                         
                         <h4>1. Services Provided</h4>
-                        <p>Zamora ("Provider") agrees to provide the Client with access to the Zamora Property Management System ("Service"). The Service includes property management, point of sale, and inventory management features.</p>
+                        <p>We grant you a limited, non-exclusive, non-transferable license to use Zamora for your internal business operations. You agree not to reverse engineer, modify, or resell the software. We retain all intellectual property rights.</p>
 
                         <h4>2. Subscription Terms</h4>
                         <p>The Service is provided on a subscription basis. The Client agrees to pay the applicable fees for the selected plan. The initial term is 14 days (Free Trial), after which a paid subscription is required to continue access.</p>
@@ -74,10 +74,10 @@ export default function ServiceContractModal({ isOpen, onClose, onSign, userName
                         <p>The Client is responsible for maintaining the confidentiality of account credentials and for all activities that occur under their account. The Client agrees not to use the Service for any illegal or unauthorized purpose.</p>
 
                         <h4>4. Data Privacy</h4>
-                        <p>Zamora respects the Client's privacy and ownership of data. We will not share Client data with third parties without consent, except as required by law or to provide the Service.</p>
+                        <p>Zamora respects the Client&apos;s privacy and ownership of data. We will not share Client data with third parties without consent, except as required by law or to provide the Service.</p>
 
                         <h4>5. Termination</h4>
-                        <p>Either party may terminate this agreement with notice. Upon termination, the Client's access to the Service will cease.</p>
+                        <p>Either party may terminate this agreement with notice. Upon termination, the Client&apos;s access to the Service will cease.</p>
 
                         <h4>6. Limitation of Liability</h4>
                         <p>To the maximum extent permitted by law, Zamora shall not be liable for any indirect, incidental, special, consequential, or punitive damages.</p>

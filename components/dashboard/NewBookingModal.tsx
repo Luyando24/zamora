@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Modal from '@/components/ui/Modal';
 import { createClient } from '@/utils/supabase/client';
 import { format } from 'date-fns';
@@ -30,14 +30,7 @@ export default function NewBookingModal({ isOpen, onClose, onSuccess, propertyId
     paymentStatus: 'pending',
   });
 
-  useEffect(() => {
-    if (isOpen) {
-      setError(null);
-      fetchRooms();
-    }
-  }, [isOpen]);
-
-  const fetchRooms = async () => {
+  const fetchRooms = useCallback(async () => {
     let propertyId = propPropertyId;
 
     if (!propertyId) {
@@ -64,7 +57,14 @@ export default function NewBookingModal({ isOpen, onClose, onSuccess, propertyId
       
       if (data) setRooms(data);
     }
-  };
+  }, [propPropertyId, supabase]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setError(null);
+      fetchRooms();
+    }
+  }, [isOpen, fetchRooms]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

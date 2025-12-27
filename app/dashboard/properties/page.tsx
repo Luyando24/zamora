@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/client';
 import { Building2, Plus, ExternalLink, MoreVertical, Eye, Edit, Trash2, LayoutDashboard } from 'lucide-react';
@@ -13,11 +13,7 @@ export default function PropertiesPage() {
   const supabase = createClient();
   const router = useRouter();
 
-  useEffect(() => {
-    fetchProperties();
-  }, []);
-
-  const fetchProperties = async () => {
+  const fetchProperties = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
@@ -37,7 +33,11 @@ export default function PropertiesPage() {
       if (data) setProperties(data);
     }
     setLoading(false);
-  };
+  }, [supabase]);
+
+  useEffect(() => {
+    fetchProperties();
+  }, [fetchProperties]);
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this property? This action cannot be undone.')) return;

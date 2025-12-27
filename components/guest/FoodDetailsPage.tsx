@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { X, Plus, Minus, ArrowLeft, Heart, Share2, Star, Check, Wine, Utensils } from 'lucide-react';
 
 interface FoodDetailsPageProps {
@@ -85,7 +86,13 @@ export default function FoodDetailsPage({ item, isOpen, onClose, onAddToCart, si
         {/* LEFT SIDE (Desktop): Image */}
         <div className="relative w-full h-[40vh] md:h-full md:w-1/2 bg-slate-100 shrink-0">
            {item.image_url ? (
-             <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+             <Image 
+               src={item.image_url} 
+               alt={item.name} 
+               fill
+               className="object-cover"
+               unoptimized
+             />
            ) : (
              <div className="w-full h-full flex items-center justify-center text-slate-300 bg-slate-50">
                 {type === 'bar' ? (
@@ -188,7 +195,13 @@ export default function FoodDetailsPage({ item, isOpen, onClose, onAddToCart, si
                             <div key={similar.id} className="flex flex-col gap-2 group cursor-pointer">
                               <div className="aspect-square rounded-2xl bg-slate-100 relative overflow-hidden">
                                  {similar.image_url ? (
-                                   <img src={similar.image_url} alt={similar.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                   <Image 
+                                     src={similar.image_url} 
+                                     alt={similar.name} 
+                                     fill
+                                     className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                     unoptimized
+                                   />
                                  ) : (
                                    <div className="w-full h-full flex items-center justify-center text-slate-300">
                                       {type === 'bar' ? <Wine size={24} className="opacity-50" /> : <Utensils size={24} className="opacity-50" />}

@@ -80,7 +80,7 @@ export default function SettingsPage() {
        setSelectedPropertyId(properties[0].id);
     }
     setLoading(false);
-  }, [selectedPropertyId, properties]);
+  }, [selectedPropertyId, properties, setSelectedPropertyId]);
 
   const handlePropertyChange = (propertyId: string) => {
       if (propertyId === 'new') {

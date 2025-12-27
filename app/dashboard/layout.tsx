@@ -26,12 +26,7 @@ export default function DashboardLayout({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const supabase = createClient();
 
-  useEffect(() => {
-    // Only run on mount, layout persists across route changes
-    checkUser();
-  }, []);
-
-  const checkUser = async () => {
+  const checkUser = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
 
@@ -71,7 +66,12 @@ export default function DashboardLayout({
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase, router]);
+
+  useEffect(() => {
+    // Only run on mount, layout persists across route changes
+    checkUser();
+  }, [checkUser]);
 
   const isSetupPage = pathname === '/dashboard/setup';
 
@@ -195,7 +195,7 @@ export default function DashboardLayout({
                   </div>
                   <div className="ml-3">
                     <p className="text-sm text-orange-700">
-                      <span className="font-bold">Action Required:</span> You haven't set up your property details yet. Features will be limited.
+                      <span className="font-bold">Action Required:</span> You haven&apos;t set up your property details yet. Features will be limited.
                     </p>
                   </div>
                 </div>

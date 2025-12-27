@@ -20,7 +20,7 @@ interface RestaurantDetailsProps {
 
 export default function RestaurantDetails({ property, menuItems, categories, barMenuItems = [], barCategories = [] }: RestaurantDetailsProps) {
   // Menu State
-  const [activeTab, setActiveTab] = useState<'food' | 'bar' | 'amenities' | 'photos'>('food');
+  const [activeTab, setActiveTab] = useState<'food' | 'drinks' | 'amenities' | 'photos'>('food');
   const [activeCategory, setActiveCategory] = useState(categories[0] || 'All');
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -74,8 +74,8 @@ export default function RestaurantDetails({ property, menuItems, categories, bar
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   // Determine current data source
-  const currentItems = activeTab === 'food' ? menuItems : barMenuItems;
-  const currentCategories = activeTab === 'food' ? categories : barCategories;
+  const currentItems = activeTab === 'food' ? menuItems : (activeTab === 'drinks' ? barMenuItems : []);
+  const currentCategories = activeTab === 'food' ? categories : (activeTab === 'drinks' ? barCategories : []);
 
   // Reset category when tab changes
   useEffect(() => {
@@ -115,7 +115,7 @@ export default function RestaurantDetails({ property, menuItems, categories, bar
                     <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/50 p-6 md:p-10 border border-slate-100">
                         
                         {/* Restaurant Header Info */}
-                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 md:mb-12">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 md:mb-12 relative">
                             <div>
                                 <h1 className="text-3xl md:text-5xl font-black text-slate-900 mb-2 tracking-tight">{property.name}</h1>
                                 <div className="flex flex-col gap-2">
@@ -130,7 +130,7 @@ export default function RestaurantDetails({ property, menuItems, categories, bar
                                 </div>
                             </div>
                             
-                            <div className="flex gap-3 self-end md:self-auto">
+                            <div className="absolute top-0 right-0 md:static flex gap-3">
                                 <button 
                                     onClick={() => {
                                         setIsSaved(!isSaved);

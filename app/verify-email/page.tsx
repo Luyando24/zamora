@@ -61,7 +61,7 @@ function VerifyEmailContent() {
 
         <h2 className="text-2xl font-bold text-white mb-2">Check your email</h2>
         <p className="text-gray-400 text-sm mb-1">
-          We've sent a verification link to
+          We&apos;ve sent a verification link to
         </p>
         <p className="text-white font-medium mb-6">
           {email || 'your email address'}
@@ -69,7 +69,7 @@ function VerifyEmailContent() {
 
         <p className="text-gray-400 text-sm mb-8 leading-relaxed">
           Click the link in the email to verify your account.<br/>
-          If you don't see it, check your spam folder.
+          If you don&apos;t see it, check your spam folder.
         </p>
 
         <Link 
@@ -81,7 +81,7 @@ function VerifyEmailContent() {
         </Link>
 
         <div className="mt-8 text-sm text-gray-500">
-          Didn't receive the email?{' '}
+          Didn&apos;t receive the email?{' '}
           <button 
             onClick={handleResend}
             disabled={resending || !email}

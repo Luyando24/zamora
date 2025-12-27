@@ -292,7 +292,7 @@ export default function PropertySetupPage() {
             Welcome to Zamora
           </h1>
           <p className="mt-3 text-xl text-gray-500 max-w-2xl mx-auto">
-            Let's get your {isRestaurant ? 'restaurant' : 'property'} set up. It only takes a minute.
+            Let&apos;s get your {isRestaurant ? 'restaurant' : 'property'} set up. It only takes a minute.
           </p>
         </div>
 

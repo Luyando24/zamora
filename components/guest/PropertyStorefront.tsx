@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
+import Image from 'next/image';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 import { 
   ShoppingBag, Utensils, BedDouble, Search, Plus, Minus, X, 
   MapPin, Phone, Mail, Clock, CheckCircle, Star, 
@@ -253,6 +255,13 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
       {/* 3. Main Content */}
       <main className="max-w-7xl mx-auto px-1 md:px-6 relative z-10 pt-24 mb-20">
          
+         <div className="mb-6 px-4 md:px-0">
+            <Breadcrumb items={[
+              { label: 'Explore', href: '/explore' },
+              { label: property.name }
+            ]} />
+         </div>
+
          {!activeRoom ? (
            <div className="space-y-6">
             {/* Hero Section */}
@@ -260,7 +269,7 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
                {/* Background Image */}
                <div className="absolute inset-0 transition-transform duration-1000 group-hover:scale-105">
                   {property.cover_image_url ? (
-                     <img src={property.cover_image_url} alt={property.name} className="w-full h-full object-cover" />
+                     <Image src={property.cover_image_url} alt={property.name} fill className="object-cover" unoptimized />
                   ) : (
                      <div className="w-full h-full bg-slate-900 flex items-center justify-center">
                         <Building2 className="text-slate-800 w-32 h-32" />
@@ -373,7 +382,7 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
                                 : 'text-slate-500 hover:text-slate-700'
                             }`}
                         >
-                            Bar
+                            Drinks
                         </button>
                         <button
                             onClick={() => { setActiveTab('amenities'); setSearchQuery(''); }}
@@ -420,7 +429,7 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
                         {/* Image Area */}
                         <div className="aspect-square relative overflow-hidden bg-slate-100">
                             {room.image_url ? (
-                                <img src={room.image_url} alt={room.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                <Image src={room.image_url} alt={room.name} fill className="object-cover group-hover:scale-110 transition-transform duration-700" unoptimized />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-slate-300">
                                     <BedDouble size={32} className="md:w-10 md:h-10" />
@@ -476,7 +485,7 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
                         {/* Image Area */}
                         <div className="h-32 md:h-56 relative overflow-hidden bg-slate-100">
                             {item.image_url ? (
-                                <img src={item.image_url} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                <Image src={item.image_url} alt={item.name} fill className="object-cover group-hover:scale-110 transition-transform duration-700" unoptimized />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-slate-300">
                                     <Utensils size={32} className="md:w-10 md:h-10" />
@@ -538,7 +547,7 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
                         {/* Image Area */}
                         <div className="h-32 md:h-56 relative overflow-hidden bg-slate-100">
                             {item.image_url ? (
-                                <img src={item.image_url} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                <Image src={item.image_url} alt={item.name} fill className="object-cover group-hover:scale-110 transition-transform duration-700" unoptimized />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-slate-300">
                                     <Wine size={32} className="md:w-10 md:h-10" />
@@ -632,16 +641,20 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
                         {/* Gallery */}
                         <div className="aspect-video w-full rounded-[2rem] overflow-hidden shadow-lg relative group bg-slate-100">
                             {activeRoom.gallery_urls && activeRoom.gallery_urls.length > 0 ? (
-                                <img 
+                                <Image 
                                     src={activeRoom.gallery_urls[currentImageIndex] || activeRoom.image_url} 
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                                    className="object-cover group-hover:scale-105 transition-transform duration-700" 
                                     alt="Room view"
+                                    fill
+                                    unoptimized
                                 />
                             ) : activeRoom.image_url ? (
-                                <img 
+                                <Image 
                                     src={activeRoom.image_url} 
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                                    className="object-cover group-hover:scale-105 transition-transform duration-700" 
                                     alt="Room view"
+                                    fill
+                                    unoptimized
                                 />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-slate-400">
@@ -681,11 +694,11 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
                                 <div 
                                     key={i} 
                                     onClick={() => setCurrentImageIndex(i)}
-                                    className={`aspect-square rounded-2xl overflow-hidden cursor-pointer transition-all ${
+                                    className={`aspect-square relative rounded-2xl overflow-hidden cursor-pointer transition-all ${
                                         currentImageIndex === i ? 'ring-4 ring-slate-900 ring-offset-2' : 'hover:opacity-80'
                                     }`}
                                 >
-                                    <img src={url} className="w-full h-full object-cover" alt={`Thumbnail ${i + 1}`} />
+                                    <Image src={url} fill className="object-cover" alt={`Thumbnail ${i + 1}`} unoptimized />
                                 </div>
                             ))}
                         </div>
@@ -915,9 +928,9 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
                 cart.map((item, index) => (
                   <div key={index} className="flex gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
                     {/* Image */}
-                    <div className="w-20 h-20 bg-white rounded-xl overflow-hidden flex-shrink-0">
+                    <div className="w-20 h-20 bg-white rounded-xl overflow-hidden flex-shrink-0 relative">
                       {item.image_url ? (
-                        <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                        <Image src={item.image_url} alt={item.name} fill className="object-cover" unoptimized />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-slate-300">
                            {item.type === 'room' ? <BedDouble size={24} /> : <Utensils size={24} />}

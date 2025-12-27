@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 import { 
@@ -32,21 +33,7 @@ export default function SavedItemsPage() {
   const router = useRouter();
   const supabase = createClient();
 
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (error || !user) {
-        router.push('/login?next=/account/saved');
-        return;
-      }
-      setUser(user);
-      fetchSavedProperties(user.id);
-    };
-
-    checkUser();
-  }, [router]);
-
-  const fetchSavedProperties = async (userId: string) => {
+  const fetchSavedProperties = useCallback(async (userId: string) => {
     const { data, error } = await supabase
       .from('saved_properties')
       .select(`
@@ -73,7 +60,21 @@ export default function SavedItemsPage() {
       setSavedProperties(data || []);
     }
     setLoading(false);
-  };
+  }, [supabase]);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error || !user) {
+        router.push('/login?next=/account/saved');
+        return;
+      }
+      setUser(user);
+      fetchSavedProperties(user.id);
+    };
+
+    checkUser();
+  }, [router, supabase, fetchSavedProperties]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -130,10 +131,12 @@ export default function SavedItemsPage() {
                     >
                         <div className="aspect-[4/3] relative bg-slate-100 overflow-hidden">
                             {item.properties.cover_image_url ? (
-                                <img 
+                                <Image 
                                     src={item.properties.cover_image_url} 
                                     alt={item.properties.name} 
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                                    fill
+                                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                    unoptimized
                                 />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-slate-300">

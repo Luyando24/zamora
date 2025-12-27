@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, use } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useProperty } from '../../context/PropertyContext';
 import { 
@@ -48,7 +49,7 @@ export default function PropertyDetailsPage({ params }: { params: Promise<{ id: 
     return (
       <div className="text-center py-12">
         <h2 className="text-2xl font-bold text-slate-900">Property Not Found</h2>
-        <p className="text-slate-500 mt-2">The property you are looking for does not exist or you don't have access to it.</p>
+        <p className="text-slate-500 mt-2">The property you are looking for does not exist or you don&apos;t have access to it.</p>
         <Link href="/dashboard/properties" className="mt-4 inline-flex items-center text-blue-600 hover:text-blue-700">
           <ArrowLeft size={16} className="mr-2" /> Back to Properties
         </Link>
@@ -113,7 +114,13 @@ export default function PropertyDetailsPage({ params }: { params: Promise<{ id: 
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="aspect-video relative bg-slate-100">
               {property.cover_image_url ? (
-                <img src={property.cover_image_url} alt={property.name} className="w-full h-full object-cover" />
+                <Image 
+                  src={property.cover_image_url} 
+                  alt={property.name} 
+                  fill 
+                  className="object-cover" 
+                  unoptimized 
+                />
               ) : (
                 <div className="flex items-center justify-center h-full text-slate-400">
                   <Building2 size={64} className="opacity-20" />
@@ -125,8 +132,8 @@ export default function PropertyDetailsPage({ params }: { params: Promise<{ id: 
                 <h3 className="text-sm font-medium text-slate-900 mb-3">Gallery</h3>
                 <div className="flex gap-2 overflow-x-auto pb-2">
                   {property.gallery_urls.map((url: string, index: number) => (
-                    <div key={index} className="h-20 w-20 flex-shrink-0 rounded-lg overflow-hidden border border-slate-200">
-                      <img src={url} alt={`Gallery ${index}`} className="w-full h-full object-cover" />
+                    <div key={index} className="h-20 w-20 flex-shrink-0 rounded-lg overflow-hidden border border-slate-200 relative">
+                      <Image src={url} alt={`Gallery ${index}`} fill className="object-cover" unoptimized />
                     </div>
                   ))}
                 </div>

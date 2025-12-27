@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import Image from 'next/image';
 import { createClient } from '@/utils/supabase/client';
 import { useProperty } from '../context/PropertyContext';
 import { 
@@ -114,7 +115,7 @@ export default function BarOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<BarOrder | null>(null);
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     if (!selectedPropertyId) return;
     
     setLoading(true);
@@ -130,12 +131,12 @@ export default function BarOrdersPage() {
             unit_price,
             total_price,
             item_name,
-             item_description,
-             item_ingredients,
-             item_image_url,
-             weight,
-             extras,
-             options,
+            item_description,
+            item_ingredients,
+            item_image_url,
+            weight,
+            extras,
+            options,
             bar_menu_items (
               name,
               description,
@@ -158,7 +159,7 @@ export default function BarOrdersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedPropertyId, supabase]);
 
   useEffect(() => {
     if (selectedPropertyId) {
@@ -187,7 +188,7 @@ export default function BarOrdersPage() {
         supabase.removeChannel(channel);
       };
     }
-  }, [selectedPropertyId]);
+  }, [selectedPropertyId, fetchOrders, supabase]);
 
   const updateStatus = async (orderId: string, newStatus: string) => {
     try {
@@ -438,9 +439,15 @@ export default function BarOrdersPage() {
                                             {item.quantity}x
                                         </span>
 
-                                        <div className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden shrink-0 flex items-center justify-center border border-slate-200">
+                                        <div className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden shrink-0 flex items-center justify-center border border-slate-200 relative">
                                             {itemImage ? (
-                                                <img src={itemImage} alt={itemName} className="w-full h-full object-cover" />
+                                                <Image 
+                                                    src={itemImage} 
+                                                    alt={itemName} 
+                                                    fill
+                                                    className="object-cover" 
+                                                    unoptimized
+                                                />
                                             ) : (
                                                 <Wine className="text-slate-300 w-6 h-6 opacity-50" />
                                             )}

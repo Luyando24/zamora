@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Modal from '@/components/ui/Modal';
 import { createClient } from '@/utils/supabase/client';
 import { format, parseISO } from 'date-fns';
@@ -31,26 +31,7 @@ export default function EditBookingModal({ isOpen, onClose, onSuccess, booking, 
     paymentStatus: 'pending'
   });
 
-  useEffect(() => {
-    if (isOpen) {
-      setError(null);
-      fetchRooms();
-      if (booking) {
-        setFormData({
-          firstName: booking.guests?.first_name || '',
-          lastName: booking.guests?.last_name || '',
-          roomId: booking.room_id,
-          checkIn: booking.check_in_date,
-          checkOut: booking.check_out_date,
-          status: booking.status,
-          paymentMethod: booking.payment_method || 'cash',
-          paymentStatus: booking.payment_status || 'pending'
-        });
-      }
-    }
-  }, [isOpen, booking]);
-
-  const fetchRooms = async () => {
+  const fetchRooms = useCallback(async () => {
     let propertyId = propPropertyId;
 
     if (!propertyId) {
@@ -77,7 +58,26 @@ export default function EditBookingModal({ isOpen, onClose, onSuccess, booking, 
       
       if (data) setRooms(data);
     }
-  };
+  }, [propPropertyId, supabase]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setError(null);
+      fetchRooms();
+      if (booking) {
+        setFormData({
+          firstName: booking.guests?.first_name || '',
+          lastName: booking.guests?.last_name || '',
+          roomId: booking.room_id,
+          checkIn: booking.check_in_date,
+          checkOut: booking.check_out_date,
+          status: booking.status,
+          paymentMethod: booking.payment_method || 'cash',
+          paymentStatus: booking.payment_status || 'pending'
+        });
+      }
+    }
+  }, [isOpen, booking, fetchRooms]);
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();

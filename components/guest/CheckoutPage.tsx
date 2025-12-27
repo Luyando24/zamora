@@ -6,6 +6,7 @@ import {
   MapPin, Phone, MessageSquare, CheckCircle2,
   Loader2, Utensils, Smartphone, Wine
 } from 'lucide-react';
+import Image from 'next/image';
 import { createClient } from '@/utils/supabase/client';
 
 interface CheckoutPageProps {
@@ -240,9 +241,15 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
                 <div className="divide-y divide-slate-50">
                     {cart.map((item, idx) => (
                         <div key={idx} className="p-4 flex gap-4">
-                            <div className="w-16 h-16 bg-slate-100 rounded-lg overflow-hidden shrink-0">
+                            <div className="w-16 h-16 bg-slate-100 rounded-lg overflow-hidden shrink-0 relative">
                                 {item.image_url ? (
-                                    <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                                    <Image 
+                                        src={item.image_url} 
+                                        alt={item.name} 
+                                        fill
+                                        className="object-cover"
+                                        unoptimized
+                                    />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-slate-300">
                                         {item.type === 'bar' ? <Wine size={16} /> : <Utensils size={16} />}
@@ -319,7 +326,7 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
                                     <p className="font-bold text-emerald-900 text-sm">✓ Table Verified</p>
                                     <p className="text-xs text-emerald-700 mt-1 leading-relaxed">
                                         Ordering from <span className="font-bold">Table {tableNumber}</span>. 
-                                        We'll bring your order right to you.
+                                        We&apos;ll bring your order right to you.
                                     </p>
                                 </div>
                             </div>

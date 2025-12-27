@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { FileText, TrendingUp, AlertCircle, CheckCircle2, Trash2 } from 'lucide-react';
 import { format, subDays } from 'date-fns';
@@ -30,13 +30,7 @@ export default function ZraDashboard() {
     fiscalizedCount: 0
   });
 
-  useEffect(() => {
-    if (selectedPropertyId) {
-      fetchReport();
-    }
-  }, [selectedPropertyId]);
-
-  const fetchReport = async () => {
+  const fetchReport = useCallback(async () => {
     if (!selectedPropertyId) return;
     setLoading(true);
     // Fetch successful ZRA transactions from the last 30 days
@@ -68,7 +62,13 @@ export default function ZraDashboard() {
       });
     }
     setLoading(false);
-  };
+  }, [selectedPropertyId]);
+
+  useEffect(() => {
+    if (selectedPropertyId) {
+      fetchReport();
+    }
+  }, [selectedPropertyId, fetchReport]);
 
   const deleteTransaction = async (id: string) => {
     if (!confirm('Are you sure you want to permanently delete this transaction? This action cannot be undone.')) return;

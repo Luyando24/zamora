@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useFolio, Folio } from '@/hooks/useFolio';
 import FolioActions from '@/components/dashboard/FolioActions';
 import { ArrowLeft, Printer, QrCode } from 'lucide-react';
@@ -12,7 +12,7 @@ export default function FolioPage({ params }: { params: { id: string } }) {
   const [folio, setFolio] = useState<Folio | null>(null);
   const { fetchFolio, addCharge } = useFolio(params.id, selectedPropertyId);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const data = await fetchFolio();
       setFolio(data);
@@ -21,13 +21,13 @@ export default function FolioPage({ params }: { params: { id: string } }) {
       // Optional: Redirect or show error UI
       alert('Error: ' + (error as Error).message);
     }
-  };
+  }, [fetchFolio]);
 
   useEffect(() => {
     if (selectedPropertyId) {
         loadData();
     }
-  }, [params.id, selectedPropertyId]);
+  }, [params.id, selectedPropertyId, loadData]);
 
   if (!selectedPropertyId) return <div className="p-8">Loading Property...</div>;
   if (!folio) return <div className="p-8">Loading Folio...</div>;

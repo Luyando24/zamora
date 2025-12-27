@@ -8,7 +8,7 @@ export default function MenuIndexPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900 mb-2">Menu Not Found</h1>
           <p className="text-slate-500">
-            It looks like you've accessed the menu page directly. Please scan a specific property's QR code or use the link provided by the establishment.
+            It looks like you&apos;ve accessed the menu page directly. Please scan a specific property&apos;s QR code or use the link provided by the establishment.
           </p>
         </div>
         <a 

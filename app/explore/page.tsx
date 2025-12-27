@@ -248,18 +248,28 @@ export default function ExplorePage() {
 
 
 
-  const fetchProperties = async () => {
+  const fetchProperties = useCallback(async (params?: {
+    checkIn?: string;
+    checkOut?: string;
+    guests?: number;
+    searchQuery?: string;
+  }) => {
     setLoading(true);
     const supabase = createClient();
+    
+    const pCheckIn = params?.checkIn ?? checkIn;
+    const pCheckOut = params?.checkOut ?? checkOut;
+    const pGuests = params?.guests ?? guestCount;
+    const pSearchQuery = params?.searchQuery ?? searchQuery;
     
     let propertiesData: any[] = [];
     
     // Call the search RPC function
     const { data, error } = await supabase.rpc('search_properties', {
-      p_check_in: checkIn || null,
-      p_check_out: checkOut || null,
-      p_guests: guestCount,
-      p_search_query: searchQuery
+      p_check_in: pCheckIn || null,
+      p_check_out: pCheckOut || null,
+      p_guests: pGuests,
+      p_search_query: pSearchQuery
     });
       
     if (error || !data || data.length === 0) {
@@ -270,8 +280,8 @@ export default function ExplorePage() {
       if (fallbackData) {
           // Client-side filter as fallback
           propertiesData = fallbackData.filter((p: any) => 
-            p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-            p.city?.toLowerCase().includes(searchQuery.toLowerCase())
+            p.name.toLowerCase().includes(pSearchQuery.toLowerCase()) || 
+            p.city?.toLowerCase().includes(pSearchQuery.toLowerCase())
           );
       }
     } else {
@@ -332,12 +342,12 @@ export default function ExplorePage() {
     }
     
     setLoading(false);
-  };
+  }, [checkIn, checkOut, guestCount, searchQuery]);
 
   const accommodationProperties = properties.filter(p => p.type?.trim().toLowerCase() !== 'restaurant');
   const restaurantProperties = properties.filter(p => p.type?.trim().toLowerCase() === 'restaurant');
 
-  const fetchPlaces = async () => {
+  const fetchPlaces = useCallback(async () => {
     const supabase = createClient();
     const { data, error } = await supabase
       .from('places')
@@ -355,7 +365,7 @@ export default function ExplorePage() {
         open_hours: p.opening_hours || '9 AM - 5 PM'
       })));
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchProperties();
@@ -386,7 +396,7 @@ export default function ExplorePage() {
       document.removeEventListener('mousedown', handleClickOutside);
       subscription.unsubscribe();
     };
-  }, []);
+  }, [fetchProperties, fetchPlaces]);
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -405,10 +415,17 @@ export default function ExplorePage() {
       
       {/* Simple Header - Just Logo and User Menu */}
       <header className="fixed top-0 w-full z-50 bg-white border-b border-slate-100 h-16 md:h-20 px-4 md:px-12 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 text-zambia-red hover:opacity-80 transition-opacity">
-           <div className="w-7 h-7 md:w-8 md:h-8 bg-zambia-red rounded-lg flex items-center justify-center text-white font-black text-sm md:text-base">Z</div>
-           <span className="text-xl font-bold tracking-tight text-zambia-red hidden md:block uppercase">ZAMORA</span>
-        </Link>
+        <div className="flex items-center gap-6">
+            <Link href="/" className="flex items-center gap-2 text-zambia-red hover:opacity-80 transition-opacity">
+            <div className="w-7 h-7 md:w-8 md:h-8 bg-zambia-red rounded-lg flex items-center justify-center text-white font-black text-sm md:text-base">Z</div>
+            <span className="text-xl font-bold tracking-tight text-zambia-red hidden md:block uppercase">ZAMORA</span>
+            </Link>
+            <div className="hidden lg:block">
+                <Breadcrumb items={[
+                    { label: 'Explore', href: '/explore' }
+                ]} />
+            </div>
+        </div>
 
         {/* Center Tabs - Navigation */}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-full hidden md:flex items-center gap-2">
@@ -614,10 +631,12 @@ export default function ExplorePage() {
                              <Link href={`/book/${property.slug || property.id}`} key={`popular-${property.id}`} className="group block cursor-pointer w-[280px] md:w-[320px] flex-none snap-start">
                                 <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-slate-100 mb-3">
                                    {property.display_image || property.cover_image_url ? (
-                                      <img 
+                                      <Image 
                                          src={property.display_image || property.cover_image_url} 
                                          alt={property.name} 
-                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                         fill
+                                         className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                         unoptimized
                                       />
                                    ) : (
                                       <div className="w-full h-full flex items-center justify-center text-slate-300">
@@ -665,10 +684,12 @@ export default function ExplorePage() {
                              <Link href={`/book/${property.slug || property.id}`} key={property.id} className="group block cursor-pointer">
                                 <div className="relative aspect-square overflow-hidden rounded-xl bg-slate-100 mb-3">
                                    {property.display_image || property.cover_image_url ? (
-                                      <img 
+                                      <Image 
                                          src={property.display_image || property.cover_image_url} 
                                          alt={property.name} 
-                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                         fill
+                                         className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                         unoptimized
                                       />
                                    ) : (
                                       <div className="w-full h-full flex items-center justify-center text-slate-300">
@@ -732,10 +753,12 @@ export default function ExplorePage() {
                         {MOCK_ACTIVITIES.slice(0, 4).map((activity) => (
                             <div key={activity.id} className="group block cursor-pointer w-[280px] md:w-[320px] flex-none snap-start">
                                 <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-slate-100 mb-3">
-                                    <img 
+                                    <Image 
                                         src={activity.image_url} 
                                         alt={activity.name} 
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                        fill
+                                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                        unoptimized
                                     />
                                     <div className="absolute top-3 left-3 bg-white/95 backdrop-blur px-3 py-1 rounded-full shadow-md text-xs font-bold text-slate-900 border border-white/20">
                                         {activity.category}
@@ -778,10 +801,12 @@ export default function ExplorePage() {
                         {MOCK_ACTIVITIES.map((activity) => (
                             <div key={activity.id} className="group block cursor-pointer">
                                 <div className="relative aspect-square overflow-hidden rounded-xl bg-slate-100 mb-3">
-                                    <img 
+                                    <Image 
                                         src={activity.image_url} 
                                         alt={activity.name} 
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                        fill
+                                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                        unoptimized
                                     />
                                     <button className="absolute top-3 right-3 p-2 hover:scale-110 transition-transform z-10">
                                         <Heart size={24} className="text-white fill-black/50 hover:fill-zambia-red hover:text-zambia-red transition-colors" />
@@ -826,10 +851,12 @@ export default function ExplorePage() {
                         {restaurantProperties.length > 0 ? restaurantProperties.slice(0, 4).map((place: any) => (
                             <Link href={`/food/${place.slug || place.id}`} key={place.id} className="group block cursor-pointer w-[280px] md:w-[320px] flex-none snap-start">
                                 <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-slate-100 mb-3">
-                                    <img 
+                                    <Image 
                                         src={place.display_image || place.cover_image_url} 
                                         alt={place.name} 
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                        fill
+                                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                        unoptimized
                                     />
                                     <div className="absolute top-3 left-3 bg-white/95 backdrop-blur px-3 py-1 rounded-full shadow-md text-xs font-bold text-slate-900 border border-white/20">
                                         Restaurant
@@ -859,10 +886,12 @@ export default function ExplorePage() {
                         )) : MOCK_FOOD.slice(0, 4).map((place) => (
                             <div key={place.id} className="group block cursor-pointer w-[280px] md:w-[320px] flex-none snap-start">
                                 <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-slate-100 mb-3">
-                                    <img 
+                                    <Image 
                                         src={place.image_url} 
                                         alt={place.name} 
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                        fill
+                                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                        unoptimized
                                     />
                                     <div className="absolute top-3 left-3 bg-white/95 backdrop-blur px-3 py-1 rounded-full shadow-md text-xs font-bold text-slate-900 border border-white/20">
                                         {place.type}
@@ -900,11 +929,13 @@ export default function ExplorePage() {
                         {restaurantProperties.map((place: any) => (
                             <Link href={`/food/${place.slug || place.id}`} key={place.id} className="group block cursor-pointer">
                                 <div className="relative aspect-square overflow-hidden rounded-xl bg-slate-100 mb-3">
-                                    <img 
-                                        src={place.cover_image_url} 
-                                        alt={place.name} 
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                    />
+                                    <Image
+                      src={place.cover_image_url}
+                      alt={place.name}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      unoptimized
+                    />
                                     <button className="absolute top-3 right-3 p-2 hover:scale-110 transition-transform z-10">
                                         <Heart size={24} className="text-white fill-black/50 hover:fill-zambia-red hover:text-zambia-red transition-colors" />
                                     </button>
@@ -946,10 +977,12 @@ export default function ExplorePage() {
                         {places.slice(0, 4).map((place) => (
                             <div key={place.id} className="group block cursor-pointer w-[280px] md:w-[320px] flex-none snap-start">
                                 <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-slate-100 mb-3">
-                                    <img 
+                                    <Image 
                                         src={place.image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=800'} 
                                         alt={place.name} 
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                        fill
+                                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                        unoptimized
                                     />
                                     <div className="absolute top-3 left-3 bg-white/95 backdrop-blur px-3 py-1 rounded-full shadow-md text-xs font-bold text-slate-900 border border-white/20">
                                         {place.type}
@@ -987,10 +1020,12 @@ export default function ExplorePage() {
                         {places.map((place) => (
                             <div key={place.id} className="group block cursor-pointer">
                                 <div className="relative aspect-square overflow-hidden rounded-xl bg-slate-100 mb-3">
-                                    <img 
+                                    <Image 
                                         src={place.image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=800'} 
                                         alt={place.name} 
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                        fill
+                                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                        unoptimized
                                     />
                                     <button className="absolute top-3 right-3 p-2 hover:scale-110 transition-transform z-10">
                                         <Heart size={24} className="text-white fill-black/50 hover:fill-zambia-red hover:text-zambia-red transition-colors" />

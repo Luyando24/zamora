@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Loader2, Printer, ChevronLeft, ChefHat, FileText } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -106,7 +107,7 @@ export default function PrintMenuPage({ searchParams }: { searchParams: { proper
     };
 
     fetchData();
-  }, [propertyId]);
+  }, [propertyId, supabase]);
 
   // Group items by category
   const grouped = items.reduce((acc: any, item: any) => {
@@ -123,7 +124,7 @@ export default function PrintMenuPage({ searchParams }: { searchParams: { proper
       <div className="flex h-screen items-center justify-center bg-white">
         <div className="flex flex-col items-center gap-4">
             <Loader2 className="animate-spin text-pink-600" size={40} />
-            <p className="text-slate-400 font-medium tracking-widest text-sm">DESIGNING MENU...</p>
+            <p className="text-slate-400 font-medium tracking-widest text-sm">DESIGNING MENU&hellip;</p>
         </div>
       </div>
     );
@@ -167,7 +168,15 @@ export default function PrintMenuPage({ searchParams }: { searchParams: { proper
         <header className="text-center mb-16 print:mb-12 print:mt-12 relative z-10">
             <div className="inline-block mb-6 relative">
                 {property?.logo_url ? (
-                    <img src={property.logo_url} alt="Logo" className="h-24 w-auto object-contain brightness-0 invert" />
+                    <div className="relative h-24 w-40 mx-auto">
+                        <Image 
+                            src={property.logo_url} 
+                            alt="Logo" 
+                            fill
+                            className="object-contain brightness-0 invert" 
+                            unoptimized
+                        />
+                    </div>
                 ) : (
                     <div className="h-20 w-20 bg-slate-900 rounded-full flex items-center justify-center mx-auto border border-slate-800 shadow-xl shadow-black/50">
                         <ChefHat className="text-pink-500" size={32} />

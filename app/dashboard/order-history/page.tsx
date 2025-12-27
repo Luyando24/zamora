@@ -42,7 +42,7 @@ export default function OrderHistoryPage() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const supabase = createClient();
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     if (!selectedPropertyId) return;
     setLoading(true);
     
@@ -72,11 +72,11 @@ export default function OrderHistoryPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedPropertyId, activeTab, supabase]);
 
   useEffect(() => {
     fetchOrders();
-  }, [selectedPropertyId, activeTab]);
+  }, [fetchOrders]);
 
   const deleteOrder = async (orderId: string) => {
     if (!confirm('Are you sure you want to permanently delete this record? This action cannot be undone.')) return;

@@ -25,7 +25,7 @@ export default function EditMenuItemPage({ params }: { params: { id: string } })
     };
 
     fetchItem();
-  }, [params.id]);
+  }, [params.id, supabase]);
 
   if (loading) {
     return (
@@ -57,7 +57,7 @@ export default function EditMenuItemPage({ params }: { params: { id: string } })
         </Link>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Edit Item</h1>
-          <p className="text-gray-500">Update details for <span className="font-medium text-gray-900">{item.name}</span></p>
+          <p className="text-gray-500">Update details for <span className="font-medium text-gray-900">{item?.name}</span></p>
         </div>
       </div>
 

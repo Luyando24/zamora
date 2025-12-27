@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { 
   Users, Plus, Search, Shield, MoreVertical, 
@@ -29,13 +29,7 @@ export default function TeamPage() {
 
   const supabase = createClient();
 
-  useEffect(() => {
-    if (selectedPropertyId) {
-        fetchTeam();
-    }
-  }, [selectedPropertyId]);
-
-  const fetchTeam = async () => {
+  const fetchTeam = useCallback(async () => {
     if (!selectedPropertyId) return;
     
     setLoading(true);
@@ -65,7 +59,13 @@ export default function TeamPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedPropertyId, supabase]);
+
+  useEffect(() => {
+    if (selectedPropertyId) {
+        fetchTeam();
+    }
+  }, [selectedPropertyId, fetchTeam]);
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,7 +106,7 @@ export default function TeamPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Team Members</h1>
-          <p className="text-slate-500">Manage your property's staff and their access levels.</p>
+          <p className="text-slate-500">Manage your property&apos;s staff and their access levels.</p>
         </div>
         <button 
           onClick={() => setIsInviteOpen(true)}

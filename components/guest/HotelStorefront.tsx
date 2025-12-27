@@ -57,7 +57,9 @@ export default function HotelStorefront({ hotel, roomTypes, menuItems, categorie
         <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
              {hotel.logo_url ? (
-               <img src={hotel.logo_url} alt={hotel.name} className="w-10 h-10 rounded-full object-cover border border-gray-100" />
+               <div className="relative w-10 h-10 rounded-full overflow-hidden border border-gray-100">
+                  <Image src={hotel.logo_url} alt={hotel.name} fill className="object-cover" unoptimized />
+               </div>
              ) : (
                <div className="w-10 h-10 rounded-full bg-zambia-green text-white flex items-center justify-center font-bold">
                  {hotel.name.charAt(0)}
@@ -129,7 +131,13 @@ export default function HotelStorefront({ hotel, roomTypes, menuItems, categorie
                 <div key={item.id} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex gap-4">
                   <div className="w-24 h-24 bg-white rounded-lg flex-shrink-0 relative overflow-hidden flex items-center justify-center p-2 border border-gray-100">
                     {item.image_url ? (
-                      <img src={item.image_url} alt={item.name} className="w-full h-full object-contain" />
+                      <Image 
+                        src={item.image_url} 
+                        alt={item.name} 
+                        fill
+                        className="object-contain"
+                        unoptimized
+                      />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-300">
                         <Utensils size={24} />
@@ -169,7 +177,13 @@ export default function HotelStorefront({ hotel, roomTypes, menuItems, categorie
               <div key={room.id} className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
                 <div className="h-48 bg-gray-200 relative">
                   {room.image_url ? (
-                    <img src={room.image_url} alt={room.name} className="w-full h-full object-cover" />
+                    <Image 
+                        src={room.image_url} 
+                        alt={room.name} 
+                        fill 
+                        className="object-cover" 
+                        unoptimized 
+                    />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400">
                        <BedDouble size={48} />
@@ -244,8 +258,8 @@ export default function HotelStorefront({ hotel, roomTypes, menuItems, categorie
               ) : (
                 cart.map(item => (
                   <div key={item.id} className="flex gap-4 items-center bg-white border border-gray-100 p-3 rounded-lg shadow-sm">
-                    <div className="w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-                       {item.image_url && <img src={item.image_url} className="w-full h-full object-cover" />}
+                    <div className="w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 relative">
+                       {item.image_url && <Image src={item.image_url} alt={item.name} fill className="object-cover" unoptimized />}
                     </div>
                     <div className="flex-1">
                       <h4 className="font-bold text-gray-900 text-sm">{item.name}</h4>

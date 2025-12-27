@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/utils/supabase/client';
+import Image from 'next/image';
 import Modal from '@/components/ui/Modal';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 import GuestNavbar from './GuestNavbar';
@@ -124,7 +125,7 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
     checkAvailability();
   }, [bookingDates, property.id]);
 
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     const supabase = createClient();
     const { data, error } = await supabase
       .from('reviews')
@@ -143,11 +144,11 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
       setReviews(data);
     }
     setReviewsLoading(false);
-  };
+  }, [property.id]);
 
   useEffect(() => {
     fetchReviews();
-  }, [property.id]);
+  }, [fetchReviews]);
 
   useEffect(() => {
     const checkSavedStatus = async () => {
@@ -416,7 +417,7 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
       {/* 2. Hero Section */}
       <div className="relative h-[60vh] md:h-[70vh] w-full overflow-hidden">
         {property.cover_image_url ? (
-            <img src={property.cover_image_url} alt={property.name} className="w-full h-full object-cover" />
+            <Image src={property.cover_image_url} alt={property.name} fill className="object-cover" unoptimized />
         ) : (
             <div className="w-full h-full bg-slate-900 flex items-center justify-center">
                 <Building2 className="text-slate-700 w-32 h-32" />
@@ -548,7 +549,7 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
                                             transition={{ duration: 0.5, ease: "easeInOut", delay: i * 0.1 }}
                                             className="absolute inset-0"
                                         >
-                                            <img src={img} alt={`Gallery ${i+1}`} className="w-full h-full object-cover" />
+                                            <Image src={img} alt={`Gallery ${i+1}`} fill className="object-cover" unoptimized />
                                         </motion.div>
                                     </div>
                                 ))}
@@ -564,7 +565,7 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
                                             transition={{ duration: 0.5, ease: "easeInOut", delay: 0.3 }}
                                             className="absolute inset-0"
                                         >
-                                            <img src={currentGalleryImages[3]} alt="Gallery 4" className="w-full h-full object-cover" />
+                                            <Image src={currentGalleryImages[3]} alt="Gallery 4" fill className="object-cover" unoptimized />
                                         </motion.div>
                                     </div>
                                 )}
@@ -605,11 +606,15 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
                     {/* Property Logo */}
                     {property.logo_url && (
                         <div className="hidden md:block w-32 h-32 bg-white rounded-2xl p-2 shadow-2xl rotate-3 transition-transform hover:rotate-0">
-                            <img 
-                                src={property.logo_url} 
-                                alt={`${property.name} logo`} 
-                                className="w-full h-full object-contain rounded-xl"
-                            />
+                            <div className="relative w-full h-full">
+                                <Image 
+                                    src={property.logo_url} 
+                                    alt={`${property.name} logo`} 
+                                    fill
+                                    className="object-contain rounded-xl"
+                                    unoptimized
+                                />
+                            </div>
                         </div>
                     )}
                 </div>
@@ -686,8 +691,8 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
                             }
                         }
                         return visibleImages.map((img: string, i: number) => (
-                          <div key={`${photosIndex}-${i}`} className="flex-none w-[85vw] md:w-auto snap-center aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 group cursor-pointer">
-                              <img src={img} alt={`Property ${i+1}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                          <div key={`${photosIndex}-${i}`} className="flex-none w-[85vw] md:w-auto snap-center aspect-[4/3] rounded-2xl overflow-hidden bg-slate-100 group cursor-pointer relative">
+                              <Image src={img} alt={`Property ${i+1}`} fill className="object-cover group-hover:scale-110 transition-transform duration-500" unoptimized />
                           </div>
                         ));
                       })()}
@@ -712,7 +717,7 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
                             <div key={room.id} className="group border border-slate-200 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col md:flex-row bg-white h-auto md:h-52">
                                 <div className="md:w-1/3 relative h-48 md:h-full overflow-hidden">
                                     {room.image_url ? (
-                                        <img src={room.image_url} alt={room.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                                        <Image src={room.image_url} alt={room.name} fill className="object-cover group-hover:scale-105 transition-transform duration-700" unoptimized />
                                     ) : (
                                         <div className="w-full h-full bg-slate-100 flex items-center justify-center">
                                             <BedDouble size={32} className="text-slate-300" />
@@ -769,9 +774,9 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           {[...menuItems, ...barMenuItems].slice(0, showFullMenu ? undefined : 4).map(item => (
                               <div key={item.id} className="flex gap-4 p-4 rounded-2xl border border-slate-100 hover:border-slate-200 transition-colors bg-white">
-                                  <div className="w-24 h-24 rounded-xl overflow-hidden bg-slate-100 flex-shrink-0">
+                                  <div className="w-24 h-24 rounded-xl overflow-hidden bg-slate-100 flex-shrink-0 relative">
                                       {item.image_url ? (
-                                          <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                                          <Image src={item.image_url} alt={item.name} fill className="object-cover" unoptimized />
                                       ) : (
                                           <div className="w-full h-full flex items-center justify-center">
                                               <Utensils className="text-slate-300" />
@@ -850,9 +855,9 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
                           {reviews.map((review) => (
                               <div key={review.id} className="bg-slate-50 p-6 rounded-3xl">
                                   <div className="flex items-center gap-4 mb-4">
-                                      <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-slate-400 overflow-hidden">
+                                      <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-slate-400 overflow-hidden relative">
                                           {review.profiles?.avatar_url ? (
-                                              <img src={review.profiles.avatar_url} alt="User" className="w-full h-full object-cover" />
+                                              <Image src={review.profiles.avatar_url} alt="User" fill className="object-cover" unoptimized />
                                           ) : (
                                               <User size={24} />
                                           )}
@@ -1060,9 +1065,9 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
                     ) : (
                         cart.map((item, index) => (
                             <div key={index} className="flex gap-4 p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                                <div className="w-20 h-20 bg-slate-100 rounded-xl overflow-hidden flex-shrink-0">
+                                <div className="w-20 h-20 bg-slate-100 rounded-xl overflow-hidden flex-shrink-0 relative">
                                     {item.image_url ? (
-                                        <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                                        <Image src={item.image_url} alt={item.name} fill className="object-cover" unoptimized />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-slate-300">
                                             {item.type === 'room' ? <BedDouble size={24} /> : <Utensils size={24} />}
