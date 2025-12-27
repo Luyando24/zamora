@@ -6,7 +6,7 @@ export async function GET() {
     const supabase = await createClient();
 
     const { data: properties, error } = await supabase
-      .from('properties')
+      .from('public_properties')
       .select('*')
       .order('name');
 

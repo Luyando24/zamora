@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-// import { Inter } from "next/font/google";
+import { Inter } from "next/font/google";
 import OfflineIndicator from "@/components/OfflineIndicator";
 import { Toaster } from 'react-hot-toast';
 import { Suspense } from 'react';
 import AnalyticsTracker from '@/components/analytics/AnalyticsTracker';
 import "./globals.css";
 
-// const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Zamora HMS",

@@ -32,7 +32,7 @@ export default function EditPlacePage({ params }: { params: { id: string } }) {
     cover_image_url: ''
   });
 
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
 
   useEffect(() => {
     const fetchPlace = async () => {
