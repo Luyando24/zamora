@@ -34,8 +34,10 @@ export async function GET(
       .limit(limit);
 
     // Filter for unassigned orders (submitted by customers via QR)
-    // IMPORTANT: We check if waiter_name is NULL *OR* empty string
-    foodQuery = foodQuery.or('waiter_name.is.null,waiter_name.eq.""');
+    // IMPORTANT: We check if waiter_name is NULL, empty, OR a generic system name (Table X, Walk-in, etc.)
+    // This ensures that orders created by the system with a placeholder name still appear in the 'New' tab.
+    const genericNamesFilter = 'waiter_name.is.null,waiter_name.eq."",waiter_name.ilike."%Table%",waiter_name.ilike."%Walk%",waiter_name.ilike."%Guest%",waiter_name.ilike."%Customer%",waiter_name.ilike."%Unknown%"';
+    foodQuery = foodQuery.or(genericNamesFilter);
 
     // Apply status filter or default to 'pending'
     if (status) {
@@ -60,8 +62,8 @@ export async function GET(
       .limit(limit);
 
     // Filter for unassigned orders (submitted by customers via QR)
-    // IMPORTANT: We check if waiter_name is NULL *OR* empty string
-    barQuery = barQuery.or('waiter_name.is.null,waiter_name.eq.""');
+    // IMPORTANT: We check if waiter_name is NULL, empty, OR a generic system name (Table X, Walk-in, etc.)
+    barQuery = barQuery.or(genericNamesFilter);
 
     // Apply status filter or default to 'pending'
     if (status) {
