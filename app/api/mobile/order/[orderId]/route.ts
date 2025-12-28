@@ -40,57 +40,85 @@ export async function PATCH(
 
         const { orderId } = params;
         const body = await req.json();
-        const { status, type } = body;
+        const { status, type, waiter_name, formData } = body;
 
-        if (!status || !type) {
-            return NextResponse.json({ error: 'Status and type are required' }, { status: 400 });
+        // Type is always required to know which table to query
+        if (!type || (type !== 'food' && type !== 'bar')) {
+            return NextResponse.json({ error: 'Valid type (food/bar) is required' }, { status: 400 });
         }
 
-        if (type !== 'food' && type !== 'bar') {
-            return NextResponse.json({ error: 'Invalid type (food/bar)' }, { status: 400 });
+        // Must provide at least one field to update
+        if (!status && !waiter_name) {
+             return NextResponse.json({ error: 'Status or waiter_name is required' }, { status: 400 });
         }
 
         const table = type === 'food' ? 'orders' : 'bar_orders';
         const supabaseAdmin = getSupabaseAdmin();
 
         // 1. Prepare updates
-        const updates: any = { status };
-
-        // 1.1 Fetch current order to check waiter_name assignment
-        // If the order has no waiter (e.g. from QR code), we assign it to the current user
-        // so it appears in their history/delivered tab.
+        const updates: any = {};
+        if (status) updates.status = status;
+        if (waiter_name) updates.waiter_name = waiter_name;
+        
+        // Handle formData update if provided (shallow merge or replace?)
+        // Ideally we fetch first, but for now let's assume if provided we might want to update it.
+        // But simply replacing it might lose other data.
+        // Let's rely on waiter_name column primarily. 
+        // If formData is sent, we can try to update it if we are careful.
+        // For assignOrder, it sends formData: { waiterName: ... }.
+        // We should probably merge it.
+        
+        // 1.1 Fetch current order to check/merge data
         const { data: currentOrder } = await supabaseAdmin
             .from(table)
-            .select('waiter_name, property_id')
+            .select('waiter_name, property_id, formData')
             .eq('id', orderId)
             .single();
 
         if (currentOrder) {
-             // Fetch user profile to get proper name
-             const { data: profile } = await supabaseAdmin
-                .from('profiles')
-                .select('first_name, last_name')
-                .eq('id', user.id)
-                .single();
+             // If we are updating waiter_name explicitly (Assign Order)
+             if (waiter_name) {
+                 updates.waiter_name = waiter_name;
+                 
+                 // Merge formData
+                 const currentFormData = currentOrder.formData || {};
+                 updates.formData = {
+                     ...currentFormData,
+                     waiterName: waiter_name, // Sync with column
+                     notes: currentFormData.notes || `(Waiter: ${waiter_name})` // Legacy support
+                 };
+             }
 
-             if (profile) {
-                 const currentWaiterName = currentOrder.waiter_name;
-                 const newWaiterName = `${profile.first_name} ${profile.last_name}`.trim();
-
-                 // If status is being marked as 'delivered', ALWAYS claim it for the current user
-                 // This ensures it appears in their Delivered tab history.
-                 // We also claim it if it was previously unassigned.
-                 const isDelivering = status === 'delivered';
-                 const isUnassigned = !currentWaiterName || 
-                                      currentWaiterName === 'Unassigned' || 
-                                      currentWaiterName === 'n/a' ||
-                                      currentWaiterName.toLowerCase().includes('table') ||
-                                      currentWaiterName.toLowerCase().includes('walk-in');
-
-                 if (isUnassigned || isDelivering) {
-                     updates.waiter_name = newWaiterName;
-                     // Also ensure formData has the name for compatibility
-                     // We can't easily merge JSONB here without fetching it, but waiter_name column is primary.
+             // Auto-claim logic (only if NOT explicitly assigning to someone else)
+             // i.e. if we are just setting status='delivered' and no waiter_name provided
+             if (status === 'delivered' && !waiter_name) {
+                 // Fetch user profile
+                 const { data: profile } = await supabaseAdmin
+                    .from('profiles')
+                    .select('first_name, last_name')
+                    .eq('id', user.id)
+                    .single();
+    
+                 if (profile) {
+                      const currentWaiterName = currentOrder.waiter_name;
+                      const newWaiterName = `${profile.first_name} ${profile.last_name}`.trim();
+    
+                      // Claim if unassigned
+                      const isUnassigned = !currentWaiterName || 
+                                           currentWaiterName === 'Unassigned' || 
+                                           currentWaiterName === 'n/a' ||
+                                           currentWaiterName.toLowerCase().includes('table') ||
+                                           currentWaiterName.toLowerCase().includes('walk-in');
+    
+                      if (isUnassigned) {
+                          updates.waiter_name = newWaiterName;
+                          // Update formData as well
+                          const currentFormData = currentOrder.formData || {};
+                          updates.formData = {
+                               ...currentFormData,
+                               waiterName: newWaiterName
+                          };
+                      }
                  }
              }
         }
@@ -100,7 +128,7 @@ export async function PATCH(
             .from(table)
             .update(updates)
             .eq('id', orderId)
-            .select() // Select to get the updated record (and verify it existed)
+            .select() 
             .single();
 
         if (updateError) {
