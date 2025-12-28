@@ -53,10 +53,51 @@ export async function PATCH(
         const table = type === 'food' ? 'orders' : 'bar_orders';
         const supabaseAdmin = getSupabaseAdmin();
 
-        // 1. Update the order
+        // 1. Prepare updates
+        const updates: any = { status };
+
+        // 1.1 Fetch current order to check waiter_name assignment
+        // If the order has no waiter (e.g. from QR code), we assign it to the current user
+        // so it appears in their history/delivered tab.
+        const { data: currentOrder } = await supabaseAdmin
+            .from(table)
+            .select('waiter_name, property_id')
+            .eq('id', orderId)
+            .single();
+
+        if (currentOrder) {
+             // Fetch user profile to get proper name
+             const { data: profile } = await supabaseAdmin
+                .from('profiles')
+                .select('first_name, last_name')
+                .eq('id', user.id)
+                .single();
+
+             if (profile) {
+                 const currentWaiterName = currentOrder.waiter_name;
+                 const newWaiterName = `${profile.first_name} ${profile.last_name}`.trim();
+
+                 // If currently unassigned (null, empty, or 'Unassigned'), assign to current user
+                 // Also, if status is being set to 'delivered', we might want to claim it regardless?
+                 // Let's stick to claiming if unassigned OR if it's a generic placeholder
+                 const isUnassigned = !currentWaiterName || 
+                                      currentWaiterName === 'Unassigned' || 
+                                      currentWaiterName === 'n/a' ||
+                                      currentWaiterName.toLowerCase().includes('table') ||
+                                      currentWaiterName.toLowerCase().includes('walk-in');
+
+                 if (isUnassigned) {
+                     updates.waiter_name = newWaiterName;
+                     // Also ensure formData has the name for compatibility
+                     // We can't easily merge JSONB here without fetching it, but waiter_name column is primary.
+                 }
+             }
+        }
+
+        // 2. Update the order
         const { data: order, error: updateError } = await supabaseAdmin
             .from(table)
-            .update({ status })
+            .update(updates)
             .eq('id', orderId)
             .select() // Select to get the updated record (and verify it existed)
             .single();
