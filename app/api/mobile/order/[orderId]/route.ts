@@ -7,14 +7,24 @@ export const dynamic = 'force-dynamic';
 // Helper to validate auth
 async function validateUser(req: NextRequest) {
     const authHeader = req.headers.get('authorization');
-    if (!authHeader) return null;
+    if (!authHeader) {
+        console.log('[API] validateUser: Missing Authorization header');
+        return null;
+    }
     
-    const token = authHeader.replace('Bearer ', '');
+    const token = authHeader.replace('Bearer ', '').trim();
     // Using admin client to verify allows checking any valid token without RLS constraints on the user table itself
     // though getUser() just validates the JWT signature and expiration.
     const { data: { user }, error } = await getSupabaseAdmin().auth.getUser(token);
     
-    if (error || !user) return null;
+    if (error) {
+        console.error('[API] validateUser: getUser error:', error.message);
+        return null;
+    }
+    if (!user) {
+        console.error('[API] validateUser: No user returned');
+        return null;
+    }
     return user;
 }
 
