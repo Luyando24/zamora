@@ -2,7 +2,7 @@
 
 This guide details the API endpoints available for the Zamora mobile application to interact with the Zamora HMS backend.
 
-**Base URL**: `https://your-domain.com` (e.g., `http://localhost:3000` for local development)
+**Base URL**: `https://zamoraapp.com` (e.g., `http://localhost:3000` for local development)
 
 ---
 
@@ -38,7 +38,7 @@ Returns a JSON object containing an array of properties.
 ### Example Code
 ```javascript
 async function fetchProperties() {
-  const response = await fetch('https://your-domain.com/api/mobile/properties');
+  const response = await fetch('https://zamoraapp.com/api/mobile/properties');
   const data = await response.json();
   return data.properties;
 }
@@ -91,7 +91,7 @@ Retrieves detailed information for a specific property, including its food and d
 ### Example Code
 ```javascript
 async function fetchPropertyDetails(propertyId) {
-  const response = await fetch(`https://your-domain.com/api/mobile/menu/${propertyId}`);
+  const response = await fetch(`https://zamoraapp.com/api/mobile/menu/${propertyId}`);
   if (!response.ok) throw new Error('Failed to fetch menu');
   return await response.json();
 }
@@ -151,7 +151,7 @@ Submits a guest order for food and/or drinks. Supports guest checkout (no login 
 ### Example Code
 ```javascript
 async function submitOrder(orderData) {
-  const response = await fetch('https://your-domain.com/api/mobile/orders', {
+  const response = await fetch('https://zamoraapp.com/api/mobile/orders', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(orderData)
@@ -204,7 +204,7 @@ Returns the created booking object or an error if no rooms are available.
 ### Example Code
 ```javascript
 async function createBooking(bookingData) {
-  const response = await fetch('https://your-domain.com/api/bookings', {
+  const response = await fetch('https://zamoraapp.com/api/bookings', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(bookingData)
@@ -310,13 +310,14 @@ Toggle availability of items (e.g., mark "Sold Out").
 These endpoints are designed for the **Waiter / Staff App**.
 
 ### 6.1 Fetch Waiter's Orders (My Orders)
-Retrieves all orders (Food & Bar) for a specific property. Can be filtered by waiter name to show only orders submitted by that waiter.
+Retrieves orders (Food & Bar) for a specific property. Can be filtered by waiter name and/or order status.
 
 - **Endpoint**: `/api/mobile/orders/[propertyId]`
 - **Method**: `GET`
 - **Params**:
   - `propertyId`: UUID of the property (in URL).
   - `waiterName`: (Query Param) Name of the waiter to filter by (e.g., `?waiterName=John`).
+  - `status`: (Query Param, Optional) Comma-separated list of statuses to filter by (e.g., `?status=pending,preparing`).
 - **Auth**: Public (relies on property ID and waiter name filter).
 
 **Response:**
@@ -334,13 +335,14 @@ Returns a JSON object with a list of orders, sorted by newest first.
       "guest_room_number": "Table 5",
       "notes": "No onions\n(Waiter: John)",
       "created_at": "2024-...",
-      "order_items": [
+      "items": [
         {
            "id": "item-uuid",
            "quantity": 1,
-           "item_name": "Burger",
+           "name": "Burger",
            "unit_price": 150,
-           "total_price": 150
+           "total_price": 150,
+           "notes": "No cheese"
         }
       ]
     }
@@ -365,12 +367,12 @@ Returns a JSON object with a list of **pending** orders, sorted by newest first.
   "orders": [
     {
       "id": "order-uuid",
-      "type": "food",
+      "type": "food", // or "bar"
       "status": "pending",
       "total_amount": 200,
       "guest_room_number": "Room 101",
       "created_at": "...",
-      "order_items": [ ... ]
+      "items": [ ... ]
     }
   ]
 }

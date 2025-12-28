@@ -11,6 +11,7 @@ export async function GET(
     const { propertyId } = params;
     const { searchParams } = new URL(req.url);
     const waiterName = searchParams.get('waiterName');
+    const status = searchParams.get('status'); // e.g., "pending,preparing"
 
     if (!propertyId) {
       return NextResponse.json({ error: 'Property ID is required' }, { status: 400 });
@@ -36,6 +37,11 @@ export async function GET(
       foodQuery = foodQuery.ilike('notes', `%(Waiter: ${waiterName})%`);
     }
 
+    if (status) {
+      const statusList = status.split(',').map(s => s.trim());
+      foodQuery = foodQuery.in('status', statusList);
+    }
+
     // Build query for Bar Orders
     let barQuery = supabaseAdmin
       .from('bar_orders')
@@ -51,6 +57,11 @@ export async function GET(
 
     if (waiterName) {
       barQuery = barQuery.ilike('notes', `%(Waiter: ${waiterName})%`);
+    }
+
+    if (status) {
+      const statusList = status.split(',').map(s => s.trim());
+      barQuery = barQuery.in('status', statusList);
     }
 
     // Execute in parallel
