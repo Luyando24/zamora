@@ -35,7 +35,9 @@ export async function GET(
       .limit(limit);
 
     if (waiterName) {
-      foodQuery = foodQuery.or(`waiter_name.eq."${waiterName}",notes.ilike."%Waiter: ${waiterName}%"`);
+      // Allow exact match OR if the name is part of the notes
+      // Also, include cases where waiter_name might have extra spaces
+      foodQuery = foodQuery.or(`waiter_name.eq."${waiterName}",waiter_name.ilike."%${waiterName}%",notes.ilike."%Waiter: ${waiterName}%"`);
     }
 
     // Apply status filter or default to 'delivered'
@@ -61,7 +63,7 @@ export async function GET(
       .limit(limit);
 
     if (waiterName) {
-      barQuery = barQuery.or(`waiter_name.eq."${waiterName}",notes.ilike."%Waiter: ${waiterName}%"`);
+      barQuery = barQuery.or(`waiter_name.eq."${waiterName}",waiter_name.ilike."%${waiterName}%",notes.ilike."%Waiter: ${waiterName}%"`);
     }
 
     // Apply status filter or default to 'delivered'
