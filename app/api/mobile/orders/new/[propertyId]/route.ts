@@ -11,7 +11,6 @@ export async function GET(
     const { propertyId } = params;
     const { searchParams } = new URL(req.url);
     const status = searchParams.get('status'); // e.g., "pending,preparing"
-    const waiterName = searchParams.get('waiterName');
     
     if (!propertyId) {
       return NextResponse.json({ error: 'Property ID is required' }, { status: 400 });
@@ -34,9 +33,8 @@ export async function GET(
       .order('created_at', { ascending: false })
       .limit(limit);
 
-    if (waiterName) {
-      foodQuery = foodQuery.or(`waiter_name.eq."${waiterName}",notes.ilike."%Waiter: ${waiterName}%"`);
-    }
+    // Filter for unassigned orders (submitted by customers via QR)
+    foodQuery = foodQuery.is('waiter_name', null);
 
     // Apply status filter or default to 'pending'
     if (status) {
@@ -60,9 +58,8 @@ export async function GET(
       .order('created_at', { ascending: false })
       .limit(limit);
 
-    if (waiterName) {
-      barQuery = barQuery.or(`waiter_name.eq."${waiterName}",notes.ilike."%Waiter: ${waiterName}%"`);
-    }
+    // Filter for unassigned orders (submitted by customers via QR)
+    barQuery = barQuery.is('waiter_name', null);
 
     // Apply status filter or default to 'pending'
     if (status) {
