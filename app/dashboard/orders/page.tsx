@@ -531,16 +531,13 @@ export default function OrdersPage() {
                 <div>
                   <h2 className="text-xl font-bold text-slate-900">Order Details</h2>
                   <div className="flex items-center gap-2 text-slate-500 text-sm font-medium">
-                    {selectedOrder.guest_room_number.toString().startsWith('Table Outdoor') ? (
-                      <>
-                        <Sun size={14} />
-                        <span>Table: {selectedOrder.guest_room_number.replace('Table Outdoor', '').trim()} (Outdoor)</span>
-                      </>
-                    ) : selectedOrder.guest_room_number.toString().startsWith('Table') ? (
+                    {selectedOrder.guest_room_number.toString().startsWith('Table') ? (
                       <>
                         <Armchair size={14} />
-                        <span>Table: {selectedOrder.guest_room_number.replace('Table', '').trim()} (Indoor)</span>
+                        <span>{selectedOrder.guest_room_number}</span>
                       </>
+                    ) : selectedOrder.guest_room_number.toString().includes('Walk-in') || selectedOrder.guest_room_number.toString().includes('Unknown') ? (
+                      <span>{selectedOrder.guest_room_number}</span>
                     ) : (
                       <span>Room {selectedOrder.guest_room_number}</span>
                     )}
@@ -777,6 +774,8 @@ function OrderCard({ order, config, onStatusUpdate, onViewDetails, nextStatus, e
                   <Armchair size={16} className="text-indigo-500" />
                   <span>Table: {order.guest_room_number.replace('Table', '').trim()} (Indoor)</span>
                 </>
+              ) : order.guest_room_number.toString().includes('Walk-in') || order.guest_room_number.toString().includes('Unknown') ? (
+                <span>{order.guest_room_number}</span>
               ) : (
                 <span>Room {order.guest_room_number}</span>
               )}
