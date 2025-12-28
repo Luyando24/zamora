@@ -10,7 +10,7 @@ export async function GET(
   try {
     const { propertyId } = params;
     const { searchParams } = new URL(req.url);
-    const status = searchParams.get('status'); // e.g., "pending,preparing"
+    const status = searchParams.get('status'); // e.g., "delivered,cancelled"
     
     if (!propertyId) {
       return NextResponse.json({ error: 'Property ID is required' }, { status: 400 });
@@ -32,12 +32,12 @@ export async function GET(
       .order('created_at', { ascending: false })
       .limit(limit);
 
-    // Apply status filter or default to 'pending'
+    // Apply status filter or default to 'delivered'
     if (status) {
       const statusList = status.split(',').map(s => s.trim());
       foodQuery = foodQuery.in('status', statusList);
     } else {
-      foodQuery = foodQuery.eq('status', 'pending');
+      foodQuery = foodQuery.eq('status', 'delivered');
     }
 
     // Build query for Bar Orders
@@ -53,12 +53,12 @@ export async function GET(
       .order('created_at', { ascending: false })
       .limit(limit);
 
-    // Apply status filter or default to 'pending'
+    // Apply status filter or default to 'delivered'
     if (status) {
       const statusList = status.split(',').map(s => s.trim());
       barQuery = barQuery.in('status', statusList);
     } else {
-      barQuery = barQuery.eq('status', 'pending');
+      barQuery = barQuery.eq('status', 'delivered');
     }
 
     // Execute in parallel
@@ -103,7 +103,7 @@ export async function GET(
     });
 
   } catch (error: any) {
-    console.error('Get New Orders Error:', error);
+    console.error('Get Delivered Orders Error:', error);
     return NextResponse.json({ 
       error: error.message || 'Internal Server Error' 
     }, { status: 500 });

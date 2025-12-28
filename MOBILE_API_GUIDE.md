@@ -351,12 +351,13 @@ Returns a JSON object with a list of orders, sorted by newest first.
 ```
 
 ### 6.2 Fetch New Orders (Pending)
-Retrieves all **pending** orders (Food & Bar) for a specific property. This is useful for seeing new orders coming in from guests (QR code scans) or other waiters.
+Retrieves all **pending** orders (Food & Bar) for a specific property. This is particularly useful for seeing new orders coming in from **QR code scans** by guests, which are unassigned to any waiter.
 
 - **Endpoint**: `/api/mobile/orders/new/[propertyId]`
 - **Method**: `GET`
 - **Params**:
   - `propertyId`: UUID of the property (in URL).
+  - `status`: (Query Param, Optional) Comma-separated list of statuses to filter by (e.g., `?status=pending`). Defaults to `pending` if not specified.
 - **Auth**: Public (relies on property ID).
 
 **Response:**
@@ -369,6 +370,35 @@ Returns a JSON object with a list of **pending** orders, sorted by newest first.
       "id": "order-uuid",
       "type": "food", // or "bar"
       "status": "pending",
+      "total_amount": 200,
+      "guest_room_number": "Room 101",
+      "created_at": "...",
+      "items": [ ... ]
+    }
+  ]
+}
+```
+
+### 6.3 Fetch Delivered Orders
+Retrieves all **delivered** orders (Food & Bar) for a specific property. This is useful for clearing tables or reviewing completed service.
+
+- **Endpoint**: `/api/mobile/orders/delivered/[propertyId]`
+- **Method**: `GET`
+- **Params**:
+  - `propertyId`: UUID of the property (in URL).
+  - `status`: (Query Param, Optional) Comma-separated list of statuses to filter by. Defaults to `delivered` if not specified.
+- **Auth**: Public (relies on property ID).
+
+**Response:**
+Returns a JSON object with a list of **delivered** orders, sorted by newest first.
+
+```json
+{
+  "orders": [
+    {
+      "id": "order-uuid",
+      "type": "food", // or "bar"
+      "status": "delivered",
       "total_amount": 200,
       "guest_room_number": "Room 101",
       "created_at": "...",
