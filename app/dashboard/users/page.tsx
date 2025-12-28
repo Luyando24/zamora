@@ -230,7 +230,7 @@ export default function TeamPage() {
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Role</label>
             <div className={`grid gap-3 ${selectedProperty?.type === 'restaurant' ? 'grid-cols-2' : 'grid-cols-3'}`}>
-              {['admin', 'manager', 'staff', 'waiter'].map((role) => (
+              {['admin', 'manager', 'staff', ...(selectedProperty?.type === 'restaurant' ? ['waiter'] : [])].map((role) => (
                 <button
                   key={role}
                   type="button"

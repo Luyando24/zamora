@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
+import { getSupabaseAdmin } from '@/lib/db/supabase-admin';
 
 export async function POST(req: NextRequest) {
     try {
@@ -24,8 +25,10 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Authentication failed' }, { status: 401 });
         }
 
-        // Fetch user profile and property details
-        const { data: profile } = await supabase
+        // Fetch user profile and property details using Admin client to bypass potential RLS issues
+        const adminClient = getSupabaseAdmin();
+        
+        const { data: profile } = await adminClient
             .from('profiles')
             .select('*, properties(id, name, type, currency_symbol, logo_url)')
             .eq('id', user.id)
