@@ -9,8 +9,22 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { foodCart, barCart, formData, propertyId } = body;
 
+    console.log('Mobile Order Received Body:', JSON.stringify(body, null, 2));
+
     if ((!foodCart || foodCart.length === 0) && (!barCart || barCart.length === 0)) {
-      return NextResponse.json({ error: 'Cart is empty' }, { status: 400 });
+      console.error('Mobile Order Error: Cart is empty. Received keys:', Object.keys(body));
+      return NextResponse.json({ 
+        error: 'Cart is empty',
+        details: 'Request must contain foodCart or barCart arrays with items.',
+        receivedPayload: {
+          keys: Object.keys(body),
+          hasFoodCart: !!foodCart,
+          foodCartLength: foodCart?.length,
+          hasBarCart: !!barCart,
+          barCartLength: barCart?.length,
+          hasCart: !!(body as any).cart
+        }
+      }, { status: 400 });
     }
 
     if (!propertyId) {
