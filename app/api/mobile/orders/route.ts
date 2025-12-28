@@ -7,7 +7,10 @@ import * as crypto from 'crypto';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { foodCart, barCart, formData, propertyId } = body;
+    
+    // Handle wrapped 'order' payload structure
+    const payload = body.order ? body.order : body;
+    const { foodCart, barCart, formData, propertyId } = payload;
 
     console.log('Mobile Order Received Body:', JSON.stringify(body, null, 2));
 
@@ -18,11 +21,11 @@ export async function POST(req: NextRequest) {
         details: 'Request must contain foodCart or barCart arrays with items.',
         receivedPayload: {
           keys: Object.keys(body),
+          innerKeys: body.order ? Object.keys(body.order) : undefined,
           hasFoodCart: !!foodCart,
           foodCartLength: foodCart?.length,
           hasBarCart: !!barCart,
-          barCartLength: barCart?.length,
-          hasCart: !!(body as any).cart
+          barCartLength: barCart?.length
         }
       }, { status: 400 });
     }
