@@ -11,6 +11,7 @@ export async function GET(
     const { propertyId } = params;
     const { searchParams } = new URL(req.url);
     const status = searchParams.get('status'); // e.g., "delivered,cancelled"
+    const waiterName = searchParams.get('waiterName');
     
     if (!propertyId) {
       return NextResponse.json({ error: 'Property ID is required' }, { status: 400 });
@@ -33,6 +34,10 @@ export async function GET(
       .order('created_at', { ascending: false })
       .limit(limit);
 
+    if (waiterName) {
+      foodQuery = foodQuery.or(`waiter_name.eq."${waiterName}",notes.ilike."%Waiter: ${waiterName}%"`);
+    }
+
     // Apply status filter or default to 'delivered'
     if (status) {
       const statusList = status.split(',').map(s => s.trim());
@@ -54,6 +59,10 @@ export async function GET(
       .eq('property_id', propertyId)
       .order('created_at', { ascending: false })
       .limit(limit);
+
+    if (waiterName) {
+      barQuery = barQuery.or(`waiter_name.eq."${waiterName}",notes.ilike."%Waiter: ${waiterName}%"`);
+    }
 
     // Apply status filter or default to 'delivered'
     if (status) {
