@@ -35,7 +35,8 @@ export async function GET(
       .limit(limit);
 
     if (waiterName) {
-      foodQuery = foodQuery.ilike('notes', `%(Waiter: ${waiterName})%`);
+      // Use the new waiter_name column if available, or fallback to notes for backward compatibility
+      foodQuery = foodQuery.or(`waiter_name.eq.${waiterName},notes.ilike.%Waiter: ${waiterName}%`);
     }
 
     if (status) {
@@ -58,7 +59,8 @@ export async function GET(
       .limit(limit);
 
     if (waiterName) {
-      barQuery = barQuery.ilike('notes', `%(Waiter: ${waiterName})%`);
+      // Use the new waiter_name column if available, or fallback to notes for backward compatibility
+      barQuery = barQuery.or(`waiter_name.eq.${waiterName},notes.ilike.%Waiter: ${waiterName}%`);
     }
 
     if (status) {
@@ -72,21 +74,32 @@ export async function GET(
     if (foodRes.error) throw foodRes.error;
     if (barRes.error) throw barRes.error;
 
-    // Helper to parse table number
-    const getTableNumber = (location: string) => {
-      if (!location) return '';
-      // If starts with "Table ", extract the rest
+    // Helper to get table number (prefer new column, fallback to parsing)
+    const getTableNumber = (order: any) => {
+      if (order.table_number) return order.table_number;
+      
+      const location = order.guest_room_number || '';
       if (location.toLowerCase().startsWith('table ')) {
         return location.substring(6).trim();
       }
-      return location; // Or return '' if you strictly want a number
+      return location;
+    };
+
+    // Helper to get waiter name (prefer new column, fallback to parsing notes)
+    const getWaiterName = (order: any) => {
+      if (order.waiter_name) return order.waiter_name;
+      
+      const notes = order.notes || '';
+      const match = notes.match(/\(Waiter: (.*?)\)/);
+      return match ? match[1] : '';
     };
 
     // Combine and Sort
     const foodOrders = (foodRes.data || []).map((o: any) => ({
       ...o,
       type: 'food',
-      table_number: getTableNumber(o.guest_room_number),
+      table_number: getTableNumber(o),
+      waiter_name: getWaiterName(o),
       items: (o.order_items || []).map((i: any) => ({
         id: i.id,
         name: i.item_name || i.menu_items?.name || 'Unknown Item',
@@ -100,7 +113,8 @@ export async function GET(
     const barOrders = (barRes.data || []).map((o: any) => ({
       ...o,
       type: 'bar',
-      table_number: getTableNumber(o.guest_room_number),
+      table_number: getTableNumber(o),
+      waiter_name: getWaiterName(o),
       items: (o.bar_order_items || []).map((i: any) => ({
         id: i.id,
         name: i.item_name || i.bar_menu_items?.name || 'Unknown Item',

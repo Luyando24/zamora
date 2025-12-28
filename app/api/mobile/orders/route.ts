@@ -287,7 +287,7 @@ export async function GET(req: NextRequest) {
       .limit(limit);
 
     if (waiterName) {
-      foodQuery = foodQuery.ilike('notes', `%(Waiter: ${waiterName})%`);
+      foodQuery = foodQuery.or(`waiter_name.eq.${waiterName},notes.ilike.%Waiter: ${waiterName}%`);
     }
 
     // Build query for Bar Orders
@@ -304,7 +304,7 @@ export async function GET(req: NextRequest) {
       .limit(limit);
 
     if (waiterName) {
-      barQuery = barQuery.ilike('notes', `%(Waiter: ${waiterName})%`);
+      barQuery = barQuery.or(`waiter_name.eq.${waiterName},notes.ilike.%Waiter: ${waiterName}%`);
     }
 
     // Execute in parallel
@@ -313,9 +313,39 @@ export async function GET(req: NextRequest) {
     if (foodRes.error) throw foodRes.error;
     if (barRes.error) throw barRes.error;
 
+    // Helper to get table number (prefer new column, fallback to parsing)
+    const getTableNumber = (order: any) => {
+      if (order.table_number) return order.table_number;
+      
+      const location = order.guest_room_number || '';
+      if (location.toLowerCase().startsWith('table ')) {
+        return location.substring(6).trim();
+      }
+      return location;
+    };
+
+    // Helper to get waiter name (prefer new column, fallback to parsing notes)
+    const getWaiterName = (order: any) => {
+      if (order.waiter_name) return order.waiter_name;
+      
+      const notes = order.notes || '';
+      const match = notes.match(/\(Waiter: (.*?)\)/);
+      return match ? match[1] : '';
+    };
+
     // Combine and Sort
-    const foodOrders = (foodRes.data || []).map((o: any) => ({ ...o, type: 'food' }));
-    const barOrders = (barRes.data || []).map((o: any) => ({ ...o, type: 'bar' }));
+    const foodOrders = (foodRes.data || []).map((o: any) => ({ 
+      ...o, 
+      type: 'food',
+      table_number: getTableNumber(o),
+      waiter_name: getWaiterName(o)
+    }));
+    const barOrders = (barRes.data || []).map((o: any) => ({ 
+      ...o, 
+      type: 'bar',
+      table_number: getTableNumber(o),
+      waiter_name: getWaiterName(o)
+    }));
 
     const allOrders = [...foodOrders, ...barOrders].sort((a, b) => 
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
