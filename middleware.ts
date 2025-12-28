@@ -116,10 +116,18 @@ export async function middleware(request: NextRequest) {
   // Add CORS headers for Mobile API
   if (url.pathname.startsWith('/api/mobile')) {
     finalResponse.headers.set('Access-Control-Allow-Origin', '*');
-    finalResponse.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    finalResponse.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
     finalResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Client-Info');
     // Ensure credentials are NOT set when Origin is *
     finalResponse.headers.delete('Access-Control-Allow-Credentials');
+
+    // Handle OPTIONS requests immediately
+    if (request.method === 'OPTIONS') {
+      return new NextResponse(null, {
+        status: 200,
+        headers: finalResponse.headers
+      });
+    }
   }
 
   return finalResponse
