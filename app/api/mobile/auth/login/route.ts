@@ -26,16 +26,36 @@ export async function POST(req: NextRequest) {
         }
 
         // Fetch user profile and property details using Admin client to bypass potential RLS issues
+        // We fetch separately to avoid issues with joins/foreign keys
         const adminClient = getSupabaseAdmin();
         
-        const { data: profile } = await adminClient
+        const { data: profile, error: profileError } = await adminClient
             .from('profiles')
-            .select('*, properties(id, name, type, currency_symbol, logo_url)')
+            .select('*')
             .eq('id', user.id)
             .single();
 
-        if (!profile) {
-            return NextResponse.json({ error: 'User profile not found' }, { status: 404 });
+        if (profileError || !profile) {
+            console.error('Profile fetch error:', profileError);
+            return NextResponse.json({ 
+                error: `User profile not found: ${profileError?.message || 'No profile data'}` 
+            }, { status: 404 });
+        }
+
+        let propertyData = null;
+        if (profile.property_id) {
+            const { data: property, error: propertyError } = await adminClient
+                .from('properties')
+                .select('id, name, type, currency_symbol, logo_url')
+                .eq('id', profile.property_id)
+                .single();
+            
+            if (propertyError) {
+                console.error('Property fetch error:', propertyError);
+                // We don't fail login if property fetch fails, just return null property
+            } else {
+                propertyData = property;
+            }
         }
 
         return NextResponse.json({
@@ -47,7 +67,7 @@ export async function POST(req: NextRequest) {
                 firstName: profile.first_name,
                 lastName: profile.last_name,
                 propertyId: profile.property_id,
-                property: profile.properties
+                property: propertyData
             },
             session: {
                 access_token: (await supabase.auth.getSession()).data.session?.access_token,
