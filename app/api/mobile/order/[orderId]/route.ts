@@ -77,16 +77,17 @@ export async function PATCH(
                  const currentWaiterName = currentOrder.waiter_name;
                  const newWaiterName = `${profile.first_name} ${profile.last_name}`.trim();
 
-                 // If currently unassigned (null, empty, or 'Unassigned'), assign to current user
-                 // Also, if status is being set to 'delivered', we might want to claim it regardless?
-                 // Let's stick to claiming if unassigned OR if it's a generic placeholder
+                 // If status is being marked as 'delivered', ALWAYS claim it for the current user
+                 // This ensures it appears in their Delivered tab history.
+                 // We also claim it if it was previously unassigned.
+                 const isDelivering = status === 'delivered';
                  const isUnassigned = !currentWaiterName || 
                                       currentWaiterName === 'Unassigned' || 
                                       currentWaiterName === 'n/a' ||
                                       currentWaiterName.toLowerCase().includes('table') ||
                                       currentWaiterName.toLowerCase().includes('walk-in');
 
-                 if (isUnassigned) {
+                 if (isUnassigned || isDelivering) {
                      updates.waiter_name = newWaiterName;
                      // Also ensure formData has the name for compatibility
                      // We can't easily merge JSONB here without fetching it, but waiter_name column is primary.
