@@ -34,7 +34,8 @@ export async function GET(
       .limit(limit);
 
     // Filter for unassigned orders (submitted by customers via QR)
-    foodQuery = foodQuery.is('waiter_name', null);
+    // IMPORTANT: We check if waiter_name is NULL *OR* empty string
+    foodQuery = foodQuery.or('waiter_name.is.null,waiter_name.eq.""');
 
     // Apply status filter or default to 'pending'
     if (status) {
@@ -59,7 +60,8 @@ export async function GET(
       .limit(limit);
 
     // Filter for unassigned orders (submitted by customers via QR)
-    barQuery = barQuery.is('waiter_name', null);
+    // IMPORTANT: We check if waiter_name is NULL *OR* empty string
+    barQuery = barQuery.or('waiter_name.is.null,waiter_name.eq.""');
 
     // Apply status filter or default to 'pending'
     if (status) {
