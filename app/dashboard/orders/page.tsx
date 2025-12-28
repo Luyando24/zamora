@@ -661,12 +661,14 @@ export default function OrdersPage() {
                 </div>
 
                 {/* Kitchen Notes (Order Level) */}
-                {selectedOrder.notes && (
+                {selectedOrder.notes?.replace(/\(Waiter: .*?\)/g, '').trim() && (
                   <div className="bg-white border border-slate-200/80 p-4 rounded-xl">
                     <h3 className="text-amber-600 font-bold text-sm mb-2 flex items-center gap-2">
                       <AlertCircle size={16} /> Special Instructions
                     </h3>
-                    <p className="text-slate-600 font-medium text-sm leading-relaxed">{selectedOrder.notes}</p>
+                    <p className="text-slate-600 font-medium text-sm leading-relaxed">
+                      {selectedOrder.notes.replace(/\(Waiter: .*?\)/g, '').trim()}
+                    </p>
                   </div>
                 )}
               </div>

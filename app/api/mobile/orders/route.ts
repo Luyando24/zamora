@@ -52,10 +52,14 @@ export async function POST(req: NextRequest) {
         }
     }
 
-    // Append waiter name to notes if present
+    // Append waiter name to notes if present (avoid duplicates)
     let finalNotes = formData.notes || '';
     if (waiterName) {
-      finalNotes = finalNotes ? `${finalNotes}\n(Waiter: ${waiterName})` : `(Waiter: ${waiterName})`;
+      const waiterString = `(Waiter: ${waiterName})`;
+      // Check if the note already contains this waiter string to prevent duplication
+      if (!finalNotes.includes(waiterString)) {
+        finalNotes = finalNotes ? `${finalNotes}\n${waiterString}` : waiterString;
+      }
     }
 
     console.log('Mobile Order Received Body:', JSON.stringify(body, null, 2));
@@ -309,7 +313,7 @@ export async function GET(req: NextRequest) {
       .limit(limit);
 
     if (waiterName) {
-      foodQuery = foodQuery.or(`waiter_name.eq.${waiterName},notes.ilike.%Waiter: ${waiterName}%`);
+      foodQuery = foodQuery.or(`waiter_name.eq."${waiterName}",notes.ilike."%Waiter: ${waiterName}%"`);
     }
 
     // Build query for Bar Orders
@@ -326,7 +330,7 @@ export async function GET(req: NextRequest) {
       .limit(limit);
 
     if (waiterName) {
-      barQuery = barQuery.or(`waiter_name.eq.${waiterName},notes.ilike.%Waiter: ${waiterName}%`);
+      barQuery = barQuery.or(`waiter_name.eq."${waiterName}",notes.ilike."%Waiter: ${waiterName}%"`);
     }
 
     // Execute in parallel
