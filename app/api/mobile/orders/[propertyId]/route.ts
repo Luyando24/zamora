@@ -25,7 +25,7 @@ export async function GET(
       .select(`
         *,
         order_items (
-          id, quantity, unit_price, total_price, item_name
+          id, quantity, unit_price, total_price, item_name, notes
         )
       `)
       .eq('property_id', propertyId)
@@ -42,7 +42,7 @@ export async function GET(
       .select(`
         *,
         bar_order_items (
-          id, quantity, unit_price, total_price, item_name
+          id, quantity, unit_price, total_price, item_name, notes
         )
       `)
       .eq('property_id', propertyId)
@@ -60,8 +60,31 @@ export async function GET(
     if (barRes.error) throw barRes.error;
 
     // Combine and Sort
-    const foodOrders = (foodRes.data || []).map((o: any) => ({ ...o, type: 'food' }));
-    const barOrders = (barRes.data || []).map((o: any) => ({ ...o, type: 'bar' }));
+    const foodOrders = (foodRes.data || []).map((o: any) => ({
+      ...o,
+      type: 'food',
+      items: (o.order_items || []).map((i: any) => ({
+        id: i.id,
+        name: i.item_name || 'Unknown Item',
+        quantity: i.quantity,
+        price: i.unit_price,
+        total_price: i.total_price,
+        notes: i.notes
+      }))
+    }));
+
+    const barOrders = (barRes.data || []).map((o: any) => ({
+      ...o,
+      type: 'bar',
+      items: (o.bar_order_items || []).map((i: any) => ({
+        id: i.id,
+        name: i.item_name || 'Unknown Item',
+        quantity: i.quantity,
+        price: i.unit_price,
+        total_price: i.total_price,
+        notes: i.notes
+      }))
+    }));
 
     const allOrders = [...foodOrders, ...barOrders].sort((a, b) => 
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
