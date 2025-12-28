@@ -15,6 +15,12 @@ export async function POST(req: NextRequest) {
     // Ensure formData is at least an empty object to prevent crashes
     const formData = rawFormData || {};
 
+    // Append waiter name to notes if present
+    let finalNotes = formData.notes || '';
+    if (formData.waiterName) {
+      finalNotes = finalNotes ? `${finalNotes}\n(Waiter: ${formData.waiterName})` : `(Waiter: ${formData.waiterName})`;
+    }
+
     console.log('Mobile Order Received Body:', JSON.stringify(body, null, 2));
     console.log('Parsed Payload:', JSON.stringify({ 
         hasFood: foodCart?.length, 
@@ -74,7 +80,7 @@ export async function POST(req: NextRequest) {
             guest_name: formData.name,
             guest_phone: formData.phone,
             guest_room_number: locationString,
-            notes: formData.notes,
+            notes: finalNotes,
             // Snapshot fields
             item_name: foodCart.map((i: any) => `${i.quantity}x ${i.name}`).join(', '),
             item_description: foodCart.map((i: any) => i.description).filter(Boolean).join('; '),
@@ -154,7 +160,7 @@ export async function POST(req: NextRequest) {
             guest_name: formData.name,
             guest_phone: formData.phone,
             guest_room_number: locationString,
-            notes: formData.notes,
+            notes: finalNotes,
           });
 
         if (orderError) throw orderError;

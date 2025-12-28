@@ -531,17 +531,17 @@ export default function OrdersPage() {
                 <div>
                   <h2 className="text-xl font-bold text-slate-900">Order Details</h2>
                   <div className="flex items-center gap-2 text-slate-500 text-sm font-medium">
-                    {selectedOrder.guest_room_number.toString().startsWith('Table') ? (
+                    {String(selectedOrder.guest_room_number).startsWith('Table') ? (
                       <>
                         <Armchair size={14} />
                         <span>{selectedOrder.guest_room_number}</span>
                       </>
-                    ) : selectedOrder.guest_room_number.toString().includes('Walk-in') || selectedOrder.guest_room_number.toString().includes('Unknown') ? (
+                    ) : String(selectedOrder.guest_room_number).includes('Walk-in') || String(selectedOrder.guest_room_number).includes('Unknown') ? (
                       <span>{selectedOrder.guest_room_number}</span>
                     ) : (
                       <span>Room {selectedOrder.guest_room_number}</span>
                     )}
-                    <span>• {new Date(selectedOrder.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    <span>• {new Date(selectedOrder.created_at || new Date()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                   </div>
                 </div>
                 <button
@@ -560,6 +560,13 @@ export default function OrdersPage() {
                     <span className="text-slate-500 text-sm font-medium">Guest Name</span>
                     <span className="text-slate-900 font-semibold">{selectedOrder.guest_name}</span>
                   </div>
+                  {/* Waiter Name Display */}
+                  {selectedOrder.notes?.match(/\(Waiter: (.*?)\)/) && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500 text-sm font-medium">Waiter</span>
+                      <span className="text-slate-900 font-semibold">{selectedOrder.notes.match(/\(Waiter: (.*?)\)/)?.[1]}</span>
+                    </div>
+                  )}
                   {selectedOrder.guest_phone && (
                     <div className="flex justify-between items-center">
                       <span className="text-slate-500 text-sm font-medium">Phone</span>
