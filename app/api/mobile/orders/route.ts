@@ -10,9 +10,18 @@ export async function POST(req: NextRequest) {
     
     // Handle wrapped 'order' payload structure
     const payload = body.order ? body.order : body;
-    const { foodCart, barCart, formData, propertyId } = payload;
+    const { foodCart, barCart, formData: rawFormData, propertyId } = payload;
+    
+    // Ensure formData is at least an empty object to prevent crashes
+    const formData = rawFormData || {};
 
     console.log('Mobile Order Received Body:', JSON.stringify(body, null, 2));
+    console.log('Parsed Payload:', JSON.stringify({ 
+        hasFood: foodCart?.length, 
+        hasBar: barCart?.length, 
+        propertyId, 
+        formData 
+    }, null, 2));
 
     if ((!foodCart || foodCart.length === 0) && (!barCart || barCart.length === 0)) {
       console.error('Mobile Order Error: Cart is empty. Received keys:', Object.keys(body));
@@ -40,7 +49,7 @@ export async function POST(req: NextRequest) {
     // Determine location string
     const locationString = formData.tableNumber 
         ? `Table ${formData.tableNumber}` 
-        : formData.roomNumber;
+        : (formData.roomNumber || 'Walk-in / Unknown');
 
     const newOrderIds: string[] = [];
     const errors: string[] = [];
@@ -211,6 +220,11 @@ export async function POST(req: NextRequest) {
 
   } catch (error: any) {
     console.error('Mobile Order Error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Stack Trace:', error.stack);
+    return NextResponse.json({ 
+        error: error.message || 'Internal Server Error',
+        stack: error.stack, // Include stack for debugging
+        details: 'Check server logs for full trace'
+    }, { status: 500 });
   }
 }
