@@ -291,6 +291,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const propertyId = searchParams.get('propertyId');
     const waiterName = searchParams.get('waiterName');
+    const status = searchParams.get('status');
 
     if (!propertyId) {
       return NextResponse.json({ error: 'Property ID is required' }, { status: 400 });
@@ -316,6 +317,11 @@ export async function GET(req: NextRequest) {
       foodQuery = foodQuery.or(`waiter_name.eq."${waiterName}",notes.ilike."%Waiter: ${waiterName}%"`);
     }
 
+    if (status) {
+      const statusList = status.split(',').map(s => s.trim());
+      foodQuery = foodQuery.in('status', statusList);
+    }
+
     // Build query for Bar Orders
     let barQuery = supabaseAdmin
       .from('bar_orders')
@@ -331,6 +337,11 @@ export async function GET(req: NextRequest) {
 
     if (waiterName) {
       barQuery = barQuery.or(`waiter_name.eq."${waiterName}",notes.ilike."%Waiter: ${waiterName}%"`);
+    }
+
+    if (status) {
+      const statusList = status.split(',').map(s => s.trim());
+      barQuery = barQuery.in('status', statusList);
     }
 
     // Execute in parallel
