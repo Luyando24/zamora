@@ -13,12 +13,27 @@ export async function POST(req: NextRequest) {
     const { foodCart, barCart, formData: rawFormData, propertyId } = payload;
     
     // Ensure formData is at least an empty object to prevent crashes
-    const formData = rawFormData || {};
+    // Also try to parse if it's a string (common in multipart/form-data conversions or weird clients)
+    let formData = rawFormData;
+    if (typeof formData === 'string') {
+        try {
+            formData = JSON.parse(formData);
+        } catch (e) {
+            console.error('Failed to parse formData string:', e);
+            formData = {};
+        }
+    }
+    formData = formData || {};
+
+    // Extract fields with multiple possible keys
+    const tableNumber = formData.tableNumber || formData.table_number || formData.table || formData.tableNo;
+    const roomNumber = formData.roomNumber || formData.room_number || formData.room;
+    const waiterName = formData.waiterName || formData.waiter_name || formData.waiter;
 
     // Append waiter name to notes if present
     let finalNotes = formData.notes || '';
-    if (formData.waiterName) {
-      finalNotes = finalNotes ? `${finalNotes}\n(Waiter: ${formData.waiterName})` : `(Waiter: ${formData.waiterName})`;
+    if (waiterName) {
+      finalNotes = finalNotes ? `${finalNotes}\n(Waiter: ${waiterName})` : `(Waiter: ${waiterName})`;
     }
 
     console.log('Mobile Order Received Body:', JSON.stringify(body, null, 2));
@@ -53,9 +68,9 @@ export async function POST(req: NextRequest) {
     const supabaseAdmin = getSupabaseAdmin();
 
     // Determine location string
-    const locationString = formData.tableNumber 
-        ? `Table ${formData.tableNumber}` 
-        : (formData.roomNumber || 'Walk-in / Unknown');
+    const locationString = tableNumber 
+        ? `Table ${tableNumber}` 
+        : (roomNumber || 'Walk-in / Unknown');
 
     const newOrderIds: string[] = [];
     const errors: string[] = [];
@@ -67,6 +82,9 @@ export async function POST(req: NextRequest) {
         const foodServiceCharge = foodTotal * 0.10;
         const foodGrandTotal = foodTotal + foodServiceCharge;
         const foodOrderId = crypto.randomUUID();
+
+        // Helper to get item name safely
+        const getItemName = (i: any) => i.name || i.item_name || i.title || i.menuItem?.name || 'Unknown Item';
 
         // Insert Order
         const { error: orderError } = await supabaseAdmin
@@ -82,7 +100,7 @@ export async function POST(req: NextRequest) {
             guest_room_number: locationString,
             notes: finalNotes,
             // Snapshot fields
-            item_name: foodCart.map((i: any) => `${i.quantity}x ${i.name}`).join(', '),
+            item_name: foodCart.map((i: any) => `${i.quantity}x ${getItemName(i)}`).join(', '),
             item_description: foodCart.map((i: any) => i.description).filter(Boolean).join('; '),
             item_ingredients: foodCart.map((i: any) => i.ingredients).filter(Boolean).join('; '),
             item_image_url: foodCart[0]?.image_url,
@@ -103,7 +121,7 @@ export async function POST(req: NextRequest) {
           total_price: (item.price || item.base_price) * item.quantity,
           notes: item.selectedOptions?.join(', '),
           // Snapshot fields
-          item_name: item.name,
+          item_name: getItemName(item),
           item_description: item.description,
           item_ingredients: item.ingredients,
           item_image_url: item.image_url,
@@ -148,6 +166,9 @@ export async function POST(req: NextRequest) {
         const barGrandTotal = barTotal + barServiceCharge;
         const barOrderId = crypto.randomUUID();
 
+        // Helper to get item name safely
+        const getItemName = (i: any) => i.name || i.item_name || i.title || i.menuItem?.name || 'Unknown Item';
+
         // Insert Order
         const { error: orderError } = await supabaseAdmin
           .from('bar_orders')
@@ -174,7 +195,7 @@ export async function POST(req: NextRequest) {
           total_price: (item.price || item.base_price) * item.quantity,
           notes: item.selectedOptions?.join(', '),
           // Snapshot fields
-          item_name: item.name,
+          item_name: getItemName(item),
           item_description: item.description,
           item_ingredients: item.ingredients,
           item_image_url: item.image_url,
