@@ -100,8 +100,15 @@ export default function Sidebar({ onLinkClick }: { onLinkClick?: () => void }) {
             const filteredItems = group.items.filter(item => {
               if (selectedProperty?.type === 'restaurant') {
                 const hotelOnlyItems = ['Room Bookings', 'Housekeeping', 'Rooms Setup', 'ZRA Reports'];
-                return !hotelOnlyItems.includes(item.name);
+                if (hotelOnlyItems.includes(item.name)) return false;
               }
+
+              // Filter items for waiters (regardless of property type)
+              if (userRole === 'waiter') {
+                const waiterAllowedItems = ['Overview', 'Food & Bar Orders', 'Order History', 'Food & Bar Menu'];
+                return waiterAllowedItems.includes(item.name);
+              }
+
               return true;
             });
 
