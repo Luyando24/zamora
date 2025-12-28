@@ -25,7 +25,8 @@ export async function GET(
       .select(`
         *,
         order_items (
-          id, quantity, unit_price, total_price, item_name, notes
+          id, quantity, unit_price, total_price, item_name, notes,
+          menu_items ( name )
         )
       `)
       .eq('property_id', propertyId)
@@ -46,7 +47,8 @@ export async function GET(
       .select(`
         *,
         bar_order_items (
-          id, quantity, unit_price, total_price, item_name, notes
+          id, quantity, unit_price, total_price, item_name, notes,
+          bar_menu_items ( name )
         )
       `)
       .eq('property_id', propertyId)
@@ -67,13 +69,24 @@ export async function GET(
     if (foodRes.error) throw foodRes.error;
     if (barRes.error) throw barRes.error;
 
+    // Helper to parse table number
+    const getTableNumber = (location: string) => {
+      if (!location) return '';
+      // If starts with "Table ", extract the rest
+      if (location.toLowerCase().startsWith('table ')) {
+        return location.substring(6).trim();
+      }
+      return location; // Or return '' if you strictly want a number
+    };
+
     // Combine and Sort
     const foodOrders = (foodRes.data || []).map((o: any) => ({
       ...o,
       type: 'food',
+      table_number: getTableNumber(o.guest_room_number),
       items: (o.order_items || []).map((i: any) => ({
         id: i.id,
-        name: i.item_name || 'Unknown Item',
+        name: i.item_name || i.menu_items?.name || 'Unknown Item',
         quantity: i.quantity,
         price: i.unit_price,
         total_price: i.total_price,
@@ -84,9 +97,10 @@ export async function GET(
     const barOrders = (barRes.data || []).map((o: any) => ({
       ...o,
       type: 'bar',
+      table_number: getTableNumber(o.guest_room_number),
       items: (o.bar_order_items || []).map((i: any) => ({
         id: i.id,
-        name: i.item_name || 'Unknown Item',
+        name: i.item_name || i.bar_menu_items?.name || 'Unknown Item',
         quantity: i.quantity,
         price: i.unit_price,
         total_price: i.total_price,

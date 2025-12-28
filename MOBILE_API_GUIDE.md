@@ -333,6 +333,7 @@ Returns a JSON object with a list of orders, sorted by newest first.
       "total_amount": 150,
       "guest_name": "Guest Name",
       "guest_room_number": "Table 5",
+      "table_number": "5",
       "notes": "No onions\n(Waiter: John)",
       "created_at": "2024-...",
       "items": [
@@ -372,6 +373,7 @@ Returns a JSON object with a list of **pending** orders, sorted by newest first.
       "status": "pending",
       "total_amount": 200,
       "guest_room_number": "Room 101",
+      "table_number": "",
       "created_at": "...",
       "items": [ ... ]
     }
@@ -401,6 +403,7 @@ Returns a JSON object with a list of **delivered** orders, sorted by newest firs
       "status": "delivered",
       "total_amount": 200,
       "guest_room_number": "Room 101",
+      "table_number": "",
       "created_at": "...",
       "items": [ ... ]
     }
