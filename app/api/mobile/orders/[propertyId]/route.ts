@@ -36,7 +36,8 @@ export async function GET(
 
     if (waiterName) {
       // Use the new waiter_name column if available, or fallback to notes for backward compatibility
-      foodQuery = foodQuery.or(`waiter_name.eq.${waiterName},notes.ilike.%Waiter: ${waiterName}%`);
+      // Quote the values to handle spaces correctly in PostgREST
+      foodQuery = foodQuery.or(`waiter_name.eq."${waiterName}",notes.ilike."%Waiter: ${waiterName}%"`);
     }
 
     if (status) {
@@ -60,7 +61,8 @@ export async function GET(
 
     if (waiterName) {
       // Use the new waiter_name column if available, or fallback to notes for backward compatibility
-      barQuery = barQuery.or(`waiter_name.eq.${waiterName},notes.ilike.%Waiter: ${waiterName}%`);
+      // Quote the values to handle spaces correctly in PostgREST
+      barQuery = barQuery.or(`waiter_name.eq."${waiterName}",notes.ilike."%Waiter: ${waiterName}%"`);
     }
 
     if (status) {
