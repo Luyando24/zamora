@@ -28,7 +28,29 @@ export async function POST(req: NextRequest) {
     // Extract fields with multiple possible keys
     const tableNumber = formData.tableNumber || formData.table_number || formData.table || formData.tableNo;
     const roomNumber = formData.roomNumber || formData.room_number || formData.room;
-    const waiterName = formData.waiterName || formData.waiter_name || formData.waiter;
+    let waiterName = formData.waiterName || formData.waiter_name || formData.waiter;
+
+    // Fallback: Try to get waiter from Auth Token if not in payload
+    if (!waiterName) {
+        const authHeader = req.headers.get('authorization');
+        if (authHeader) {
+            const token = authHeader.replace('Bearer ', '');
+            // Use admin client to verify token and get user
+            const { data: { user } } = await getSupabaseAdmin().auth.getUser(token);
+            
+            if (user) {
+                const { data: profile } = await getSupabaseAdmin()
+                    .from('profiles')
+                    .select('first_name, last_name')
+                    .eq('id', user.id)
+                    .single();
+                    
+                if (profile) {
+                    waiterName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
+                }
+            }
+        }
+    }
 
     // Append waiter name to notes if present
     let finalNotes = formData.notes || '';
