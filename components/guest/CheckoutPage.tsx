@@ -83,6 +83,7 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
             guest_name: formData.name,
             guest_phone: formData.phone,
             guest_room_number: locationString,
+            table_number: formData.tableNumber ? String(formData.tableNumber) : null,
             notes: formData.notes,
             // Snapshot fields (Summary)
             item_name: foodCart.map(i => `${i.quantity}x ${i.name}`).join(', '),

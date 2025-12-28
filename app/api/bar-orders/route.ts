@@ -25,6 +25,9 @@ export async function POST(req: NextRequest) {
         ? `Table ${formData.tableNumber}` 
         : formData.roomNumber;
 
+    const tableNumber = formData.tableNumber;
+    const waiterName = formData.waiterName;
+
     // 1. Calculate Totals
     const barTotal = barCart.reduce((sum: number, i: any) => sum + (i.price || i.base_price) * i.quantity, 0);
     const barServiceCharge = barTotal * 0.10;
@@ -43,6 +46,8 @@ export async function POST(req: NextRequest) {
         guest_name: formData.name,
         guest_phone: formData.phone,
         guest_room_number: locationString,
+        table_number: tableNumber ? String(tableNumber) : null,
+        waiter_name: waiterName || null,
         notes: formData.notes,
       });
 
