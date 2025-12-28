@@ -53,8 +53,7 @@ export async function GET(
       .select(`
         *,
         bar_order_items (
-          id, quantity, unit_price, total_price, item_name, notes,
-          bar_menu_items ( name )
+          id, quantity, unit_price, total_price, item_name, notes
         )
       `)
       .eq('property_id', propertyId)

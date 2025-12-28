@@ -29,10 +29,10 @@ export async function GET(
         return NextResponse.json({ error: 'Food Query Failed', details: foodError }, { status: 500 });
     }
 
-    // Fetch raw bar orders
+    // Fetch raw bar orders with items
     const { data: barOrders, error: barError } = await supabaseAdmin
       .from('bar_orders')
-      .select('*')
+      .select('*, bar_order_items(*)')
       .eq('property_id', propertyId)
       .order('created_at', { ascending: false })
       .limit(limit);
@@ -60,7 +60,9 @@ export async function GET(
           waiter_name: o.waiter_name,
           guest_room_number: o.guest_room_number,
           table_number: o.table_number,
-          notes: o.notes
+          notes: o.notes,
+          item_count: o.bar_order_items?.length,
+          items_raw: o.bar_order_items
       }))
     });
 
