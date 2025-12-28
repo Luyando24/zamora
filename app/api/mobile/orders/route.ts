@@ -98,6 +98,8 @@ export async function POST(req: NextRequest) {
             guest_name: formData.name,
             guest_phone: formData.phone,
             guest_room_number: locationString,
+            table_number: tableNumber ? String(tableNumber) : null, // NEW: Dedicated column
+            waiter_name: waiterName || null, // NEW: Dedicated column
             notes: finalNotes,
             // Snapshot fields
             item_name: foodCart.map((i: any) => `${i.quantity}x ${getItemName(i)}`).join(', '),
@@ -181,6 +183,8 @@ export async function POST(req: NextRequest) {
             guest_name: formData.name,
             guest_phone: formData.phone,
             guest_room_number: locationString,
+            table_number: tableNumber ? String(tableNumber) : null, // NEW: Dedicated column
+            waiter_name: waiterName || null, // NEW: Dedicated column
             notes: finalNotes,
           });
 
