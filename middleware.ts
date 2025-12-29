@@ -113,8 +113,8 @@ export async function middleware(request: NextRequest) {
   // We pass our rewrite response so cookies are set on it.
   const finalResponse = await updateSession(request, response)
 
-  // Add CORS headers for Mobile API
-  if (url.pathname.startsWith('/api/mobile')) {
+  // Add CORS headers for Mobile API and Auth routes
+  if (url.pathname.startsWith('/api/mobile') || url.pathname.startsWith('/api/auth')) {
     finalResponse.headers.set('Access-Control-Allow-Origin', '*');
     finalResponse.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
     finalResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Client-Info');
