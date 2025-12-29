@@ -53,6 +53,30 @@ This guide documents the API endpoints, authentication flow, and real-time subsc
 
 ## 2. Orders API
 
+### Get Rooms (New Dec 2025)
+Fetches available room types for the property (for booking or info).
+
+**Endpoint:** `GET /rooms/[propertyId]`
+
+**Response:**
+```json
+{
+  "rooms": [
+    {
+      "id": "room_type_uuid",
+      "name": "Deluxe Room",
+      "description": "A nice room",
+      "base_price": 1500,
+      "price": 1500, // Helper field
+      "image_url": "https://...",
+      "image": "https://...", // Helper field
+      "capacity": 2,
+      "amenities": ["wifi", "ac"]
+    }
+  ]
+}
+```
+
 ### Get Active Orders (My Orders)
 Fetches orders assigned to the specific waiter.
 
