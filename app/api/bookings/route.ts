@@ -29,11 +29,32 @@ export async function POST(req: NextRequest) {
     //    Overlap logic: (RequestStart < ExistingEnd) AND (RequestEnd > ExistingStart)
     
     // Get all rooms of this type
-    const { data: rooms, error: roomsError } = await supabase
+    // Handle potential schema difference (property_id vs hotel_id)
+    let rooms: any[] | null = null;
+    let roomsError: any = null;
+    let idColumn = 'property_id';
+
+    const { data: roomsP, error: roomsErrorP } = await supabase
       .from('rooms')
       .select('id')
       .eq('room_type_id', roomTypeId)
       .eq('property_id', propertyId);
+
+    if (roomsErrorP && (roomsErrorP.message.includes('column rooms.property_id does not exist') || roomsErrorP.code === '42703')) {
+       console.log('[Booking] property_id column missing, trying hotel_id');
+       idColumn = 'hotel_id';
+       const { data: roomsH, error: roomsErrorH } = await supabase
+         .from('rooms')
+         .select('id')
+         .eq('room_type_id', roomTypeId)
+         .eq('hotel_id', propertyId);
+       
+       rooms = roomsH;
+       roomsError = roomsErrorH;
+    } else {
+       rooms = roomsP;
+       roomsError = roomsErrorP;
+    }
 
     if (roomsError) throw roomsError;
     if (!rooms || rooms.length === 0) {
@@ -70,7 +91,7 @@ export async function POST(req: NextRequest) {
       .from('guests')
       .select('id')
       .eq('email', guestDetails.email)
-      .eq('property_id', propertyId)
+      .eq(idColumn, propertyId)
       .single();
 
     if (existingGuest) {
@@ -80,7 +101,7 @@ export async function POST(req: NextRequest) {
       const { data: newGuest, error: createGuestError } = await supabase
         .from('guests')
         .insert({
-          property_id: propertyId,
+          [idColumn]: propertyId,
           first_name: guestDetails.firstName,
           last_name: guestDetails.lastName,
           email: guestDetails.email,
@@ -97,7 +118,7 @@ export async function POST(req: NextRequest) {
     const { data: booking, error: createBookingError } = await supabase
       .from('bookings')
       .insert({
-        property_id: propertyId,
+        [idColumn]: propertyId,
         guest_id: guestId,
         room_id: availableRoom.id,
         check_in_date: checkIn,

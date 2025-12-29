@@ -111,3 +111,81 @@ Always check `.length > 0` before trying to access `data.rooms[0]`.
 2.  **Is the Property ID correct?** (Check `console.log`)
 3.  **Are there rooms in the DB?** (Ask the property owner)
 4.  **Is the network request blocked?** (Check AndroidManifest / Info.plist for HTTP permissions if not using HTTPS)
+
+---
+
+## 6. Creating Room Bookings
+
+To create a reservation, you must send a POST request with the guest details and dates.
+
+**Endpoint:** `POST https://zamoraapp.com/api/bookings`
+
+### Request Body
+```json
+{
+  "propertyId": "uuid-of-property",
+  "roomTypeId": "uuid-of-room-type",
+  "checkIn": "2025-01-20",
+  "checkOut": "2025-01-25",
+  "guestDetails": {
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@example.com",
+    "phone": "+260970000000"
+  }
+}
+```
+
+### Success Response (200 OK)
+```json
+{
+  "success": true,
+  "booking": {
+    "id": "generated-booking-uuid",
+    "status": "confirmed",
+    "check_in_date": "2025-01-20",
+    "check_out_date": "2025-01-25",
+    "total_amount": null 
+  }
+}
+```
+*Note: `total_amount` might be null initially if not calculated by the backend immediately. You should calculate the estimated total on the client side (Price * Nights).*
+
+### Error Responses
+*   **400 Bad Request:** Missing fields.
+*   **404 Not Found:** `No rooms of this type found`.
+*   **409 Conflict:** `No rooms available for these dates` (All rooms of this type are fully booked).
+*   **500 Internal Server Error:** Backend failure.
+
+### Implementation Example
+```typescript
+const createBooking = async (bookingDetails) => {
+  try {
+    const response = await fetch('https://zamoraapp.com/api/bookings', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(bookingDetails),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      // Handle specific errors
+      if (response.status === 409) {
+        alert("Sorry, no rooms are available for these dates.");
+      } else {
+        alert(data.error || "Booking failed.");
+      }
+      return null;
+    }
+
+    return data.booking;
+  } catch (error) {
+    console.error("Booking Request Error:", error);
+    alert("Network error. Please try again.");
+    return null;
+  }
+};
+```
