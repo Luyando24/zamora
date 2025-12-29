@@ -73,7 +73,16 @@ Fetches orders assigned to the specific waiter.
       "status": "pending",
       "table_number": "5",
       "waiter_name": "John Doe",
-      "items": [...],
+      "items": [
+        {
+           "id": "item_uuid",
+           "name": "Burger",
+           "quantity": 2,
+           "price": 100,
+           "total_price": 200,
+           "notes": "No onions"
+        }
+      ],
       "created_at": "ISO_DATE"
     }
   ]
@@ -90,6 +99,7 @@ Fetches unassigned orders (e.g., QR code orders) for the "New" tab.
   - `NULL` or Empty
   - Generic names: "Table X", "Walk-in", "Guest", "Customer", "Unknown"
 - **Developer Note:** These orders are available for any waiter to "Claim".
+- **Bar Orders Fix (Dec 2025):** The API now ensures `bar_order_items` are correctly populated using snapshot data, fixing the "0 items" issue.
 
 ### Get Delivered Orders
 Fetches history of delivered orders.
@@ -100,25 +110,38 @@ Fetches history of delivered orders.
 - `waiterName`: Filter by waiter.
 - `status`: Default is "delivered".
 
-### Create Order
+### Create Order (Mixed Food & Bar Supported)
 **Endpoint:** `POST /orders`
 
-**Request Body:**
+The API supports submitting both `foodCart` and `barCart` in a single request. The backend will automatically split them into separate processing queues (Kitchen vs Bar) but they will share the same `formData` (Table Number, Guest Name, etc).
+
+**Request Body (Mixed Order Example):**
 ```json
 {
   "order": {
     "propertyId": "property_uuid",
     "foodCart": [
-      { "id": "item_id", "quantity": 2, "price": 100, "name": "Burger" }
+      { "id": "food_item_id", "quantity": 1, "price": 100, "name": "Burger" }
     ],
-    "barCart": [],
+    "barCart": [
+       { "id": "bar_item_id", "quantity": 2, "price": 20, "name": "Beer" }
+    ],
     "formData": {
       "tableNumber": "5",
       "waiterName": "John Doe",
-      "paymentMethod": "cash", // or "card", "room_bill"
-      "notes": "No onions"
+      "paymentMethod": "cash",
+      "notes": "No onions on burger"
     }
   }
+}
+```
+
+**Response:**
+Returns an array of created Order IDs (one for food, one for bar).
+```json
+{
+  "success": true,
+  "orderIds": ["food_order_uuid", "bar_order_uuid"]
 }
 ```
 
@@ -151,6 +174,9 @@ Fetches history of delivered orders.
 ## 3. Real-time Updates (Supabase)
 
 To ensure the app updates instantly without pulling-to-refresh, implement Supabase Realtime subscriptions.
+
+**RLS Note (Important):**
+Authentication RLS policies have been relaxed (as of Dec 28, 2025) to allow any `authenticated` user to view `orders` and `bar_orders` for their property. This ensures real-time events are received by all staff.
 
 **Tables to Watch:**
 1. `orders` (Food)
@@ -206,6 +232,15 @@ const channel = supabase
 - **Cause:** Client-side filtering in `TakeOrderScreen.tsx` might be too aggressive.
 - **Fix:** Ensure your client-side filter includes orders where `waiter_name` matches the user OR is a generic name (if you want to show shared history).
 
+### Bar Orders Showing "0 items"
+- **Cause:** Nested relationship lookup for `bar_menu_items` was failing if items were deleted or unlinked.
+- **Fix:** The API now uses `items_raw` (snapshot data from `bar_order_items`) which is guaranteed to exist. The field `name` is populated from `item_name` snapshot.
+
+### Debugging API Responses
+- **Tool:** Use the debug endpoint to view raw database rows (bypassing some filters).
+- **URL:** `https://zamoraapp.com/api/debug/orders/[PROPERTY_ID]`
+- **Usage:** Check if orders exist and verify their `waiter_name` and `status` fields directly.
+
 ---
 
 ## 5. Data Models
@@ -214,6 +249,7 @@ const channel = supabase
 ```typescript
 interface Order {
   id: string;
+  order_number: number; // Unique incremental ID (e.g., 101, 102)
   created_at: string;
   property_id: string;
   status: 'pending' | 'preparing' | 'processing' | 'ready' | 'delivered' | 'cancelled';
@@ -224,6 +260,15 @@ interface Order {
   items: OrderItem[];
   guest_name?: string;
   guest_phone?: string;
+  notes?: string;
+}
+
+interface OrderItem {
+  id: string;
+  name: string; // Populated from item_name snapshot
+  quantity: number;
+  price: number;
+  total_price: number;
   notes?: string;
 }
 ```

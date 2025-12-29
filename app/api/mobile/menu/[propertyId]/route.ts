@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/server';
+import { getSupabaseAdmin } from '@/lib/db/supabase-admin';
 import { NextResponse } from 'next/server';
 import { validate as isUuid } from 'uuid';
 
@@ -9,10 +9,12 @@ export async function GET(
   { params }: { params: { propertyId: string } }
 ) {
   try {
-    const supabase = await createClient();
+    const supabase = getSupabaseAdmin();
     const { propertyId } = params;
 
     let resolvedPropertyId = propertyId;
+    
+    console.log(`[Mobile Menu] Fetching for property: ${propertyId}`);
 
     // 1. Resolve Property ID (if slug provided)
     if (!isUuid(propertyId)) {
@@ -23,19 +25,23 @@ export async function GET(
         .single();
 
       if (error || !property) {
+        console.error('[Mobile Menu] Property slug lookup failed:', error);
         return NextResponse.json({ error: 'Property not found' }, { status: 404 });
       }
       resolvedPropertyId = property.id;
     }
 
     // 2. Fetch Property Details (Basic)
+    // We use 'properties' table instead of 'public_properties' view to ensure we get 'created_by'
+    // which is needed for fetching categories.
     const { data: property, error: propError } = await supabase
-      .from('public_properties')
+      .from('properties')
       .select('*')
       .eq('id', resolvedPropertyId)
       .single();
 
     if (propError || !property) {
+      console.error('[Mobile Menu] Property details lookup failed:', propError);
       return NextResponse.json({ error: 'Property not found' }, { status: 404 });
     }
 
@@ -47,7 +53,9 @@ export async function GET(
       .eq('is_available', true);
 
     if (menuError) {
-      console.error('Menu Error:', menuError);
+      console.error('[Mobile Menu] Food menu fetch failed:', menuError);
+    } else {
+        console.log(`[Mobile Menu] Found ${menuItems?.length || 0} food items`);
     }
 
     // 4. Fetch Bar Menu Items
@@ -58,7 +66,9 @@ export async function GET(
       .eq('is_available', true);
 
     if (barError) {
-      console.error('Bar Error:', barError);
+      console.error('[Mobile Menu] Bar menu fetch failed:', barError);
+    } else {
+        console.log(`[Mobile Menu] Found ${barMenuItems?.length || 0} bar items`);
     }
 
     // 5. Extract Categories
@@ -67,6 +77,8 @@ export async function GET(
       .select('name')
       .or(`created_by.eq.${property?.created_by},created_by.is.null`)
       .order('name');
+      
+    console.log(`[Mobile Menu] Found ${foodCategories.data?.length || 0} food categories`);
 
     const barCategories = Array.from(new Set((barMenuItems || []).map((item: any) => item.category).filter(Boolean))).sort();
 
