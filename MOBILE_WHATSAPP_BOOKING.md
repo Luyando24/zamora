@@ -3,9 +3,9 @@
 This guide explains how to implement the "Book via WhatsApp" feature in the mobile application, matching the web implementation.
 
 ## 1. API Update
-The property details endpoint has been updated to return the `whatsapp_booking_phone` field.
+The property details and rooms endpoints have been updated to return the `whatsapp_booking_phone` field.
 
-**Endpoint:** `GET /api/mobile/properties/[propertyId]`
+**Endpoint 1:** `GET /api/mobile/properties/[propertyId]`
 
 **Response Example:**
 ```json
@@ -17,6 +17,24 @@ The property details endpoint has been updated to return the `whatsapp_booking_p
     "type": "hotel",
     "whatsapp_booking_phone": "+260970000000" // Nullable
   }
+}
+```
+
+**Endpoint 2:** `GET /api/mobile/rooms/[propertyId]`
+
+**Response Example:**
+```json
+{
+  "rooms": [
+    {
+      "id": "...",
+      "name": "Deluxe Room",
+      "price": 100,
+      "image": "...",
+      "whatsapp_booking_phone": "+260970000000" // Included in each room object
+    }
+  ],
+  "whatsapp_booking_phone": "+260970000000" // Also at root level
 }
 ```
 

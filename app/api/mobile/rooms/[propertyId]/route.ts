@@ -15,6 +15,15 @@ export async function GET(
         return NextResponse.json({ error: 'Property ID is required' }, { status: 400 });
     }
 
+    // Fetch property details for WhatsApp number
+    const { data: propertyData } = await supabase
+      .from('properties')
+      .select('whatsapp_booking_phone')
+      .eq('id', propertyId)
+      .single();
+    
+    const whatsappPhone = propertyData?.whatsapp_booking_phone || null;
+
     // Fetch Room Types
     // Note: The schema might use 'property_id' or 'hotel_id'. 
     // Based on test script, 'property_id' works for Ringroad View Lodge.
