@@ -82,10 +82,21 @@ export async function GET(
 
     const barCategories = Array.from(new Set((barMenuItems || []).map((item: any) => item.category).filter(Boolean))).sort();
 
+    // Transform items to match mobile app expectations (image field)
+    const formattedMenuItems = menuItems?.map(item => ({
+      ...item,
+      image: item.image_url || item.gallery_urls?.[0] || null
+    }));
+
+    const formattedBarMenuItems = barMenuItems?.map(item => ({
+      ...item,
+      image: item.image_url || null
+    }));
+
     return NextResponse.json({
       property,
-      menuItems: menuItems || [],
-      barMenuItems: barMenuItems || [],
+      menuItems: formattedMenuItems || [],
+      barMenuItems: formattedBarMenuItems || [],
       categories: foodCategories.data?.map(c => c.name) || [],
       barCategories
     });
