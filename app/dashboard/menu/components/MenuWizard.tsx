@@ -59,7 +59,7 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
   const [formData, setFormData] = useState({
     name: initialData?.name || '',
     description: initialData?.description || '',
-    category: initialData?.category || 'Food',
+    category: initialData?.category || '',
     price: initialData?.price || '',
     image_url: initialData?.image_url || '',
     gallery_urls: initialData?.gallery_urls || [],
@@ -189,10 +189,12 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
         <div className="col-span-2 md:col-span-1">
           <label className="block text-sm font-bold text-slate-700 mb-2">Category <span className="text-pink-600">*</span></label>
           <select
+            required
             className="block w-full rounded-xl border border-slate-200 px-4 py-3.5 text-slate-900 bg-white focus:bg-white focus:ring-2 focus:ring-pink-600 focus:border-transparent transition-all"
             value={formData.category}
             onChange={e => setFormData({ ...formData, category: e.target.value })}
           >
+            <option value="" disabled>Select a category...</option>
             {dbCategories.map(cat => (
               <option key={cat.id} value={cat.name}>{cat.name}</option>
             ))}

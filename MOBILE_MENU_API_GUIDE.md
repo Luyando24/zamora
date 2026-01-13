@@ -52,6 +52,15 @@ The API returns a JSON object with the following structure:
 }
 ```
 
+## Category Logic (Dynamic Extraction)
+
+To prevent data leakage and ensure relevance, **categories are derived dynamically** from the menu items assigned to the property.
+
+*   **How it works**: The API fetches all *available* menu items for the property and extracts the unique `category` values from them.
+*   **Implication 1**: You do not need to manage a separate "Property Categories" list. Just assign items to the property, and their categories will appear automatically.
+*   **Implication 2**: If a category has no items assigned to the property (or all items are unavailable), that category **will not** appear in the response.
+*   **Implication 3**: This logic guarantees that categories from other properties (owned by the same user) will never "leak" into this property's menu.
+
 ## Data Freshness & Caching
 
 To ensure the mobile app always displays the latest prices and items, this endpoint enforces **strict no-caching policies**.
@@ -89,7 +98,13 @@ Our API uses an **Inner Join** to ensure strict isolation:
 ```
 This guarantees that **only** items explicitly assigned to the requested Property ID are returned.
 
-### Issue 3: "Blank Menu"
+### Issue 3: "Categories from other properties appearing"
+**Cause**: The API was previously fetching categories based on the "Owner ID" rather than the "Property ID".
+**Solution**: The API now extracts categories *directly* from the fetched menu items.
+*   **Fix**: Ensure your app is consuming the `categories` array from the API response, which is now strictly filtered.
+*   **Verify**: Check that the `menuItems` array only contains items for your property. The `categories` list is generated from this array.
+
+### Issue 4: "Blank Menu"
 **Cause**: 
 *   Invalid `propertyId` (UUID or Slug).
 *   No items assigned to the property.
