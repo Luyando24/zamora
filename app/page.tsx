@@ -293,7 +293,7 @@ export default function LandingPage() {
             © 2025 Zamora Systems. Built for Zambia 🇿🇲
           </div>
           <div className="flex gap-6">
-            <a href="#" className="text-gray-500 hover:text-white transition-colors">Privacy</a>
+            <Link href="/privacy-policy" className="text-gray-500 hover:text-white transition-colors">Privacy</Link>
             <a href="#" className="text-gray-500 hover:text-white transition-colors">Terms</a>
             <a href="#" className="text-gray-500 hover:text-white transition-colors">Contact</a>
           </div>

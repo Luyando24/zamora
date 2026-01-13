@@ -1056,6 +1056,24 @@ export default function ExplorePage() {
 
       </main>
 
+      {/* Footer */}
+      <footer className="border-t border-slate-100 py-12 bg-slate-50 mt-20 mb-16 md:mb-0">
+        <div className="max-w-[1600px] mx-auto px-6 md:px-12 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-zambia-red flex items-center justify-center font-bold text-sm text-white">Z</div>
+            <span className="font-bold tracking-tight uppercase text-slate-900">ZAMORA</span>
+          </div>
+          <div className="text-sm text-slate-500">
+            © 2025 Zamora Systems. Built for Zambia 🇿🇲
+          </div>
+          <div className="flex gap-6">
+            <Link href="/privacy-policy" className="text-slate-500 hover:text-slate-900 transition-colors">Privacy</Link>
+            <Link href="#" className="text-slate-500 hover:text-slate-900 transition-colors">Terms</Link>
+            <Link href="#" className="text-slate-500 hover:text-slate-900 transition-colors">Contact</Link>
+          </div>
+        </div>
+      </footer>
+
       {/* Mobile Bottom Navigation */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-50 px-6 pb-safe pt-2">
         <div className="flex justify-between items-center h-16">
