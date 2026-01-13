@@ -66,7 +66,20 @@ export default function PrivacyPolicyPage() {
               In some regions (like the European Economic Area), you have certain rights under applicable data protection laws. These may include the right (i) to request access and obtain a copy of your personal information, (ii) to request rectification or erasure; (iii) to restrict the processing of your personal information; and (iv) if applicable, to data portability. In certain circumstances, you may also have the right to object to the processing of your personal information.
             </p>
 
-            <h2 className="text-2xl font-bold text-slate-900 mt-8 mb-4">8. Contact Us</h2>
+            <h2 className="text-2xl font-bold text-slate-900 mt-8 mb-4">8. Account Deletion</h2>
+            <p className="leading-relaxed">
+              You have the right to request that we delete your account and all associated personal data. To initiate this process, please click the link below to email our support team. We will verify your identity and process your request within 30 days.
+            </p>
+            <p className="mt-2">
+                <a 
+                    href="mailto:support@zamoraapp.com?subject=Request%20to%20Delete%20Account%20and%20Data" 
+                    className="text-red-600 hover:text-red-800 font-medium underline"
+                >
+                    Request Account Deletion
+                </a>
+            </p>
+
+            <h2 className="text-2xl font-bold text-slate-900 mt-8 mb-4">9. Contact Us</h2>
             <p className="leading-relaxed">
               If you have questions or comments about this policy, you may email us at support@zamoraapp.com.
             </p>
