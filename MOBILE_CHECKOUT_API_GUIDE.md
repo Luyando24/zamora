@@ -42,6 +42,9 @@ The request body should include the following new fields within the `formData` o
     // 1. Delivery Option (Optional)
     // Required if orderCategory is 'delivery'
     "deliveryOption": "YANGO" | "BWANGU" | null,
+    
+    // Address for self-delivery (not gift)
+    "deliveryAddress": "Plot 123, Cairo Road",
 
     // 2. Order Category (Optional, default: 'standard')
     // 'standard' = In-house / Room Service
@@ -67,6 +70,7 @@ The following columns have been added to `orders` and `bar_orders` tables:
 | Column | Type | Description |
 | :--- | :--- | :--- |
 | `delivery_option` | `TEXT` | Provider name (e.g., 'YANGO') |
+| `delivery_address` | `TEXT` | Address for self-delivery |
 | `order_category` | `TEXT` | 'standard', 'delivery', etc. |
 | `is_gift` | `BOOLEAN` | True if this is a gift order |
 | `recipient_name` | `TEXT` | Name of the gift receiver |

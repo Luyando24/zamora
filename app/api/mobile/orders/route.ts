@@ -141,7 +141,8 @@ export async function POST(req: NextRequest) {
         isGift = false,
         recipientName,
         recipientPhone,
-        recipientAddress
+        recipientAddress,
+        deliveryAddress
     } = formData;
 
     const newOrderIds: string[] = [];
@@ -180,6 +181,7 @@ export async function POST(req: NextRequest) {
             recipient_name: recipientName || null,
             recipient_phone: recipientPhone || null,
             recipient_address: recipientAddress || null,
+            delivery_address: deliveryAddress || null,
             user_id: userId || null,
             // Snapshot fields
             item_name: foodCart.map((i: any) => `${i.quantity}x ${getItemName(i)}`).join(', '),
@@ -273,6 +275,7 @@ export async function POST(req: NextRequest) {
             recipient_name: recipientName || null,
             recipient_phone: recipientPhone || null,
             recipient_address: recipientAddress || null,
+            delivery_address: deliveryAddress || null,
             user_id: userId || null,
           });
 

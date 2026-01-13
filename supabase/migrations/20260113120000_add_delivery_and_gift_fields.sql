@@ -9,9 +9,10 @@ ADD COLUMN IF NOT EXISTS is_gift BOOLEAN DEFAULT false,
 ADD COLUMN IF NOT EXISTS recipient_name TEXT,
 ADD COLUMN IF NOT EXISTS recipient_phone TEXT,
 ADD COLUMN IF NOT EXISTS recipient_address TEXT,
+ADD COLUMN IF NOT EXISTS delivery_address TEXT, -- For self-delivery
 ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id);
 
--- Bar Orders (keeping schema consistent)
+-- Bar Orders
 ALTER TABLE bar_orders 
 ADD COLUMN IF NOT EXISTS delivery_option TEXT,
 ADD COLUMN IF NOT EXISTS order_category TEXT DEFAULT 'standard',
@@ -19,4 +20,5 @@ ADD COLUMN IF NOT EXISTS is_gift BOOLEAN DEFAULT false,
 ADD COLUMN IF NOT EXISTS recipient_name TEXT,
 ADD COLUMN IF NOT EXISTS recipient_phone TEXT,
 ADD COLUMN IF NOT EXISTS recipient_address TEXT,
+ADD COLUMN IF NOT EXISTS delivery_address TEXT, -- For self-delivery
 ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id);
