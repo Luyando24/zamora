@@ -29,6 +29,17 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
   const supabase = createClient();
   const { properties, selectedPropertyId } = useProperty();
   const { categories: dbCategories } = useMenuCategories(selectedPropertyId);
+  
+  // Deduplicate categories by name to avoid confusion
+  const uniqueCategories = dbCategories.reduce((acc: any[], current) => {
+    const x = acc.find(item => item.name === current.name);
+    if (!x) {
+      return acc.concat([current]);
+    } else {
+      return acc;
+    }
+  }, []).sort((a, b) => a.name.localeCompare(b.name));
+
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [selectedPropertyIds, setSelectedPropertyIds] = useState<string[]>([]);
@@ -195,7 +206,7 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
             onChange={e => setFormData({ ...formData, category: e.target.value })}
           >
             <option value="" disabled>Select a category...</option>
-            {dbCategories.map(cat => (
+            {uniqueCategories.map(cat => (
               <option key={cat.id} value={cat.name}>{cat.name}</option>
             ))}
           </select>
