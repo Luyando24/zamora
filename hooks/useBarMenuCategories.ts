@@ -30,7 +30,11 @@ export function useBarMenuCategories(propertyId?: string | null) {
         .order('name');
       
       if (propertyId) {
-        query = query.or(`property_id.eq.${propertyId},property_id.is.null`);
+        query = query.eq('property_id', propertyId);
+      } else {
+        setCategories([]);
+        setLoading(false);
+        return;
       }
 
       const { data, error } = await Promise.race([query, timeout]) as any;

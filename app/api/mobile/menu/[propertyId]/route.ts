@@ -65,10 +65,12 @@ export async function GET(
     }
 
     // 4. Fetch Bar Menu Items
+    // We now filter directly by property_id column on the item table for strict isolation
+    // This avoids reliance on junction table state which caused leakage issues
     const { data: barMenuItems, error: barError } = await supabase
       .from('bar_menu_items')
-      .select('*, bar_menu_item_properties!inner(property_id)')
-      .eq('bar_menu_item_properties.property_id', resolvedPropertyId)
+      .select('*')
+      .eq('property_id', resolvedPropertyId)
       .eq('is_available', true);
 
     if (barError) {

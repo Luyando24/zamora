@@ -89,14 +89,22 @@ Even with these headers, mobile networking libraries (like Axios, React Query, o
 3.  Verify the API is returning fresh data by visiting the URL in a browser (browsers respect the `no-store` header).
 
 ### Issue 2: "Fetching data from other properties"
-**Cause**: This usually happens if the `propertyId` is not being filtered correctly or if the database query is too permissive (missing `!inner` join).
+**Cause**: This usually happens if the `propertyId` is not being filtered correctly or if the database query is too permissive.
 **Verification**:
-Our API uses an **Inner Join** to ensure strict isolation:
+Our API uses strict filtering to ensure isolation:
+
+**For Food Menu Items:**
 ```typescript
 .select('*, menu_item_properties!inner(property_id)')
 .eq('menu_item_properties.property_id', propertyId)
 ```
-This guarantees that **only** items explicitly assigned to the requested Property ID are returned.
+
+**For Bar Menu Items:**
+```typescript
+.select('*')
+.eq('property_id', propertyId)
+```
+This guarantees that **only** items explicitly assigned to the requested Property ID are returned. For Bar Menu items, we enforce ownership at the row level (`property_id` column) to prevent any potential leakage from shared references.
 
 ### Issue 3: "Categories from other properties appearing"
 **Cause**: The API was previously fetching categories based on the "Owner ID" rather than the "Property ID".

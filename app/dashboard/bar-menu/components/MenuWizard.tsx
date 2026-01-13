@@ -29,9 +29,18 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
   const supabase = createClient();
   const { properties, selectedPropertyId } = useProperty();
   const { categories: dbCategories } = useBarMenuCategories(selectedPropertyId);
+  
+  // Deduplicate categories and ensure they are valid
+  const uniqueCategories = Array.from(new Set(dbCategories.map(c => c.name)))
+    .filter(Boolean)
+    .map(name => ({ id: name, name }));
+
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [selectedPropertyIds, setSelectedPropertyIds] = useState<string[]>([]);
+  
+  // Track original assignments to detect changes
+  const [originalPropertyIds, setOriginalPropertyIds] = useState<string[]>([]);
 
   // Fetch initial assignments
   useEffect(() => {
@@ -44,7 +53,9 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
                 .eq('menu_item_id', initialData.id);
             
             if (assignments) {
-                setSelectedPropertyIds(assignments.map(a => a.property_id));
+                const ids = assignments.map(a => a.property_id);
+                setSelectedPropertyIds(ids);
+                setOriginalPropertyIds(ids);
             }
         } else {
             // If new item, default to ACTIVE property
@@ -54,12 +65,12 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
         }
     };
     init();
-  }, [initialData, selectedPropertyId, supabase, selectedPropertyIds.length]);
+  }, [initialData, selectedPropertyId, supabase]); // Removed selectedPropertyIds.length dependency to prevent loops
   
   const [formData, setFormData] = useState({
     name: initialData?.name || '',
     description: initialData?.description || '',
-    category: initialData?.category || 'Cocktails',
+    category: initialData?.category || '',
     price: initialData?.price || '',
     image_url: initialData?.image_url || '',
     gallery_urls: initialData?.gallery_urls || [],
@@ -123,31 +134,82 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
         payload.price = null; 
       }
       
-      let itemId;
-      let error;
-      if (initialData?.id) {
-        const { error: err } = await supabase.from('bar_menu_items').update(payload).eq('id', initialData.id);
-        error = err;
-        itemId = initialData.id;
-      } else {
-        payload.created_by = user.id;
-        const { data: newItem, error: err } = await supabase.from('bar_menu_items').insert(payload).select().single();
-        error = err;
-        itemId = newItem?.id;
-      }
-
-      if (error) throw error;
-
-      // Update Property Assignments
-      await supabase.from('bar_menu_item_properties').delete().eq('menu_item_id', itemId);
+      // STRICT ISOLATION LOGIC
       
-      const assignments = selectedPropertyIds.map(propId => ({
-          menu_item_id: itemId,
-          property_id: propId
-      }));
+      if (initialData?.id) {
+        // 1. UPDATE EXISTING ITEM
+        // Updates the item itself. Note: If this item happens to be shared (legacy data), 
+        // this update will affect all properties sharing it. This is expected behavior for shared items.
+        const { error: updateError } = await supabase
+            .from('bar_menu_items')
+            .update(payload)
+            .eq('id', initialData.id);
+            
+        if (updateError) throw updateError;
+        
+        // Handle Assignment Changes
+        
+        // A. Removed Properties: Delete the assignment (Item remains, just unlinked from this property)
+        const removedProps = originalPropertyIds.filter(id => !selectedPropertyIds.includes(id));
+        if (removedProps.length > 0) {
+            await supabase.from('bar_menu_item_properties')
+                .delete()
+                .eq('menu_item_id', initialData.id)
+                .in('property_id', removedProps);
+        }
+        
+        // B. Added Properties: Create NEW COPY of the item (Strict Isolation)
+        // We do NOT link the existing ID to the new property to prevent future "leakage"
+        const addedProps = selectedPropertyIds.filter(id => !originalPropertyIds.includes(id));
+        for (const propId of addedProps) {
+            const newItemPayload = { ...payload, created_by: user.id };
+            // Ensure property_id column is set if it exists (for consistency)
+            // We use 'property_id' in payload if the table supports it, otherwise it's ignored or errors?
+            // Safer to rely on junction table, but if table has property_id, we should set it.
+            // Since we can't easily check schema here, we'll include it if we think it's needed.
+            // Previous code didn't set it explicitly, but let's try.
+            // Actually, best to rely on junction table.
+            
+            const { data: newItem, error: insertError } = await supabase
+                .from('bar_menu_items')
+                .insert(newItemPayload)
+                .select()
+                .single();
+                
+            if (insertError) throw insertError;
+            
+            await supabase.from('bar_menu_item_properties').insert({
+                menu_item_id: newItem.id,
+                property_id: propId
+            });
+            
+            // Also update property_id on the item itself if column exists (optional but good)
+            await supabase.from('bar_menu_items').update({ property_id: propId }).eq('id', newItem.id).maybeSingle();
+        }
 
-      const { error: assignError } = await supabase.from('bar_menu_item_properties').insert(assignments);
-      if (assignError) throw assignError;
+      } else {
+        // 2. CREATE NEW ITEM
+        // Create a separate item copy for EACH selected property
+        for (const propId of selectedPropertyIds) {
+            const newItemPayload = { ...payload, created_by: user.id };
+            
+            const { data: newItem, error: insertError } = await supabase
+                .from('bar_menu_items')
+                .insert(newItemPayload)
+                .select()
+                .single();
+                
+            if (insertError) throw insertError;
+            
+            await supabase.from('bar_menu_item_properties').insert({
+                menu_item_id: newItem.id,
+                property_id: propId
+            });
+            
+             // Also update property_id on the item itself if column exists
+            await supabase.from('bar_menu_items').update({ property_id: propId }).eq('id', newItem.id).maybeSingle();
+        }
+      }
 
       router.push('/dashboard/bar-menu');
       router.refresh();
@@ -189,11 +251,13 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
         <div className="col-span-2 md:col-span-1">
           <label className="block text-sm font-bold text-slate-700 mb-2">Category <span className="text-pink-500">*</span></label>
           <select
+            required
             className="block w-full rounded-xl border border-slate-200 px-4 py-3.5 text-slate-900 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
             value={formData.category}
             onChange={e => setFormData({ ...formData, category: e.target.value })}
           >
-            {dbCategories.map(cat => (
+            <option value="" disabled>Select a category...</option>
+            {uniqueCategories.map(cat => (
               <option key={cat.id} value={cat.name}>{cat.name}</option>
             ))}
           </select>

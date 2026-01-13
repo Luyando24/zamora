@@ -30,7 +30,15 @@ export function useMenuCategories(propertyId?: string | null) {
         .order('name');
       
       if (propertyId) {
-        query = query.or(`property_id.eq.${propertyId},property_id.is.null`);
+        query = query.eq('property_id', propertyId);
+      } else {
+        // If no property selected (e.g. creating new property or admin view), 
+        // we shouldn't show categories or show all? 
+        // Better to return empty or handle gracefully.
+        // For now, let's just return empty if no propertyId is provided to avoid global confusion
+        setCategories([]);
+        setLoading(false);
+        return;
       }
 
       const { data, error } = await Promise.race([query, timeout]) as any;
