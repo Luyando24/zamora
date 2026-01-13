@@ -59,13 +59,17 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
             }
         } else {
             // If new item, default to ACTIVE property
-            if (selectedPropertyId && selectedPropertyIds.length === 0) {
-                setSelectedPropertyIds([selectedPropertyId]);
-            }
+            // We only set this ONCE if the list is empty
+            setSelectedPropertyIds(prev => {
+                if (prev.length === 0 && selectedPropertyId) {
+                    return [selectedPropertyId];
+                }
+                return prev;
+            });
         }
     };
     init();
-  }, [initialData, selectedPropertyId, supabase]); // Removed selectedPropertyIds.length dependency to prevent loops
+  }, [initialData, selectedPropertyId, supabase]);
   
   const [formData, setFormData] = useState({
     name: initialData?.name || '',

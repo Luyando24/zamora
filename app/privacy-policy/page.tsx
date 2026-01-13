@@ -15,7 +15,7 @@ export default function PrivacyPolicyPage() {
 
           <div className="space-y-6 text-slate-600">
             <p className="leading-relaxed">
-              Welcome to Zamora HMS ("we," "our," or "us"). We are committed to protecting your personal information and your right to privacy. If you have any questions or concerns about this privacy notice or our practices with regard to your personal information, please contact us.
+              Welcome to Zamora HMS (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;). We are committed to protecting your personal information and your right to privacy. If you have any questions or concerns about this privacy notice or our practices with regard to your personal information, please contact us.
             </p>
 
             <h2 className="text-2xl font-bold text-slate-900 mt-8 mb-4">1. Information We Collect</h2>
