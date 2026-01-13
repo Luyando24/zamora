@@ -99,7 +99,43 @@ async function fetchPropertyDetails(propertyId) {
 
 ---
 
-## 3. Submit Order (Food & Drinks)
+## 3. Fetch Property Rooms
+
+Retrieves a list of available room types for a specific property (Hotel/Lodge).
+
+- **Endpoint**: `/api/mobile/rooms/[propertyId]`
+- **Method**: `GET`
+- **Params**:
+  - `propertyId`: The UUID of the property.
+- **Auth**: Public
+
+### Response
+```json
+{
+  "rooms": [
+    {
+      "id": "room-uuid",
+      "name": "Deluxe Suite",
+      "description": "A luxury suite with sea view",
+      "price": 1500,
+      "base_price": 1500,
+      "image": "https://...",
+      "image_url": "https://...",
+      "capacity": 2,
+      "bed_type": "King",
+      "size": "40sqm"
+    },
+    // ...
+  ],
+  "whatsapp_booking_phone": "+26097..." // Null if not set
+}
+```
+
+**Note:** This endpoint includes `Cache-Control: no-store` headers to ensure real-time price updates.
+
+---
+
+## 4. Submit Order (Food & Drinks)
 
 Submits a guest order for food and/or drinks. Supports guest checkout (no login required).
 
@@ -162,7 +198,7 @@ async function submitOrder(orderData) {
 
 ---
 
-## 4. Create Booking
+## 5. Create Booking
 
 Creates a room reservation.
 
@@ -221,7 +257,7 @@ async function createBooking(bookingData) {
 
 ---
 
-## 5. Restaurant Owner API (Protected)
+## 6. Restaurant Owner API (Protected)
 
 These endpoints are designed for the **Restaurant Owner Mobile App**. They allow owners to view orders, update statuses, and manage availability.
 
@@ -305,7 +341,7 @@ Toggle availability of items (e.g., mark "Sold Out").
 
 ---
 
-## 6. Waiter API
+## 7. Waiter API
 
 These endpoints are designed for the **Waiter / Staff App**.
 

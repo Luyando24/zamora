@@ -65,7 +65,14 @@ export async function GET(
     }));
 
     return NextResponse.json({
-      rooms: formattedRooms || []
+      rooms: formattedRooms || [],
+      whatsapp_booking_phone: whatsappPhone
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      }
     });
 
   } catch (error: any) {

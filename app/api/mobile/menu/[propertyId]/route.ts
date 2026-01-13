@@ -99,6 +99,12 @@ export async function GET(
       barMenuItems: formattedBarMenuItems || [],
       categories: foodCategories.data?.map(c => c.name) || [],
       barCategories
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      }
     });
 
   } catch (error: any) {
