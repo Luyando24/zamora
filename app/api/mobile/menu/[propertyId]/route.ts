@@ -77,14 +77,11 @@ export async function GET(
         console.log(`[Mobile Menu] Found ${barMenuItems?.length || 0} bar items`);
     }
 
-    // 5. Extract Categories
-    const foodCategories = await supabase
-      .from('menu_categories')
-      .select('name')
-      .or(`created_by.eq.${property?.created_by},created_by.is.null`)
-      .order('name');
+    // 5. Extract Categories directly from Menu Items (Matches Web Logic)
+    // This prevents "category leakage" from other properties owned by the same user
+    const uniqueCategories = Array.from(new Set((menuItems || []).map((item: any) => item.category).filter(Boolean))).sort();
       
-    console.log(`[Mobile Menu] Found ${foodCategories.data?.length || 0} food categories`);
+    console.log(`[Mobile Menu] Extracted ${uniqueCategories.length} food categories from items`);
 
     const barCategories = Array.from(new Set((barMenuItems || []).map((item: any) => item.category).filter(Boolean))).sort();
 
@@ -103,7 +100,7 @@ export async function GET(
       property,
       menuItems: formattedMenuItems || [],
       barMenuItems: formattedBarMenuItems || [],
-      categories: foodCategories.data?.map(c => c.name) || [],
+      categories: uniqueCategories || [],
       barCategories
     }, {
       headers: {
