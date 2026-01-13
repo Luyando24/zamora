@@ -25,9 +25,10 @@ Returns a JSON object containing an array of properties.
       "name": "Property Name",
       "slug": "property-slug",
       "type": "hotel | restaurant | etc",
-      "cover_image_url": "https://...",
+      "address": "Plot 123, Street Name",
       "city": "Lusaka",
-      "country": "Zambia"
+      "country": "Zambia",
+      "cover_image_url": "https://...",
       // ... other fields
     }
     // ...

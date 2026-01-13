@@ -62,6 +62,8 @@ export default function SettingsPage() {
     wifi_password: '',
     admin_notification_phone: '',
     whatsapp_booking_phone: '',
+    city: '',
+    country: 'Zambia',
     type: 'hotel', // Default
     settings: {} // For JSONB data
   });
@@ -72,6 +74,8 @@ export default function SettingsPage() {
       if (selected) {
         setHotel({
             ...selected,
+            city: selected.city || '',
+            country: selected.country || 'Zambia',
             settings: selected.settings || {}
         });
       }
@@ -89,6 +93,8 @@ export default function SettingsPage() {
             name: '',
             slug: '',
             address: '',
+            city: '',
+            country: 'Zambia',
             zra_tpin: '',
             logo_url: '',
             phone: '',
@@ -315,6 +321,29 @@ export default function SettingsPage() {
                                             onChange={e => setHotel({ ...hotel, address: e.target.value })}
                                             placeholder="Enter full physical address"
                                         />
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-sm font-semibold text-slate-700 mb-2">City</label>
+                                            <input
+                                                type="text"
+                                                className="block w-full rounded-xl border-slate-200 shadow-sm focus:border-zambia-green focus:ring-zambia-green/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
+                                                value={hotel.city || ''}
+                                                onChange={e => setHotel({ ...hotel, city: e.target.value })}
+                                                placeholder="e.g. Lusaka"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-semibold text-slate-700 mb-2">Country</label>
+                                            <input
+                                                type="text"
+                                                className="block w-full rounded-xl border-slate-200 shadow-sm focus:border-zambia-green focus:ring-zambia-green/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
+                                                value={hotel.country || 'Zambia'}
+                                                onChange={e => setHotel({ ...hotel, country: e.target.value })}
+                                                placeholder="e.g. Zambia"
+                                            />
+                                        </div>
                                     </div>
 
                                     <div>
