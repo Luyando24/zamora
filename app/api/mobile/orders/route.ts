@@ -93,10 +93,56 @@ export async function POST(req: NextRequest) {
     // Use Admin Client to bypass RLS and ensure reliability
     const supabaseAdmin = getSupabaseAdmin();
 
+    // 0. AUTH & PROPERTY TYPE CHECK
+    // Fetch property details to check type
+    const { data: propertyData, error: propError } = await supabaseAdmin
+      .from('properties')
+      .select('type')
+      .eq('id', propertyId)
+      .single();
+
+    if (propError || !propertyData) {
+      return NextResponse.json({ error: 'Property not found' }, { status: 404 });
+    }
+
+    let userId: string | null = null;
+    const authHeader = req.headers.get('authorization');
+
+    // Attempt to get user from token
+    if (authHeader) {
+        const token = authHeader.replace('Bearer ', '');
+        const { data: { user } } = await supabaseAdmin.auth.getUser(token);
+        if (user) {
+            userId = user.id;
+        }
+    }
+
+    // ENFORCE AUTH FOR RESTAURANTS (Food Orders)
+    // If it's a restaurant property and placing a food order, user MUST be logged in.
+    // (Assuming bar orders might be more casual or same rule applies, but user specified 'food order')
+    // We enforce it generally if any cart is present, or specifically for food.
+    // User said: "User cannot place a food order from the restaurant type of property if not logged in"
+    if (propertyData.type === 'restaurant' && foodCart && foodCart.length > 0 && !userId) {
+        return NextResponse.json({ 
+            error: 'Authentication required', 
+            details: 'You must be logged in to place a food order at this restaurant.' 
+        }, { status: 401 });
+    }
+
     // Determine location string
     const locationString = tableNumber 
         ? `Table ${tableNumber}` 
         : (roomNumber || 'Walk-in / Unknown');
+
+    // Extract New Fields
+    const { 
+        deliveryOption, // 'YANGO', 'BWANGU', etc.
+        orderCategory = 'standard', // 'delivery', 'pickup', 'room_service'
+        isGift = false,
+        recipientName,
+        recipientPhone,
+        recipientAddress
+    } = formData;
 
     const newOrderIds: string[] = [];
     const errors: string[] = [];
@@ -124,9 +170,17 @@ export async function POST(req: NextRequest) {
             guest_name: formData.name,
             guest_phone: formData.phone,
             guest_room_number: locationString,
-            table_number: tableNumber ? String(tableNumber) : null, // NEW: Dedicated column
-            waiter_name: waiterName || null, // NEW: Dedicated column
+            table_number: tableNumber ? String(tableNumber) : null,
+            waiter_name: waiterName || null,
             notes: finalNotes,
+            // New Fields
+            delivery_option: deliveryOption || null,
+            order_category: orderCategory,
+            is_gift: isGift,
+            recipient_name: recipientName || null,
+            recipient_phone: recipientPhone || null,
+            recipient_address: recipientAddress || null,
+            user_id: userId || null,
             // Snapshot fields
             item_name: foodCart.map((i: any) => `${i.quantity}x ${getItemName(i)}`).join(', '),
             item_description: foodCart.map((i: any) => i.description).filter(Boolean).join('; '),
@@ -212,6 +266,14 @@ export async function POST(req: NextRequest) {
             table_number: tableNumber ? String(tableNumber) : null, // NEW: Dedicated column
             waiter_name: waiterName || null, // NEW: Dedicated column
             notes: finalNotes,
+            // New Fields
+            delivery_option: deliveryOption || null,
+            order_category: orderCategory,
+            is_gift: isGift,
+            recipient_name: recipientName || null,
+            recipient_phone: recipientPhone || null,
+            recipient_address: recipientAddress || null,
+            user_id: userId || null,
           });
 
         if (orderError) throw orderError;
