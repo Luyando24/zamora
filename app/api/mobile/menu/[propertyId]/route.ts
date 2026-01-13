@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { validate as isUuid } from 'uuid';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET(
   request: Request,
@@ -14,7 +15,7 @@ export async function GET(
 
     let resolvedPropertyId = propertyId;
     
-    console.log(`[Mobile Menu] Fetching for property: ${propertyId}`);
+    console.log(`[Mobile Menu] 🚀 Fetching for property: ${propertyId}`);
 
     // 1. Resolve Property ID (if slug provided)
     if (!isUuid(propertyId)) {
@@ -29,6 +30,11 @@ export async function GET(
         return NextResponse.json({ error: 'Property not found' }, { status: 404 });
       }
       resolvedPropertyId = property.id;
+    }
+
+    if (!resolvedPropertyId) {
+      console.error('[Mobile Menu] ❌ Failed to resolve Property ID');
+      return NextResponse.json({ error: 'Invalid Property ID' }, { status: 400 });
     }
 
     // 2. Fetch Property Details (Basic)
