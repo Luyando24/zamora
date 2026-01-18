@@ -27,7 +27,7 @@ export default function SupportPage() {
                 <ArrowLeft size={16} /> Back Home
             </Link>
             <h1 className="text-3xl font-black text-slate-900">Help & Support</h1>
-            <p className="text-slate-500 mt-2 text-lg">We're here to help. Get in touch with us.</p>
+            <p className="text-slate-500 mt-2 text-lg">We&apos;re here to help. Get in touch with us.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">

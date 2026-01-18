@@ -1,10 +1,47 @@
 import { supabase } from '@/lib/supabase';
 import ModernPropertyDetails from '@/components/guest/ModernPropertyDetails';
 import { validate as isUuid } from 'uuid';
+import { Metadata, ResolvingMetadata } from 'next';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+
+export async function generateMetadata(
+  { params }: { params: Promise<{ propertyId: string }> },
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const { propertyId } = await params;
+  
+  let propertyQuery = supabase.from('public_properties').select('*');
+  if (isUuid(propertyId)) {
+    propertyQuery = propertyQuery.eq('id', propertyId);
+  } else {
+    propertyQuery = propertyQuery.eq('slug', propertyId);
+  }
+  const { data: property } = await propertyQuery.single();
+
+  if (!property) {
+    return {
+      title: 'Property Not Found',
+    };
+  }
+
+  const previousImages = (await parent).openGraph?.images || [];
+  const description = property.description 
+    ? property.description.substring(0, 155) + (property.description.length > 155 ? '...' : '')
+    : `Book your stay at ${property.name} in ${property.city || 'Zambia'}. Best rates guaranteed on Zamora.`;
+
+  return {
+    title: `${property.name} - ${property.city || 'Zambia'} Accommodation`,
+    description: description,
+    openGraph: {
+      title: `${property.name} | Book on Zamora`,
+      description: description,
+      images: property.cover_image_url ? [property.cover_image_url, ...previousImages] : previousImages,
+    },
+  };
+}
 
 export default async function BookingPage({ params }: { params: Promise<{ propertyId: string }> }) {
   const { propertyId } = await params;

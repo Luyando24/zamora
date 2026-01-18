@@ -2,8 +2,8 @@ import React from 'react';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | Zamora HMS',
-  description: 'Privacy Policy for Zamora Hotel Management System',
+  title: 'Privacy Policy | Zamora - Secure & Private Booking',
+  description: 'Learn how Zamora protects your personal information and booking data. Transparency and security are our top priorities.',
 };
 
 export default function PrivacyPolicyPage() {

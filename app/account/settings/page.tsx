@@ -175,7 +175,7 @@ export default function SettingsPage() {
              <button className="px-6 py-3 border border-red-200 text-red-600 rounded-xl font-bold text-sm hover:bg-red-50 transition-colors">
                  Delete Account
              </button>
-        </form>
+        </div>
       </main>
       <GuestBottomNav />
     </div>
