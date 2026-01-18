@@ -424,7 +424,7 @@ export default function PropertyStorefront({ property, roomTypes, menuItems, cat
                     <div 
                         key={room.id} 
                         onClick={() => setActiveRoom(room)}
-                        className="group bg-white rounded-2xl md:rounded-3xl border border-slate-100 hover:border-slate-300 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full cursor-pointer"
+                        className="group bg-white rounded-xl md:rounded-2xl border border-slate-100 hover:border-slate-300 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col h-full cursor-pointer"
                     >
                         {/* Image Area */}
                         <div className="aspect-square relative overflow-hidden bg-slate-100">

@@ -195,7 +195,7 @@ export default function ExplorePage() {
     id: p.id,
     title: p.name,
     location: p.city || p.country || p.address,
-    subtitle: p.min_price ? `Starting Price K${p.min_price} /night` : 'View Details',
+    subtitle: p.min_price ? `From K${p.min_price} /night` : 'View Details',
     image: p.display_image || p.cover_image_url,
     type: 'stay',
     slug: p.slug
@@ -251,7 +251,7 @@ export default function ExplorePage() {
       key={item.id} 
       className="block group"
     >
-      <div className="relative aspect-[4/3] md:aspect-video overflow-hidden rounded-2xl bg-slate-100 mb-4 shadow-sm">
+      <div className="relative aspect-[4/3] md:aspect-video overflow-hidden rounded-xl bg-slate-100 mb-4 shadow-sm">
         {item.image ? (
           <Image
             src={item.image}

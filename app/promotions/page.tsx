@@ -33,7 +33,7 @@ export default function PromotionsPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Promo Card 1 */}
-            <div className="bg-gradient-to-br from-pink-500 to-rose-600 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden">
+            <div className="bg-gradient-to-br from-pink-500 to-rose-600 rounded-2xl p-8 text-white shadow-lg relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
                 <div className="relative z-10">
                     <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold mb-4">
@@ -48,7 +48,7 @@ export default function PromotionsPage() {
             </div>
 
              {/* Promo Card 2 */}
-             <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm relative overflow-hidden">
+             <div className="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm relative overflow-hidden">
                 <div className="relative z-10">
                     <div className="inline-flex items-center gap-2 bg-slate-100 px-3 py-1 rounded-full text-xs font-bold text-slate-600 mb-4">
                         <Tag size={12} /> WEEKEND DEAL
