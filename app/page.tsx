@@ -39,13 +39,13 @@ export default function LandingPage() {
 
           <div className="flex items-center gap-4">
             <Link 
-              href="/dashboard" 
+              href="/login" 
               className="text-sm font-medium text-gray-300 hover:text-white transition-colors hidden sm:block"
             >
               Sign In
             </Link>
             <Link
-              href="/dashboard"
+              href="/signup"
               className="group relative px-6 py-2.5 bg-white text-[#030712] rounded-full font-bold text-sm hover:bg-gray-100 transition-all active:scale-95 hidden sm:block"
             >
               Get Started
@@ -95,14 +95,14 @@ export default function LandingPage() {
                 </Link>
                 <div className="h-px bg-white/10 my-2"></div>
                 <Link 
-                  href="/dashboard" 
+                  href="/login" 
                   className="text-lg font-medium text-gray-300 hover:text-white"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Sign In
                 </Link>
                 <Link
-                  href="/dashboard"
+                  href="/signup"
                   className="text-center px-6 py-3 bg-white text-[#030712] rounded-full font-bold text-lg hover:bg-gray-100 transition-all active:scale-95"
                   onClick={() => setMobileMenuOpen(false)}
                 >

@@ -43,7 +43,7 @@ function LoginContent() {
           .eq('id', user.id)
           .single();
 
-        const role = profile?.role || 'staff';
+        const role = profile?.role || 'user';
 
         if (role === 'super_admin') {
           router.push('/admin');
@@ -87,18 +87,18 @@ function LoginContent() {
               Welcome back to <span className="text-transparent bg-clip-text bg-gradient-to-r from-zambia-red to-orange-600">Zamora</span>
             </h1>
             <p className="text-gray-400 text-lg leading-relaxed">
-              Manage your hotel operations, inventory, and guest experiences with our futuristic hospitality OS.
+              Sign in to manage your property, check your bookings, or explore the best experiences in Zambia.
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white/5 backdrop-blur-lg p-4 rounded-xl border border-white/10">
-              <h3 className="font-bold text-white mb-1">Easy Booking</h3>
-              <p className="text-sm text-gray-400">Book your stay in just a few clicks.</p>
+              <h3 className="font-bold text-white mb-1">For Travelers</h3>
+              <p className="text-sm text-gray-400">Book your next adventure with ease.</p>
             </div>
             <div className="bg-white/5 backdrop-blur-lg p-4 rounded-xl border border-white/10">
-              <h3 className="font-bold text-white mb-1">Best Rates</h3>
-              <p className="text-sm text-gray-400">Get the best deals on your favorite hotels.</p>
+              <h3 className="font-bold text-white mb-1">For Business</h3>
+              <p className="text-sm text-gray-400">Manage your hotel operations seamlessly.</p>
             </div>
           </div>
         </motion.div>
