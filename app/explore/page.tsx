@@ -72,6 +72,7 @@ const CATEGORIES = [
 ];
 
 import GuestBottomNav from '@/components/guest/GuestBottomNav';
+import GuestNavbar from '@/components/guest/GuestNavbar';
 
 export default function ExplorePage() {
   const [activeCategory, setActiveCategory] = useState('all');
@@ -85,53 +86,86 @@ export default function ExplorePage() {
 
   const fetchProperties = useCallback(async () => {
     setLoading(true);
-    const supabase = createClient();
+    try {
+      const supabase = createClient();
+      
+      // 1. Determine Fetch Strategy
+    // If no specific search params, prefer public_properties to get ALL types (Activities, Restaurants, etc.)
+    // search_properties RPC is strict on "available rooms" which hides non-stay items.
+    const useRpc = false; // For initial load without params, avoid RPC to ensure we get diversity
+
+    let propertiesData: any[] = [];
     
-    // Fetch properties
-    const { data, error } = await supabase.rpc('search_properties', {
-      p_check_in: null,
-      p_check_out: null,
-      p_guests: 1,
-      p_search_query: ''
-    });
+    if (useRpc) {
+       // 1. Try RPC Search
+       const { data: rpcData, error: rpcError } = await supabase.rpc('search_properties', {
+         p_check_in: null,
+         p_check_out: null,
+         p_guests: 1,
+         p_search_query: ''
+       });
+ 
+       if (rpcError) {
+         console.error('RPC Error:', rpcError);
+       } else {
+         propertiesData = rpcData || [];
+       }
+    }
 
-    let propertiesData = data || [];
-
-    // If RPC fails or returns empty, fallback
-    if (!data || data.length === 0) {
-        const { data: fallbackData } = await supabase.from('public_properties').select('*');
+    // 2. Fallback or Primary Fetch: public_properties view
+    if (propertiesData.length === 0) {
+      const { data: fallbackData, error: fallbackError } = await supabase
+        .from('public_properties')
+        .select('*');
+      
+      if (fallbackError) {
+        console.error('Fetch Error (public_properties):', fallbackError);
+        // 3. Last resort: try properties table directly
+        const { data: tableData, error: tableError } = await supabase
+          .from('properties')
+          .select('*');
+          
+        if (tableError) console.error('Table Error (properties):', tableError);
+        else propertiesData = tableData || [];
+      } else {
         propertiesData = fallbackData || [];
+      }
     }
 
-    // Enhance with prices/images
-    if (propertiesData.length > 0) {
-      const propertyIds = propertiesData.map((p: any) => p.id);
-      const { data: roomTypes } = await supabase
-        .from('room_types')
-        .select('property_id, image_url, base_price')
-        .in('property_id', propertyIds);
+      // Enhance with prices/images
+      if (propertiesData.length > 0) {
+        const propertyIds = propertiesData.map((p: any) => p.id);
+        const { data: roomTypes } = await supabase
+          .from('room_types')
+          .select('property_id, image_url, base_price')
+          .in('property_id', propertyIds);
 
-      const enhancedProperties = propertiesData.map((p: any) => {
-        const pRooms = (roomTypes || []).filter((r: any) => r.property_id === p.id);
-        pRooms.sort((a: any, b: any) => a.base_price - b.base_price);
-        const bestRoom = pRooms[0];
+        const enhancedProperties = propertiesData.map((p: any) => {
+          const pRooms = (roomTypes || []).filter((r: any) => r.property_id === p.id);
+          pRooms.sort((a: any, b: any) => a.base_price - b.base_price);
+          const bestRoom = pRooms[0];
 
-        // Determine type
-        let type = p.type || 'hotel';
-        if (type === 'hotel' && pRooms.length === 0) type = 'restaurant'; // Fallback logic
+          // Determine type
+          let type = p.type || 'hotel';
+          if (type === 'hotel' && pRooms.length === 0) type = 'restaurant'; // Fallback logic
 
-        return {
-          ...p,
-          type,
-          display_image: bestRoom?.image_url || p.cover_image_url,
-          min_price: bestRoom?.base_price || p.min_price
-        };
-      });
-      setProperties(enhancedProperties);
-    } else {
-      setProperties([]);
+          return {
+            ...p,
+            type,
+            display_image: bestRoom?.image_url || p.cover_image_url,
+            min_price: bestRoom?.base_price || p.min_price
+          };
+        });
+        setProperties(enhancedProperties);
+      } else {
+        setProperties([]);
+      }
+    } catch (err) {
+      console.error('Unexpected error fetching properties:', err);
+      toast.error('Failed to load listings');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -260,8 +294,13 @@ export default function ExplorePage() {
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900 pb-24">
       
-      {/* Header */}
-      <header className="fixed top-0 w-full z-50 bg-white px-6 h-16 flex items-center justify-between border-b border-slate-50">
+      {/* Desktop Header */}
+      <div className="hidden md:block">
+        <GuestNavbar />
+      </div>
+
+      {/* Mobile Header */}
+      <header className="md:hidden fixed top-0 w-full z-50 bg-white px-6 h-16 flex items-center justify-between border-b border-slate-50">
         <span className="text-2xl font-black tracking-widest uppercase text-slate-900">ZAMORA</span>
         <button 
           onClick={() => setIsDrawerOpen(true)}
@@ -364,7 +403,7 @@ export default function ExplorePage() {
       <main className="pt-20 px-6 max-w-7xl mx-auto">
         
         {/* Categories Grid */}
-        <div className="grid grid-cols-2 gap-3 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-8">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.id}
