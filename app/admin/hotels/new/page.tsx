@@ -56,7 +56,7 @@ export default function NewHotelPage() {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <form onSubmit={handleSubmit} className="p-8 space-y-8">
+        <form onSubmit={handleSubmit} className="p-4 md:p-8 space-y-8">
           
           {/* Basic Information */}
           <div>
