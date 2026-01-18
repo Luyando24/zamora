@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/dashboard/', '/admin/', '/api/'],
     },
-    sitemap: 'https://zamora.zm/sitemap.xml',
+    sitemap: 'https://zamoraapp.com/sitemap.xml',
   };
 }

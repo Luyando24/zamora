@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_ZM',
-    url: 'https://zamora.zm',
+    url: 'https://zamoraapp.com',
     siteName: 'Zamora',
     title: 'Zamora | Best Accommodation & Hotels in Zambia',
     description: 'Discover and book top-rated hotels, lodges, safari camps, and guest houses in Zambia.',
