@@ -29,7 +29,7 @@ function LoginContent() {
 
     try {
       const { data: { user }, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim().toLowerCase(),
         password,
       });
 
