@@ -5,7 +5,8 @@ import { createClient } from '@/utils/supabase/client';
 import { 
   Home, Bed, Utensils, MapPin, Target, Backpack, 
   Menu, Search, Heart, User, FileText, Bookmark,
-  Building2, Tent, ShoppingBag, Clock, Star
+  Building2, Tent, ShoppingBag, Clock, Star,
+  X, Box, Gift, Settings, HelpCircle, ChevronRight
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -115,11 +116,14 @@ const CATEGORIES = [
   { id: 'tours', name: 'Package Tours', icon: Backpack, color: 'bg-slate-100 text-slate-900' }
 ];
 
+import GuestBottomNav from '@/components/guest/GuestBottomNav';
+
 export default function ExplorePage() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   // Bottom Nav State
   const [activeTab, setActiveTab] = useState('Home');
@@ -186,38 +190,38 @@ export default function ExplorePage() {
     checkUser();
   }, [fetchProperties]);
 
+  // Helper to format items uniformly
+  const formatProperty = (p: any) => ({
+    id: p.id,
+    title: p.name,
+    location: p.city || p.country || p.address,
+    subtitle: p.min_price ? `Starting Price K${p.min_price} /night` : 'View Details',
+    image: p.display_image || p.cover_image_url,
+    type: 'stay',
+    slug: p.slug
+  });
+
+  const formatActivity = (a: any) => ({
+    id: a.id,
+    title: a.name,
+    location: a.location,
+    subtitle: `From K${a.price}`,
+    image: a.image_url,
+    type: 'activity'
+  });
+
+  const formatPlace = (p: any) => ({
+    id: p.id,
+    title: p.name,
+    location: p.location,
+    subtitle: p.type,
+    image: p.image_url,
+    type: 'place'
+  });
+
   // Filter content based on category
   const getFilteredContent = () => {
     let content: any[] = [];
-
-    // Helper to format items uniformly
-    const formatProperty = (p: any) => ({
-      id: p.id,
-      title: p.name,
-      location: p.city || p.country || p.address,
-      subtitle: p.min_price ? `Starting Price K${p.min_price} /night` : 'View Details',
-      image: p.display_image || p.cover_image_url,
-      type: 'stay',
-      slug: p.slug
-    });
-
-    const formatActivity = (a: any) => ({
-      id: a.id,
-      title: a.name,
-      location: a.location,
-      subtitle: `From K${a.price}`,
-      image: a.image_url,
-      type: 'activity'
-    });
-
-    const formatPlace = (p: any) => ({
-      id: p.id,
-      title: p.name,
-      location: p.location,
-      subtitle: p.type,
-      image: p.image_url,
-      type: 'place'
-    });
 
     if (activeCategory === 'all') {
       // Mix of everything
@@ -226,12 +230,10 @@ export default function ExplorePage() {
         ...MOCK_ACTIVITIES.map(formatActivity),
         ...MOCK_PLACES.map(formatPlace)
       ];
-      // Shuffle slightly for "Explore" feel? No, just list them.
     } else if (activeCategory === 'stays') {
       content = properties.filter(p => p.type !== 'restaurant').map(formatProperty);
     } else if (activeCategory === 'food') {
       content = properties.filter(p => p.type === 'restaurant').map(formatProperty);
-      // Add mock food places if any
     } else if (activeCategory === 'places') {
       content = MOCK_PLACES.map(formatPlace);
     } else if (activeCategory === 'activities' || activeCategory === 'tours') {
@@ -243,16 +245,164 @@ export default function ExplorePage() {
 
   const filteredContent = getFilteredContent();
 
+  const renderCard = (item: any) => (
+    <Link 
+      href={item.type === 'stay' ? `/book/${item.slug || item.id}` : '#'} 
+      key={item.id} 
+      className="block group"
+    >
+      <div className="relative aspect-[4/3] md:aspect-video overflow-hidden rounded-2xl bg-slate-100 mb-4 shadow-sm">
+        {item.image ? (
+          <Image
+            src={item.image}
+            alt={item.title}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            unoptimized
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-slate-300 bg-slate-50">
+            <Building2 size={48} />
+          </div>
+        )}
+        <button className="absolute top-3 right-3 p-2 bg-white/30 backdrop-blur-md rounded-full hover:bg-white/50 transition-colors">
+          <Bookmark size={20} className="text-white fill-transparent" />
+        </button>
+      </div>
+      
+      <div className="space-y-1 px-1">
+        <h3 className="font-bold text-slate-900 text-lg leading-tight">{item.title}</h3>
+        <div className="flex items-center gap-1.5 text-slate-500 text-sm">
+          <MapPin size={14} className="text-slate-400" />
+          <span>{item.location}</span>
+        </div>
+        <p className="text-slate-500 text-sm mt-1">{item.subtitle}</p>
+      </div>
+    </Link>
+  );
+
+  const renderSection = (title: string, items: any[], categoryId: string) => {
+    if (items.length === 0) return null;
+    return (
+      <div className="mb-12">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-slate-900">{title}</h2>
+          <button 
+            onClick={() => setActiveCategory(categoryId)}
+            className="text-sm font-semibold text-slate-500 hover:text-slate-900 flex items-center gap-1"
+          >
+            View All <ChevronRight size={16} />
+          </button>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+          {items.slice(0, 4).map(renderCard)}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900 pb-24">
       
       {/* Header */}
       <header className="fixed top-0 w-full z-50 bg-white px-6 h-16 flex items-center justify-between border-b border-slate-50">
         <span className="text-2xl font-black tracking-widest uppercase text-slate-900">ZAMORA</span>
-        <button className="p-2 -mr-2">
-          <Menu size={28} className="text-slate-900" />
+        <button 
+          onClick={() => setIsDrawerOpen(true)}
+          className="p-2 -mr-2 text-slate-900 hover:bg-slate-50 rounded-full transition-colors"
+        >
+          <Menu size={28} />
         </button>
       </header>
+
+      {/* Drawer Menu */}
+      {isDrawerOpen && (
+        <>
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] transition-opacity"
+            onClick={() => setIsDrawerOpen(false)}
+          />
+          
+          {/* Drawer Panel */}
+          <div className="fixed top-0 right-0 h-full w-[300px] bg-white z-[70] shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+            {/* Drawer Header */}
+            <div className="h-16 px-6 flex items-center justify-between border-b border-slate-100">
+              <span className="font-bold text-lg text-slate-900">Menu</span>
+              <button 
+                onClick={() => setIsDrawerOpen(false)}
+                className="p-2 -mr-2 text-slate-400 hover:text-slate-900 rounded-full hover:bg-slate-50 transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* Menu Items */}
+            <div className="flex-1 overflow-y-auto py-4">
+              <div className="space-y-1">
+                <Link href="/account" className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors group">
+                  <div className="flex items-center gap-4">
+                    <User size={22} className="text-slate-400 group-hover:text-slate-900" />
+                    <span className="font-medium text-slate-700 group-hover:text-slate-900">Profile</span>
+                  </div>
+                  <ChevronRight size={18} className="text-slate-300 group-hover:text-slate-500" />
+                </Link>
+
+                <Link href="/account/orders" className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors group">
+                  <div className="flex items-center gap-4">
+                    <Box size={22} className="text-slate-400 group-hover:text-slate-900" />
+                    <span className="font-medium text-slate-700 group-hover:text-slate-900">My Orders</span>
+                  </div>
+                  <ChevronRight size={18} className="text-slate-300 group-hover:text-slate-500" />
+                </Link>
+
+                <Link href="/account/saved" className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors group">
+                  <div className="flex items-center gap-4">
+                    <Heart size={22} className="text-zambia-red" fill="currentColor" />
+                    <span className="font-medium text-slate-700 group-hover:text-slate-900">Saved Stays</span>
+                  </div>
+                  <ChevronRight size={18} className="text-slate-300 group-hover:text-slate-500" />
+                </Link>
+              </div>
+
+              <div className="h-px bg-slate-100 my-4 mx-6" />
+
+              <div className="space-y-1">
+                <Link href="/promotions" className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors group">
+                  <div className="flex items-center gap-4">
+                    <Gift size={22} className="text-slate-400 group-hover:text-slate-900" />
+                    <span className="font-medium text-slate-700 group-hover:text-slate-900">Promotions</span>
+                  </div>
+                  <ChevronRight size={18} className="text-slate-300 group-hover:text-slate-500" />
+                </Link>
+
+                <Link href="/account/settings" className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors group">
+                  <div className="flex items-center gap-4">
+                    <Settings size={22} className="text-slate-400 group-hover:text-slate-900" />
+                    <span className="font-medium text-slate-700 group-hover:text-slate-900">Settings</span>
+                  </div>
+                  <ChevronRight size={18} className="text-slate-300 group-hover:text-slate-500" />
+                </Link>
+
+                <Link href="/support" className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 transition-colors group">
+                  <div className="flex items-center gap-4">
+                    <HelpCircle size={22} className="text-zambia-red" />
+                    <span className="font-medium text-slate-700 group-hover:text-slate-900">Help & Support</span>
+                  </div>
+                  <ChevronRight size={18} className="text-slate-300 group-hover:text-slate-500" />
+                </Link>
+              </div>
+            </div>
+            
+            {/* Drawer Footer (Optional) */}
+            <div className="p-6 border-t border-slate-100 bg-slate-50/50">
+              <p className="text-xs text-center text-slate-400">
+                Version 1.0.0 • Zamora
+              </p>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Main Content */}
       <main className="pt-20 px-6 max-w-7xl mx-auto">
@@ -279,60 +429,36 @@ export default function ExplorePage() {
 
         {/* Explore Section */}
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-6">Explore</h2>
+          {activeCategory !== 'all' && <h2 className="text-2xl font-bold text-slate-900 mb-6">Explore</h2>}
           
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {loading ? (
-              // Loading Skeletons
-              [...Array(4)].map((_, i) => (
+          {loading ? (
+             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              {[...Array(4)].map((_, i) => (
                 <div key={i} className="animate-pulse space-y-3">
                   <div className="bg-slate-100 rounded-2xl aspect-[4/3] w-full"></div>
                   <div className="h-4 bg-slate-100 rounded w-3/4"></div>
                   <div className="h-3 bg-slate-100 rounded w-1/2"></div>
                 </div>
-              ))
-            ) : filteredContent.length > 0 ? (
-              filteredContent.map((item) => (
-                <Link 
-                  href={item.type === 'stay' ? `/book/${item.slug || item.id}` : '#'} 
-                  key={item.id} 
-                  className="block group"
-                >
-                  <div className="relative aspect-[4/3] md:aspect-video overflow-hidden rounded-2xl bg-slate-100 mb-4 shadow-sm">
-                    {item.image ? (
-                      <Image
-                        src={item.image}
-                        alt={item.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                        unoptimized
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-slate-300 bg-slate-50">
-                        <Building2 size={48} />
-                      </div>
-                    )}
-                    <button className="absolute top-3 right-3 p-2 bg-white/30 backdrop-blur-md rounded-full hover:bg-white/50 transition-colors">
-                      <Bookmark size={20} className="text-white fill-transparent" />
-                    </button>
-                  </div>
-                  
-                  <div className="space-y-1 px-1">
-                    <h3 className="font-bold text-slate-900 text-lg leading-tight">{item.title}</h3>
-                    <div className="flex items-center gap-1.5 text-slate-500 text-sm">
-                      <MapPin size={14} className="text-slate-400" />
-                      <span>{item.location}</span>
-                    </div>
-                    <p className="text-slate-500 text-sm mt-1">{item.subtitle}</p>
-                  </div>
-                </Link>
-              ))
-            ) : (
-              <div className="col-span-full text-center py-12 text-slate-500">
-                No items found in this category.
-              </div>
-            )}
-          </div>
+              ))}
+            </div>
+          ) : activeCategory === 'all' ? (
+             <>
+               {renderSection('Stays', properties.filter(p => p.type !== 'restaurant').map(formatProperty), 'stays')}
+               {renderSection('Food & Drink', properties.filter(p => p.type === 'restaurant').map(formatProperty), 'food')}
+               {renderSection('Activities', MOCK_ACTIVITIES.map(formatActivity), 'activities')}
+               {renderSection('Places', MOCK_PLACES.map(formatPlace), 'places')}
+             </>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              {filteredContent.length > 0 ? (
+                filteredContent.map(renderCard)
+              ) : (
+                <div className="col-span-full text-center py-12 text-slate-500">
+                  No items found in this category.
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </main>
 
@@ -355,57 +481,7 @@ export default function ExplorePage() {
       </footer>
 
       {/* Mobile Bottom Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-50 px-6 pb-safe pt-2">
-        <div className="flex justify-between items-center h-16">
-          <button 
-            onClick={() => setActiveTab('Home')}
-            className={`flex flex-col items-center justify-center gap-1 w-full h-full transition-colors ${
-              activeTab === 'Home' ? 'text-slate-900' : 'text-slate-400'
-            }`}
-          >
-            <Home size={24} strokeWidth={activeTab === 'Home' ? 2.5 : 2} />
-            <span className={`text-[10px] font-bold ${activeTab === 'Home' ? 'text-slate-900' : 'text-slate-500'}`}>
-              Home
-            </span>
-          </button>
-
-          <button 
-            onClick={() => setActiveTab('Saved')}
-            className={`flex flex-col items-center justify-center gap-1 w-full h-full transition-colors ${
-              activeTab === 'Saved' ? 'text-slate-900' : 'text-slate-400'
-            }`}
-          >
-            <Heart size={24} strokeWidth={activeTab === 'Saved' ? 2.5 : 2} />
-            <span className={`text-[10px] font-bold ${activeTab === 'Saved' ? 'text-slate-900' : 'text-slate-500'}`}>
-              Saved
-            </span>
-          </button>
-
-          <button 
-            onClick={() => setActiveTab('Orders')}
-            className={`flex flex-col items-center justify-center gap-1 w-full h-full transition-colors ${
-              activeTab === 'Orders' ? 'text-slate-900' : 'text-slate-400'
-            }`}
-          >
-            <FileText size={24} strokeWidth={activeTab === 'Orders' ? 2.5 : 2} />
-            <span className={`text-[10px] font-bold ${activeTab === 'Orders' ? 'text-slate-900' : 'text-slate-500'}`}>
-              Orders
-            </span>
-          </button>
-
-          <button 
-            onClick={() => setActiveTab('Profile')}
-            className={`flex flex-col items-center justify-center gap-1 w-full h-full transition-colors ${
-              activeTab === 'Profile' ? 'text-slate-900' : 'text-slate-400'
-            }`}
-          >
-            <User size={24} strokeWidth={activeTab === 'Profile' ? 2.5 : 2} />
-            <span className={`text-[10px] font-bold ${activeTab === 'Profile' ? 'text-slate-900' : 'text-slate-500'}`}>
-              Profile
-            </span>
-          </button>
-        </div>
-      </div>
+      <GuestBottomNav />
 
     </div>
   );

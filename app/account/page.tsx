@@ -4,12 +4,13 @@ import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 import { 
-  User, Calendar, MapPin, CreditCard, LogOut, 
+  User, Calendar, MapPin, LogOut, 
   Settings, ChevronRight, BedDouble, Clock, CheckCircle, XCircle, Bookmark, ArrowLeft
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { format } from 'date-fns';
+import GuestBottomNav from '@/components/guest/GuestBottomNav';
 
 interface Booking {
   booking_id: string;
@@ -106,22 +107,22 @@ export default function AccountPage() {
               </h1>
               <p className="text-slate-500 text-sm mb-6">{user.email}</p>
               
-              <button className="w-full py-3 border border-slate-200 rounded-xl font-bold text-sm hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
+              <Link href="/account/settings" className="w-full py-3 border border-slate-200 rounded-xl font-bold text-sm hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
                 <Settings size={16} /> Edit Profile
-              </button>
+              </Link>
             </div>
 
             <div className="bg-white p-2 rounded-3xl shadow-sm border border-slate-100">
                <div className="flex flex-col gap-1">
-                 <button className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl text-slate-900 font-bold text-sm">
+                 <Link href="/account" className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl text-slate-900 font-bold text-sm">
                     <Calendar size={20} /> My Bookings
-                 </button>
-                 <button className="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl text-slate-500 hover:text-slate-900 font-bold text-sm transition-colors">
-                    <CreditCard size={20} /> Payments
-                 </button>
-                 <button className="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl text-slate-500 hover:text-slate-900 font-bold text-sm transition-colors w-full text-left">
+                 </Link>
+                 <Link href="/account/orders" className="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl text-slate-500 hover:text-slate-900 font-bold text-sm transition-colors w-full text-left">
+                    <Clock size={20} /> My Orders
+                 </Link>
+                 <Link href="/account/settings" className="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl text-slate-500 hover:text-slate-900 font-bold text-sm transition-colors w-full text-left">
                     <User size={20} /> Personal Info
-                 </button>
+                 </Link>
                  <Link href="/account/saved" className="flex items-center gap-4 p-4 hover:bg-slate-50 rounded-2xl text-slate-500 hover:text-slate-900 font-bold text-sm transition-colors w-full text-left">
                     <Bookmark size={20} /> Saved Items
                  </Link>
@@ -184,6 +185,7 @@ export default function AccountPage() {
           </div>
         </div>
       </main>
+      <GuestBottomNav />
     </div>
   );
 }

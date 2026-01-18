@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import GuestBottomNav from '@/components/guest/GuestBottomNav';
 
 interface SavedProperty {
   id: string;
@@ -176,6 +177,7 @@ export default function SavedItemsPage() {
             </div>
         )}
       </main>
+      <GuestBottomNav />
     </div>
   );
 }
