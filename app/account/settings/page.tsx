@@ -108,7 +108,7 @@ export default function SettingsPage() {
                         value={formData.firstName}
                         onChange={(e) => setFormData({...formData, firstName: e.target.value})}
                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all font-medium"
-                        placeholder="John"
+                        placeholder="Mulenga"
                     />
                 </div>
                 <div className="space-y-2">
@@ -118,7 +118,7 @@ export default function SettingsPage() {
                         value={formData.lastName}
                         onChange={(e) => setFormData({...formData, lastName: e.target.value})}
                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all font-medium"
-                        placeholder="Doe"
+                        placeholder="Banda"
                     />
                 </div>
             </div>

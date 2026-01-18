@@ -195,7 +195,7 @@ export default function SignupPage() {
                           type="text"
                           required
                           className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-black/5 focus:border-slate-400 transition-all"
-                          placeholder="John"
+                          placeholder="Mulenga"
                           value={firstName}
                           onChange={(e) => setFirstName(e.target.value)}
                         />
@@ -209,7 +209,7 @@ export default function SignupPage() {
                           type="text"
                           required
                           className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-black/5 focus:border-slate-400 transition-all"
-                          placeholder="Doe"
+                          placeholder="Banda"
                           value={lastName}
                           onChange={(e) => setLastName(e.target.value)}
                         />

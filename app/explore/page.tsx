@@ -30,17 +30,6 @@ interface Property {
   type?: string;
 }
 
-interface Activity {
-  id: string;
-  name: string;
-  location: string;
-  duration: string;
-  price: number;
-  rating: number;
-  image_url: string;
-  category: string;
-}
-
 interface Place {
   id: string;
   name: string;
@@ -50,40 +39,6 @@ interface Place {
   image_url: string;
   open_hours: string;
 }
-
-// Mock Data
-const MOCK_ACTIVITIES: Activity[] = [
-  {
-    id: '1',
-    name: 'Chaminuka Game Reserve Day Trip',
-    location: 'Chongwe (45min from Lusaka)',
-    duration: 'Full Day',
-    price: 1500,
-    rating: 4.9,
-    image_url: 'https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&q=80&w=800',
-    category: 'Safari & Nature'
-  },
-  {
-    id: '2',
-    name: 'Lilayi Elephant Nursery Visit',
-    location: 'Lusaka South',
-    duration: '2 hours',
-    price: 150,
-    rating: 4.9,
-    image_url: 'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?auto=format&fit=crop&q=80&w=800',
-    category: 'Wildlife Conservation'
-  },
-  {
-    id: '5',
-    name: 'Tiffany\'s Canyon Boat Cruise',
-    location: 'Kafue Road',
-    duration: '4 hours',
-    price: 400,
-    rating: 4.6,
-    image_url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&q=80&w=800',
-    category: 'Leisure'
-  }
-];
 
 const MOCK_PLACES: Place[] = [
   {
@@ -201,13 +156,14 @@ export default function ExplorePage() {
     slug: p.slug
   });
 
-  const formatActivity = (a: any) => ({
-    id: a.id,
-    title: a.name,
-    location: a.location,
-    subtitle: `From K${a.price}`,
-    image: a.image_url,
-    type: 'activity'
+  const formatActivity = (p: any) => ({
+    id: p.id,
+    title: p.name,
+    location: p.city || p.country || p.address,
+    subtitle: p.min_price ? `From K${p.min_price}` : 'View Details',
+    image: p.display_image || p.cover_image_url,
+    type: 'activity',
+    slug: p.slug
   });
 
   const formatPlace = (p: any) => ({
@@ -227,17 +183,17 @@ export default function ExplorePage() {
       // Mix of everything
       content = [
         ...properties.map(formatProperty),
-        ...MOCK_ACTIVITIES.map(formatActivity),
+        ...properties.filter(p => p.type === 'activity').map(formatActivity),
         ...MOCK_PLACES.map(formatPlace)
       ];
     } else if (activeCategory === 'stays') {
-      content = properties.filter(p => p.type !== 'restaurant').map(formatProperty);
+      content = properties.filter(p => p.type !== 'restaurant' && p.type !== 'activity').map(formatProperty);
     } else if (activeCategory === 'food') {
       content = properties.filter(p => p.type === 'restaurant').map(formatProperty);
     } else if (activeCategory === 'places') {
       content = MOCK_PLACES.map(formatPlace);
     } else if (activeCategory === 'activities' || activeCategory === 'tours') {
-      content = MOCK_ACTIVITIES.map(formatActivity);
+      content = properties.filter(p => p.type === 'activity').map(formatActivity);
     }
 
     return content;
@@ -443,9 +399,9 @@ export default function ExplorePage() {
             </div>
           ) : activeCategory === 'all' ? (
              <>
-               {renderSection('Stays', properties.filter(p => p.type !== 'restaurant').map(formatProperty), 'stays')}
+               {renderSection('Stays', properties.filter(p => p.type !== 'restaurant' && p.type !== 'activity').map(formatProperty), 'stays')}
                {renderSection('Food & Drink', properties.filter(p => p.type === 'restaurant').map(formatProperty), 'food')}
-               {renderSection('Activities', MOCK_ACTIVITIES.map(formatActivity), 'activities')}
+               {renderSection('Activities', properties.filter(p => p.type === 'activity').map(formatActivity), 'activities')}
                {renderSection('Places', MOCK_PLACES.map(formatPlace), 'places')}
              </>
           ) : (
