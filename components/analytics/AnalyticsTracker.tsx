@@ -2,13 +2,11 @@
 
 import { useEffect, useRef } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { createClient } from '@/utils/supabase/client';
 import { nanoid } from 'nanoid';
 
 export default function AnalyticsTracker() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const supabase = createClient();
   // Use a ref to prevent double logging in React Strict Mode or rapid re-renders
   const loggedPathRef = useRef<string | null>(null);
 
@@ -49,20 +47,22 @@ export default function AnalyticsTracker() {
         if (loggedPathRef.current === fullPath) return;
         loggedPathRef.current = fullPath;
 
-        const { error } = await supabase.from('analytics_events').insert({
-          event_type: 'page_view',
-          page_path: fullPath,
-          referrer: document.referrer || null,
-          device_type: getDeviceType(),
-          browser: getBrowser(),
-          session_id: sessionId
+        // Use API route to bypass RLS issues for anonymous users
+        await fetch('/api/analytics/track', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            event_type: 'page_view',
+            page_path: fullPath,
+            referrer: document.referrer || null,
+            device_type: getDeviceType(),
+            browser: getBrowser(),
+            session_id: sessionId
+          }),
         });
 
-        if (error) {
-          console.error('Error logging analytics:', error);
-        } else {
-          console.log('Analytics recorded:', fullPath);
-        }
       } catch (err) {
         // Fail silently to not impact user experience
         console.error('Analytics error:', err);
@@ -71,7 +71,7 @@ export default function AnalyticsTracker() {
 
     logPageView();
     
-  }, [pathname, searchParams, supabase]);
+  }, [pathname, searchParams]);
 
   return null; // Render nothing
 }
