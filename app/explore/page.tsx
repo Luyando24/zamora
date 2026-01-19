@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { createClient } from '@/utils/supabase/client';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { 
   Home, Bed, Utensils, MapPin, Target, Backpack, 
   Menu, Search, Heart, User, FileText, Bookmark,
@@ -75,11 +76,20 @@ import GuestBottomNav from '@/components/guest/GuestBottomNav';
 import GuestNavbar from '@/components/guest/GuestNavbar';
 
 export default function ExplorePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white" />}>
+      <ExploreContent />
+    </Suspense>
+  );
+}
+
+function ExploreContent() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const searchParams = useSearchParams();
 
   // Bottom Nav State
   const [activeTab, setActiveTab] = useState('Home');
@@ -88,21 +98,22 @@ export default function ExplorePage() {
     setLoading(true);
     try {
       const supabase = createClient();
+      const searchQuery = searchParams.get('q') || '';
       
       // 1. Determine Fetch Strategy
-    // If no specific search params, prefer public_properties to get ALL types (Activities, Restaurants, etc.)
-    // search_properties RPC is strict on "available rooms" which hides non-stay items.
-    const useRpc = false; // For initial load without params, avoid RPC to ensure we get diversity
+      // If no specific search params, prefer public_properties to get ALL types (Activities, Restaurants, etc.)
+      // search_properties RPC is strict on "available rooms" which hides non-stay items.
+      const useRpc = !!searchQuery; 
 
-    let propertiesData: any[] = [];
-    
-    if (useRpc) {
-       // 1. Try RPC Search
+      let propertiesData: any[] = [];
+      
+      if (useRpc) {
+         // 1. Try RPC Search
        const { data: rpcData, error: rpcError } = await supabase.rpc('search_properties', {
          p_check_in: null,
          p_check_out: null,
          p_guests: 1,
-         p_search_query: ''
+         p_search_query: searchQuery
        });
  
        if (rpcError) {
@@ -166,7 +177,7 @@ export default function ExplorePage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [searchParams]);
 
   useEffect(() => {
     fetchProperties();
@@ -183,7 +194,7 @@ export default function ExplorePage() {
   const formatProperty = (p: any) => ({
     id: p.id,
     title: p.name,
-    location: p.city || p.country || p.address,
+    location: p.city || p.address || p.country,
     subtitle: p.min_price ? `From K${p.min_price} /night` : 'View Details',
     image: p.display_image || p.cover_image_url,
     type: 'stay',
@@ -193,7 +204,7 @@ export default function ExplorePage() {
   const formatActivity = (p: any) => ({
     id: p.id,
     title: p.name,
-    location: p.city || p.country || p.address,
+    location: p.city || p.address || p.country,
     subtitle: p.min_price ? `From K${p.min_price}` : 'View Details',
     image: p.display_image || p.cover_image_url,
     type: 'activity',

@@ -30,10 +30,10 @@ export async function generateMetadata(
   const previousImages = (await parent).openGraph?.images || [];
   const description = property.description 
     ? property.description.substring(0, 155) + (property.description.length > 155 ? '...' : '')
-    : `Book your stay at ${property.name} in ${property.city || 'Zambia'}. Best rates guaranteed on Zamora.`;
+    : `Book your stay at ${property.name} in ${property.city || property.address || 'Zambia'}. Best rates guaranteed on Zamora.`;
 
   return {
-    title: `${property.name} - ${property.city || 'Zambia'} Accommodation`,
+    title: `${property.name} - ${property.city || property.address || 'Zambia'} Accommodation`,
     description: description,
     openGraph: {
       title: `${property.name} | Book on Zamora`,

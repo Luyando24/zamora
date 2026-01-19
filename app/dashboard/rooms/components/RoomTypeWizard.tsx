@@ -23,6 +23,10 @@ const POPULAR_AMENITIES = [
   'Room Service', 'Wake-up Service', 'Soundproofing'
 ];
 
+const BED_TYPES = [
+  'Single', 'Double', 'Queen', 'King', 'Twin', 'Bunk Bed', 'Sofa Bed', 'Studio'
+];
+
 const STEPS = [
   { id: 1, name: 'Property', icon: Building },
   { id: 2, name: 'Basic Info', icon: FileText },
@@ -56,6 +60,7 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
     description: initialData?.description || '',
     base_price: initialData?.base_price || '',
     capacity: initialData?.capacity || 2,
+    bed_type: initialData?.bed_type || 'Queen',
     image_url: initialData?.image_url || '',
     gallery_urls: initialData?.gallery_urls || [],
     amenities: initialData?.amenities || [],
@@ -76,8 +81,8 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
         }
       }
       if (currentStep === 3) {
-        if (!formData.base_price || !formData.capacity) {
-          alert('Please fill in the required fields (Price, Capacity)');
+        if (!formData.base_price || !formData.capacity || !formData.bed_type) {
+          alert('Please fill in the required fields (Price, Capacity, Bed Type)');
           return;
         }
       }
@@ -222,6 +227,28 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
             value={formData.capacity}
             onChange={e => setFormData({ ...formData, capacity: Number(e.target.value) })}
           />
+        </div>
+
+        <div className="md:col-span-2">
+           <label className="block text-sm font-medium text-gray-700 mb-1">Bed Type <span className="text-red-500">*</span></label>
+           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+             {BED_TYPES.map((type) => (
+               <button
+                 key={type}
+                 type="button"
+                 onClick={() => setFormData({ ...formData, bed_type: type })}
+                 className={`
+                   p-3 rounded-xl border-2 text-sm font-medium transition-all
+                   ${formData.bed_type === type
+                     ? 'border-zambia-green bg-green-50 text-zambia-green'
+                     : 'border-slate-100 bg-white text-slate-600 hover:border-slate-300'
+                   }
+                 `}
+               >
+                 {type}
+               </button>
+             ))}
+           </div>
         </div>
       </div>
     </div>

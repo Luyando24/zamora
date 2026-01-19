@@ -21,6 +21,7 @@ interface SavedProperty {
     name: string;
     city: string;
     country: string;
+    address: string;
     cover_image_url: string;
     min_price: number;
     slug: string;
@@ -46,6 +47,7 @@ export default function SavedItemsPage() {
           name,
           city,
           country,
+          address,
           cover_image_url,
           min_price,
           slug
@@ -154,7 +156,7 @@ export default function SavedItemsPage() {
                             </div>
                             <div className="flex items-center gap-1 text-sm text-slate-500 mb-4">
                                 <MapPin size={14} />
-                                {item.properties.city}, {item.properties.country}
+                                {item.properties.city || item.properties.address || item.properties.country}
                             </div>
                             <div className="mt-auto pt-4 border-t border-slate-50 flex justify-between items-center text-xs text-slate-400 font-medium">
                                 <span>Saved on {format(new Date(item.created_at), 'MMM d, yyyy')}</span>

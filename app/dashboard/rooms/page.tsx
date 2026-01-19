@@ -16,6 +16,7 @@ interface RoomType {
   description: string | null;
   image_url: string | null;
   capacity: number;
+  bed_type?: string;
 }
 
 interface Room {
@@ -167,8 +168,15 @@ export default function RoomsPage() {
                  ) : (
                    <BedDouble className="text-slate-300" size={48} />
                  )}
-                 <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur text-slate-900 px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
-                   Capacity: {type.capacity}
+                 <div className="absolute bottom-3 right-3 flex gap-2">
+                   {type.bed_type && (
+                     <div className="bg-white/90 backdrop-blur text-slate-900 px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
+                       {type.bed_type}
+                     </div>
+                   )}
+                   <div className="bg-white/90 backdrop-blur text-slate-900 px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
+                     {type.capacity} Guests
+                   </div>
                  </div>
               </div>
               <div className="p-5 flex-1 flex flex-col">

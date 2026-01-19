@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Menu, User, Building2, Tent, ShoppingBag, LogIn, UserPlus, LogOut, MessageSquare, Map, Heart, UserCircle } from 'lucide-react';
+import { Menu, User, ShoppingBag, LogIn, UserPlus, LogOut, MessageSquare, Map, Heart, UserCircle, Search } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
 import { createClient } from '@/utils/supabase/client';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 interface GuestNavbarProps {
   cartCount?: number;
@@ -15,16 +15,29 @@ interface GuestNavbarProps {
 export default function GuestNavbar({ cartCount, onCartClick }: GuestNavbarProps) {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
-  
-  // Tabs Configuration
-  const tabs = [
-    { name: 'Accommodation', icon: Building2 },
-    { name: 'Activities', icon: Tent },
-    { name: 'Places', icon: ShoppingBag }, 
-  ];
+  const searchParams = useSearchParams();
 
+  useEffect(() => {
+    // Sync search input with URL params
+    const q = searchParams.get('q');
+    if (q) setSearchQuery(q);
+  }, [searchParams]);
+
+  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      const params = new URLSearchParams(searchParams.toString());
+      if (searchQuery.trim()) {
+        params.set('q', searchQuery.trim());
+      } else {
+        params.delete('q');
+      }
+      router.push(`/explore?${params.toString()}`);
+    }
+  };
+  
   useEffect(() => {
     // Check auth status
     const checkAuth = async () => {
@@ -60,20 +73,21 @@ export default function GuestNavbar({ cartCount, onCartClick }: GuestNavbarProps
          <span className="text-xl font-bold tracking-tight text-black uppercase">ZAMORA</span>
       </Link>
 
-      {/* Center Tabs - Navigation */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-full hidden md:flex items-center gap-2">
-         {tabs.map(tab => (
-           <Link
-             key={tab.name}
-             href="/explore"
-             className="relative h-full px-4 flex items-center gap-2 text-sm font-bold transition-colors text-slate-500 hover:text-slate-800 hover:bg-slate-50"
-           >
-             <div className="flex items-center gap-2">
-                 <tab.icon size={20} className="text-slate-500" />
-                 <span>{tab.name}</span>
-             </div>
-           </Link>
-         ))}
+      {/* Center Search Bar */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:block w-full max-w-lg">
+        <div className="relative group">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-slate-400 group-focus-within:text-slate-600 transition-colors" />
+            </div>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearch}
+              placeholder="Search for stays, experiences, or places..."
+              className="block w-full pl-11 pr-4 py-2.5 border border-slate-200 rounded-full leading-5 bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-slate-100 focus:border-slate-300 sm:text-sm shadow-sm transition-all duration-200"
+            />
+        </div>
       </div>
 
       {/* User Menu */}

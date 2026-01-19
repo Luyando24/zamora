@@ -830,7 +830,9 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
                                 </button>
                             </div>
                         </div>
-                        <p className="text-slate-600">{property.address}, {property.city}, {property.country}</p>
+                        <p className="text-slate-600">
+                            {[property.address, property.city, property.country].filter(Boolean).join(', ')}
+                        </p>
                     </section>
 
                     {/* Reviews */}
