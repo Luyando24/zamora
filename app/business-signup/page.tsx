@@ -147,8 +147,8 @@ export default function BusinessSignupPage() {
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="lg:hidden flex items-center gap-2 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-zambia-red flex items-center justify-center font-bold text-white text-xl">Z</div>
-            <span className="font-bold text-2xl tracking-tight">Zamora</span>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-600 to-pink-400 flex items-center justify-center font-bold text-xl shadow-lg shadow-pink-600/20 text-white">Z</div>
+            <span className="font-bold text-2xl tracking-tight uppercase">Zamora</span>
           </div>
 
           <div className="mb-8">

@@ -653,24 +653,19 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
 
                     {/* Overview */}
                     <section id="overview" ref={overviewRef} className="space-y-6">
-                        <h2 className="text-2xl font-bold text-slate-900">About this place</h2>
-                        <p className="text-slate-600 leading-relaxed text-lg">
-                            {property.description || "Experience the perfect blend of comfort and style. Nestled in the heart of the city, this property offers a unique escape with top-tier amenities and personalized service. Whether you're here for business or leisure, our dedicated team ensures a memorable stay."}
-                        </p>
-
                         <div className="grid grid-cols-2 gap-4 pt-4">
                             <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl">
                                 <Clock className="text-slate-900" />
                                 <div>
                                     <p className="text-xs font-bold text-slate-500 uppercase">Check-in</p>
-                                    <p className="font-bold text-slate-900">14:00 - 20:00</p>
+                                    <p className="font-bold text-slate-900">{property.check_in_time || '14:00'}</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl">
                                 <Clock className="text-slate-900" />
                                 <div>
                                     <p className="text-xs font-bold text-slate-500 uppercase">Check-out</p>
-                                    <p className="font-bold text-slate-900">11:00</p>
+                                    <p className="font-bold text-slate-900">{property.check_out_time || '11:00'}</p>
                                 </div>
                             </div>
                         </div>

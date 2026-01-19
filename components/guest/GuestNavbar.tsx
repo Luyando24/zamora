@@ -69,8 +69,8 @@ export default function GuestNavbar({ cartCount, onCartClick }: GuestNavbarProps
   return (
     <header className="fixed top-0 w-full z-50 bg-white border-b border-slate-100 h-16 md:h-20 px-4 md:px-12 flex items-center justify-between">
       <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-         <div className="w-7 h-7 md:w-8 md:h-8 bg-zambia-red rounded-lg flex items-center justify-center text-white font-black text-sm md:text-base">Z</div>
-         <span className="text-xl font-bold tracking-tight text-black uppercase">ZAMORA</span>
+         <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-600 to-pink-400 flex items-center justify-center font-bold text-xl shadow-lg shadow-pink-600/20 text-white">Z</div>
+         <span className="text-2xl font-bold tracking-tight text-black uppercase">ZAMORA</span>
       </Link>
 
       {/* Center Search Bar */}

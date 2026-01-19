@@ -543,7 +543,7 @@ function ExploreContent() {
             <span className="font-bold tracking-tight uppercase text-slate-900">ZAMORA</span>
           </div>
           <div className="text-sm text-slate-500">
-            © 2025 Zamora Systems. Built for Zambia 🇿🇲
+            &copy; {new Date().getFullYear()} Zamora. Made by <a href="https://spaceminds.agency/" target="_blank" rel="noopener noreferrer" className="hover:text-slate-900 transition-colors">Space Minds</a>
           </div>
           <div className="flex gap-6">
             <Link href="/privacy-policy" className="text-slate-500 hover:text-slate-900 transition-colors">Privacy</Link>

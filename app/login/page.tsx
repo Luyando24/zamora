@@ -80,11 +80,11 @@ function LoginContent() {
           className="max-w-lg"
         >
           <div className="mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-zambia-red to-orange-600 flex items-center justify-center font-bold text-3xl shadow-lg shadow-zambia-red/20 mb-6">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-pink-600 to-pink-400 flex items-center justify-center font-bold text-3xl shadow-lg shadow-pink-600/20 text-white mb-6">
               Z
             </div>
             <h1 className="text-5xl font-bold tracking-tight leading-tight mb-6">
-              Welcome back to <span className="text-transparent bg-clip-text bg-gradient-to-r from-zambia-red to-orange-600">Zamora</span>
+              Welcome back to <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-purple-600">Zamora</span>
             </h1>
             <p className="text-gray-400 text-lg leading-relaxed">
               Sign in to manage your property, check your bookings, or explore the best experiences in Zambia.
@@ -109,8 +109,8 @@ function LoginContent() {
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="lg:hidden flex items-center gap-2 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-zambia-red flex items-center justify-center font-bold text-white text-xl">Z</div>
-            <span className="font-bold text-2xl tracking-tight">Zamora</span>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-600 to-pink-400 flex items-center justify-center font-bold text-xl shadow-lg shadow-pink-600/20 text-white">Z</div>
+            <span className="font-bold text-2xl tracking-tight uppercase">Zamora</span>
           </div>
 
           <div className="mb-8">

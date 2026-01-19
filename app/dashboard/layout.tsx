@@ -103,11 +103,11 @@ export default function DashboardLayout({
             </button>
             {/* Branding */}
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center text-white font-black shadow-lg shadow-slate-900/20">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-600 to-pink-400 flex items-center justify-center font-bold text-xl shadow-lg shadow-pink-600/20 text-white">
                 Z
               </div>
               <div>
-                <h1 className="text-lg font-black tracking-tight text-slate-900 leading-none">ZAMORA</h1>
+                <h1 className="text-lg font-bold tracking-tight text-slate-900 leading-none uppercase">ZAMORA</h1>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Hospitality OS</p>
               </div>
             </div>

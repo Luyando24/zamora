@@ -76,6 +76,8 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
     cover_image_url: '',
     gallery_urls: [] as string[],
     amenities: [] as string[],
+    check_in_time: '',
+    check_out_time: '',
   });
   const [newAmenity, setNewAmenity] = useState('');
   const supabase = createClient();
@@ -106,6 +108,8 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
         amenities: Array.isArray(data.amenities) 
           ? data.amenities.map((a: any) => typeof a === 'object' ? a.name : a)
           : [],
+        check_in_time: data.check_in_time || '',
+        check_out_time: data.check_out_time || '',
       });
     }
     setLoading(false);
