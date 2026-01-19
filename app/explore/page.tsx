@@ -88,8 +88,10 @@ function ExploreContent() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [savedPropertyIds, setSavedPropertyIds] = useState<Set<string>>(new Set());
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   // Bottom Nav State
   const [activeTab, setActiveTab] = useState('Home');
@@ -186,9 +188,66 @@ function ExploreContent() {
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
+
+      if (user) {
+        const { data } = await supabase
+          .from('saved_properties')
+          .select('property_id')
+          .eq('user_id', user.id);
+          
+        if (data) {
+          setSavedPropertyIds(new Set(data.map((item: any) => item.property_id)));
+        }
+      }
     };
     checkUser();
   }, [fetchProperties]);
+
+  const toggleSave = async (e: React.MouseEvent, propertyId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user) {
+      toast.error('Please sign in to save properties');
+      router.push('/login?next=/explore');
+      return;
+    }
+
+    const supabase = createClient();
+    const isSaved = savedPropertyIds.has(propertyId);
+    const newSavedIds = new Set(savedPropertyIds);
+
+    if (isSaved) {
+      newSavedIds.delete(propertyId);
+    } else {
+      newSavedIds.add(propertyId);
+    }
+    setSavedPropertyIds(newSavedIds);
+
+    try {
+      if (isSaved) {
+        const { error } = await supabase
+          .from('saved_properties')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('property_id', propertyId);
+          
+        if (error) throw error;
+        toast.success('Property removed from saved');
+      } else {
+        const { error } = await supabase
+          .from('saved_properties')
+          .insert({ user_id: user.id, property_id: propertyId });
+          
+        if (error) throw error;
+        toast.success('Property saved');
+      }
+    } catch (error) {
+      console.error('Error toggling save:', error);
+      setSavedPropertyIds(savedPropertyIds); // Revert
+      toast.error('Failed to update saved status');
+    }
+  };
 
   // Helper to format items uniformly
   const formatProperty = (p: any) => ({
@@ -266,16 +325,24 @@ function ExploreContent() {
             <Building2 size={48} />
           </div>
         )}
-        <button className="absolute top-3 right-3 p-2 bg-white/30 backdrop-blur-md rounded-full hover:bg-white/50 transition-colors">
-          <Bookmark size={20} className="text-white fill-transparent" />
-        </button>
+        {item.type !== 'place' && (
+          <button 
+            onClick={(e) => toggleSave(e, item.id)}
+            className="absolute top-3 right-3 p-2 bg-white/30 backdrop-blur-md rounded-full hover:bg-white/50 transition-colors z-10"
+          >
+            <Bookmark 
+              size={20} 
+              className={savedPropertyIds.has(item.id) ? "text-zambia-red fill-zambia-red" : "text-white fill-transparent"} 
+            />
+          </button>
+        )}
       </div>
       
       <div className="space-y-1 px-1">
         <h3 className="font-bold text-slate-900 text-lg leading-tight">{item.title}</h3>
         <div className="flex items-center gap-1.5 text-slate-500 text-sm">
-          <MapPin size={14} className="text-slate-400" />
-          <span>{item.location}</span>
+          <MapPin size={14} className="text-slate-400 shrink-0" />
+          <span className="truncate flex-1">{item.location}</span>
         </div>
         <p className="text-slate-500 text-sm mt-1">{item.subtitle}</p>
       </div>

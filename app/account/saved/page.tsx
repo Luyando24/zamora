@@ -155,8 +155,8 @@ export default function SavedItemsPage() {
                                 <h3 className="font-bold text-lg text-slate-900 line-clamp-1">{item.properties.name}</h3>
                             </div>
                             <div className="flex items-center gap-1 text-sm text-slate-500 mb-4">
-                                <MapPin size={14} />
-                                {item.properties.city || item.properties.address || item.properties.country}
+                                <MapPin size={14} className="shrink-0" />
+                                <span className="truncate flex-1">{item.properties.city || item.properties.address || item.properties.country}</span>
                             </div>
                             <div className="mt-auto pt-4 border-t border-slate-50 flex justify-between items-center text-xs text-slate-400 font-medium">
                                 <span>Saved on {format(new Date(item.created_at), 'MMM d, yyyy')}</span>
