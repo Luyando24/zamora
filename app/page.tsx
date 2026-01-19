@@ -15,12 +15,9 @@ export default function LandingPage() {
       {/* Navigation */}
       <nav className="fixed w-full z-50 bg-[#030712]/80 backdrop-blur-md border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-600 to-pink-400 flex items-center justify-center font-bold text-xl shadow-lg shadow-pink-600/20">
-              Z
-            </div>
-            <span className="font-bold text-xl tracking-tight uppercase">ZAMORA</span>
-          </div>
+          <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
+            <span className="font-black text-2xl tracking-[0.2em] uppercase">ZAMORA</span>
+          </Link>
           
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-300">
             <Link href="#features" className="hover:text-white transition-colors relative group">

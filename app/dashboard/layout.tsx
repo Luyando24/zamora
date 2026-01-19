@@ -102,14 +102,9 @@ export default function DashboardLayout({
               <Menu size={24} />
             </button>
             {/* Branding */}
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-600 to-pink-400 flex items-center justify-center font-bold text-xl shadow-lg shadow-pink-600/20 text-white">
-                Z
-              </div>
-              <div>
-                <h1 className="text-lg font-bold tracking-tight text-slate-900 leading-none uppercase">ZAMORA</h1>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Hospitality OS</p>
-              </div>
+            <div className="flex flex-col">
+                <h1 className="text-xl font-black tracking-[0.2em] text-slate-900 leading-none uppercase">ZAMORA</h1>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Hospitality OS</p>
             </div>
           </div>
 

@@ -33,12 +33,9 @@ export default function AdminSidebar() {
   return (
     <div className="flex h-full w-64 flex-col bg-slate-900 text-white shadow-xl">
       <div className="flex h-16 items-center px-6 border-b border-white/10">
-        <div className="flex items-center gap-3">
-           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-600 to-pink-400 flex items-center justify-center font-bold text-xl shadow-lg shadow-pink-600/20 text-white">Z</div>
-           <div>
-             <h1 className="text-lg font-bold tracking-tight text-white leading-none uppercase">ZAMORA</h1>
-             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Super Admin</p>
-           </div>
+        <div className="flex flex-col">
+             <h1 className="text-xl font-black tracking-[0.2em] text-white leading-none uppercase">ZAMORA</h1>
+             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Super Admin</p>
         </div>
       </div>
       

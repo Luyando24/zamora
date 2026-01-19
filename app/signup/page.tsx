@@ -164,10 +164,9 @@ export default function SignupPage() {
       <div className="w-full lg:w-1/2 bg-white text-slate-900 flex flex-col justify-center items-center p-8 lg:p-12 relative z-20">
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
-          <div className="lg:hidden flex items-center gap-2 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-600 to-pink-400 flex items-center justify-center font-bold text-xl shadow-lg shadow-pink-600/20 text-white">Z</div>
-            <span className="font-bold text-2xl tracking-tight uppercase">Zamora</span>
-          </div>
+          <Link href="/" className="lg:hidden flex items-center mb-8 hover:opacity-80 transition-opacity">
+            <span className="font-black text-2xl tracking-[0.2em] uppercase text-slate-900">ZAMORA</span>
+          </Link>
 
           <div className="mb-8">
             <h2 className="text-2xl font-bold mb-2">Create your account</h2>

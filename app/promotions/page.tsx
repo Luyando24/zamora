@@ -11,9 +11,8 @@ export default function PromotionsPage() {
       {/* Navbar */}
       <nav className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-600 to-pink-400 flex items-center justify-center font-bold text-xl shadow-lg shadow-pink-600/20 text-white">Z</div>
-            <span className="hidden md:block font-bold text-2xl tracking-tight uppercase text-slate-900">Zamora</span>
+          <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
+            <span className="font-black text-2xl tracking-[0.2em] uppercase text-slate-900">ZAMORA</span>
           </Link>
           <div className="flex items-center gap-4">
              <Link href="/explore" className="text-sm font-bold text-slate-500 hover:text-slate-900">Explore</Link>

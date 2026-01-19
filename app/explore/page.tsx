@@ -379,7 +379,9 @@ function ExploreContent() {
 
       {/* Mobile Header */}
       <header className="md:hidden fixed top-0 w-full z-50 bg-white px-6 h-16 flex items-center justify-between border-b border-slate-50">
-        <span className="text-2xl font-black tracking-widest uppercase text-slate-900">ZAMORA</span>
+        <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
+            <span className="text-2xl font-black tracking-[0.2em] uppercase text-slate-900">ZAMORA</span>
+        </Link>
         <button 
           onClick={() => setIsDrawerOpen(true)}
           className="p-2 -mr-2 text-slate-900 hover:bg-slate-50 rounded-full transition-colors"
