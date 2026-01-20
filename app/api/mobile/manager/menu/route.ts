@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
         if (!propertyId) return NextResponse.json({ error: 'Property ID required' }, { status: 400 });
 
         const access = await verifyManagerAccess(req, propertyId);
-        if (access.error) return NextResponse.json({ error: access.error }, { status: access.status });
+        if (access.error || !access.user) return NextResponse.json({ error: access.error || 'Unauthorized' }, { status: access.status || 401 });
 
         const supabase = getSupabaseAdmin();
 
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
         }
 
         const access = await verifyManagerAccess(req, propertyId);
-        if (access.error) return NextResponse.json({ error: access.error }, { status: access.status });
+        if (access.error || !access.user) return NextResponse.json({ error: access.error || 'Unauthorized' }, { status: access.status || 401 });
 
         const supabase = getSupabaseAdmin();
         const table = type === 'bar' ? 'bar_menu_items' : 'menu_items';

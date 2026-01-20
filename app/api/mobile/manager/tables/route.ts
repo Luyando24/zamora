@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
         const propertyId = searchParams.get('propertyId');
         
         const access = await verifyManagerAccess(req, propertyId || '');
-        if (access.error) return NextResponse.json({ error: access.error }, { status: access.status });
+        if (access.error || !access.user) return NextResponse.json({ error: access.error || 'Unauthorized' }, { status: access.status || 401 });
 
         const supabase = getSupabaseAdmin();
         const { data: tables, error } = await supabase
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
         const { propertyId, room_number, room_type_id, status, notes } = body;
 
         const access = await verifyManagerAccess(req, propertyId);
-        if (access.error) return NextResponse.json({ error: access.error }, { status: access.status });
+        if (access.error || !access.user) return NextResponse.json({ error: access.error || 'Unauthorized' }, { status: access.status || 401 });
 
         if (!room_number || !room_type_id) {
             return NextResponse.json({ error: 'Room number and type are required' }, { status: 400 });

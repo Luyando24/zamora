@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
         const propertyId = searchParams.get('propertyId');
         
         const access = await verifyManagerAccess(req, propertyId || '');
-        if (access.error) return NextResponse.json({ error: access.error }, { status: access.status });
+        if (access.error || !access.user) return NextResponse.json({ error: access.error || 'Unauthorized' }, { status: access.status || 401 });
 
         const supabase = getSupabaseAdmin();
         const { data: types, error } = await supabase

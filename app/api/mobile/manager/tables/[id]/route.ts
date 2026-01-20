@@ -9,7 +9,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         const { propertyId, room_number, room_type_id, status, notes } = body;
 
         const access = await verifyManagerAccess(req, propertyId);
-        if (access.error) return NextResponse.json({ error: access.error }, { status: access.status });
+        if (access.error || !access.user) return NextResponse.json({ error: access.error || 'Unauthorized' }, { status: access.status || 401 });
 
         const supabase = getSupabaseAdmin();
         
@@ -47,7 +47,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
         const propertyId = searchParams.get('propertyId');
 
         const access = await verifyManagerAccess(req, propertyId || '');
-        if (access.error) return NextResponse.json({ error: access.error }, { status: access.status });
+        if (access.error || !access.user) return NextResponse.json({ error: access.error || 'Unauthorized' }, { status: access.status || 401 });
 
         const supabase = getSupabaseAdmin();
 
