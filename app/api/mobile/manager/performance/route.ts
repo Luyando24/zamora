@@ -1,0 +1,115 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getSupabaseAdmin } from '@/lib/db/supabase-admin';
+import { verifyManagerAccess } from '../utils';
+
+export const dynamic = 'force-dynamic';
+
+export async function GET(req: NextRequest) {
+    try {
+        const { searchParams } = new URL(req.url);
+        const propertyId = searchParams.get('propertyId');
+        const period = searchParams.get('period') || 'today';
+
+        if (!propertyId) return NextResponse.json({ error: 'Property ID required' }, { status: 400 });
+
+        // Verify Access
+        const access = await verifyManagerAccess(req, propertyId);
+        if (access.error) return NextResponse.json({ error: access.error }, { status: access.status });
+
+        const supabase = getSupabaseAdmin();
+
+        // Determine Date Range
+        const now = new Date();
+        let startDate = new Date();
+        
+        switch (period) {
+            case 'today':
+                startDate.setHours(0, 0, 0, 0);
+                break;
+            case 'week':
+                startDate.setDate(now.getDate() - 7);
+                break;
+            case 'month':
+                startDate.setMonth(now.getMonth() - 1);
+                break;
+            case 'year':
+                startDate.setFullYear(now.getFullYear() - 1);
+                break;
+            default:
+                startDate.setHours(0, 0, 0, 0); // Default to today
+        }
+
+        const startDateStr = startDate.toISOString();
+
+        // 1. Fetch Orders (Food)
+        const { data: foodOrders, error: foodError } = await supabase
+            .from('orders')
+            .select('id, status, total_amount, created_at, order_items(name, quantity, price)')
+            .eq('property_id', propertyId)
+            .gte('created_at', startDateStr);
+
+        if (foodError) throw foodError;
+
+        // 2. Fetch Orders (Bar)
+        const { data: barOrders, error: barError } = await supabase
+            .from('bar_orders')
+            .select('id, status, total_amount, created_at, bar_order_items(item_name, quantity, price)')
+            .eq('property_id', propertyId)
+            .gte('created_at', startDateStr);
+
+        if (barError) throw barError;
+
+        // 3. Process Data
+        const allOrders = [
+            ...(foodOrders || []).map(o => ({ ...o, type: 'food', items: o.order_items })),
+            ...(barOrders || []).map(o => ({ ...o, type: 'bar', items: o.bar_order_items?.map((i: any) => ({ name: i.item_name, quantity: i.quantity, price: i.price })) }))
+        ];
+
+        const totalOrders = allOrders.length;
+        const totalRevenue = allOrders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0);
+        const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+        // Orders by Status
+        const ordersByStatus: Record<string, number> = {};
+        allOrders.forEach(o => {
+            const status = o.status || 'unknown';
+            ordersByStatus[status] = (ordersByStatus[status] || 0) + 1;
+        });
+
+        // Top Items
+        const itemMap: Record<string, { quantity: number, revenue: number }> = {};
+        allOrders.forEach(o => {
+            if (o.items && Array.isArray(o.items)) {
+                o.items.forEach((item: any) => {
+                    const name = item.name || 'Unknown Item';
+                    const qty = Number(item.quantity) || 0;
+                    const price = Number(item.price) || 0;
+                    
+                    if (!itemMap[name]) itemMap[name] = { quantity: 0, revenue: 0 };
+                    itemMap[name].quantity += qty;
+                    itemMap[name].revenue += (qty * price);
+                });
+            }
+        });
+
+        const topItems = Object.entries(itemMap)
+            .map(([name, stats]) => ({ name, ...stats }))
+            .sort((a, b) => b.quantity - a.quantity)
+            .slice(0, 5); // Top 5
+
+        return NextResponse.json({
+            period,
+            summary: {
+                totalOrders,
+                totalRevenue,
+                averageOrderValue
+            },
+            ordersByStatus,
+            topItems
+        });
+
+    } catch (error: any) {
+        console.error('Performance API Error:', error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+}
