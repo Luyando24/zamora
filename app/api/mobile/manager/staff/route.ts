@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
 
         const { data: staff, error } = await supabase
             .from('profiles')
-            .select('id, first_name, last_name, email, role, phone')
+            .select('id, first_name, last_name, email, role')
             .eq('property_id', propertyId)
             .in('role', ['waiter', 'manager', 'chef', 'bartender']) // List relevant staff roles
             .order('created_at', { ascending: false });
@@ -55,7 +55,8 @@ export async function POST(req: NextRequest) {
                 first_name: firstName,
                 last_name: lastName,
                 property_id: propertyId,
-                role: role
+                role: role,
+                phone: phone
             }
         });
 
@@ -75,8 +76,7 @@ export async function POST(req: NextRequest) {
                 first_name: firstName,
                 last_name: lastName,
                 role,
-                property_id: propertyId,
-                phone
+                property_id: propertyId
             });
 
         if (profileError) {

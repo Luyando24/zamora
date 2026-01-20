@@ -67,8 +67,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         if (firstName !== undefined) updates.first_name = firstName;
         if (lastName !== undefined) updates.last_name = lastName;
         if (role !== undefined) updates.role = role;
-        if (phone !== undefined) updates.phone = phone;
-
+        
         const { error: updateError } = await supabase
             .from('profiles')
             .update(updates)
@@ -77,9 +76,14 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         if (updateError) throw updateError;
 
         // Optionally update Auth Metadata if name changed
-        if (firstName || lastName) {
+        const metadataUpdates: any = {};
+        if (firstName !== undefined) metadataUpdates.first_name = firstName;
+        if (lastName !== undefined) metadataUpdates.last_name = lastName;
+        if (phone !== undefined) metadataUpdates.phone = phone;
+
+        if (Object.keys(metadataUpdates).length > 0) {
              await supabase.auth.admin.updateUserById(userId, {
-                user_metadata: { first_name: firstName, last_name: lastName }
+                user_metadata: metadataUpdates
              });
         }
 
