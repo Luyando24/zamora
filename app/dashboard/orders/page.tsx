@@ -202,7 +202,7 @@ export default function OrdersPage() {
   const [barOrders, setBarOrders] = useState<BarOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | BarOrder | null>(null);
-  const [userRole, setUserRole] = useState<string>('staff');
+  const [userRole, setUserRole] = useState<string | null>(null);
   const supabase = createClient();
 
   useEffect(() => {
@@ -211,6 +211,9 @@ export default function OrdersPage() {
       if (user) {
         const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
         if (profile?.role) setUserRole(profile.role);
+        else setUserRole('staff');
+      } else {
+        setUserRole('staff');
       }
     };
     fetchRole();
@@ -221,10 +224,10 @@ export default function OrdersPage() {
   };
 
   const fetchFoodOrders = useCallback(async () => {
-    if (!selectedPropertyId) return;
+    if (!selectedPropertyId || !userRole) return;
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('orders')
         .select(`
           *,
@@ -239,6 +242,12 @@ export default function OrdersPage() {
         .eq('property_id', selectedPropertyId)
         .order('created_at', { ascending: false });
 
+      if (userRole === 'cashier') {
+        query = query.eq('status', 'delivered');
+      }
+
+      const { data, error } = await query;
+
       if (error) throw error;
       setFoodOrders((data as any[]) || []);
     } catch (error) {
@@ -246,13 +255,13 @@ export default function OrdersPage() {
     } finally {
       setLoading(false);
     }
-  }, [selectedPropertyId, supabase]);
+  }, [selectedPropertyId, supabase, userRole]);
 
   const fetchBarOrders = useCallback(async () => {
-    if (!selectedPropertyId) return;
+    if (!selectedPropertyId || !userRole) return;
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('bar_orders')
         .select(`
           *,
@@ -264,6 +273,12 @@ export default function OrdersPage() {
         .eq('property_id', selectedPropertyId)
         .order('created_at', { ascending: false });
 
+      if (userRole === 'cashier') {
+        query = query.eq('status', 'delivered');
+      }
+
+      const { data, error } = await query;
+
       if (error) throw error;
       setBarOrders((data as any[]) || []);
     } catch (error) {
@@ -271,7 +286,7 @@ export default function OrdersPage() {
     } finally {
       setLoading(false);
     }
-  }, [selectedPropertyId, supabase]);
+  }, [selectedPropertyId, supabase, userRole]);
 
   useEffect(() => {
     if (selectedPropertyId) {
@@ -486,35 +501,39 @@ export default function OrdersPage() {
       <main className="flex-1 overflow-x-auto overflow-y-hidden p-6">
         <div className="flex gap-6 h-full min-w-[1400px]">
 
-          <Column
-            title="New Orders"
-            orders={groupedOrders.pending}
-            config={currentConfig.pending}
-            onStatusUpdate={(id, status) => updateStatus(id, status, activeTab)}
-            onViewDetails={setSelectedOrder}
-            nextStatus="preparing"
-            elapsedTime={getElapsedTime}
-          />
+          {userRole !== 'cashier' && (
+            <>
+              <Column
+                title="New Orders"
+                orders={groupedOrders.pending}
+                config={currentConfig.pending}
+                onStatusUpdate={(id, status) => updateStatus(id, status, activeTab)}
+                onViewDetails={setSelectedOrder}
+                nextStatus="preparing"
+                elapsedTime={getElapsedTime}
+              />
 
-          <Column
-            title="Preparing"
-            orders={groupedOrders.preparing}
-            config={currentConfig.preparing}
-            onStatusUpdate={(id, status) => updateStatus(id, status, activeTab)}
-            onViewDetails={setSelectedOrder}
-            nextStatus="ready"
-            elapsedTime={getElapsedTime}
-          />
+              <Column
+                title="Preparing"
+                orders={groupedOrders.preparing}
+                config={currentConfig.preparing}
+                onStatusUpdate={(id, status) => updateStatus(id, status, activeTab)}
+                onViewDetails={setSelectedOrder}
+                nextStatus="ready"
+                elapsedTime={getElapsedTime}
+              />
 
-          <Column
-            title="Ready for Pickup"
-            orders={groupedOrders.ready}
-            config={currentConfig.ready}
-            onStatusUpdate={(id, status) => updateStatus(id, status, activeTab)}
-            onViewDetails={setSelectedOrder}
-            nextStatus="delivered"
-            elapsedTime={getElapsedTime}
-          />
+              <Column
+                title="Ready for Pickup"
+                orders={groupedOrders.ready}
+                config={currentConfig.ready}
+                onStatusUpdate={(id, status) => updateStatus(id, status, activeTab)}
+                onViewDetails={setSelectedOrder}
+                nextStatus="delivered"
+                elapsedTime={getElapsedTime}
+              />
+            </>
+          )}
 
           <Column
             title="Completed"

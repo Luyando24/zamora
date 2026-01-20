@@ -114,13 +114,28 @@ export default function BarOrdersPage() {
   const [orders, setOrders] = useState<BarOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<BarOrder | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchRole = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+        if (profile?.role) setUserRole(profile.role);
+        else setUserRole('staff');
+      } else {
+        setUserRole('staff');
+      }
+    };
+    fetchRole();
+  }, [supabase]);
 
   const fetchOrders = useCallback(async () => {
-    if (!selectedPropertyId) return;
+    if (!selectedPropertyId || !userRole) return;
     
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('bar_orders')
         .select(`
           *,
@@ -152,6 +167,12 @@ export default function BarOrdersPage() {
         .eq('property_id', selectedPropertyId)
         .order('created_at', { ascending: false });
 
+      if (userRole === 'cashier') {
+        query = query.eq('status', 'delivered');
+      }
+
+      const { data, error } = await query;
+      
       if (error) throw error;
       
       setOrders((data as any[]) || []);
@@ -160,7 +181,7 @@ export default function BarOrdersPage() {
     } finally {
       setLoading(false);
     }
-  }, [selectedPropertyId, supabase]);
+  }, [selectedPropertyId, supabase, userRole]);
 
   useEffect(() => {
     if (selectedPropertyId) {
@@ -298,35 +319,39 @@ export default function BarOrdersPage() {
       <main className="flex-1 overflow-x-auto overflow-y-hidden p-6">
         <div className="flex gap-6 h-full min-w-[1400px]">
           
-          <Column 
-            title="New Orders" 
-            orders={groupedOrders.pending} 
-            config={STATUS_CONFIG.pending}
-            onStatusUpdate={updateStatus}
-            onViewDetails={setSelectedOrder}
-            nextStatus="preparing"
-            elapsedTime={getElapsedTime}
-          />
+          {userRole !== 'cashier' && (
+            <>
+              <Column 
+                title="New Orders" 
+                orders={groupedOrders.pending} 
+                config={STATUS_CONFIG.pending}
+                onStatusUpdate={updateStatus}
+                onViewDetails={setSelectedOrder}
+                nextStatus="preparing"
+                elapsedTime={getElapsedTime}
+              />
 
-          <Column 
-            title="Preparing" 
-            orders={groupedOrders.preparing} 
-            config={STATUS_CONFIG.preparing}
-            onStatusUpdate={updateStatus}
-            onViewDetails={setSelectedOrder}
-            nextStatus="ready"
-            elapsedTime={getElapsedTime}
-          />
+              <Column 
+                title="Preparing" 
+                orders={groupedOrders.preparing} 
+                config={STATUS_CONFIG.preparing}
+                onStatusUpdate={updateStatus}
+                onViewDetails={setSelectedOrder}
+                nextStatus="ready"
+                elapsedTime={getElapsedTime}
+              />
 
-          <Column 
-            title="Ready for Pickup" 
-            orders={groupedOrders.ready} 
-            config={STATUS_CONFIG.ready}
-            onStatusUpdate={updateStatus}
-            onViewDetails={setSelectedOrder}
-            nextStatus="delivered"
-            elapsedTime={getElapsedTime}
-          />
+              <Column 
+                title="Ready for Pickup" 
+                orders={groupedOrders.ready} 
+                config={STATUS_CONFIG.ready}
+                onStatusUpdate={updateStatus}
+                onViewDetails={setSelectedOrder}
+                nextStatus="delivered"
+                elapsedTime={getElapsedTime}
+              />
+            </>
+          )}
 
           <Column 
             title="Completed" 
