@@ -22,7 +22,7 @@ export default function TeamPage() {
     email: '',
     firstName: '',
     lastName: '',
-    role: 'staff',
+    role: 'cashier',
     password: ''
   });
   const [inviting, setInviting] = useState(false);
@@ -87,7 +87,7 @@ export default function TeamPage() {
 
       toast.success('Member added successfully');
       setIsInviteOpen(false);
-      setFormData({ email: '', firstName: '', lastName: '', role: 'staff', password: '' });
+      setFormData({ email: '', firstName: '', lastName: '', role: 'cashier', password: '' });
       fetchTeam(); // Refresh list
     } catch (error: any) {
       toast.error(error.message);
@@ -162,6 +162,7 @@ export default function TeamPage() {
                     ${user.role === 'admin' ? 'bg-purple-100 text-purple-700' :
                       user.role === 'manager' ? 'bg-blue-100 text-blue-700' :
                         user.role === 'waiter' ? 'bg-orange-100 text-orange-700' :
+                          user.role === 'cashier' ? 'bg-emerald-100 text-emerald-700' :
                           'bg-slate-100 text-slate-700'}`}
                   >
                     {user.role}
@@ -230,7 +231,7 @@ export default function TeamPage() {
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Role</label>
             <div className="grid gap-3 grid-cols-2">
-              {['admin', 'manager', 'staff', 'waiter'].map((role) => (
+              {['admin', 'manager', 'cashier', 'waiter'].map((role) => (
                 <button
                   key={role}
                   type="button"
@@ -247,7 +248,7 @@ export default function TeamPage() {
             <p className="text-xs text-slate-500 mt-2">
               {formData.role === 'admin' && 'Full access to all settings and financial data.'}
               {formData.role === 'manager' && 'Can manage operations, inventory, and staff.'}
-              {formData.role === 'staff' && 'Limited access to assigned tasks and orders.'}
+              {formData.role === 'cashier' && 'Limited access to food orders and POS.'}
               {formData.role === 'waiter' && 'Can manage tables and take orders.'}
             </p>
           </div>

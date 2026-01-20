@@ -200,7 +200,19 @@ export default function OrdersPage() {
   const [barOrders, setBarOrders] = useState<BarOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | BarOrder | null>(null);
+  const [userRole, setUserRole] = useState<string>('staff');
   const supabase = createClient();
+
+  useEffect(() => {
+    const fetchRole = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+        if (profile?.role) setUserRole(profile.role);
+      }
+    };
+    fetchRole();
+  }, [supabase]);
 
   const handlePropertyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedPropertyId(e.target.value);
@@ -409,30 +421,32 @@ export default function OrdersPage() {
           </div>
 
           {/* Tab Switcher */}
-          <div className="bg-slate-100 p-1 rounded-lg flex items-center">
-            <button
-              onClick={() => setActiveTab('food')}
-              className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'food' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-            >
-              Food Orders
-              {activeFoodCount > 0 && (
-                <span className="flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[10px] font-bold rounded-full bg-red-500 text-white shadow-sm">
-                  {activeFoodCount}
-                </span>
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab('bar')}
-              className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'bar' ? 'bg-white text-purple-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-            >
-              Bar Orders
-              {activeBarCount > 0 && (
-                <span className="flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[10px] font-bold rounded-full bg-red-500 text-white shadow-sm">
-                  {activeBarCount}
-                </span>
-              )}
-            </button>
-          </div>
+          {userRole !== 'cashier' && (
+            <div className="bg-slate-100 p-1 rounded-lg flex items-center">
+              <button
+                onClick={() => setActiveTab('food')}
+                className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'food' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                Food Orders
+                {activeFoodCount > 0 && (
+                  <span className="flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[10px] font-bold rounded-full bg-red-500 text-white shadow-sm">
+                    {activeFoodCount}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => setActiveTab('bar')}
+                className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'bar' ? 'bg-white text-purple-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                Bar Orders
+                {activeBarCount > 0 && (
+                  <span className="flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[10px] font-bold rounded-full bg-red-500 text-white shadow-sm">
+                    {activeBarCount}
+                  </span>
+                )}
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-3">

@@ -15,14 +15,14 @@ import { useEffect, useState, useCallback } from 'react';
 export const navigationGroups = [
   {
     title: 'Main',
-    roles: ['admin', 'manager', 'staff', 'waiter'],
+    roles: ['admin', 'manager', 'cashier', 'waiter'],
     items: [
       { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
     ]
   },
   {
     title: 'Operations',
-    roles: ['admin', 'manager', 'staff', 'waiter'],
+    roles: ['admin', 'manager', 'cashier', 'waiter'],
     items: [
       { name: 'Room Bookings', href: '/dashboard/inventory', icon: CalendarDays },
       { name: 'Stock Management', href: '/dashboard/stock', icon: Package },
@@ -58,7 +58,7 @@ export default function Sidebar({ onLinkClick }: { onLinkClick?: () => void }) {
   const supabase = createClient();
   const { selectedProperty } = useProperty();
   const [userEmail, setUserEmail] = useState<string>('User');
-  const [userRole, setUserRole] = useState<string>('staff');
+  const [userRole, setUserRole] = useState<string>('cashier');
 
   const getUser = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -109,6 +109,12 @@ export default function Sidebar({ onLinkClick }: { onLinkClick?: () => void }) {
               if (userRole === 'waiter') {
                 const waiterAllowedItems = ['Overview', 'Food & Bar Orders', 'Order History', 'Food & Bar Menu'];
                 return waiterAllowedItems.includes(item.name);
+              }
+
+              // Filter items for cashiers
+              if (userRole === 'cashier') {
+                const cashierAllowedItems = ['Overview', 'Food & Bar Orders', 'Order History'];
+                return cashierAllowedItems.includes(item.name);
               }
 
               return true;

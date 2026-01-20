@@ -15,7 +15,7 @@ import { createClient } from '@/utils/supabase/client';
 export default function BottomNav() {
     const pathname = usePathname();
     const supabase = createClient();
-    const [userRole, setUserRole] = useState<string>('staff');
+    const [userRole, setUserRole] = useState<string>('cashier');
 
     const getRole = useCallback(async () => {
         const { data: { user } } = await supabase.auth.getUser();
@@ -37,11 +37,11 @@ export default function BottomNav() {
     }, [getRole]);
 
     const navItems = [
-        { name: 'Overview', href: '/dashboard', icon: LayoutDashboard, roles: ['admin', 'manager', 'staff', 'waiter'] },
-        { name: 'Orders', href: '/dashboard/orders', icon: Utensils, roles: ['admin', 'manager', 'staff', 'waiter'] },
-        { name: 'Bookings', href: '/dashboard/inventory', icon: CalendarDays, roles: ['admin', 'manager', 'staff'] },
-        { name: 'Menu', href: '/dashboard/menu', icon: Utensils, roles: ['admin', 'manager', 'staff', 'waiter'] },
-        { name: 'Cleaning', href: '/housekeeping', icon: BedDouble, roles: ['admin', 'manager', 'staff'] },
+        { name: 'Overview', href: '/dashboard', icon: LayoutDashboard, roles: ['admin', 'manager', 'cashier', 'waiter'] },
+        { name: 'Orders', href: '/dashboard/orders', icon: Utensils, roles: ['admin', 'manager', 'cashier', 'waiter'] },
+        { name: 'Bookings', href: '/dashboard/inventory', icon: CalendarDays, roles: ['admin', 'manager'] },
+        { name: 'Menu', href: '/dashboard/menu', icon: Utensils, roles: ['admin', 'manager', 'waiter'] },
+        { name: 'Cleaning', href: '/housekeeping', icon: BedDouble, roles: ['admin', 'manager'] },
     ];
 
     return (
