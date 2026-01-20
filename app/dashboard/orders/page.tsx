@@ -46,6 +46,7 @@ interface Order {
   order_items: OrderItem[];
   guest_phone?: string;
   payment_method?: string;
+  payment_status?: 'pending' | 'paid';
   property_id?: string;
 }
 
@@ -84,6 +85,7 @@ interface BarOrder {
   bar_order_items: BarOrderItem[];
   guest_phone?: string;
   payment_method?: string;
+  payment_status?: 'pending' | 'paid';
   property_id?: string;
 }
 

@@ -124,6 +124,7 @@ export default function BarOrdersPage() {
         .from('bar_orders')
         .select(`
           *,
+          payment_status,
           bar_order_items (
             id,
             quantity,
