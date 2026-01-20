@@ -579,12 +579,22 @@ export default function OrdersPage() {
                     <span>• {new Date(selectedOrder.created_at || new Date()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                   </div>
                 </div>
-                <button
-                  onClick={() => setSelectedOrder(null)}
-                  className="p-1.5 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors"
-                >
-                  <X size={20} />
-                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => printReceipt(selectedOrder)}
+                    className="p-1.5 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors"
+                    title="Print Receipt"
+                  >
+                    <Printer size={20} />
+                  </button>
+                  <button
+                    onClick={() => setSelectedOrder(null)}
+                    className="p-1.5 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors"
+                    aria-label="Close"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
               </div>
 
               {/* Modal Content */}
@@ -609,8 +619,14 @@ export default function OrdersPage() {
                     </div>
                   )}
                   <div className="flex justify-between items-center">
-                    <span className="text-slate-500 text-sm font-medium">Payment</span>
+                    <span className="text-slate-500 text-sm font-medium">Payment Method</span>
                     <span className="text-slate-900 font-semibold capitalize">{selectedOrder.payment_method?.replace('_', ' ') || 'Room Charge'}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-500 text-sm font-medium">Payment Status</span>
+                    <span className={`font-bold uppercase text-xs px-2 py-0.5 rounded-full ${selectedOrder.payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+                      {selectedOrder.payment_status || 'Pending'}
+                    </span>
                   </div>
                 </div>
 
@@ -827,6 +843,9 @@ function OrderCard({ order, config, onStatusUpdate, onViewDetails, nextStatus, e
             <p className="text-xs text-slate-500 font-medium">{order.guest_name}</p>
           </div>
           <div className="flex items-center gap-2">
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border uppercase ${order.payment_status === 'paid' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-orange-50 text-orange-700 border-orange-200'}`}>
+              {order.payment_status || 'pending'}
+            </span>
             <span className={`text-xs font-bold px-2 py-1 rounded-full ${config.badge}`}>
               {elapsedTime(order.created_at)} ago
             </span>

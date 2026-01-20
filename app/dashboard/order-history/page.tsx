@@ -56,6 +56,7 @@ export default function OrderHistoryPage() {
         .from(table)
         .select(`
           *,
+          payment_status,
           ${itemsTable} (
             id, quantity, total_price, item_name,
             ${menuRelation} (name)
@@ -232,6 +233,15 @@ export default function OrderHistoryPage() {
                         K{order.total_amount.toFixed(2)}
                       </td>
                       <td className="px-6 py-4 text-center">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase ${
+                          order.payment_status === 'paid' 
+                            ? 'bg-green-100 text-green-700 border border-green-200' 
+                            : 'bg-orange-100 text-orange-700 border border-orange-200'
+                        }`}>
+                          {order.payment_status || 'pending'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-center">
                         <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold capitalize gap-1.5 ${order.status === 'delivered'
                             ? 'bg-emerald-100 text-emerald-700'
                             : 'bg-slate-100 text-slate-500'
@@ -294,6 +304,20 @@ export default function OrderHistoryPage() {
                     <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
                       <p className="text-xs text-slate-500 uppercase font-bold">Room/Table</p>
                       <p className="font-semibold text-slate-900">{selectedOrder.guest_room_number}</p>
+                    </div>
+                    <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                      <p className="text-xs text-slate-500 uppercase font-bold">Payment Status</p>
+                      <span className={`inline-flex items-center mt-1 px-2 py-0.5 rounded-full text-xs font-bold uppercase ${
+                        selectedOrder.payment_status === 'paid' 
+                          ? 'bg-green-100 text-green-700 border border-green-200' 
+                          : 'bg-orange-100 text-orange-700 border border-orange-200'
+                      }`}>
+                        {selectedOrder.payment_status || 'Pending'}
+                      </span>
+                    </div>
+                    <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                      <p className="text-xs text-slate-500 uppercase font-bold">Payment Method</p>
+                      <p className="font-semibold text-slate-900 capitalize">{selectedOrder.payment_method?.replace('_', ' ') || 'Room Charge'}</p>
                     </div>
                   </div>
 
