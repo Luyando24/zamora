@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
             .from('profiles')
             .select('id, first_name, last_name, email, role')
             .eq('property_id', propertyId)
-            .in('role', ['admin', 'manager', 'staff', 'waiter', 'chef', 'bartender']) // List relevant staff roles
+            // Removed role filter to ensure all staff types are visible
             .order('created_at', { ascending: false });
 
         if (error) throw error;
