@@ -1,13 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 import { getSupabaseAdmin } from '@/lib/db/supabase-admin';
+
+function getSupabase(req: NextRequest) {
+    const authHeader = req.headers.get('Authorization');
+    return createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+            global: {
+                headers: {
+                    Authorization: authHeader || '',
+                },
+            },
+        }
+    );
+}
 
 export async function verifyManagerAccess(req: NextRequest, propertyId: string) {
     if (!propertyId) {
         return { error: 'Property ID is required', status: 400 };
     }
 
-    const supabase = await createClient();
+    const supabase = getSupabase(req);
     const { data: { user }, error } = await supabase.auth.getUser();
 
     if (error || !user) {

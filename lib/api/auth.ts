@@ -1,5 +1,7 @@
 import { NextRequest } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
+import { createClient as createServerClient } from '@/utils/supabase/server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { getSupabaseAdmin } from '@/lib/db/supabase-admin';
 
 /**
  * Authentication and authorization utilities for API routes
@@ -17,12 +19,30 @@ export interface AuthResult {
     error?: string;
 }
 
+async function getSupabase(req: NextRequest) {
+    const authHeader = req.headers.get('Authorization');
+    if (authHeader) {
+        return createSupabaseClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            {
+                global: {
+                    headers: {
+                        Authorization: authHeader,
+                    },
+                },
+            }
+        );
+    }
+    return await createServerClient();
+}
+
 /**
  * Authenticate the request and return the user
  */
 export async function authenticateRequest(req: NextRequest): Promise<AuthResult> {
     try {
-        const supabase = await createClient();
+        const supabase = await getSupabase(req);
         const { data: { user }, error } = await supabase.auth.getUser();
 
         if (error || !user) {
@@ -33,8 +53,9 @@ export async function authenticateRequest(req: NextRequest): Promise<AuthResult>
         }
 
         // Fetch user profile for role information
+        // Try 'profiles' table first as it's the standard in this project
         const { data: profile } = await supabase
-            .from('users')
+            .from('profiles')
             .select('role')
             .eq('id', user.id)
             .single();
@@ -63,7 +84,7 @@ export async function authorizeHotelAccess(
     propertyId: string
 ): Promise<{ authorized: boolean; error?: string }> {
     try {
-        const supabase = await createClient();
+        const supabase = getSupabaseAdmin();
 
         // 1. Check if user is the owner (creator) of the property
         const { data: property, error: propError } = await supabase
@@ -117,10 +138,10 @@ export async function requireRole(
     requiredRoles: string[]
 ): Promise<{ authorized: boolean; error?: string; role?: string }> {
     try {
-        const supabase = await createClient();
+        const supabase = getSupabaseAdmin();
 
         const { data: profile, error } = await supabase
-            .from('users')
+            .from('profiles')
             .select('role')
             .eq('id', userId)
             .single();
@@ -155,7 +176,7 @@ export async function verifyResourceOwnership(
     ownerField: string = 'user_id'
 ): Promise<{ authorized: boolean; error?: string }> {
     try {
-        const supabase = await createClient();
+        const supabase = getSupabaseAdmin();
 
         const { data, error } = await supabase
             .from(resourceTable)
@@ -185,7 +206,7 @@ export async function authorizeFolioAccess(
     folioId: string
 ): Promise<{ authorized: boolean; error?: string }> {
     try {
-        const supabase = await createClient();
+        const supabase = getSupabaseAdmin();
 
         // Get folio with property information
         const { data: folio, error: folioError } = await supabase
