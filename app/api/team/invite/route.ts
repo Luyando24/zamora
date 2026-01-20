@@ -74,6 +74,19 @@ export async function POST(req: NextRequest) {
          console.error('Error updating profile:', profileError);
     }
 
+    // 3. Add to Property Staff (CRITICAL for RLS visibility)
+    const { error: staffError } = await adminClient
+        .from('property_staff')
+        .upsert({
+            property_id: propertyId,
+            user_id: newUserId,
+            role: role
+        }, { onConflict: 'property_id,user_id' });
+
+    if (staffError) {
+         console.error('Error updating property_staff:', staffError);
+    }
+
     return NextResponse.json({ success: true, user: authData.user });
 
   } catch (err: any) {
