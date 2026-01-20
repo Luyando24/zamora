@@ -1,14 +1,15 @@
 'use client';
 import { useState } from 'react';
-import { useERP } from '@/hooks/useERP';
+import { InventoryItem, useERP } from '@/hooks/useERP';
 import { useProperty } from '../context/PropertyContext';
-import { Plus, Search, Package, AlertTriangle, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { Plus, Search, Package, AlertTriangle, ArrowUpRight, ArrowDownRight, Pencil } from 'lucide-react';
 import StockItemModal from '@/components/dashboard/erp/StockItemModal';
 
 export default function StockPage() {
   const { selectedPropertyId } = useProperty();
   const { inventory, suppliers, loading, refetch } = useERP(selectedPropertyId);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
 
@@ -17,6 +18,16 @@ export default function StockPage() {
     const matchesCategory = filterCategory === 'all' || item.category === filterCategory;
     return matchesSearch && matchesCategory;
   });
+
+  const handleEdit = (item: InventoryItem) => {
+    setSelectedItem(item);
+    setIsModalOpen(true);
+  };
+
+  const handleAdd = () => {
+    setSelectedItem(null);
+    setIsModalOpen(true);
+  };
 
   if (loading) {
     return (
@@ -63,7 +74,7 @@ export default function StockPage() {
            </div>
            
            <button
-             onClick={() => setIsModalOpen(true)}
+             onClick={handleAdd}
              className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-all font-bold text-sm shadow-lg shadow-slate-900/10"
            >
              <Plus size={16} /> Add Item
@@ -82,11 +93,14 @@ export default function StockPage() {
                 <th className="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Cost / Unit</th>
                 <th className="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Supplier</th>
                 <th className="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-slate-100">
               {filteredItems.map(item => {
                 const isLowStock = item.quantity <= item.min_quantity;
+                const supplierName = suppliers.find(s => s.id === item.supplier_id)?.name || '-';
+                
                 return (
                   <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -98,18 +112,18 @@ export default function StockPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600 capitalize">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 capitalize">
                         {item.category}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <div className="text-sm font-bold text-slate-900">{item.quantity} <span className="text-slate-400 font-normal text-xs">{item.unit}</span></div>
+                      <div className="text-sm font-bold text-slate-900">{item.quantity} <span className="text-slate-500 font-normal text-xs">{item.unit}</span></div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-slate-600">
-                      ${item.cost_per_unit.toFixed(2)}
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <div className="text-sm text-slate-600">${item.cost_per_unit.toFixed(2)}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                      {item.supplier?.name || '-'}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                      {supplierName}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       {isLowStock ? (
@@ -122,14 +136,23 @@ export default function StockPage() {
                         </div>
                       )}
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <button 
+                        onClick={() => handleEdit(item)}
+                        className="text-slate-400 hover:text-blue-600 p-2 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="Edit Item"
+                      >
+                        <Pencil size={16} />
+                      </button>
+                    </td>
                   </tr>
                 );
               })}
               
               {filteredItems.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-slate-500 text-sm">
-                    No items found. Add inventory to get started.
+                  <td colSpan={7} className="px-6 py-12 text-center text-slate-500 text-sm">
+                    No stock items found.
                   </td>
                 </tr>
               )}
@@ -143,6 +166,7 @@ export default function StockPage() {
         onClose={() => setIsModalOpen(false)}
         propertyId={selectedPropertyId || ''}
         suppliers={suppliers}
+        item={selectedItem}
         onSuccess={refetch}
       />
     </div>

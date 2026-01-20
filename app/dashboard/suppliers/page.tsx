@@ -1,20 +1,31 @@
 'use client';
 import { useState } from 'react';
-import { useERP } from '@/hooks/useERP';
+import { Supplier, useERP } from '@/hooks/useERP';
 import { useProperty } from '../context/PropertyContext';
-import { Plus, Search, Truck, Phone, Mail, MapPin } from 'lucide-react';
+import { Plus, Search, Truck, Phone, Mail, MapPin, Pencil } from 'lucide-react';
 import SupplierModal from '@/components/dashboard/erp/SupplierModal';
 
 export default function SuppliersPage() {
   const { selectedPropertyId } = useProperty();
   const { suppliers, loading, refetch } = useERP(selectedPropertyId);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredSuppliers = suppliers.filter(s => 
     s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     s.contact_name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleEdit = (supplier: Supplier) => {
+    setSelectedSupplier(supplier);
+    setIsModalOpen(true);
+  };
+
+  const handleAdd = () => {
+    setSelectedSupplier(null);
+    setIsModalOpen(true);
+  };
 
   if (loading) {
     return (
@@ -47,7 +58,7 @@ export default function SuppliersPage() {
              />
            </div>
            <button
-             onClick={() => setIsModalOpen(true)}
+             onClick={handleAdd}
              className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-all font-bold text-sm shadow-lg shadow-slate-900/10"
            >
              <Plus size={16} /> Add Supplier
@@ -57,8 +68,16 @@ export default function SuppliersPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredSuppliers.map(supplier => (
-          <div key={supplier.id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all">
-            <div className="flex justify-between items-start mb-4">
+          <div key={supplier.id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all group relative">
+            <button 
+              onClick={() => handleEdit(supplier)}
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+              title="Edit Supplier"
+            >
+              <Pencil size={16} />
+            </button>
+
+            <div className="flex justify-between items-start mb-4 pr-8">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
                   <Truck size={20} />
@@ -108,6 +127,7 @@ export default function SuppliersPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         propertyId={selectedPropertyId || ''}
+        supplier={selectedSupplier}
         onSuccess={refetch}
       />
     </div>

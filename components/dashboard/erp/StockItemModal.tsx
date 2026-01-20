@@ -1,20 +1,22 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { X } from 'lucide-react';
-import { Supplier } from '@/hooks/useERP';
+import { Supplier, InventoryItem } from '@/hooks/useERP';
 
 export default function StockItemModal({ 
   isOpen, 
   onClose, 
   propertyId, 
   suppliers,
+  item,
   onSuccess 
 }: { 
   isOpen: boolean; 
   onClose: () => void; 
   propertyId: string; 
   suppliers: Supplier[];
+  item?: InventoryItem | null;
   onSuccess: () => void; 
 }) {
   const [loading, setLoading] = useState(false);
@@ -27,6 +29,23 @@ export default function StockItemModal({
     supplier_id: ''
   });
 
+  useEffect(() => {
+    if (isOpen) {
+      if (item) {
+        setFormData({
+          name: item.name || '',
+          category: item.category || 'food',
+          unit: item.unit || 'kg',
+          min_quantity: item.min_quantity || 0,
+          cost_per_unit: item.cost_per_unit || 0,
+          supplier_id: item.supplier_id || ''
+        });
+      } else {
+        setFormData({ name: '', category: 'food', unit: 'kg', min_quantity: 0, cost_per_unit: 0, supplier_id: '' });
+      }
+    }
+  }, [isOpen, item]);
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,22 +54,38 @@ export default function StockItemModal({
     const supabase = createClient();
 
     try {
-      const { error } = await supabase
-        .from('inventory_items')
-        .insert({
-          ...formData,
-          supplier_id: formData.supplier_id || null,
-          property_id: propertyId,
-          quantity: 0 // Start with 0
-        });
+      if (item) {
+        // Update
+        const { error } = await supabase
+          .from('inventory_items')
+          .update({
+            ...formData,
+            supplier_id: formData.supplier_id || null,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', item.id)
+          .eq('property_id', propertyId);
 
-      if (error) throw error;
+        if (error) throw error;
+      } else {
+        // Create
+        const { error } = await supabase
+          .from('inventory_items')
+          .insert({
+            ...formData,
+            supplier_id: formData.supplier_id || null,
+            property_id: propertyId,
+            quantity: 0 // Start with 0
+          });
+
+        if (error) throw error;
+      }
+
       onSuccess();
       onClose();
-      setFormData({ name: '', category: 'food', unit: 'kg', min_quantity: 0, cost_per_unit: 0, supplier_id: '' });
     } catch (error) {
-      console.error('Error adding item:', error);
-      alert('Failed to add item');
+      console.error('Error saving item:', error);
+      alert('Failed to save item');
     } finally {
       setLoading(false);
     }
@@ -60,7 +95,7 @@ export default function StockItemModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-bold text-slate-900">Add Stock Item</h3>
+          <h3 className="text-xl font-bold text-slate-900">{item ? 'Edit Stock Item' : 'Add Stock Item'}</h3>
           <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full">
             <X size={20} className="text-slate-500" />
           </button>
@@ -154,7 +189,7 @@ export default function StockItemModal({
               disabled={loading}
               className="px-6 py-2 bg-slate-900 text-white rounded-xl font-medium hover:bg-slate-800 disabled:opacity-50"
             >
-              {loading ? 'Adding...' : 'Add Item'}
+              {loading ? 'Saving...' : (item ? 'Update Item' : 'Add Item')}
             </button>
           </div>
         </form>

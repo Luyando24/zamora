@@ -1,17 +1,20 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { X } from 'lucide-react';
+import { Supplier } from '@/hooks/useERP';
 
 export default function SupplierModal({ 
   isOpen, 
   onClose, 
   propertyId, 
+  supplier,
   onSuccess 
 }: { 
   isOpen: boolean; 
   onClose: () => void; 
   propertyId: string; 
+  supplier?: Supplier | null;
   onSuccess: () => void; 
 }) {
   const [loading, setLoading] = useState(false);
@@ -23,6 +26,22 @@ export default function SupplierModal({
     address: ''
   });
 
+  useEffect(() => {
+    if (isOpen) {
+      if (supplier) {
+        setFormData({
+          name: supplier.name || '',
+          contact_name: supplier.contact_name || '',
+          email: supplier.email || '',
+          phone: supplier.phone || '',
+          address: supplier.address || ''
+        });
+      } else {
+        setFormData({ name: '', contact_name: '', email: '', phone: '', address: '' });
+      }
+    }
+  }, [isOpen, supplier]);
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,20 +50,35 @@ export default function SupplierModal({
     const supabase = createClient();
 
     try {
-      const { error } = await supabase
-        .from('suppliers')
-        .insert({
-          ...formData,
-          property_id: propertyId
-        });
+      if (supplier) {
+        // Update
+        const { error } = await supabase
+          .from('suppliers')
+          .update({
+            ...formData,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', supplier.id)
+          .eq('property_id', propertyId);
 
-      if (error) throw error;
+        if (error) throw error;
+      } else {
+        // Create
+        const { error } = await supabase
+          .from('suppliers')
+          .insert({
+            ...formData,
+            property_id: propertyId
+          });
+
+        if (error) throw error;
+      }
+
       onSuccess();
       onClose();
-      setFormData({ name: '', contact_name: '', email: '', phone: '', address: '' });
     } catch (error) {
-      console.error('Error adding supplier:', error);
-      alert('Failed to add supplier');
+      console.error('Error saving supplier:', error);
+      alert('Failed to save supplier');
     } finally {
       setLoading(false);
     }
@@ -54,7 +88,7 @@ export default function SupplierModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-bold text-slate-900">Add Supplier</h3>
+          <h3 className="text-xl font-bold text-slate-900">{supplier ? 'Edit Supplier' : 'Add Supplier'}</h3>
           <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full">
             <X size={20} className="text-slate-500" />
           </button>
@@ -123,7 +157,7 @@ export default function SupplierModal({
               disabled={loading}
               className="px-6 py-2 bg-slate-900 text-white rounded-xl font-medium hover:bg-slate-800 disabled:opacity-50"
             >
-              {loading ? 'Adding...' : 'Add Supplier'}
+              {loading ? 'Saving...' : (supplier ? 'Update Supplier' : 'Add Supplier')}
             </button>
           </div>
         </form>
