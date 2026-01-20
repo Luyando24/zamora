@@ -7,7 +7,7 @@ import { useProperty } from '@/app/dashboard/context/PropertyContext';
 import {
   LayoutDashboard, CalendarDays, BedDouble, FileText,
   Settings, LogOut, DoorOpen, Utensils, Building2,
-  ChevronRight, User, Wine, Users, History
+  ChevronRight, User, Wine, Users, History, Package, Truck
 } from 'lucide-react';
 import { useEffect, useState, useCallback } from 'react';
 
@@ -25,6 +25,8 @@ export const navigationGroups = [
     roles: ['admin', 'manager', 'staff', 'waiter'],
     items: [
       { name: 'Room Bookings', href: '/dashboard/inventory', icon: CalendarDays },
+      { name: 'Stock Management', href: '/dashboard/stock', icon: Package },
+      { name: 'Suppliers', href: '/dashboard/suppliers', icon: Truck },
       { name: 'Food & Bar Orders', href: '/dashboard/orders', icon: Utensils },
       { name: 'Order History', href: '/dashboard/order-history', icon: History },
       { name: 'Food & Bar Menu', href: '/dashboard/menu', icon: Utensils },
