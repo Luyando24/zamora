@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
         // 1. Fetch Orders (Food)
         const { data: foodOrders, error: foodError } = await supabase
             .from('orders')
-            .select('id, status, total_amount, created_at, order_items(name, quantity, price)')
+            .select('id, status, total_amount, created_at, order_items(item_name, quantity, unit_price)')
             .eq('property_id', propertyId)
             .gte('created_at', startDateStr);
 
@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
         // 2. Fetch Orders (Bar)
         const { data: barOrders, error: barError } = await supabase
             .from('bar_orders')
-            .select('id, status, total_amount, created_at, bar_order_items(item_name, quantity, price)')
+            .select('id, status, total_amount, created_at, bar_order_items(item_name, quantity, unit_price)')
             .eq('property_id', propertyId)
             .gte('created_at', startDateStr);
 
@@ -61,8 +61,24 @@ export async function GET(req: NextRequest) {
 
         // 3. Process Data
         const allOrders = [
-            ...(foodOrders || []).map(o => ({ ...o, type: 'food', items: o.order_items })),
-            ...(barOrders || []).map(o => ({ ...o, type: 'bar', items: o.bar_order_items?.map((i: any) => ({ name: i.item_name, quantity: i.quantity, price: i.price })) }))
+            ...(foodOrders || []).map(o => ({ 
+                ...o, 
+                type: 'food', 
+                items: o.order_items?.map((i: any) => ({ 
+                    name: i.item_name, 
+                    quantity: i.quantity, 
+                    price: i.unit_price 
+                })) 
+            })),
+            ...(barOrders || []).map(o => ({ 
+                ...o, 
+                type: 'bar', 
+                items: o.bar_order_items?.map((i: any) => ({ 
+                    name: i.item_name, 
+                    quantity: i.quantity, 
+                    price: i.unit_price 
+                })) 
+            }))
         ];
 
         const totalOrders = allOrders.length;
