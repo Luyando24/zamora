@@ -71,7 +71,7 @@ export default function StockItemModal({
             <label className="block text-sm font-medium text-slate-700 mb-1">Item Name *</label>
             <input
               required
-              className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900"
               value={formData.name}
               onChange={e => setFormData({...formData, name: e.target.value})}
             />
@@ -81,7 +81,7 @@ export default function StockItemModal({
              <div>
                <label className="block text-sm font-medium text-slate-700 mb-1">Category</label>
                <select
-                 className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                 className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900"
                  value={formData.category}
                  onChange={e => setFormData({...formData, category: e.target.value})}
                >
@@ -95,7 +95,7 @@ export default function StockItemModal({
              <div>
                <label className="block text-sm font-medium text-slate-700 mb-1">Unit</label>
                <input
-                 className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                 className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900"
                  value={formData.unit}
                  onChange={e => setFormData({...formData, unit: e.target.value})}
                  placeholder="e.g. kg, L, pack"
@@ -109,7 +109,7 @@ export default function StockItemModal({
                <input
                  type="number"
                  min="0"
-                 className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                 className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900"
                  value={formData.min_quantity}
                  onChange={e => setFormData({...formData, min_quantity: Number(e.target.value)})}
                />
@@ -120,7 +120,7 @@ export default function StockItemModal({
                  type="number"
                  min="0"
                  step="0.01"
-                 className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                 className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900"
                  value={formData.cost_per_unit}
                  onChange={e => setFormData({...formData, cost_per_unit: Number(e.target.value)})}
                />
@@ -130,7 +130,7 @@ export default function StockItemModal({
           <div>
              <label className="block text-sm font-medium text-slate-700 mb-1">Supplier</label>
              <select
-               className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+               className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900"
                value={formData.supplier_id}
                onChange={e => setFormData({...formData, supplier_id: e.target.value})}
              >

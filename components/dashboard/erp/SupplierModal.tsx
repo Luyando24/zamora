@@ -65,7 +65,7 @@ export default function SupplierModal({
             <label className="block text-sm font-medium text-slate-700 mb-1">Company Name *</label>
             <input
               required
-              className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900"
               value={formData.name}
               onChange={e => setFormData({...formData, name: e.target.value})}
             />
@@ -75,7 +75,7 @@ export default function SupplierModal({
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Contact Person</label>
               <input
-                className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900"
                 value={formData.contact_name}
                 onChange={e => setFormData({...formData, contact_name: e.target.value})}
               />
@@ -83,7 +83,7 @@ export default function SupplierModal({
             <div>
                <label className="block text-sm font-medium text-slate-700 mb-1">Phone</label>
                <input
-                 className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                 className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900"
                  value={formData.phone}
                  onChange={e => setFormData({...formData, phone: e.target.value})}
                />
@@ -94,7 +94,7 @@ export default function SupplierModal({
             <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
             <input
               type="email"
-              className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900"
               value={formData.email}
               onChange={e => setFormData({...formData, email: e.target.value})}
             />
@@ -103,7 +103,7 @@ export default function SupplierModal({
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Address</label>
             <textarea
-              className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900"
               rows={3}
               value={formData.address}
               onChange={e => setFormData({...formData, address: e.target.value})}
