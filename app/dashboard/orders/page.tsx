@@ -430,6 +430,89 @@ export default function OrdersPage() {
     }
   };
 
+  const printReceipt = (order: Order | BarOrder) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const isFood = 'order_items' in order;
+    const items = isFood ? order.order_items : (order as BarOrder).bar_order_items;
+
+    const itemsHtml = items.map((item: any) => {
+      let name = item.item_name || 'Item';
+      if (!item.item_name) {
+        if (isFood && item.menu_items) name = item.menu_items.name;
+        else if (!isFood && item.bar_menu_items) name = item.bar_menu_items.name;
+      }
+
+      return `
+        <tr>
+            <td style="padding: 5px 0;">${item.quantity}x ${name}</td>
+            <td style="text-align: right; padding: 5px 0;">K${item.total_price?.toFixed(2) || '0.00'}</td>
+        </tr>
+    `}).join('');
+
+    const propertyName = properties?.find(p => p.id === selectedPropertyId)?.name || 'Zamora';
+
+    const html = `
+        <html>
+        <head>
+            <title>Receipt - ${order.guest_room_number}</title>
+            <style>
+                body { font-family: 'Courier New', Courier, monospace; width: 300px; margin: 0 auto; padding: 20px; color: #000; }
+                .header { text-align: center; margin-bottom: 20px; border-bottom: 1px dashed #000; padding-bottom: 10px; }
+                .title { font-size: 1.2em; font-weight: bold; margin: 0; text-transform: uppercase; }
+                .info { font-size: 0.9em; margin: 5px 0; }
+                table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 0.9em; }
+                .total { border-top: 1px dashed #000; margin-top: 10px; padding-top: 10px; text-align: right; font-weight: bold; font-size: 1.1em; }
+                .footer { text-align: center; margin-top: 20px; font-size: 0.8em; border-top: 1px dashed #000; padding-top: 10px; }
+                .payment-status { text-align: center; margin: 10px 0; font-weight: bold; border: 1px solid #000; padding: 5px; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <p class="title">${propertyName}</p>
+                <p class="info">${new Date(order.created_at).toLocaleString()}</p>
+                <p class="info">Order #${order.id.slice(0, 8)}</p>
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <p class="info"><strong>Guest:</strong> ${order.guest_name}</p>
+                <p class="info"><strong>Location:</strong> ${order.guest_room_number}</p>
+            </div>
+
+            <table>
+                <tbody>
+                    ${itemsHtml}
+                </tbody>
+            </table>
+
+            <div class="total">
+                Total: K${order.total_amount?.toFixed(2)}
+            </div>
+
+            <div class="payment-status">
+                ${order.payment_status === 'paid' ? 'PAID' : 'PAYMENT PENDING'}
+                <br/>
+                <span style="font-size: 0.8em; font-weight: normal;">${order.payment_method?.replace('_', ' ') || 'Room Charge'}</span>
+            </div>
+
+             <div class="footer">
+                <p>Thank you for your order!</p>
+            </div>
+            <script>
+                window.onload = function() {
+                  window.print();
+                  setTimeout(() => window.close(), 100);
+                }
+            </script>
+        </body>
+        </html>
+    `;
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+  };
+
   return (
     <div className="h-screen flex flex-col bg-slate-50 font-sans antialiased">
       {/* Header */}
