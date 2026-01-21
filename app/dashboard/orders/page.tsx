@@ -398,7 +398,11 @@ export default function OrdersPage() {
     pending: currentOrders.filter(o => o.status === 'pending'),
     preparing: currentOrders.filter(o => o.status === 'preparing'),
     ready: currentOrders.filter(o => o.status === 'ready'),
-    completed: currentOrders.filter(o => ['delivered', 'cancelled'].includes(o.status)),
+    completed: currentOrders.filter(o =>
+      userRole === 'cashier'
+        ? o.status === 'delivered'
+        : ['delivered', 'cancelled'].includes(o.status)
+    ),
   };
 
   const refreshOrders = () => {

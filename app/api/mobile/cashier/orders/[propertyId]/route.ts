@@ -64,15 +64,17 @@ export async function GET(
         )
       `)
       .eq('property_id', propertyId)
-      .order('created_at', { ascending: false })
-      .limit(50);
+      .order('created_at', { ascending: false });
 
-    if (status) {
+    if (profile.role === 'cashier') {
+      // Cashiers ONLY see delivered and paid orders by default
+      foodQuery = foodQuery.eq('status', 'delivered').eq('payment_status', 'paid');
+    } else if (status) {
       const statuses = status.split(',').map(s => s.trim());
       foodQuery = foodQuery.in('status', statuses);
     }
 
-    if (paymentStatus) {
+    if (paymentStatus && profile.role !== 'cashier') {
       foodQuery = foodQuery.eq('payment_status', paymentStatus);
     }
 
@@ -87,15 +89,16 @@ export async function GET(
         )
       `)
       .eq('property_id', propertyId)
-      .order('created_at', { ascending: false })
-      .limit(50);
+      .order('created_at', { ascending: false });
 
-    if (status) {
+    if (profile.role === 'cashier') {
+      barQuery = barQuery.eq('status', 'delivered').eq('payment_status', 'paid');
+    } else if (status) {
       const statuses = status.split(',').map(s => s.trim());
       barQuery = barQuery.in('status', statuses);
     }
 
-    if (paymentStatus) {
+    if (paymentStatus && profile.role !== 'cashier') {
       barQuery = barQuery.eq('payment_status', paymentStatus);
     }
 

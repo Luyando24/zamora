@@ -120,8 +120,8 @@ export default function Sidebar({ onLinkClick }: { onLinkClick?: () => void }) {
               }
 
               // Filter items for cashiers
-              if (userRole === 'cashier') {
-                const cashierAllowedItems = ['Food & Bar Orders', 'Order History'];
+              if (userRole.toLowerCase() === 'cashier') {
+                const cashierAllowedItems = ['Food & Bar Orders', 'Order History', 'Food & Bar Menu'];
                 return cashierAllowedItems.includes(item.name);
               }
 

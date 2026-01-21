@@ -41,7 +41,22 @@ export default function OrderHistoryPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const supabase = createClient();
+
+  useEffect(() => {
+    const fetchRole = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+        if (profile?.role) setUserRole(profile.role);
+        else setUserRole('staff');
+      } else {
+        setUserRole('staff');
+      }
+    };
+    fetchRole();
+  }, [supabase]);
 
   const fetchOrders = useCallback(async () => {
     if (!selectedPropertyId) return;
@@ -52,7 +67,10 @@ export default function OrderHistoryPage() {
       const itemsTable = activeTab === 'food' ? 'order_items' : 'bar_order_items';
       const menuRelation = activeTab === 'food' ? 'menu_items' : 'bar_menu_items';
 
-      // We only want history (delivered or cancelled)
+      // Build status filter
+      let statuses = ['delivered', 'cancelled', 'pos_completed'];
+      // Standard history view includes delivered, cancelled, and pos_completed
+
       const { data, error } = await supabase
         .from(table)
         .select(`
@@ -64,7 +82,7 @@ export default function OrderHistoryPage() {
           )
         `)
         .eq('property_id', selectedPropertyId)
-        .in('status', ['delivered', 'cancelled', 'pos_completed'])
+        .in('status', statuses)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -74,7 +92,7 @@ export default function OrderHistoryPage() {
     } finally {
       setLoading(false);
     }
-  }, [selectedPropertyId, activeTab, supabase]);
+  }, [selectedPropertyId, activeTab, supabase, userRole]);
 
   useEffect(() => {
     fetchOrders();
@@ -235,18 +253,18 @@ export default function OrderHistoryPage() {
                       </td>
                       <td className="px-6 py-4 text-center">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase ${order.payment_status === 'paid'
-                            ? 'bg-green-100 text-green-700 border border-green-200'
-                            : 'bg-orange-100 text-orange-700 border border-orange-200'
+                          ? 'bg-green-100 text-green-700 border border-green-200'
+                          : 'bg-orange-100 text-orange-700 border border-orange-200'
                           }`}>
                           {order.payment_status || 'pending'}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-center">
                         <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold capitalize gap-1.5 ${order.status === 'pos_completed'
-                            ? 'bg-blue-100 text-blue-700'
-                            : order.status === 'delivered'
-                              ? 'bg-emerald-100 text-emerald-700'
-                              : 'bg-slate-100 text-slate-500'
+                          ? 'bg-blue-100 text-blue-700'
+                          : order.status === 'delivered'
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : 'bg-slate-100 text-slate-500'
                           }`}>
                           {order.status === 'pos_completed' ? <CheckSquare size={12} /> : order.status === 'delivered' ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
                           {order.status === 'pos_completed' ? 'Registered' : order.status === 'delivered' ? 'Completed' : 'Cancelled'}
@@ -310,8 +328,8 @@ export default function OrderHistoryPage() {
                     <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
                       <p className="text-xs text-slate-500 uppercase font-bold">Payment Status</p>
                       <span className={`inline-flex items-center mt-1 px-2 py-0.5 rounded-full text-xs font-bold uppercase ${selectedOrder.payment_status === 'paid'
-                          ? 'bg-green-100 text-green-700 border border-green-200'
-                          : 'bg-orange-100 text-orange-700 border border-orange-200'
+                        ? 'bg-green-100 text-green-700 border border-green-200'
+                        : 'bg-orange-100 text-orange-700 border border-orange-200'
                         }`}>
                         {selectedOrder.payment_status || 'Pending'}
                       </span>
