@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
         if (profile.property_id) {
             const { data: property, error: propertyError } = await adminClient
                 .from('properties')
-                .select('id, name, type, currency_symbol, logo_url')
+                .select('id, name, type, logo_url')
                 .eq('id', profile.property_id)
                 .single();
             

@@ -1,6 +1,6 @@
 # Chef Mobile API Integration Guide
 
-This guide provides the necessary endpoints and workflow instructions for developing the Chef Mobile Application for Zamora Hospitality OS.
+This guide provides the necessary endpoints and workflow instructions for developing the Chef user-flow just like other roles like waiter, manager etc.
 
 ## 1. Authentication
 
