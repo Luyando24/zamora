@@ -119,6 +119,12 @@ export default function Sidebar({ onLinkClick }: { onLinkClick?: () => void }) {
                 return chefAllowedItems.includes(item.name);
               }
 
+              // Filter items for cashiers
+              if (userRole === 'cashier') {
+                const cashierAllowedItems = ['Food & Bar Orders', 'Order History'];
+                return cashierAllowedItems.includes(item.name);
+              }
+
               // Hide Kitchen Dashboard for other roles (except admin/manager)
               if (item.name === 'Kitchen Dashboard' && !['admin', 'manager', 'chef'].includes(userRole)) {
                 return false;

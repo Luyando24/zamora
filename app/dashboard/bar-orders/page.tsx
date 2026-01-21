@@ -53,6 +53,7 @@ interface BarOrder {
   bar_order_items: BarOrderItem[];
   guest_phone?: string;
   payment_method?: string;
+  payment_status?: 'pending' | 'paid';
 }
 
 const STATUS_CONFIG = {
