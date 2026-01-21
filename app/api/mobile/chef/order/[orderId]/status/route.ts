@@ -26,10 +26,11 @@ export async function POST(
 
         const { orderId } = params;
         const body = await req.json();
-        const { type } = body;
+        const { status, type = 'food' } = body;
 
-        if (!type || (type !== 'food' && type !== 'bar')) {
-            return NextResponse.json({ error: 'Valid type (food/bar) is required' }, { status: 400 });
+        const allowedStatuses = ['pending', 'preparing', 'ready', 'delivered', 'cancelled'];
+        if (!status || !allowedStatuses.includes(status)) {
+            return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
         }
 
         const admin = getSupabaseAdmin();
@@ -41,32 +42,28 @@ export async function POST(
             .eq('id', user.id)
             .single();
 
-        if (!profile || !['cashier', 'admin', 'manager'].includes(profile.role)) {
+        if (!profile || !['chef', 'admin', 'manager', 'waiter'].includes(profile.role)) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
-        const table = type === 'food' ? 'orders' : 'bar_orders';
+        const table = type === 'bar' ? 'bar_orders' : 'orders';
 
-        const { data, error: updateError } = await admin
+        const { error: updateError } = await admin
             .from(table)
-            .update({ status: 'pos_completed' })
-            .eq('id', orderId)
-            .select();
+            .update({ status })
+            .eq('id', orderId);
 
         if (updateError) throw updateError;
 
-        if (!data || data.length === 0) {
-            return NextResponse.json({
-                error: `Order not found in ${table} table. Please verify orderId and type.`,
-                receivedOrderId: orderId,
-                receivedType: type
-            }, { status: 404 });
-        }
+        // Optional: Trigger SMS notification (similar to web)
+        // We'll skip for now to keep the API fast, as the web dashboard handles it on status change.
+        // But if the mobile app is the only thing changing it, we might need it.
+        // Actually, it's better to stay consistent.
 
-        return NextResponse.json({ success: true, message: 'Order marked as pos_completed', order: data[0] });
+        return NextResponse.json({ success: true, message: `Order status updated to ${status}` });
 
     } catch (error: any) {
-        console.error('POS Registration Error:', error);
+        console.error('Chef Status Update Error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

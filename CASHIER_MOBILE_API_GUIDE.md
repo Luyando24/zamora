@@ -92,17 +92,27 @@ This ensures that the cashier ONLY sees orders that are finalized and ready to b
 }
 ```
 
-## 3. Register to POS
+## 3. POS Registration
 
-Mark an order as successfully registered in the POS system. This updates the order status to `pos_completed`. Once an order is `pos_completed`, it will **automatically disappear** from the default listing (since it's no longer just "delivered").
+Mark an order as "POS Completed" after recording it on the physical point-of-sale machine. This action permanently moves the order to the History list.
 
 **Endpoint:** `POST /api/mobile/cashier/order/[orderId]/pos`
 **Payload:**
 ```json
 {
-  "type": "food" // or "bar"
+  "type": "food" // Required: "food" or "bar"
 }
 ```
+
+**Workflow Note:** 
+- Once this endpoint succeeds, the order status changes to `pos_completed`.
+- It will **automatically disappear** from the default Order Listing (Section 2) since that endpoint filters for `status='delivered'` by default.
+- To see the order again, you must fetch it from the **History** endpoint (Section 5).
+
+**Troubleshooting:**
+- If you receive a `404 Not Found`, it means the `orderId` does not exist in the table specified by `type`. Ensure you are passing the correct `type` ("food" for food orders, "bar" for bar orders) returned by the Order Listing.
+
+---
 
 ## 4. Troubleshooting: "Why are no orders showing up?"
 
