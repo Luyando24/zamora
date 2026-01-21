@@ -23,7 +23,7 @@ export async function GET(
 ) {
   try {
     const { propertyId } = params;
-    
+
     // 1. Verify User
     const supabase = getSupabase(req);
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -41,19 +41,20 @@ export async function GET(
       .single();
 
     if (!profile) {
-        return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
     }
 
     const allowedRoles = ['cashier', 'manager', 'admin'];
     if (!allowedRoles.includes(profile.role)) {
-        return NextResponse.json({ error: 'Forbidden: Cashier access only' }, { status: 403 });
+      return NextResponse.json({ error: 'Forbidden: Cashier access only' }, { status: 403 });
     }
 
     const { searchParams } = new URL(req.url);
-    const status = searchParams.get('status');
+    const status = searchParams.get('status') || 'delivered';
+    const paymentStatus = searchParams.get('payment_status') || 'paid';
 
-    // 3. Fetch Food Orders (NO BAR ORDERS)
-    let query = admin
+    // 3. Fetch Food Orders
+    let foodQuery = admin
       .from('orders')
       .select(`
         *,
@@ -64,16 +65,44 @@ export async function GET(
       `)
       .eq('property_id', propertyId)
       .order('created_at', { ascending: false })
-      .limit(100);
+      .limit(50);
 
     if (status) {
-        const statuses = status.split(',').map(s => s.trim());
-        query = query.in('status', statuses);
+      const statuses = status.split(',').map(s => s.trim());
+      foodQuery = foodQuery.in('status', statuses);
     }
 
-    const { data: orders, error: dbError } = await query;
+    if (paymentStatus) {
+      foodQuery = foodQuery.eq('payment_status', paymentStatus);
+    }
 
-    if (dbError) throw dbError;
+    // 3.1 Fetch Bar Orders
+    let barQuery = admin
+      .from('bar_orders')
+      .select(`
+        *,
+        bar_order_items (
+          id, quantity, unit_price, total_price, item_name, notes,
+          bar_menu_items ( name, image_url, description )
+        )
+      `)
+      .eq('property_id', propertyId)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (status) {
+      const statuses = status.split(',').map(s => s.trim());
+      barQuery = barQuery.in('status', statuses);
+    }
+
+    if (paymentStatus) {
+      barQuery = barQuery.eq('payment_status', paymentStatus);
+    }
+
+    const [foodRes, barRes] = await Promise.all([foodQuery, barQuery]);
+
+    if (foodRes.error) throw foodRes.error;
+    if (barRes.error) throw barRes.error;
 
     // Helper to get table number
     const getTableNumber = (order: any) => {
@@ -94,23 +123,43 @@ export async function GET(
     };
 
     // 4. Format
-    const formattedOrders = (orders || []).map(o => ({
-        ...o,
-        type: 'food',
-        table_number: getTableNumber(o),
-        waiter_name: getWaiterName(o),
-        items: (o.order_items || []).map((i: any) => ({
-            id: i.id,
-            name: i.menu_items?.name || i.item_name || 'Unknown',
-            quantity: i.quantity,
-            price: i.unit_price,
-            total_price: i.total_price,
-            notes: i.notes,
-            image: i.menu_items?.image_url
-        }))
+    const foodOrders = (foodRes.data || []).map(o => ({
+      ...o,
+      type: 'food',
+      table_number: getTableNumber(o),
+      waiter_name: getWaiterName(o),
+      items: (o.order_items || []).map((i: any) => ({
+        id: i.id,
+        name: i.menu_items?.name || i.item_name || 'Unknown',
+        quantity: i.quantity,
+        price: i.unit_price,
+        total_price: i.total_price,
+        notes: i.notes,
+        image: i.menu_items?.image_url
+      }))
     }));
 
-    return NextResponse.json({ orders: formattedOrders });
+    const barOrders = (barRes.data || []).map(o => ({
+      ...o,
+      type: 'bar',
+      table_number: getTableNumber(o),
+      waiter_name: getWaiterName(o),
+      items: (o.bar_order_items || []).map((i: any) => ({
+        id: i.id,
+        name: i.bar_menu_items?.name || i.item_name || 'Unknown',
+        quantity: i.quantity,
+        price: i.unit_price,
+        total_price: i.total_price,
+        notes: i.notes,
+        image: i.bar_menu_items?.image_url
+      }))
+    }));
+
+    const allOrders = [...foodOrders, ...barOrders].sort((a, b) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+
+    return NextResponse.json({ orders: allOrders });
 
   } catch (error: any) {
     console.error('Cashier Orders Error:', error);

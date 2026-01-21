@@ -380,7 +380,7 @@ export default function RestaurantDetails({ property, menuItems, categories, bar
           <div className="bg-pink-500 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between border border-pink-400 backdrop-blur-md bg-opacity-95 shadow-pink-200">
             <div className="flex flex-col">
               <span className="text-xs text-white/90 font-bold uppercase tracking-wider">{cart.reduce((a, b) => a + b.quantity, 0)} Items</span>
-              <span className="text-xl font-black">K{cartTotal.toFixed(2)}</span>
+              <span className="text-xl font-black">K{(cartTotal || 0).toFixed(2)}</span>
             </div>
             <button
               onClick={() => setIsCartOpen(true)}

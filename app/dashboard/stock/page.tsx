@@ -120,7 +120,7 @@ export default function StockPage() {
                       <div className="text-sm font-bold text-slate-900">{item.quantity} <span className="text-slate-500 font-normal text-xs">{item.unit}</span></div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <div className="text-sm text-slate-600">${item.cost_per_unit.toFixed(2)}</div>
+                      <div className="text-sm text-slate-600">${(item.cost_per_unit || 0).toFixed(2)}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                       {supplierName}

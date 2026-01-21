@@ -6,7 +6,7 @@ import { createClient } from '@/utils/supabase/client';
 import { useProperty } from '../context/PropertyContext';
 import {
   Clock, CheckCircle2, ChefHat, Truck, AlertCircle,
-  RefreshCw, Building2, Utensils, XCircle, Eye, X, Wine, Sun, Armchair, Trash2
+  RefreshCw, Building2, Utensils, XCircle, Eye, X, Wine, Sun, Armchair, Trash2, CheckSquare, Printer
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -38,7 +38,7 @@ interface OrderItem {
 interface Order {
   id: string;
   created_at: string;
-  status: 'pending' | 'preparing' | 'ready' | 'delivered' | 'cancelled';
+  status: 'pending' | 'preparing' | 'ready' | 'delivered' | 'cancelled' | 'pos_completed';
   guest_room_number: string;
   guest_name: string;
   total_amount: number;
@@ -77,7 +77,7 @@ interface BarOrderItem {
 interface BarOrder {
   id: string;
   created_at: string;
-  status: 'pending' | 'preparing' | 'ready' | 'delivered' | 'cancelled';
+  status: 'pending' | 'preparing' | 'ready' | 'delivered' | 'cancelled' | 'pos_completed';
   guest_room_number: string;
   guest_name: string;
   total_amount: number;
@@ -202,6 +202,7 @@ export default function OrdersPage() {
   const [barOrders, setBarOrders] = useState<BarOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | BarOrder | null>(null);
+  const [orderToConfirmPOS, setOrderToConfirmPOS] = useState<{ id: string; type: 'food' | 'bar' } | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const supabase = createClient();
 
@@ -243,7 +244,7 @@ export default function OrdersPage() {
         .order('created_at', { ascending: false });
 
       if (userRole === 'cashier') {
-        query = query.eq('status', 'delivered');
+        query = query.eq('status', 'delivered').eq('payment_status', 'paid');
       }
 
       const { data, error } = await query;
@@ -274,7 +275,7 @@ export default function OrdersPage() {
         .order('created_at', { ascending: false });
 
       if (userRole === 'cashier') {
-        query = query.eq('status', 'delivered');
+        query = query.eq('status', 'delivered').eq('payment_status', 'paid');
       }
 
       const { data, error } = await query;
@@ -325,7 +326,12 @@ export default function OrdersPage() {
     }
   }, [selectedPropertyId, fetchFoodOrders, fetchBarOrders, supabase]);
 
-  const updateStatus = async (orderId: string, newStatus: string, type: 'food' | 'bar') => {
+  const updateStatus = async (orderId: string, newStatus: string, type: 'food' | 'bar', skipConfirm = false) => {
+    if (newStatus === 'pos_completed' && !skipConfirm) {
+      setOrderToConfirmPOS({ id: orderId, type });
+      return;
+    }
+
     try {
       const table = type === 'food' ? 'orders' : 'bar_orders';
       const { error } = await supabase
@@ -364,6 +370,8 @@ export default function OrdersPage() {
       } else {
         setBarOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus as BarOrder['status'] } : o));
       }
+
+      setOrderToConfirmPOS(null);
     } catch (error) {
       console.error('Error updating status:', error);
       alert('Failed to update status');
@@ -536,7 +544,7 @@ export default function OrdersPage() {
           )}
 
           <Column
-            title="Completed"
+            title={userRole === 'cashier' ? "Pending POS Registration" : "Completed"}
             orders={groupedOrders.completed}
             config={currentConfig.delivered}
             onStatusUpdate={(id, status) => updateStatus(id, status, activeTab)}
@@ -728,7 +736,7 @@ export default function OrdersPage() {
               <div className="p-5 border-t border-slate-100 bg-white flex justify-between items-center">
                 <div>
                   <p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Total</p>
-                  <p className="text-2xl font-black text-slate-900">K{selectedOrder.total_amount.toFixed(2)}</p>
+                  <p className="text-2xl font-black text-slate-900">K{(selectedOrder.total_amount || 0).toFixed(2)}</p>
                 </div>
                 <div className="flex gap-3">
                   <button
@@ -743,6 +751,45 @@ export default function OrdersPage() {
                     className="px-5 py-2.5 bg-slate-800 border border-slate-800 text-white font-bold rounded-xl hover:bg-slate-700 transition-colors text-sm active:scale-95 shadow-lg shadow-slate-800/10"
                   >
                     Done
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* POS Confirmation Modal */}
+      <AnimatePresence>
+        {orderToConfirmPOS && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" onClick={() => setOrderToConfirmPOS(null)}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-200"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="p-8 text-center">
+                <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <CheckSquare size={32} />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-2">Confirm POS Registration</h3>
+                <p className="text-slate-500 text-sm leading-relaxed mb-8">
+                  Has this order been successfully added to the POS system? This will mark the order as fully completed.
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => setOrderToConfirmPOS(null)}
+                    className="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-colors text-sm"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => updateStatus(orderToConfirmPOS.id, 'pos_completed', orderToConfirmPOS.type, true)}
+                    className="px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-emerald-600/20 active:scale-95 text-sm"
+                  >
+                    Confirm
                   </button>
                 </div>
               </div>
@@ -880,6 +927,16 @@ function OrderCard({ order, config, onStatusUpdate, onViewDetails, nextStatus, e
             className={`w-full text-center py-2.5 rounded-lg font-bold text-sm transition-all duration-200 shadow-lg ${config.button} hover:shadow-xl active:scale-95`}
           >
             {`Move to ${nextStatus.charAt(0).toUpperCase() + nextStatus.slice(1)}`}
+          </button>
+        )}
+
+        {order.status === 'delivered' && (
+          <button
+            onClick={() => onStatusUpdate(order.id, 'pos_completed')}
+            className="w-full text-center py-2.5 mt-2 rounded-lg font-bold text-sm transition-all duration-200 shadow-sm bg-slate-800 text-white hover:bg-slate-900 hover:shadow-md active:scale-95 flex items-center justify-center gap-2"
+          >
+            <CheckSquare size={16} />
+            Register to POS
           </button>
         )}
       </div>

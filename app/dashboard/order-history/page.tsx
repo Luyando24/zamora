@@ -5,7 +5,7 @@ import { createClient } from '@/utils/supabase/client';
 import { useProperty } from '../context/PropertyContext';
 import {
   Trash2, RefreshCw, Utensils, Wine, Search,
-  CalendarDays, Filter, Eye, X, CheckCircle2, XCircle
+  CalendarDays, Filter, Eye, X, CheckCircle2, XCircle, CheckSquare
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -23,7 +23,7 @@ interface OrderItem {
 interface Order {
   id: string;
   created_at: string;
-  status: 'delivered' | 'cancelled';
+  status: 'delivered' | 'cancelled' | 'pos_completed';
   guest_room_number: string;
   guest_name: string;
   total_amount: number;
@@ -63,7 +63,7 @@ export default function OrderHistoryPage() {
           )
         `)
         .eq('property_id', selectedPropertyId)
-        .in('status', ['delivered', 'cancelled'])
+        .in('status', ['delivered', 'cancelled', 'pos_completed'])
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -230,7 +230,7 @@ export default function OrderHistoryPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-right font-bold text-slate-900">
-                        K{order.total_amount.toFixed(2)}
+                        K{(order.total_amount || 0).toFixed(2)}
                       </td>
                       <td className="px-6 py-4 text-center">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase ${
@@ -242,12 +242,15 @@ export default function OrderHistoryPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold capitalize gap-1.5 ${order.status === 'delivered'
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold capitalize gap-1.5 ${
+                          order.status === 'pos_completed'
+                            ? 'bg-blue-100 text-blue-700'
+                            : order.status === 'delivered'
                             ? 'bg-emerald-100 text-emerald-700'
                             : 'bg-slate-100 text-slate-500'
-                          }`}>
-                          {order.status === 'delivered' ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
-                          {order.status === 'delivered' ? 'Completed' : 'Cancelled'}
+                        }`}>
+                          {order.status === 'pos_completed' ? <CheckSquare size={12} /> : order.status === 'delivered' ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
+                          {order.status === 'pos_completed' ? 'Registered' : order.status === 'delivered' ? 'Completed' : 'Cancelled'}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-center">
@@ -330,7 +333,7 @@ export default function OrderHistoryPage() {
                             <span className="font-bold text-slate-900 mr-2">{item.quantity}x</span>
                             {item.item_name || (activeTab === 'food' ? item.menu_items?.name : item.bar_menu_items?.name)}
                           </span>
-                          <span className="font-medium">K{item.total_price.toFixed(2)}</span>
+                          <span className="font-medium">K{(item.total_price || 0).toFixed(2)}</span>
                         </div>
                       ))}
                     </div>
@@ -338,7 +341,7 @@ export default function OrderHistoryPage() {
 
                   <div className="flex justify-between items-center pt-4 border-t border-slate-100">
                     <span className="font-bold text-slate-500">Total Amount</span>
-                    <span className="text-xl font-black text-slate-900">K{selectedOrder.total_amount.toFixed(2)}</span>
+                    <span className="text-xl font-black text-slate-900">K{(selectedOrder.total_amount || 0).toFixed(2)}</span>
                   </div>
                 </div>
               </div>

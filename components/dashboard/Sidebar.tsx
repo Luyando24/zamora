@@ -107,13 +107,13 @@ export default function Sidebar({ onLinkClick }: { onLinkClick?: () => void }) {
 
               // Filter items for waiters (regardless of property type)
               if (userRole === 'waiter') {
-                const waiterAllowedItems = ['Overview', 'Food & Bar Orders', 'Order History', 'Food & Bar Menu'];
+                const waiterAllowedItems = ['Food & Bar Orders', 'Order History', 'Food & Bar Menu'];
                 return waiterAllowedItems.includes(item.name);
               }
 
               // Filter items for cashiers
               if (userRole === 'cashier') {
-                const cashierAllowedItems = ['Overview', 'Food & Bar Orders', 'Order History'];
+                const cashierAllowedItems = ['Food & Bar Orders', 'Order History'];
                 return cashierAllowedItems.includes(item.name);
               }
 

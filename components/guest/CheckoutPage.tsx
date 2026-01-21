@@ -281,15 +281,15 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
                 <div className="p-4 bg-slate-50 space-y-2 border-t border-slate-100">
                     <div className="flex justify-between text-sm text-slate-500">
                         <span>Subtotal</span>
-                        <span className="font-medium">K{cartTotal.toFixed(2)}</span>
+                        <span className="font-medium">K{(cartTotal || 0).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-sm text-slate-500">
                         <span>Service Charge (10%)</span>
-                        <span className="font-medium">K{serviceCharge.toFixed(2)}</span>
+                        <span className="font-medium">K{(serviceCharge || 0).toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-lg font-black text-slate-900 pt-2 border-t border-slate-200 mt-2">
                         <span>Total</span>
-                        <span>K{grandTotal.toFixed(2)}</span>
+                        <span>K{(grandTotal || 0).toFixed(2)}</span>
                     </div>
                 </div>
             </div>
