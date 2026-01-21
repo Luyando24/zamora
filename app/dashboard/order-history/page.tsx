@@ -31,6 +31,7 @@ interface Order {
   bar_order_items?: OrderItem[]; // for bar
   guest_phone?: string;
   payment_method?: string;
+  payment_status?: 'pending' | 'paid';
 }
 
 export default function OrderHistoryPage() {
@@ -121,8 +122,8 @@ export default function OrderHistoryPage() {
             <button
               onClick={() => setActiveTab('food')}
               className={`px-4 py-2 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'food'
-                  ? 'bg-slate-900 text-white shadow-sm'
-                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                ? 'bg-slate-900 text-white shadow-sm'
+                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
                 }`}
             >
               <Utensils size={16} />
@@ -131,8 +132,8 @@ export default function OrderHistoryPage() {
             <button
               onClick={() => setActiveTab('bar')}
               className={`px-4 py-2 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'bar'
-                  ? 'bg-purple-900 text-white shadow-sm'
-                  : 'text-slate-500 hover:text-purple-900 hover:bg-purple-50'
+                ? 'bg-purple-900 text-white shadow-sm'
+                : 'text-slate-500 hover:text-purple-900 hover:bg-purple-50'
                 }`}
             >
               <Wine size={16} />
@@ -233,22 +234,20 @@ export default function OrderHistoryPage() {
                         K{(order.total_amount || 0).toFixed(2)}
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase ${
-                          order.payment_status === 'paid' 
-                            ? 'bg-green-100 text-green-700 border border-green-200' 
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase ${order.payment_status === 'paid'
+                            ? 'bg-green-100 text-green-700 border border-green-200'
                             : 'bg-orange-100 text-orange-700 border border-orange-200'
-                        }`}>
+                          }`}>
                           {order.payment_status || 'pending'}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold capitalize gap-1.5 ${
-                          order.status === 'pos_completed'
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold capitalize gap-1.5 ${order.status === 'pos_completed'
                             ? 'bg-blue-100 text-blue-700'
                             : order.status === 'delivered'
-                            ? 'bg-emerald-100 text-emerald-700'
-                            : 'bg-slate-100 text-slate-500'
-                        }`}>
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : 'bg-slate-100 text-slate-500'
+                          }`}>
                           {order.status === 'pos_completed' ? <CheckSquare size={12} /> : order.status === 'delivered' ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
                           {order.status === 'pos_completed' ? 'Registered' : order.status === 'delivered' ? 'Completed' : 'Cancelled'}
                         </span>
@@ -310,11 +309,10 @@ export default function OrderHistoryPage() {
                     </div>
                     <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
                       <p className="text-xs text-slate-500 uppercase font-bold">Payment Status</p>
-                      <span className={`inline-flex items-center mt-1 px-2 py-0.5 rounded-full text-xs font-bold uppercase ${
-                        selectedOrder.payment_status === 'paid' 
-                          ? 'bg-green-100 text-green-700 border border-green-200' 
+                      <span className={`inline-flex items-center mt-1 px-2 py-0.5 rounded-full text-xs font-bold uppercase ${selectedOrder.payment_status === 'paid'
+                          ? 'bg-green-100 text-green-700 border border-green-200'
                           : 'bg-orange-100 text-orange-700 border border-orange-200'
-                      }`}>
+                        }`}>
                         {selectedOrder.payment_status || 'Pending'}
                       </span>
                     </div>
