@@ -110,7 +110,7 @@ const STATUS_CONFIG = {
 
 export default function BarOrdersPage() {
   const supabase = createClient();
-  const { selectedPropertyId } = useProperty();
+  const { selectedPropertyId, properties } = useProperty();
   const [orders, setOrders] = useState<BarOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<BarOrder | null>(null);
