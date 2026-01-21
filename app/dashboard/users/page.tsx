@@ -163,7 +163,8 @@ export default function TeamPage() {
                       user.role === 'manager' ? 'bg-blue-100 text-blue-700' :
                         user.role === 'waiter' ? 'bg-orange-100 text-orange-700' :
                           user.role === 'cashier' ? 'bg-emerald-100 text-emerald-700' :
-                          'bg-slate-100 text-slate-700'}`}
+                            user.role === 'chef' ? 'bg-indigo-100 text-indigo-700' :
+                              'bg-slate-100 text-slate-700'}`}
                   >
                     {user.role}
                   </div>
@@ -231,7 +232,7 @@ export default function TeamPage() {
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Role</label>
             <div className="grid gap-3 grid-cols-2">
-              {['admin', 'manager', 'cashier', 'waiter'].map((role) => (
+              {['admin', 'manager', 'cashier', 'waiter', 'chef'].map((role) => (
                 <button
                   key={role}
                   type="button"
@@ -250,6 +251,7 @@ export default function TeamPage() {
               {formData.role === 'manager' && 'Can manage operations, inventory, and staff.'}
               {formData.role === 'cashier' && 'Limited access to food orders and POS.'}
               {formData.role === 'waiter' && 'Can manage tables and take orders.'}
+              {formData.role === 'chef' && 'Access to Kitchen Dashboard for preparing orders.'}
             </p>
           </div>
 

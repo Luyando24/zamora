@@ -52,6 +52,8 @@ export default function DashboardPage() {
 
             if (profile?.role === 'cashier') {
                 router.push('/dashboard/orders');
+            } else if (profile?.role === 'chef') {
+                router.push('/dashboard/kitchen');
             }
         }
     }, [supabase, router]);

@@ -7,7 +7,7 @@ import { useProperty } from '@/app/dashboard/context/PropertyContext';
 import {
   LayoutDashboard, CalendarDays, BedDouble, FileText,
   Settings, LogOut, DoorOpen, Utensils, Building2,
-  ChevronRight, User, Wine, Users, History, Package, Truck
+  ChevronRight, User, Wine, Users, History, Package, Truck, ChefHat
 } from 'lucide-react';
 import { useEffect, useState, useCallback } from 'react';
 
@@ -15,14 +15,15 @@ import { useEffect, useState, useCallback } from 'react';
 export const navigationGroups = [
   {
     title: 'Main',
-    roles: ['admin', 'manager', 'cashier', 'waiter'],
+    roles: ['admin', 'manager', 'cashier', 'waiter', 'chef'],
     items: [
       { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
+      { name: 'Kitchen Dashboard', href: '/dashboard/kitchen', icon: ChefHat },
     ]
   },
   {
     title: 'Operations',
-    roles: ['admin', 'manager', 'cashier', 'waiter'],
+    roles: ['admin', 'manager', 'cashier', 'waiter', 'chef'],
     items: [
       { name: 'Room Bookings', href: '/dashboard/inventory', icon: CalendarDays },
       { name: 'Stock Management', href: '/dashboard/stock', icon: Package },
@@ -111,10 +112,16 @@ export default function Sidebar({ onLinkClick }: { onLinkClick?: () => void }) {
                 return waiterAllowedItems.includes(item.name);
               }
 
-              // Filter items for cashiers
-              if (userRole === 'cashier') {
-                const cashierAllowedItems = ['Food & Bar Orders', 'Order History'];
-                return cashierAllowedItems.includes(item.name);
+              // Filter items for chefs
+              if (userRole === 'chef') {
+                const chefAllowedItems = ['Kitchen Dashboard', 'Order History', 'Food & Bar Menu'];
+                if (item.name === 'Overview') return false; // Hide Overview for chefs as they redirect
+                return chefAllowedItems.includes(item.name);
+              }
+
+              // Hide Kitchen Dashboard for other roles (except admin/manager)
+              if (item.name === 'Kitchen Dashboard' && !['admin', 'manager', 'chef'].includes(userRole)) {
+                return false;
               }
 
               return true;
