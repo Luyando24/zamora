@@ -50,8 +50,12 @@ export async function GET(
     }
 
     const { searchParams } = new URL(req.url);
-    const status = searchParams.get('status') || 'delivered';
-    const paymentStatus = searchParams.get('payment_status') || 'paid';
+    const status = searchParams.get('status'); // Removed default 'delivered'
+    const paymentStatus = searchParams.get('payment_status'); // Removed default 'paid'
+
+    // Logging for debugging
+    console.log(`[API] Cashier Orders - PropertyID: ${propertyId}, User: ${user.id}, Role: ${profile.role}`);
+    console.log(`[API] Query Params - status: ${status}, paymentStatus: ${paymentStatus}`);
 
     // 3. Fetch Food Orders
     let foodQuery = admin
@@ -67,15 +71,16 @@ export async function GET(
       .order('created_at', { ascending: false });
 
     if (profile.role === 'cashier') {
-      // Cashiers ONLY see delivered and paid orders by default
-      foodQuery = foodQuery.eq('status', 'delivered').eq('payment_status', 'paid');
-    } else if (status) {
-      const statuses = status.split(',').map(s => s.trim());
-      foodQuery = foodQuery.in('status', statuses);
-    }
-
-    if (paymentStatus && profile.role !== 'cashier') {
-      foodQuery = foodQuery.eq('payment_status', paymentStatus);
+      // Default for cashier is delivered + paid, but allow overrides
+      foodQuery = foodQuery.eq('status', status || 'delivered').eq('payment_status', paymentStatus || 'paid');
+    } else {
+      if (status) {
+        const statuses = status.split(',').map(s => s.trim());
+        foodQuery = foodQuery.in('status', statuses);
+      }
+      if (paymentStatus) {
+        foodQuery = foodQuery.eq('payment_status', paymentStatus);
+      }
     }
 
     // 3.1 Fetch Bar Orders
@@ -92,14 +97,15 @@ export async function GET(
       .order('created_at', { ascending: false });
 
     if (profile.role === 'cashier') {
-      barQuery = barQuery.eq('status', 'delivered').eq('payment_status', 'paid');
-    } else if (status) {
-      const statuses = status.split(',').map(s => s.trim());
-      barQuery = barQuery.in('status', statuses);
-    }
-
-    if (paymentStatus && profile.role !== 'cashier') {
-      barQuery = barQuery.eq('payment_status', paymentStatus);
+      barQuery = barQuery.eq('status', status || 'delivered').eq('payment_status', paymentStatus || 'paid');
+    } else {
+      if (status) {
+        const statuses = status.split(',').map(s => s.trim());
+        barQuery = barQuery.in('status', statuses);
+      }
+      if (paymentStatus) {
+        barQuery = barQuery.eq('payment_status', paymentStatus);
+      }
     }
 
     const [foodRes, barRes] = await Promise.all([foodQuery, barQuery]);

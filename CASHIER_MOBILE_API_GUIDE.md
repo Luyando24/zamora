@@ -44,12 +44,14 @@ Cashiers utilize the same login endpoint as waiters and managers. The role is re
 
 Retrieve orders that are ready for POS registration.
 
-### Default Behavior (Important!)
-By default, this endpoint filters for orders that meet BOTH of these criteria:
-1.  `status`: **"delivered"** (The waiter has served the guest)
-2.  `payment_status`: **"paid"** (The guest has successfully paid)
+### Role-Specific Defaults (Important!)
+Different roles have different default filters to optimize their workflow:
 
-This ensures that the cashier ONLY sees orders that are finalized and ready to be punched into the POS system.
+- **Cashiers**: By default, this filters for `status='delivered'` AND `payment_status='paid'`.
+- **Other Roles**: By default, this filters for `status='delivered'`.
+
+**Overrides**: You can override these defaults by explicitly passing `status` or `payment_status` in the query string. For example, to find unpaid but delivered orders as a cashier, use:
+`GET /api/mobile/cashier/orders/[propertyId]?payment_status=pending`
 
 **Endpoint:** `GET /api/mobile/cashier/orders/[propertyId]`
 
@@ -149,3 +151,28 @@ To "move" an order to history on the mobile app, follow this workflow:
     - The order will **no longer appear** in the `GET /api/mobile/cashier/orders/...` list (active tab).
     - The order **will now appear** in the `GET /api/mobile/cashier/history/...` list (history tab).
 
+---
+
+## 7. CRITICAL: Fixing Orders "coming back" to Pending
+
+If orders appear to return to the Pending POS screen after registration, the mobile developer **MUST** verify the following:
+
+### Action 1: Check the `type` parameter
+When calling `POST /api/mobile/cashier/order/[orderId]/pos`, you **MUST** include the correct `type` in the payload.
+- Use `"type": "food"` for orders from the `orders` table.
+- Use `"type": "bar"` for orders from the `bar_orders` table.
+- **Why?** If the type is wrong, the server will return a `404 Not Found` and the order status will **NOT** change.
+
+### Action 2: Verify the API Response
+Do not assume every request succeeds. 
+- If the response is `200 OK`, the order is now `pos_completed` and will be hidden from the default `GET` list.
+- If the response is `404`, `400`, or `500`, the registration **FAILED** and the order remains in the pending list. Log the response body to see the specific error.
+
+### Action 3: Strict Status Filtering
+Ensure your "Pending POS" tab ONLY displays orders from the default `GET /api/mobile/cashier/orders/[propertyId]` call without adding custom manual filters that might include `pos_completed` orders. The server is now configured to strictly exclude registered orders from this list by default.
+
+### Action 4: Immediate UI Removal
+Upon a successful `200 OK` response from the POS registration endpoint, your app should:
+1. Remove the order from the local "Pending" state/list.
+2. If using a global store (Redux/Zustand), trigger a refresh or manually update the order list.
+3. Show a success toast to the user.
