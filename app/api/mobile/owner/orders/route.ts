@@ -26,13 +26,21 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { searchParams } = new URL(req.url);
+    const filterType = searchParams.get('type'); // 'food', 'bar', or null (all)
+    const filterPropertyId = searchParams.get('propertyId'); // Optional: specific property
+
     // 2. Get User's Properties (or specific property if param provided)
-    // For now, let's fetch orders for ALL properties owned by this user
-    // First, find properties owned by user
-    const { data: properties, error: propError } = await supabase
+    let query = supabase
       .from('properties')
       .select('id, name, type')
       .eq('created_by', user.id);
+    
+    if (filterPropertyId) {
+      query = query.eq('id', filterPropertyId);
+    }
+
+    const { data: properties, error: propError } = await query;
 
     if (propError) {
       return NextResponse.json({ error: propError.message }, { status: 500 });
@@ -44,42 +52,46 @@ export async function GET(req: NextRequest) {
 
     const propertyIds = properties.map(p => p.id);
 
-    // 3. Fetch Food Orders
-    const { data: foodOrders, error: foodError } = await supabase
-      .from('orders')
-      .select(`
-        *,
-        order_items (
+    let foodOrders: any[] = [];
+    let barOrders: any[] = [];
+
+    // 3. Fetch Food Orders (if not filtering for bar only)
+    if (!filterType || filterType === 'food') {
+      const { data, error } = await supabase
+        .from('orders')
+        .select(`
           *,
-          menu_items (name, image_url)
-        )
-      `)
-      .in('property_id', propertyIds)
-      .neq('status', 'delivered') // Optional: maybe filtering delivered?
-      .neq('status', 'cancelled') // Optional: maybe filtering cancelled?
-      // Actually, for an "Active Orders" view, we usually want non-completed.
-      // But let's return all recent ones or allow status filtering via query param.
-      // For MVP, let's return all non-archived (everything for now, sorted by date).
-      .order('created_at', { ascending: false })
-      .limit(50);
+          order_items (
+            *,
+            menu_items (name, image_url)
+          )
+        `)
+        .in('property_id', propertyIds)
+        .order('created_at', { ascending: false })
+        .limit(50);
 
-    if (foodError) throw foodError;
+      if (error) throw error;
+      foodOrders = data || [];
+    }
 
-    // 4. Fetch Bar Orders
-    const { data: barOrders, error: barError } = await supabase
-      .from('bar_orders')
-      .select(`
-        *,
-        bar_order_items (
+    // 4. Fetch Bar Orders (if not filtering for food only)
+    if (!filterType || filterType === 'bar') {
+      const { data, error } = await supabase
+        .from('bar_orders')
+        .select(`
           *,
-          bar_menu_items (name, image_url)
-        )
-      `)
-      .in('property_id', propertyIds)
-      .order('created_at', { ascending: false })
-      .limit(50);
+          bar_order_items (
+            *,
+            bar_menu_items (name, image_url)
+          )
+        `)
+        .in('property_id', propertyIds)
+        .order('created_at', { ascending: false })
+        .limit(50);
 
-    if (barError) throw barError;
+      if (error) throw error;
+      barOrders = data || [];
+    }
 
     // 5. Normalize and Merge
     const normalizedFood = (foodOrders || []).map(o => ({
