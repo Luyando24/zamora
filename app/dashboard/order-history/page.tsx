@@ -162,8 +162,17 @@ export default function OrderHistoryPage() {
           <button
             onClick={fetchOrders}
             className="p-2.5 bg-white border border-slate-200 hover:bg-slate-50 rounded-lg text-slate-500 transition-colors"
+            title="Refresh"
           >
             <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+          </button>
+
+          <button
+            onClick={deleteAllOrders}
+            className="p-2.5 bg-white border border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
+            title={`Delete All ${activeTab === 'food' ? 'Food' : 'Bar'} History`}
+          >
+            <Trash2 size={18} />
           </button>
         </div>
       </div>

@@ -445,7 +445,7 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
              type="submit"
              form="checkout-form"
              disabled={loading}
-             className="w-full py-4 bg-black text-white rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2"
+             className="w-full py-4 bg-black text-white rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2 disabled:bg-slate-600 disabled:opacity-100"
          >
              {loading ? <Loader2 className="animate-spin" /> : 'Confirm Order'}
          </button>
