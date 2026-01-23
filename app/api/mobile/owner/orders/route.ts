@@ -31,10 +31,10 @@ export async function GET(req: NextRequest) {
     const filterPropertyId = searchParams.get('propertyId'); // Optional: specific property
 
     // 2. Get User's Properties (or specific property if param provided)
+    // We rely on RLS to filter properties the user has access to (Owned or Assigned)
     let query = supabase
       .from('properties')
-      .select('id, name, type')
-      .eq('created_by', user.id);
+      .select('id, name, type');
     
     if (filterPropertyId) {
       query = query.eq('id', filterPropertyId);

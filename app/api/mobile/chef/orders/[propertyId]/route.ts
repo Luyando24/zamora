@@ -87,6 +87,7 @@ export async function GET(
         // 4. Format
         const orders = (data || []).map(o => ({
             id: o.id,
+            type: 'food',
             created_at: o.created_at,
             status: o.status,
             guest_name: o.guest_name,
