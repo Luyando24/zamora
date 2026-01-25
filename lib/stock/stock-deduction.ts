@@ -100,7 +100,7 @@ export async function deductStockForFoodOrder(
         }
 
         // 5. Apply deductions
-        for (const [inventoryItemId, { quantity, itemName, unit }] of deductionMap) {
+        for (const [inventoryItemId, { quantity, itemName, unit }] of Array.from(deductionMap)) {
             // Get current quantity
             const { data: currentItem, error: fetchErr } = await supabase
                 .from('inventory_items')
@@ -241,7 +241,7 @@ export async function deductStockForBarOrder(
         }
 
         // 5. Apply deductions
-        for (const [inventoryItemId, { quantity, itemName, unit }] of deductionMap) {
+        for (const [inventoryItemId, { quantity, itemName, unit }] of Array.from(deductionMap)) {
             const { data: currentItem, error: fetchErr } = await supabase
                 .from('inventory_items')
                 .select('quantity')
