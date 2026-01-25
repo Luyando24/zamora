@@ -15,6 +15,7 @@ export async function GET(req: NextRequest) {
             .from('room_types')
             .select('*')
             .eq('property_id', propertyId)
+            .eq('category', 'table')
             .order('name');
 
         if (error) throw error;
@@ -46,7 +47,8 @@ export async function POST(req: NextRequest) {
                 description,
                 capacity: capacity || 4,
                 base_price: base_price || 0,
-                image_url
+                image_url,
+                category: 'table'
             })
             .select()
             .single();

@@ -67,10 +67,25 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
         const foodServiceCharge = foodTotal * 0.10;
         const foodGrandTotal = foodTotal + foodServiceCharge;
         
-        // Determine location string
+        // Determine location string and Table ID
         const locationString = formData.tableNumber 
             ? `Table ${formData.tableNumber}` 
             : formData.roomNumber;
+            
+        let tableId = null;
+        if (formData.tableNumber) {
+            // Lookup table ID from rooms table
+            const { data: roomData } = await supabase
+                .from('rooms')
+                .select('id')
+                .eq('property_id', property.id)
+                .eq('room_number', formData.tableNumber)
+                .single();
+            
+            if (roomData) {
+                tableId = roomData.id;
+            }
+        }
 
         const { error: orderError } = await supabase
           .from('orders')
@@ -84,6 +99,7 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
             guest_phone: formData.phone,
             guest_room_number: locationString,
             table_number: formData.tableNumber ? String(formData.tableNumber) : null,
+            table_id: tableId, // Link to table entity
             notes: formData.notes,
             // Snapshot fields (Summary)
             item_name: foodCart.map(i => `${i.quantity}x ${i.name}`).join(', '),

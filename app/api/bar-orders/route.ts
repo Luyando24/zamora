@@ -27,6 +27,21 @@ export async function POST(req: NextRequest) {
 
     const tableNumber = formData.tableNumber;
     const waiterName = formData.waiterName;
+    
+    // Lookup Table ID if table number is present
+    let tableId = null;
+    if (tableNumber) {
+        const { data: roomData } = await supabaseAdmin
+            .from('rooms')
+            .select('id')
+            .eq('property_id', propertyId)
+            .eq('room_number', tableNumber)
+            .single();
+        
+        if (roomData) {
+            tableId = roomData.id;
+        }
+    }
 
     // 1. Calculate Totals
     const barTotal = barCart.reduce((sum: number, i: any) => sum + (i.price || i.base_price) * i.quantity, 0);
@@ -47,6 +62,7 @@ export async function POST(req: NextRequest) {
         guest_phone: formData.phone,
         guest_room_number: locationString,
         table_number: tableNumber ? String(tableNumber) : null,
+        table_id: tableId,
         waiter_name: waiterName || null,
         notes: formData.notes,
       });
