@@ -269,7 +269,7 @@ export default function TablesPage() {
                             {tableTypes.length === 0 && (
                                 <tr>
                                     <td colSpan={4} className="px-6 py-12 text-center text-slate-400">
-                                        No table types found. Create types like "Indoor" or "Outdoor".
+                                        No table types found. Create types like &quot;Indoor&quot; or &quot;Outdoor&quot;.
                                     </td>
                                 </tr>
                             )}
