@@ -96,7 +96,7 @@ export async function verifyStaffAccess(req: NextRequest, propertyId: string) {
     if (!staffMember) {
          const { data: profile } = await admin
             .from('profiles')
-            .select('role')
+            .select('role, property_id')
             .eq('id', user.id)
             .single();
             
