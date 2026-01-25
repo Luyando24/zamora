@@ -43,8 +43,12 @@ export default function MenuStorefront({
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  
+  // Local state for location (initialized from props, updated from cache)
+  const [activeRoom, setActiveRoom] = useState(roomNumber || '');
+  const [activeTable, setActiveTable] = useState(tableNumber || '');
 
-  // Load cart from localStorage
+  // Load cart and location from localStorage
   useEffect(() => {
     const savedCart = localStorage.getItem('zamora_guest_cart');
     if (savedCart) {
@@ -54,8 +58,31 @@ export default function MenuStorefront({
         console.error('Failed to parse cart', e);
       }
     }
+
+    // Load saved location if not provided in props
+    const savedLocation = localStorage.getItem('zamora_guest_location');
+    if (savedLocation) {
+        try {
+            const parsed = JSON.parse(savedLocation);
+            if (!roomNumber && parsed.room) setActiveRoom(parsed.room);
+            if (!tableNumber && parsed.table) setActiveTable(parsed.table);
+        } catch (e) {
+            console.error('Failed to parse saved location', e);
+        }
+    }
+
+    // Save provided props to localStorage for future use
+    if (roomNumber || tableNumber) {
+        localStorage.setItem('zamora_guest_location', JSON.stringify({
+            room: roomNumber || '',
+            table: tableNumber || ''
+        }));
+        if (roomNumber) setActiveRoom(roomNumber);
+        if (tableNumber) setActiveTable(tableNumber);
+    }
+
     setIsLoaded(true);
-  }, []);
+  }, [roomNumber, tableNumber]);
 
   // Save cart to localStorage
   useEffect(() => {
@@ -519,8 +546,8 @@ export default function MenuStorefront({
         onClose={() => setIsCheckoutOpen(false)}
         cart={cart}
         property={property}
-        roomNumber={roomNumber}
-        tableNumber={tableNumber}
+        roomNumber={activeRoom}
+        tableNumber={activeTable}
         onOrderSuccess={() => {
           setCart([]);
           setIsCheckoutOpen(false);
