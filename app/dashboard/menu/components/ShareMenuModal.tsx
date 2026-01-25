@@ -49,6 +49,30 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
   const currentProperty = properties.find(p => p.id === selectedPropertyId) || { name: hotelName, id: hotelId };
   const currentHotelId = currentProperty.id;
   const currentHotelName = currentProperty.name;
+  const [menuUrl, setMenuUrl] = useState('');
+
+  // Update menuUrl when dependencies change
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    // Check environment to decide URL format
+    const hostname = window.location.hostname;
+    const isIp = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(hostname);
+    const isLocalhost = hostname === 'localhost';
+    const origin = window.location.origin;
+
+    let finalLocValue = locationValue;
+    if (locationType === 'table' && tableType === 'outdoor' && locationValue) {
+        finalLocValue = `Outdoor ${locationValue}`;
+    }
+
+    const queryParam = locationValue 
+        ? (locationType === 'room' ? `?room=${encodeURIComponent(locationValue)}` : `?table=${encodeURIComponent(finalLocValue)}`)
+        : '';
+    
+    // Always use path-based URL to ensure consistency and avoid DNS issues
+    setMenuUrl(`${origin}/menu/${currentHotelId}${queryParam}`);
+  }, [locationValue, locationType, tableType, currentHotelId, currentProperty]);
 
   if (!currentHotelId) {
     return (
@@ -60,35 +84,6 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
       </div>
     );
   }
-
-  // Point to the dedicated public menu page
-  const getMenuUrl = (locValue: string) => {
-    if (typeof window === 'undefined') return '';
-    
-    const slug = (currentProperty as any).slug;
-    
-    let finalLocValue = locValue;
-    if (locationType === 'table' && tableType === 'outdoor' && locValue) {
-        finalLocValue = `Outdoor ${locValue}`;
-    }
-
-    const queryParam = locValue 
-        ? (locationType === 'room' ? `?room=${encodeURIComponent(locValue)}` : `?table=${encodeURIComponent(finalLocValue)}`)
-        : '';
-
-    if (slug) {
-        const protocol = window.location.protocol;
-        const host = window.location.host;
-        const domain = host.includes('localhost') 
-                ? 'localhost:3000' 
-                : host.split('.').slice(-2).join('.');
-                
-            return `${protocol}//${slug}.${domain}/menu${queryParam}`;
-        }
-        return `${window.location.origin}/menu/${currentHotelId}${queryParam}`;
-  };
-
-  const menuUrl = getMenuUrl(locationValue);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(menuUrl);
