@@ -156,7 +156,7 @@ export default function QRCodeDisplay({ isOpen, onClose, tableNumber, tableType,
     // The Number
     ctx.font = '900 200px sans-serif'; // Very bold and large
     ctx.fillStyle = '#ffffff';
-    ctx.fillText(cleanTableNumber, WIDTH - rightMargin, topMargin + 80);
+    ctx.fillText(tableNumber, WIDTH - rightMargin, topMargin + 80);
     
     ctx.restore();
 
