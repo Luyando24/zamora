@@ -80,8 +80,7 @@ export default function TableTypeWizard({ initialData }: TableTypeWizardProps) {
         base_price: formData.base_price || 0,
         capacity: formData.capacity,
         image_url: formData.image_url,
-        // We might want to tag this as a 'table' type if we modify schema, 
-        // but for now we rely on the property being a restaurant or convention
+        category: 'table'
       };
 
       let error;

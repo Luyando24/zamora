@@ -51,16 +51,20 @@ export default function RoomsPage() {
     if (!selectedPropertyId) return;
     setLoading(true);
     
+    // Fetch Rooms (rooms with room_type.category = 'room' or null for backward compatibility)
     const { data: rData } = await supabase
       .from('rooms')
-      .select('*, room_types(name)')
+      .select('*, room_types!inner(name, category)')
       .eq('property_id', selectedPropertyId)
+      .or('category.eq.room,category.is.null', { foreignTable: 'room_types' })
       .order('room_number');
       
+    // Fetch Room Types
     const { data: tData } = await supabase
       .from('room_types')
       .select('*')
       .eq('property_id', selectedPropertyId)
+      .or('category.eq.room,category.is.null')
       .order('name');
     
     if (rData) setRooms(rData);

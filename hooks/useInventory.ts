@@ -58,14 +58,15 @@ export function useInventory(startDate: Date = new Date(), days: number = 30, pr
     try {
       setLoading(true);
       
-      // 1. Fetch Rooms
+      // 1. Fetch Rooms (only accommodation rooms)
       const { data: roomsData, error: roomsError } = await supabase
         .from('rooms')
         .select(`
           *,
-          room_types ( name, base_price )
+          room_types!inner ( name, base_price, category )
         `)
         .eq('property_id', propertyId)
+        .or('category.eq.room,category.is.null', { foreignTable: 'room_types' })
         .order('room_number', { ascending: true });
 
       if (roomsError) throw roomsError;

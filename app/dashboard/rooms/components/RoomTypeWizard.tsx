@@ -103,7 +103,7 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
           throw new Error('Please select a property.');
       }
 
-      const payload = { ...formData, property_id: selectedPropertyId };
+      const payload = { ...formData, property_id: selectedPropertyId, category: 'room' };
       
       let error;
       if (initialData?.id) {

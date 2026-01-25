@@ -184,18 +184,20 @@ export default function DashboardPage() {
             const today = new Date().toISOString().split('T')[0];
             const startOfDay = new Date(today).toISOString();
 
-            // 1. Total Rooms
+            // 1. Total Rooms (Accommodation Only)
             const { count: totalRooms } = await supabase
                 .from('rooms')
-                .select('*', { count: 'exact', head: true })
-                .eq('property_id', selectedPropertyId);
+                .select('*, room_types!inner(category)', { count: 'exact', head: true })
+                .eq('property_id', selectedPropertyId)
+                .or('category.eq.room,category.is.null', { foreignTable: 'room_types' });
 
             // 2. Maintenance Rooms
             const { count: maintenanceRooms } = await supabase
                 .from('rooms')
-                .select('*', { count: 'exact', head: true })
+                .select('*, room_types!inner(category)', { count: 'exact', head: true })
                 .eq('status', 'maintenance')
-                .eq('property_id', selectedPropertyId);
+                .eq('property_id', selectedPropertyId)
+                .or('category.eq.room,category.is.null', { foreignTable: 'room_types' });
 
             // 3. Today's Check-ins
             const { count: checkIns } = await supabase

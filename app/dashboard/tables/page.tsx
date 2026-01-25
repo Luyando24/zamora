@@ -24,6 +24,7 @@ interface Table {
   notes: string | null;
   room_types?: {
     name: string;
+    category: string;
   };
   property_id: string;
 }
@@ -56,18 +57,20 @@ export default function TablesPage() {
     if (!selectedPropertyId) return;
     setLoading(true);
     
-    // Reuse 'rooms' table but semantically treat them as tables
+    // Fetch Tables (rooms with room_type.category = 'table')
     const { data: tData } = await supabase
       .from('rooms')
-      .select('*, room_types(name)')
+      .select('*, room_types!inner(name, category)')
       .eq('property_id', selectedPropertyId)
-      .order('room_number');
+      .eq('room_types.category', 'table')
+      .order('room_number', { ascending: true });
       
-    // Reuse 'room_types' table
+    // Fetch Table Types
     const { data: ttData } = await supabase
       .from('room_types')
       .select('*')
       .eq('property_id', selectedPropertyId)
+      .eq('category', 'table')
       .order('name');
     
     if (tData) setTables(tData);
@@ -229,7 +232,7 @@ export default function TablesPage() {
                             </div>
                         </div>
                     ))}
-                    {tables.length === 0 && (
+                            {tables.length === 0 && (
                         <div className="col-span-full py-12 text-center text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
                             <Utensils className="mx-auto mb-3 opacity-20" size={48} />
                             <p>No tables found. Add your first table to get started.</p>
@@ -266,7 +269,7 @@ export default function TablesPage() {
                             {tableTypes.length === 0 && (
                                 <tr>
                                     <td colSpan={4} className="px-6 py-12 text-center text-slate-400">
-                                        No table types found. Create types like &quot;Indoor&quot; or &quot;Outdoor&quot;.
+                                        No table types found. Create types like "Indoor" or "Outdoor".
                                     </td>
                                 </tr>
                             )}

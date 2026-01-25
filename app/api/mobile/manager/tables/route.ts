@@ -13,8 +13,9 @@ export async function GET(req: NextRequest) {
         const supabase = getSupabaseAdmin();
         const { data: tables, error } = await supabase
             .from('rooms')
-            .select('*, room_types(name)')
+            .select('*, room_types!inner(name, category)')
             .eq('property_id', propertyId)
+            .eq('room_types.category', 'table')
             .order('room_number');
 
         if (error) throw error;

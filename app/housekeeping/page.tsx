@@ -34,7 +34,8 @@ export default function HousekeepingPage() {
   const fetchRooms = async () => {
     const { data, error } = await supabase
       .from('rooms')
-      .select('*, room_types(name)')
+      .select('*, room_types!inner(name, category)')
+      .or('category.eq.room,category.is.null', { foreignTable: 'room_types' })
       .order('room_number');
     
     if (data) setRooms(data as any);
