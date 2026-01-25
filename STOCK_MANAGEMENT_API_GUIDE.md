@@ -465,3 +465,27 @@ curl -X POST "https://your-domain.com/api/mobile/manager/stock/snapshot" \
 ## Questions?
 
 If you have any questions about implementing stock management in the mobile app, please refer to the existing API guides (CHEF_MOBILE_API_GUIDE.md, CASHIER_MOBILE_API_GUIDE.md) for patterns and conventions used in this project.
+
+---
+
+## Database Schema Updates
+
+The following schema changes have been applied to support direct stock tracking on bar menu items.
+
+**SQL Migration:**
+```sql
+ALTER TABLE bar_menu_items
+ADD COLUMN IF NOT EXISTS track_stock BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS stock_quantity INTEGER DEFAULT 0,
+ADD COLUMN IF NOT EXISTS low_stock_threshold INTEGER DEFAULT 5,
+ADD COLUMN IF NOT EXISTS cost_price NUMERIC(10, 2) DEFAULT 0.00;
+```
+
+**Column Guide:**
+| Column Name | Type | Default | Description |
+|-------------|------|---------|-------------|
+| `track_stock` | BOOLEAN | `FALSE` | Enable/Disable stock tracking for this item |
+| `stock_quantity` | INTEGER | `0` | Current quantity in stock |
+| `low_stock_threshold` | INTEGER | `5` | Quantity at which to trigger a low stock alert |
+| `cost_price` | NUMERIC(10, 2) | `0.00` | Cost price per unit for value calculation |
+

@@ -102,7 +102,16 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         if (original_price !== undefined) updates.original_price = original_price;
         if (discount_badge !== undefined) updates.discount_badge = discount_badge;
 
-        const { error: updateError } = await supabase
+        // Update stock fields for bar items
+        if (type === 'bar') {
+            const { track_stock, stock_quantity, low_stock_threshold, cost_price } = body;
+            if (track_stock !== undefined) updates.track_stock = track_stock;
+            if (stock_quantity !== undefined) updates.stock_quantity = stock_quantity;
+            if (low_stock_threshold !== undefined) updates.low_stock_threshold = low_stock_threshold;
+            if (cost_price !== undefined) updates.cost_price = cost_price;
+        }
+
+        const { data: updatedItem, error: updateError } = await supabase
             .from(table)
             .update(updates)
             .eq('id', params.id);

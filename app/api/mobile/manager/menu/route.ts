@@ -84,6 +84,15 @@ export async function POST(req: NextRequest) {
             property_id: propertyId // Legacy support / Direct column
         };
 
+        // Add stock fields for bar items
+        if (type === 'bar') {
+            const { track_stock, stock_quantity, low_stock_threshold, cost_price } = body;
+            if (track_stock !== undefined) payload.track_stock = track_stock;
+            if (stock_quantity !== undefined) payload.stock_quantity = stock_quantity;
+            if (low_stock_threshold !== undefined) payload.low_stock_threshold = low_stock_threshold;
+            if (cost_price !== undefined) payload.cost_price = cost_price;
+        }
+
         // Add optional fields if present
         if (ingredients) payload.ingredients = ingredients;
         if (dietary_info) payload.dietary_info = dietary_info;

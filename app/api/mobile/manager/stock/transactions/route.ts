@@ -20,7 +20,8 @@ export async function POST(req: NextRequest) {
             type, // 'in', 'out', 'adjustment', 'waste'
             quantity, // Positive number
             reason,
-            costAtTime
+            costAtTime,
+            date // Optional: Allow backdating
         } = body;
 
         if (!propertyId || !itemId || !type || quantity === undefined) {
@@ -114,7 +115,8 @@ export async function POST(req: NextRequest) {
                 quantity: quantityChange,
                 reason: reason || `${type.charAt(0).toUpperCase() + type.slice(1)} by ${profile.role}`,
                 cost_at_time: costAtTime || item.cost_per_unit,
-                performed_by: user.id
+                performed_by: user.id,
+                created_at: date || undefined // Use provided date or default to now()
             })
             .select()
             .single();

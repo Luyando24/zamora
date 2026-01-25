@@ -137,6 +137,11 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
       if (payload.price === '') {
         payload.price = null; 
       }
+
+      // Handle cost_price (optional)
+      if (payload.cost_price === '') {
+        payload.cost_price = null;
+      }
       
       // STRICT ISOLATION LOGIC
       
@@ -457,6 +462,63 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
                 })}
             </div>
         )}
+      </div>
+
+      {/* Stock Management */}
+      <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <div className="flex items-center justify-between mb-4">
+              <div>
+                  <h3 className="font-bold text-slate-900">Track Stock Level</h3>
+                  <p className="text-xs text-slate-500">Automatically deduct stock when sold.</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                  <input 
+                      type="checkbox" 
+                      className="sr-only peer"
+                      checked={formData.track_stock}
+                      onChange={e => setFormData({...formData, track_stock: e.target.checked})}
+                  />
+                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+          </div>
+
+          {formData.track_stock && (
+              <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2">
+                  <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Current Stock</label>
+                      <input 
+                          type="number"
+                          placeholder="0"
+                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                          value={formData.stock_quantity}
+                          onChange={e => setFormData({...formData, stock_quantity: parseInt(e.target.value) || 0})}
+                      />
+                  </div>
+                  <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Low Stock Alert</label>
+                      <input 
+                          type="number"
+                          placeholder="5"
+                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                          value={formData.low_stock_threshold}
+                          onChange={e => setFormData({...formData, low_stock_threshold: parseInt(e.target.value) || 0})}
+                      />
+                  </div>
+                  <div className="col-span-2">
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Cost Price (Optional)</label>
+                      <div className="relative">
+                          <span className="absolute left-3 top-2 text-slate-400 text-xs">K</span>
+                          <input 
+                              type="number"
+                              placeholder="0.00"
+                              className="w-full pl-8 pr-3 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                              value={formData.cost_price}
+                              onChange={e => setFormData({...formData, cost_price: e.target.value})}
+                          />
+                      </div>
+                  </div>
+              </div>
+          )}
       </div>
 
       <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 flex items-center justify-between">

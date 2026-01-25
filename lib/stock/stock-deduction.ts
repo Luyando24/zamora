@@ -197,7 +197,8 @@ export async function deductStockForBarOrder(
             return { success: true, deductions, errors };
         }
 
-        // 3. Fetch recipes for bar items
+        // 3. Fetch recipes for bar items AND direct stock info
+        // We fetch both: recipes mapping to inventory_items, AND bar_menu_items themselves if they track stock
         const { data: recipes, error: recipeError } = await supabase
             .from('menu_item_recipes')
             .select(`
@@ -211,36 +212,67 @@ export async function deductStockForBarOrder(
 
         if (recipeError) {
             errors.push(`Failed to fetch bar recipes: ${recipeError.message}`);
-            return { success: false, deductions, errors };
+            // Don't return yet, we might have direct stock items
         }
 
-        if (!recipes || recipes.length === 0) {
-            return { success: true, deductions, errors };
+        // Fetch bar menu items to check for direct stock tracking
+        const { data: directItems, error: directStockError } = await supabase
+            .from('bar_menu_items')
+            .select('id, name, track_stock, stock_quantity, low_stock_threshold')
+            .in('id', barMenuItemIds)
+            .eq('track_stock', true);
+
+        if (directStockError) {
+             errors.push(`Failed to fetch direct stock items: ${directStockError.message}`);
         }
 
         // 4. Calculate deductions
+        // We use a unified map for inventory items. 
+        // For direct bar items, we treat them as their own "inventory item" for deduction purposes,
+        // or handle them separately.
+        // To keep it clean, let's handle "Inventory Items" (recipes) and "Direct Bar Items" separately.
+        
+        // A. Inventory Items (via Recipes)
         const deductionMap: Map<string, { quantity: number; itemName: string; unit: string }> = new Map();
+        
+        // B. Direct Bar Items
+        const directDeductionMap: Map<string, { quantity: number; itemName: string }> = new Map();
 
         for (const orderItem of orderItems) {
-            const itemRecipes = recipes.filter(r => r.bar_menu_item_id === orderItem.bar_menu_item_id);
+            // Check for recipes first
+            const itemRecipes = recipes?.filter(r => r.bar_menu_item_id === orderItem.bar_menu_item_id) || [];
 
-            for (const recipe of itemRecipes) {
-                const totalToDeduct = (recipe.quantity_per_unit || 1) * (orderItem.quantity || 1);
-                const invItem = recipe.inventory_items as any;
-
-                if (invItem) {
-                    const existing = deductionMap.get(recipe.inventory_item_id) || {
+            if (itemRecipes.length > 0) {
+                for (const recipe of itemRecipes) {
+                    const totalToDeduct = (recipe.quantity_per_unit || 1) * (orderItem.quantity || 1);
+                    const invItem = recipe.inventory_items as any;
+    
+                    if (invItem) {
+                        const existing = deductionMap.get(recipe.inventory_item_id) || {
+                            quantity: 0,
+                            itemName: invItem.name,
+                            unit: invItem.unit || 'unit'
+                        };
+                        existing.quantity += totalToDeduct;
+                        deductionMap.set(recipe.inventory_item_id, existing);
+                    }
+                }
+            } else {
+                // If no recipe, check if it's a direct stock item
+                const directItem = directItems?.find(d => d.id === orderItem.bar_menu_item_id);
+                if (directItem) {
+                    const totalToDeduct = (orderItem.quantity || 1);
+                    const existing = directDeductionMap.get(directItem.id) || {
                         quantity: 0,
-                        itemName: invItem.name,
-                        unit: invItem.unit || 'unit'
+                        itemName: directItem.name
                     };
                     existing.quantity += totalToDeduct;
-                    deductionMap.set(recipe.inventory_item_id, existing);
+                    directDeductionMap.set(directItem.id, existing);
                 }
             }
         }
 
-        // 5. Apply deductions
+        // 5. Apply deductions (Inventory Items)
         for (const [inventoryItemId, { quantity, itemName, unit }] of Array.from(deductionMap)) {
             const { data: currentItem, error: fetchErr } = await supabase
                 .from('inventory_items')
@@ -292,6 +324,48 @@ export async function deductStockForBarOrder(
             });
         }
 
+        // 6. Apply deductions (Direct Bar Items)
+        for (const [barItemId, { quantity, itemName }] of Array.from(directDeductionMap)) {
+             // Fetch current again to be safe
+             const { data: currentItem, error: fetchErr } = await supabase
+                .from('bar_menu_items')
+                .select('stock_quantity')
+                .eq('id', barItemId)
+                .single();
+            
+            if (fetchErr || !currentItem) {
+                errors.push(`Failed to fetch bar item ${itemName}: ${fetchErr?.message}`);
+                continue;
+            }
+
+            const newQuantity = Math.max(0, (currentItem.stock_quantity || 0) - quantity);
+
+            const { error: updateErr } = await supabase
+                .from('bar_menu_items')
+                .update({
+                    stock_quantity: newQuantity
+                })
+                .eq('id', barItemId);
+
+            if (updateErr) {
+                errors.push(`Failed to update stock for ${itemName}: ${updateErr.message}`);
+                continue;
+            }
+
+            // We don't log to 'inventory_transactions' because that table links to 'inventory_items'.
+            // Unless we want to create a separate transaction log for bar items, or make 'item_id' polymorphic.
+            // For now, we just deduct. 
+            // Ideally, we should unify them, but user requested "simple" tracking on bar table.
+            
+            deductions.push({
+                inventoryItemId: barItemId, // Reusing field
+                itemName,
+                quantityDeducted: quantity,
+                unit: 'unit',
+                newQuantity
+            });
+        }
+
         return { success: errors.length === 0, deductions, errors };
     } catch (error: any) {
         errors.push(`Unexpected error: ${error.message}`);
@@ -321,19 +395,49 @@ export async function takeStockSnapshot(
             return { success: false, error: `Failed to fetch inventory: ${fetchErr.message}` };
         }
 
-        // Calculate total value
-        const totalValue = (items || []).reduce((sum, item) => {
+        // Fetch tracked bar items
+        const { data: barItems, error: barFetchErr } = await supabase
+            .from('bar_menu_items')
+            .select('id, name, stock_quantity, cost_price, bar_menu_item_properties!inner(property_id)')
+            .eq('bar_menu_item_properties.property_id', propertyId)
+            .eq('track_stock', true)
+            .order('name');
+
+        if (barFetchErr) {
+             console.warn('Failed to fetch bar items for snapshot:', barFetchErr);
+        }
+
+        // Calculate total value (Inventory)
+        let totalValue = (items || []).reduce((sum, item) => {
             return sum + ((item.quantity || 0) * (item.cost_per_unit || 0));
         }, 0);
 
+        // Add Bar Items Value
+        if (barItems) {
+            totalValue += barItems.reduce((sum, item) => {
+                return sum + ((item.stock_quantity || 0) * (item.cost_price || 0));
+            }, 0);
+        }
+
         // Format items for JSON storage
-        const snapshotItems = (items || []).map(item => ({
-            item_id: item.id,
-            name: item.name,
-            quantity: item.quantity,
-            unit: item.unit,
-            cost_per_unit: item.cost_per_unit
-        }));
+        const snapshotItems = [
+            ...(items || []).map(item => ({
+                item_id: item.id,
+                name: item.name,
+                quantity: item.quantity,
+                unit: item.unit,
+                cost_per_unit: item.cost_per_unit,
+                type: 'inventory'
+            })),
+            ...(barItems || []).map(item => ({
+                item_id: item.id,
+                name: item.name,
+                quantity: item.stock_quantity,
+                unit: 'unit',
+                cost_per_unit: item.cost_price,
+                type: 'bar'
+            }))
+        ];
 
         // Get today's date
         const today = new Date().toISOString().split('T')[0];

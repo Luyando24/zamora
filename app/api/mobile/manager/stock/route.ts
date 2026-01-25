@@ -8,6 +8,98 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/db/supabase-admin';
 
+export async function POST(req: NextRequest) {
+    try {
+        const body = await req.json();
+        const {
+            propertyId,
+            name,
+            category,
+            unit,
+            min_quantity,
+            cost_per_unit,
+            supplier_id,
+            initial_quantity
+        } = body;
+
+        if (!propertyId || !name) {
+            return NextResponse.json({ error: 'Missing required fields: propertyId, name' }, { status: 400 });
+        }
+
+        // Verify auth
+        const authHeader = req.headers.get('authorization');
+        if (!authHeader) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const token = authHeader.replace('Bearer ', '');
+        const supabase = getSupabaseAdmin();
+
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+        if (authError || !user) {
+            return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+        }
+
+        // Verify user permission
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role, property_id')
+            .eq('id', user.id)
+            .single();
+
+        if (!profile || (profile.property_id !== propertyId && !['admin', 'super_admin'].includes(profile.role))) {
+            return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+        }
+
+        // Create Item
+        const { data: newItem, error: insertError } = await supabase
+            .from('inventory_items')
+            .insert({
+                property_id: propertyId,
+                name,
+                category: category || 'food',
+                unit: unit || 'unit',
+                min_quantity: min_quantity || 0,
+                cost_per_unit: cost_per_unit || 0,
+                supplier_id: supplier_id || null,
+                quantity: initial_quantity || 0,
+                // created_at and updated_at are usually handled by DB defaults, but we can set updated_at
+                updated_at: new Date().toISOString()
+            })
+            .select()
+            .single();
+
+        if (insertError) throw insertError;
+
+        // Handle Initial Stock Transaction
+        if (initial_quantity && initial_quantity > 0) {
+            const { error: txnError } = await supabase
+                .from('inventory_transactions')
+                .insert({
+                    item_id: newItem.id,
+                    type: 'in',
+                    quantity: initial_quantity,
+                    reason: 'Initial Stock',
+                    cost_at_time: cost_per_unit || 0,
+                    performed_by: user.id
+                });
+            
+            if (txnError) {
+                console.error('Failed to log initial stock transaction:', txnError);
+                // We don't fail the request, but we log the error
+            }
+        }
+
+        return NextResponse.json({ success: true, item: newItem });
+
+    } catch (error: any) {
+        console.error('Stock creation error:', error);
+        return NextResponse.json({
+            error: error.message || 'Internal Server Error'
+        }, { status: 500 });
+    }
+}
+
 export async function GET(req: NextRequest) {
     try {
         const { searchParams } = new URL(req.url);
