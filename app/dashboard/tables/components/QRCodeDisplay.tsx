@@ -18,6 +18,15 @@ export default function QRCodeDisplay({ isOpen, onClose, tableNumber, tableType,
   const { properties } = useProperty();
   const [isDownloading, setIsDownloading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [menuUrl, setMenuUrl] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const origin = window.location.origin;
+        const queryParam = `?table=${encodeURIComponent(tableNumber)}`;
+        setMenuUrl(`${origin}/menu/${propertyId}${queryParam}`);
+    }
+  }, [propertyId, tableNumber]);
   
   // Close on Escape key
   useEffect(() => {
@@ -38,16 +47,6 @@ export default function QRCodeDisplay({ isOpen, onClose, tableNumber, tableType,
   
   // Find current property details for logo/wifi
   const property = properties.find(p => p.id === propertyId);
-  const [menuUrl, setMenuUrl] = useState('');
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-        const origin = window.location.origin;
-        const queryParam = `?table=${encodeURIComponent(tableNumber)}`;
-        // Use path-based URL for reliability and to avoid DNS/Subdomain issues
-        setMenuUrl(`${origin}/menu/${propertyId}${queryParam}`);
-    }
-  }, [propertyId, tableNumber]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(menuUrl);
