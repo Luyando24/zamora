@@ -17,6 +17,26 @@ interface MenuWizardProps {
   initialData?: any;
 }
 
+interface MenuFormData {
+  name: string;
+  description: string;
+  category: string;
+  price: string | number;
+  image_url: string;
+  gallery_urls: string[];
+  customization_options: any[];
+  is_available: boolean;
+  weight: string;
+  ingredients: string;
+  original_price: string | number;
+  discount_badge: string;
+  dietary_info: string;
+  track_stock: boolean;
+  stock_quantity: number;
+  low_stock_threshold: number;
+  cost_price: string | number;
+}
+
 const STEPS = [
   { id: 1, name: 'The Basics', icon: Wine, description: 'Name, Category & Story' },
   { id: 2, name: 'Pricing & Size', icon: Sparkles, description: 'Cost, Volume & Badges' },
@@ -71,7 +91,7 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
     init();
   }, [initialData, selectedPropertyId, supabase]);
   
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<MenuFormData>({
     name: initialData?.name || '',
     description: initialData?.description || '',
     category: initialData?.category || '',
