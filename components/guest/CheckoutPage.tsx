@@ -209,7 +209,7 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
           onClick={onOrderSuccess}
           className="bg-slate-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-black transition-colors"
         >
-          Back to Menu
+          View Active Session
         </button>
       </div>
     );

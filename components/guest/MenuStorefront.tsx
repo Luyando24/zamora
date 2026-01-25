@@ -11,6 +11,7 @@ import Breadcrumb from '@/components/ui/Breadcrumb';
 import FoodDetailsPage from './FoodDetailsPage';
 import CheckoutPage from './CheckoutPage';
 import OrderHistoryPage from './OrderHistoryPage';
+import GuestSessionView from './GuestSessionView';
 
 interface MenuStorefrontProps {
   property: any;
@@ -37,6 +38,7 @@ export default function MenuStorefront({
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isSessionOpen, setIsSessionOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -515,6 +517,7 @@ export default function MenuStorefront({
         onOrderSuccess={() => {
           setCart([]);
           setIsCheckoutOpen(false);
+          setIsSessionOpen(true); // Open session view instead of just closing
         }}
       />
       {/* Order History Page */}
@@ -522,6 +525,14 @@ export default function MenuStorefront({
         isOpen={isHistoryOpen} 
         onClose={() => setIsHistoryOpen(false)} 
         propertyId={property.id} 
+      />
+      
+      {/* Active Session View */}
+      <GuestSessionView 
+        isOpen={isSessionOpen}
+        onClose={() => setIsSessionOpen(false)}
+        propertyId={property.id}
+        onAddItems={() => setIsSessionOpen(false)}
       />
 
     </div>
