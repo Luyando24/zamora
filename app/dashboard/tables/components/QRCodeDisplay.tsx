@@ -38,38 +38,16 @@ export default function QRCodeDisplay({ isOpen, onClose, tableNumber, tableType,
   
   // Find current property details for logo/wifi
   const property = properties.find(p => p.id === propertyId);
+  const [menuUrl, setMenuUrl] = useState('');
 
-  const getMenuUrl = () => {
-    if (typeof window === 'undefined') return '';
-    
-    const slug = property?.slug;
-    const queryParam = `?table=${encodeURIComponent(tableNumber)}`;
-
-    // Check environment to decide URL format
-    const hostname = window.location.hostname;
-    const isIp = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(hostname);
-    const isLocalhost = hostname === 'localhost';
-
-    // Only use subdomain logic for real domains (not IP or localhost)
-    if (slug && !isIp && !isLocalhost) {
-        const protocol = window.location.protocol;
-        const host = window.location.host;
-        // Attempt to extract root domain (e.g. app.domain.com -> domain.com)
-        // This handles cases with ports correctly (e.g. domain.com:3000)
-        // Note: This simple slice(-2) works for .com, .net but not .co.uk. 
-        // For now we stick to existing behavior but protected from IPs.
-        
-        const parts = host.split('.');
-        const rootDomainWithPort = parts.slice(-2).join('.');
-        
-        return `${protocol}//${slug}.${rootDomainWithPort}/menu${queryParam}`;
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+        const origin = window.location.origin;
+        const queryParam = `?table=${encodeURIComponent(tableNumber)}`;
+        // Use path-based URL for reliability and to avoid DNS/Subdomain issues
+        setMenuUrl(`${origin}/menu/${propertyId}${queryParam}`);
     }
-    
-    // Fallback: Path-based URL
-    return `${window.location.origin}/menu/${propertyId}${queryParam}`;
-  };
-
-  const menuUrl = getMenuUrl();
+  }, [propertyId, tableNumber]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(menuUrl);
@@ -409,6 +387,7 @@ export default function QRCodeDisplay({ isOpen, onClose, tableNumber, tableType,
   };
 
   const downloadQR = async () => {
+    if (!menuUrl) return;
     setIsDownloading(true);
     try {
         const canvas = await generateCanvas();
@@ -461,13 +440,19 @@ export default function QRCodeDisplay({ isOpen, onClose, tableNumber, tableType,
                 {/* QR Preview Card */}
                 <div className="bg-white p-4 rounded-3xl shadow-[0_0_40px_-10px_rgba(236,72,153,0.3)] relative group transition-transform hover:scale-[1.02] duration-300 mb-8">
                     <div className="relative">
-                        <QRCodeSVG 
-                            value={menuUrl} 
-                            size={180}
-                            level="H"
-                            includeMargin={true}
-                            className="rounded-xl"
-                        />
+                        {menuUrl ? (
+                            <QRCodeSVG 
+                                value={menuUrl} 
+                                size={180}
+                                level="H"
+                                includeMargin={true}
+                                className="rounded-xl"
+                            />
+                        ) : (
+                            <div className="w-[180px] h-[180px] flex items-center justify-center bg-slate-50 rounded-xl">
+                                <Loader2 className="animate-spin text-slate-300" size={32} />
+                            </div>
+                        )}
                         {/* Center Logo/Icon Overlay */}
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                             <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg p-1">
@@ -483,7 +468,7 @@ export default function QRCodeDisplay({ isOpen, onClose, tableNumber, tableType,
                 <div className="w-full space-y-3">
                     <button 
                         onClick={downloadQR}
-                        disabled={isDownloading}
+                        disabled={isDownloading || !menuUrl}
                         className="w-full flex items-center justify-center gap-2 bg-white text-black hover:bg-pink-50 disabled:bg-slate-200 px-6 py-3.5 rounded-xl font-bold transition-all transform active:scale-[0.98] shadow-lg shadow-pink-500/10"
                     >
                         {isDownloading ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
@@ -499,10 +484,11 @@ export default function QRCodeDisplay({ isOpen, onClose, tableNumber, tableType,
                             {copied ? 'Copied!' : 'Copy Link'}
                         </button>
                         <a 
-                            href={menuUrl}
+                            href={menuUrl || '#'}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex-1 py-3 bg-slate-900 border border-slate-800 text-slate-300 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-slate-800 hover:text-white transition-colors active:scale-[0.98] group"
+                            onClick={(e) => !menuUrl && e.preventDefault()}
+                            className={`flex-1 py-3 bg-slate-900 border border-slate-800 text-slate-300 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-slate-800 hover:text-white transition-colors active:scale-[0.98] group ${!menuUrl ? 'opacity-50 pointer-events-none' : ''}`}
                         >
                             <ExternalLink size={14} className="group-hover:text-pink-400 transition-colors" /> Open Menu
                         </a>
