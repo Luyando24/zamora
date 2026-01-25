@@ -308,71 +308,28 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
       {/* RIGHT COLUMN: Form */}
       <div className="w-full md:w-[480px] bg-white border-l border-slate-100 order-1 md:order-2 shrink-0 md:overflow-y-auto">
          <div className="p-6 md:p-8 md:h-full flex flex-col">
-            <h2 className="text-xl font-black text-slate-900 mb-6">Delivery Details</h2>
+            <h2 className="text-xl font-black text-slate-900 mb-6">Confirm Order</h2>
             
             <form id="checkout-form" onSubmit={handleSubmit} className="flex-1 flex flex-col space-y-6">
                 
-                    {/* Room & Guest Info */}
+                    {/* Room & Guest Info - Simplified/Hidden if detected */}
                     <div className="space-y-4">
-                        {roomNumber ? (
+                        {(roomNumber || tableNumber) && (
                              <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex items-start gap-3 animate-in fade-in slide-in-from-top-2 shadow-sm">
                                 <div className="bg-emerald-100 p-2 rounded-full text-emerald-600 shrink-0">
-                                    <CheckCircle2 size={20} />
+                                    {roomNumber ? <CheckCircle2 size={20} /> : <Utensils size={20} />}
                                 </div>
                                 <div>
-                                    <p className="font-bold text-emerald-900 text-sm">✓ Delivery Location Verified</p>
+                                    <p className="font-bold text-emerald-900 text-sm">✓ Location Verified</p>
                                     <p className="text-xs text-emerald-700 mt-1 leading-relaxed">
-                                        Rest assured, we know you are in <span className="font-bold">Room {roomNumber}</span>. 
-                                        Your order will be delivered directly to your door.
+                                        Delivering to <span className="font-bold">{roomNumber ? `Room ${roomNumber}` : `Table ${tableNumber}`}</span>.
                                     </p>
                                 </div>
                             </div>
-                        ) : tableNumber ? (
-                             <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex items-start gap-3 animate-in fade-in slide-in-from-top-2 shadow-sm">
-                                <div className="bg-emerald-100 p-2 rounded-full text-emerald-600 shrink-0">
-                                    <Utensils size={20} />
-                                </div>
-                                <div>
-                                    <p className="font-bold text-emerald-900 text-sm">✓ Table Verified</p>
-                                    <p className="text-xs text-emerald-700 mt-1 leading-relaxed">
-                                        Ordering from <span className="font-bold">Table {tableNumber}</span>. 
-                                        We&apos;ll bring your order right to you.
-                                    </p>
-                                </div>
-                            </div>
-                        ) : null}
-
-                        {/* Guest Name - Hidden/Removed for quick checkout */}
-                        {/* 
-                        <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-1">Guest Name <span className="text-red-500">*</span></label>
-                            <input 
-                                required
-                                type="text"
-                                placeholder="Your Full Name"
-                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent transition-all outline-none font-medium"
-                                value={formData.name}
-                                onChange={e => setFormData({...formData, name: e.target.value})}
-                            />
-                        </div>
-                        */}
+                        )}
 
                     <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1">Phone Number (Optional)</label>
-                        <div className="relative">
-                            <Phone className="absolute left-3 top-3 text-slate-400" size={18} />
-                            <input 
-                                type="tel"
-                                placeholder="+260..."
-                                className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent transition-all outline-none font-medium"
-                                value={formData.phone}
-                                onChange={e => setFormData({...formData, phone: e.target.value})}
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-1">Notes for Kitchen</label>
+                        <label className="block text-sm font-bold text-slate-700 mb-1">Notes (Optional)</label>
                         <div className="relative">
                             <MessageSquare className="absolute left-3 top-3 text-slate-400" size={18} />
                             <textarea 
@@ -388,30 +345,16 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
 
                 <hr className="border-slate-100" />
 
-                {/* Payment Method */}
+                {/* Simplified Payment - Default to 'Pay Later' visually */}
                 <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-3">Payment Method</label>
-                    <div className="grid grid-cols-2 gap-3">
-                        {[
-                            { id: 'room_charge', label: 'Room Charge', icon: MapPin },
-                            { id: 'cash', label: 'Cash', icon: Banknote },
-                            { id: 'card', label: 'Card', icon: CreditCard },
-                            { id: 'mobile_money', label: 'Mobile Money', icon: Wallet },
-                        ].map((method) => (
-                            <button
-                                key={method.id}
-                                type="button"
-                                onClick={() => setFormData({...formData, paymentMethod: method.id})}
-                                className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${
-                                    formData.paymentMethod === method.id 
-                                    ? 'border-black bg-black text-white shadow-md' 
-                                    : 'border-slate-100 bg-white text-slate-500 hover:border-slate-200 hover:bg-slate-50'
-                                }`}
-                            >
-                                <method.icon size={24} className="mb-2" />
-                                <span className="text-xs font-bold">{method.label}</span>
-                            </button>
-                        ))}
+                    <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <div className="bg-white p-2 rounded-full border border-slate-100 shadow-sm">
+                            <Banknote size={20} className="text-slate-900" />
+                        </div>
+                        <div>
+                            <p className="font-bold text-sm text-slate-900">Payment Due Later</p>
+                            <p className="text-xs text-slate-500">Pay your waiter or at checkout.</p>
+                        </div>
                     </div>
                 </div>
 
@@ -421,10 +364,10 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
                         disabled={loading}
                         className="w-full py-4 bg-black text-white rounded-2xl font-bold text-lg hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl transition-all transform active:scale-[0.98] flex items-center justify-center gap-2"
                     >
-                        {loading ? <Loader2 className="animate-spin" /> : 'Confirm Order'}
+                        {loading ? <Loader2 className="animate-spin" /> : 'Place Order'}
                     </button>
                     <p className="text-xs text-center text-slate-400 mt-4">
-                        By placing this order, you agree to pay the total amount of K{grandTotal.toFixed(2)} upon delivery or checkout.
+                        Total Amount: K{grandTotal.toFixed(2)}
                     </p>
                 </div>
             </form>

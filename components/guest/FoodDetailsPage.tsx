@@ -268,9 +268,10 @@ export default function FoodDetailsPage({ item, isOpen, onClose, onAddToCart, si
                            onAddToCart(item, quantity, { selectedOptions: Array.from(selectedOptions) });
                            handleClose();
                         }}
-                        className="bg-pink-500 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-pink-200 active:scale-95 transition-all hover:bg-pink-600 flex items-center gap-2"
+                        className="bg-black text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-xl hover:bg-slate-800 active:scale-95 transition-all flex items-center gap-2 group"
                      >
-                        <span>Add to cart</span>
+                        <span className="group-hover:translate-x-1 transition-transform">Add to Order</span>
+                        <ArrowRight size={20} className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
                      </button>
                   </div>
                </div>

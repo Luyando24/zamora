@@ -293,8 +293,15 @@ export default function MenuStorefront({
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         addToCart(item);
+                                        const btn = e.currentTarget;
+                                        btn.innerHTML = 'Added!';
+                                        btn.classList.add('bg-green-500', 'text-white', 'border-green-500');
+                                        setTimeout(() => {
+                                            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg> Add';
+                                            btn.classList.remove('bg-green-500', 'text-white', 'border-green-500');
+                                        }, 1000);
                                     }}
-                                    className="w-full py-2 bg-white border border-slate-200 text-slate-900 rounded-xl flex items-center justify-center gap-2 font-bold text-xs md:text-sm shadow-sm hover:bg-slate-50 active:scale-[0.98] transition-all"
+                                    className="w-full py-2 bg-white border border-slate-200 text-slate-900 rounded-xl flex items-center justify-center gap-2 font-bold text-xs md:text-sm shadow-sm hover:bg-slate-50 active:scale-[0.98] transition-all duration-300"
                                 >
                                     <Plus size={14} /> Add
                                 </button>
