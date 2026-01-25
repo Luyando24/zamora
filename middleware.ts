@@ -57,6 +57,7 @@ export async function middleware(request: NextRequest) {
           !url.pathname.startsWith('/signup') && 
           !url.pathname.startsWith('/auth') &&
           !url.pathname.startsWith('/verify-email') &&
+          !url.pathname.startsWith('/menu') &&
           !url.pathname.startsWith('/api')) { // Allow API calls
           
           rewrittenUrl.pathname = `/dashboard${url.pathname === '/' ? '' : url.pathname}`
