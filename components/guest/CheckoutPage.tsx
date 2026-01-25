@@ -27,10 +27,10 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
   const [formData, setFormData] = useState({
     roomNumber: roomNumber || '',
     tableNumber: tableNumber || '',
-    name: '',
+    name: 'Guest', // Default name for quick checkout
     phone: '',
     notes: '',
-    paymentMethod: 'room_charge' // room_charge, cash, card, mobile_money
+    paymentMethod: 'cash' // Default to cash for quick checkout
   });
 
   useEffect(() => {
@@ -331,37 +331,22 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
                                     </p>
                                 </div>
                             </div>
-                        ) : (
-                            /* Manual Room Number Input - Commented out as requested
-                            <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-1">Room Number <span className="text-red-500">*</span></label>
-                                <div className="relative">
-                                    <MapPin className="absolute left-3 top-3 text-slate-400" size={18} />
-                                    <input 
-                                        required
-                                        type="text"
-                                        placeholder="e.g. 104"
-                                        className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent transition-all outline-none font-medium"
-                                        value={formData.roomNumber}
-                                        onChange={e => setFormData({...formData, roomNumber: e.target.value})}
-                                    />
-                                </div>
-                            </div>
-                            */
-                            null
-                        )}
+                        ) : null}
 
+                        {/* Guest Name - Hidden/Removed for quick checkout */}
+                        {/* 
                         <div>
                             <label className="block text-sm font-bold text-slate-700 mb-1">Guest Name <span className="text-red-500">*</span></label>
                             <input 
                                 required
-                            type="text"
-                            placeholder="Your Full Name"
-                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent transition-all outline-none font-medium"
-                            value={formData.name}
-                            onChange={e => setFormData({...formData, name: e.target.value})}
-                        />
-                    </div>
+                                type="text"
+                                placeholder="Your Full Name"
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-black focus:border-transparent transition-all outline-none font-medium"
+                                value={formData.name}
+                                onChange={e => setFormData({...formData, name: e.target.value})}
+                            />
+                        </div>
+                        */}
 
                     <div>
                         <label className="block text-sm font-bold text-slate-700 mb-1">Phone Number (Optional)</label>
