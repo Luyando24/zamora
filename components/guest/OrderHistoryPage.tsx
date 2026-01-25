@@ -58,7 +58,9 @@ export default function OrderHistoryPage({ isOpen, onClose, propertyId }: OrderH
   const [loading, setLoading] = useState(true);
 
   const fetchOrders = useCallback(async () => {
-    setLoading(true);
+    // Only set loading on initial open
+    // setLoading(true); // Removed to prevent flashing
+
     const savedOrderIds = JSON.parse(localStorage.getItem('zamora_guest_order_ids') || '[]');
 
     if (savedOrderIds.length === 0) {
@@ -115,54 +117,17 @@ export default function OrderHistoryPage({ isOpen, onClose, propertyId }: OrderH
     let channel: any;
 
     if (isOpen) {
+      setLoading(true);
       fetchOrders();
 
       // Set up Realtime Subscription
+      // We listen for any update to orders table where ID is in our list
       const savedOrderIds = JSON.parse(localStorage.getItem('zamora_guest_order_ids') || '[]');
 
       if (savedOrderIds.length > 0) {
-        channel = supabase
-          .channel('guest_orders_tracking')
-          .on(
-            'postgres_changes',
-            {
-              event: 'UPDATE',
-              schema: 'public',
-              table: 'orders',
-              filter: `property_id=eq.${propertyId}`,
-            },
-            (payload) => {
-              if (savedOrderIds.includes(payload.new.id)) {
-                setOrders((prev) =>
-                  prev.map((order) =>
-                    order.id === payload.new.id
-                      ? { ...order, ...payload.new }
-                      : order
-                  )
-                );
-              }
-            }
-          )
-          .on(
-            'postgres_changes',
-            {
-              event: 'UPDATE',
-              schema: 'public',
-              table: 'bar_orders',
-              filter: `property_id=eq.${propertyId}`,
-            },
-            (payload) => {
-              if (savedOrderIds.includes(payload.new.id)) {
-                setOrders((prev) =>
-                  prev.map((order) =>
-                    order.id === payload.new.id
-                      ? { ...order, ...payload.new }
-                      : order
-                  )
-                );
-              }
-            }
-          )
+        channel = supabase.channel('guest_history_tracking')
+          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'orders' }, fetchOrders)
+          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'bar_orders' }, fetchOrders)
           .subscribe();
       }
     }
@@ -172,7 +137,7 @@ export default function OrderHistoryPage({ isOpen, onClose, propertyId }: OrderH
         supabase.removeChannel(channel);
       }
     };
-  }, [isOpen, propertyId, fetchOrders, supabase]);
+  }, [isOpen, fetchOrders, supabase]);
 
   if (!isOpen) return null;
 
