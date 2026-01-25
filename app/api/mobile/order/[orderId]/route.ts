@@ -40,7 +40,7 @@ export async function PATCH(
 
         const { orderId } = params;
         const body = await req.json();
-        const { status, type, waiter_name, formData } = body;
+        const { status, type, waiter_name, formData, payment_method } = body;
 
         // Type is always required to know which table to query
         if (!type || (type !== 'food' && type !== 'bar')) {
@@ -48,8 +48,8 @@ export async function PATCH(
         }
 
         // Must provide at least one field to update
-        if (!status && !waiter_name) {
-             return NextResponse.json({ error: 'Status or waiter_name is required' }, { status: 400 });
+        if (!status && !waiter_name && !payment_method) {
+             return NextResponse.json({ error: 'Status, waiter_name, or payment_method is required' }, { status: 400 });
         }
 
         const table = type === 'food' ? 'orders' : 'bar_orders';
@@ -59,6 +59,7 @@ export async function PATCH(
         const updates: any = {};
         if (status) updates.status = status;
         if (waiter_name) updates.waiter_name = waiter_name;
+        if (payment_method) updates.payment_method = payment_method;
         
         // Handle formData update if provided (shallow merge or replace?)
         // Ideally we fetch first, but for now let's assume if provided we might want to update it.

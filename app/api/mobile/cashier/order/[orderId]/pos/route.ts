@@ -26,7 +26,7 @@ export async function POST(
 
         const { orderId } = params;
         const body = await req.json();
-        const { type } = body;
+        const { type, payment_method } = body;
 
         if (!type || (type !== 'food' && type !== 'bar')) {
             return NextResponse.json({ error: 'Valid type (food/bar) is required' }, { status: 400 });
@@ -46,10 +46,12 @@ export async function POST(
         }
 
         const table = type === 'food' ? 'orders' : 'bar_orders';
+        const updates: any = { status: 'pos_completed' };
+        if (payment_method) updates.payment_method = payment_method;
 
         const { data, error: updateError } = await admin
             .from(table)
-            .update({ status: 'pos_completed' })
+            .update(updates)
             .eq('id', orderId)
             .select();
 

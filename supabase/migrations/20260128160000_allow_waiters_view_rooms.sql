@@ -21,9 +21,6 @@ USING (
       AND property_staff.user_id = auth.uid()
     )
     OR
-    -- OR user created the room (owner/admin fallback)
-    created_by = auth.uid()
-    OR
     -- OR user is super admin
     is_super_admin()
   )
