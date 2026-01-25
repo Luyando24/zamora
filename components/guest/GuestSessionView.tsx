@@ -332,5 +332,3 @@ export default function GuestSessionView({ isOpen, onClose, propertyId, onAddIte
     </>
   );
 }
-  );
-}
