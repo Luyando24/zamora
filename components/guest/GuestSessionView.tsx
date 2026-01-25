@@ -132,7 +132,7 @@ export default function GuestSessionView({ isOpen, onClose, propertyId, onAddIte
     } finally {
       setLoading(false);
     }
-  }, [propertyId, supabase]);
+  }, [propertyId, supabase, prevOrderStatuses, restaurantName]);
 
   useEffect(() => {
     if (isOpen) {

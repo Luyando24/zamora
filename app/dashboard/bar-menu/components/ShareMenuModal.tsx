@@ -251,7 +251,24 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
 
     // 4. Draw QR Code
     // Use the reusable function to get the URL for this specific location
-    const targetUrl = getMenuUrl(targetLocValue);
+    
+    // Check environment to decide URL format (Local function logic)
+    const hostname = window.location.hostname;
+    const isIp = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(hostname);
+    const isLocalhost = hostname === 'localhost';
+    const origin = window.location.origin;
+
+    let finalLocValue = targetLocValue;
+    if (locationType === 'table' && tableType === 'outdoor' && targetLocValue) {
+        finalLocValue = `Outdoor ${targetLocValue}`;
+    }
+
+    const queryParam = targetLocValue 
+        ? (locationType === 'room' ? `?room=${encodeURIComponent(targetLocValue)}` : `?table=${encodeURIComponent(finalLocValue)}`)
+        : '';
+    
+    // Always use path-based URL to ensure consistency and avoid DNS issues
+    const targetUrl = `${origin}/menu/${currentHotelId}${queryParam}`;
     
     try {
         const qrUrl = await QRCode.toDataURL(targetUrl, {
