@@ -69,3 +69,48 @@ export async function verifyManagerAccess(req: NextRequest, propertyId: string) 
 
     return { success: true, user, profile };
 }
+
+export async function verifyStaffAccess(req: NextRequest, propertyId: string) {
+    if (!propertyId) {
+        return { error: 'Property ID is required', status: 400 };
+    }
+
+    const supabase = getSupabase(req);
+    const { data: { user }, error } = await supabase.auth.getUser();
+
+    if (error || !user) {
+        return { error: 'Unauthorized', status: 401 };
+    }
+
+    const admin = getSupabaseAdmin();
+
+    // Check if user is linked to property in property_staff
+    const { data: staffMember } = await admin
+        .from('property_staff')
+        .select('role')
+        .eq('property_id', propertyId)
+        .eq('user_id', user.id)
+        .single();
+
+    // Also check if they are owner/admin via profile (fallback if not in property_staff)
+    if (!staffMember) {
+         const { data: profile } = await admin
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+            
+         if (profile && (profile.role === 'admin' || profile.role === 'owner')) {
+             return { success: true, user, role: profile.role };
+         }
+         
+         // Special case: Manager might be in profiles but not property_staff (legacy)
+         if (profile && profile.role === 'manager' && profile.property_id === propertyId) {
+             return { success: true, user, role: 'manager' };
+         }
+
+         return { error: 'Forbidden: You are not a staff member of this property', status: 403 };
+    }
+
+    return { success: true, user, role: staffMember.role };
+}
