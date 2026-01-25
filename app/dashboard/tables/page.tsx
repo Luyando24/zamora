@@ -4,10 +4,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useProperty } from '../context/PropertyContext';
 import Modal from '@/components/ui/Modal';
-import { Plus, Edit, Trash2, AlertTriangle, LayoutGrid, List, Utensils, QrCode, Loader2 } from 'lucide-react';
+import { Plus, Edit, Trash2, AlertTriangle, LayoutGrid, List, Utensils, QrCode, Loader2, Layers } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import QRCodeDisplay from './components/QRCodeDisplay';
+import BulkCreateTableModal from './components/BulkCreateTableModal';
 
 interface TableType {
   id: string;
@@ -130,7 +131,11 @@ export default function TablesPage() {
       setIsModalOpen(false);
       fetchData();
     } catch (error: any) {
-      alert('Error saving table: ' + error.message);
+      if (error.code === '23505' || error.message?.includes('rooms_hotel_id_room_number_key')) {
+        alert('Error: This table number already exists. Please choose a unique number.');
+      } else {
+        alert('Error saving table: ' + error.message);
+      }
     }
   };
 
@@ -300,7 +305,7 @@ export default function TablesPage() {
             <div>
                 <label className="block text-sm font-bold text-slate-700 mb-1">Table Type</label>
                 <select 
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900 text-slate-900"
                     value={newTableTypeId}
                     onChange={e => setNewTableTypeId(e.target.value)}
                 >
@@ -329,6 +334,20 @@ export default function TablesPage() {
             </div>
         </div>
       </Modal>
+
+      {/* Bulk Add Modal */}
+      {selectedPropertyId && (
+        <BulkCreateTableModal
+            isOpen={isBulkModalOpen}
+            onClose={() => setIsBulkModalOpen(false)}
+            propertyId={selectedPropertyId}
+            tableTypes={tableTypes}
+            onSuccess={() => {
+                fetchData();
+                setIsBulkModalOpen(false);
+            }}
+        />
+      )}
 
       {/* QR Code Modal */}
       {selectedTableForQr && selectedPropertyId && (
