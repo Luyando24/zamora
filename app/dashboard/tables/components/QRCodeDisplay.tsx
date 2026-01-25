@@ -42,29 +42,30 @@ export default function QRCodeDisplay({ isOpen, onClose, tableNumber, tableType,
   const getMenuUrl = () => {
     if (typeof window === 'undefined') return '';
     
-    // Logic from ShareMenuModal: If table type is "Outdoor", prefix it?
-    // In ShareMenuModal: if (locationType === 'table' && tableType === 'outdoor') finalLocValue = `Outdoor ${locValue}`;
-    // Here we have the actual table entity. If the user named it "1" but type is "Outdoor", 
-    // should we prefix it? 
-    // If the system relies on the string "Outdoor 1" to identify the table, then yes.
-    // However, usually the table number in the DB is the identifier.
-    // Let's stick to the tableNumber provided. 
-    // But we might want to display "OUTDOOR" on the flyer.
-
-    // Use slug if available for cleaner URL
     const slug = property?.slug;
     const queryParam = `?table=${encodeURIComponent(tableNumber)}`;
 
-    if (slug) {
+    // Check environment to decide URL format
+    const hostname = window.location.hostname;
+    const isIp = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(hostname);
+    const isLocalhost = hostname === 'localhost';
+
+    // Only use subdomain logic for real domains (not IP or localhost)
+    if (slug && !isIp && !isLocalhost) {
         const protocol = window.location.protocol;
         const host = window.location.host;
-        const domain = host.includes('localhost') 
-                ? 'localhost:3000' 
-                : host.split('.').slice(-2).join('.');
-                
-        return `${protocol}//${slug}.${domain}/menu${queryParam}`;
+        // Attempt to extract root domain (e.g. app.domain.com -> domain.com)
+        // This handles cases with ports correctly (e.g. domain.com:3000)
+        // Note: This simple slice(-2) works for .com, .net but not .co.uk. 
+        // For now we stick to existing behavior but protected from IPs.
+        
+        const parts = host.split('.');
+        const rootDomainWithPort = parts.slice(-2).join('.');
+        
+        return `${protocol}//${slug}.${rootDomainWithPort}/menu${queryParam}`;
     }
     
+    // Fallback: Path-based URL
     return `${window.location.origin}/menu/${propertyId}${queryParam}`;
   };
 
