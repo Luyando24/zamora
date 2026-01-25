@@ -63,6 +63,16 @@ export async function POST(
             }, { status: 404 });
         }
 
+        // Update Table Status to 'dirty' after payment/completion
+        const order = data[0];
+        if (order.table_number) {
+            await admin
+                .from('rooms')
+                .update({ status: 'dirty' })
+                .eq('property_id', order.property_id)
+                .eq('room_number', order.table_number);
+        }
+
         return NextResponse.json({ success: true, message: 'Order marked as pos_completed', order: data[0] });
 
     } catch (error: any) {

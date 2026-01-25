@@ -202,8 +202,19 @@ export default function TablesPage() {
                     {tables.map(table => (
                         <div key={table.id} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow group relative">
                             <div className="flex justify-between items-start mb-2">
-                                <div className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">
-                                    {table.room_types?.name || 'Table'}
+                                <div className="flex flex-col gap-1">
+                                    <div className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider w-fit">
+                                        {table.room_types?.name || 'Table'}
+                                    </div>
+                                    <div className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider w-fit ${
+                                        table.status === 'occupied' 
+                                            ? 'bg-red-50 text-red-600' 
+                                            : table.status === 'dirty'
+                                            ? 'bg-orange-50 text-orange-600'
+                                            : 'bg-green-50 text-green-600'
+                                    }`}>
+                                        {table.status || 'Available'}
+                                    </div>
                                 </div>
                                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button 

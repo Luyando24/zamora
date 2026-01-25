@@ -122,6 +122,15 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
         if (itemsError) throw itemsError;
         newOrderIds.push(foodOrderId);
 
+        // Update Table Status to 'occupied'
+        if (formData.tableNumber) {
+            await supabase
+                .from('rooms')
+                .update({ status: 'occupied' })
+                .eq('property_id', property.id)
+                .eq('room_number', formData.tableNumber);
+        }
+
         // Notify via SMS
         fetch('/api/notifications/sms', {
             method: 'POST',

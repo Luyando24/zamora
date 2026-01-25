@@ -56,6 +56,23 @@ export async function POST(
 
         if (updateError) throw updateError;
 
+        // Update Table Status to 'occupied' when delivered
+        if (status === 'delivered') {
+            const { data: order } = await admin
+                .from(table)
+                .select('table_number, property_id')
+                .eq('id', orderId)
+                .single();
+
+            if (order && order.table_number) {
+                await admin
+                    .from('rooms')
+                    .update({ status: 'occupied' })
+                    .eq('property_id', order.property_id)
+                    .eq('room_number', order.table_number);
+            }
+        }
+
         return NextResponse.json({ success: true, message: `Order status updated to ${status}` });
 
     } catch (error: any) {

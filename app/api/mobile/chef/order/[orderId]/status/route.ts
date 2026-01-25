@@ -55,6 +55,23 @@ export async function POST(
 
         if (updateError) throw updateError;
 
+        // Update Table Status to 'occupied' when delivered
+        if (status === 'delivered') {
+            const { data: order } = await admin
+                .from(table)
+                .select('table_number, property_id')
+                .eq('id', orderId)
+                .single();
+
+            if (order && order.table_number) {
+                await admin
+                    .from('rooms')
+                    .update({ status: 'occupied' })
+                    .eq('property_id', order.property_id)
+                    .eq('room_number', order.table_number);
+            }
+        }
+
         // Optional: Trigger SMS notification (similar to web)
         // We'll skip for now to keep the API fast, as the web dashboard handles it on status change.
         // But if the mobile app is the only thing changing it, we might need it.
