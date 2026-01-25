@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useProperty } from '../context/PropertyContext';
 import Modal from '@/components/ui/Modal';
-import { Plus, Edit, Trash2, AlertTriangle, LayoutGrid, List, Utensils, QrCode } from 'lucide-react';
+import { Plus, Edit, Trash2, AlertTriangle, LayoutGrid, List, Utensils, QrCode, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import QRCodeDisplay from './components/QRCodeDisplay';
@@ -266,7 +266,7 @@ export default function TablesPage() {
                             {tableTypes.length === 0 && (
                                 <tr>
                                     <td colSpan={4} className="px-6 py-12 text-center text-slate-400">
-                                        No table types found. Create types like "Indoor" or "Outdoor".
+                                        No table types found. Create types like &quot;Indoor&quot; or &quot;Outdoor&quot;.
                                     </td>
                                 </tr>
                             )}

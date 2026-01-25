@@ -92,7 +92,7 @@ export default function OrderHistoryPage() {
     } finally {
       setLoading(false);
     }
-  }, [selectedPropertyId, activeTab, supabase, userRole]);
+  }, [selectedPropertyId, activeTab, supabase]);
 
   useEffect(() => {
     fetchOrders();
