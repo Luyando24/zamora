@@ -43,8 +43,6 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     };
   }, [isOpen, onClose, hotelId]);
 
-  if (!isOpen) return null;
-  
   // Resolve current property details
   const currentProperty = properties.find(p => p.id === selectedPropertyId) || { name: hotelName, id: hotelId };
   const currentHotelId = currentProperty.id;
@@ -54,6 +52,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
   // Update menuUrl when dependencies change
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    if (!currentHotelId) return;
     
     // Check environment to decide URL format
     const hostname = window.location.hostname;
@@ -72,7 +71,9 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
     
     // Always use path-based URL to ensure consistency and avoid DNS issues
     setMenuUrl(`${origin}/menu/${currentHotelId}${queryParam}`);
-  }, [locationValue, locationType, tableType, currentHotelId, currentProperty]);
+  }, [locationValue, locationType, tableType, currentHotelId]);
+
+  if (!isOpen) return null;
 
   if (!currentHotelId) {
     return (
