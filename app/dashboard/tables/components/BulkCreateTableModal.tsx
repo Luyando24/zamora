@@ -170,14 +170,14 @@ export default function BulkCreateTableModal({
                  <input 
                     type="text" 
                     placeholder="Prefix (opt)" 
-                    className="w-24 px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900 text-slate-900"
+                    className="w-24 px-3 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900 text-slate-900"
                     value={prefix}
                     onChange={e => handleInputChange(inputString, e.target.value)}
                  />
                  <input 
                     type="text" 
                     placeholder="Range or list (e.g. 1-20)" 
-                    className="flex-1 px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900 text-slate-900"
+                    className="flex-1 px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900 text-slate-900"
                     value={inputString}
                     onChange={e => handleInputChange(e.target.value, prefix)}
                  />

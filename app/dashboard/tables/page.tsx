@@ -44,6 +44,7 @@ export default function TablesPage() {
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
   const [editItem, setEditItem] = useState<Table | null>(null);
   
   // New Table Form
@@ -297,7 +298,7 @@ export default function TablesPage() {
                 <input 
                     type="text" 
                     placeholder="e.g. 1, 2, A1, B2"
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900 text-slate-900"
+                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900 text-slate-900"
                     value={newTableNumber}
                     onChange={e => setNewTableNumber(e.target.value)}
                 />
@@ -305,7 +306,7 @@ export default function TablesPage() {
             <div>
                 <label className="block text-sm font-bold text-slate-700 mb-1">Table Type</label>
                 <select 
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900 text-slate-900"
+                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900 text-slate-900"
                     value={newTableTypeId}
                     onChange={e => setNewTableTypeId(e.target.value)}
                 >
