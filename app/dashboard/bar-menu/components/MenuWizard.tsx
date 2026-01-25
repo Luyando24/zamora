@@ -84,7 +84,11 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
     ingredients: initialData?.ingredients || '', // Mixers/Ingredients
     original_price: initialData?.original_price || '',
     discount_badge: initialData?.discount_badge || '',
-    dietary_info: initialData?.dietary_info || '' // Alcohol % or Type
+    dietary_info: initialData?.dietary_info || '', // Alcohol % or Type
+    track_stock: initialData?.track_stock ?? false,
+    stock_quantity: initialData?.stock_quantity || 0,
+    low_stock_threshold: initialData?.low_stock_threshold || 5,
+    cost_price: initialData?.cost_price || ''
   });
 
   const handleNext = () => {

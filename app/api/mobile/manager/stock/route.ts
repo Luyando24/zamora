@@ -19,7 +19,9 @@ export async function POST(req: NextRequest) {
             min_quantity,
             cost_per_unit,
             supplier_id,
-            initial_quantity
+            initial_quantity,
+            location,
+            initial_date
         } = body;
 
         if (!propertyId || !name) {
@@ -63,6 +65,7 @@ export async function POST(req: NextRequest) {
                 cost_per_unit: cost_per_unit || 0,
                 supplier_id: supplier_id || null,
                 quantity: initial_quantity || 0,
+                location: location || null,
                 // created_at and updated_at are usually handled by DB defaults, but we can set updated_at
                 updated_at: new Date().toISOString()
             })
@@ -81,7 +84,8 @@ export async function POST(req: NextRequest) {
                     quantity: initial_quantity,
                     reason: 'Initial Stock',
                     cost_at_time: cost_per_unit || 0,
-                    performed_by: user.id
+                    performed_by: user.id,
+                    created_at: initial_date || undefined
                 });
             
             if (txnError) {
