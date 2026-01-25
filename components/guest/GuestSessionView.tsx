@@ -33,7 +33,8 @@ export default function GuestSessionView({ isOpen, onClose, propertyId, onAddIte
   const [callWaiterSuccess, setCallWaiterSuccess] = useState(false);
   
   // Track previous order statuses to trigger notifications
-  const [prevOrderStatuses, setPrevOrderStatuses] = useState<Record<string, string>>({});
+  const prevOrderStatusesRef = useRef<Record<string, string>>({});
+  const [isCallWaiterModalOpen, setIsCallWaiterModalOpen] = useState(false);
 
   // Request notification permission on mount
   useEffect(() => {
@@ -54,7 +55,10 @@ export default function GuestSessionView({ isOpen, onClose, propertyId, onAddIte
   };
 
   const fetchOrders = useCallback(async () => {
-    setLoading(true);
+    // Only set loading on initial load or if explicitly needed, to avoid flash
+    // We can rely on 'orders' state to show content.
+    // setLoading(true); // Removed to prevent flashing on every update
+    
     const savedOrderIds = JSON.parse(localStorage.getItem('zamora_guest_order_ids') || '[]');
 
     if (savedOrderIds.length === 0) {
@@ -84,14 +88,14 @@ export default function GuestSessionView({ isOpen, onClose, propertyId, onAddIte
       setOrders(allOrders);
 
       // Check for status changes and trigger notifications
+      const prevOrderStatuses = prevOrderStatusesRef.current;
       const newStatuses: Record<string, string> = {};
+      
       allOrders.forEach(order => {
         newStatuses[order.id] = order.status;
         
         const oldStatus = prevOrderStatuses[order.id];
         // Only notify if status changed AND it's not the initial load (unless we want initial notifications, but usually better on change)
-        // Actually, for initial load we might skip, but let's check if we have prevStatuses populated.
-        // Simple check: if oldStatus exists and is different.
         if (oldStatus && oldStatus !== order.status) {
              let title = 'Order Update';
              let body = `Your order status has changed to ${order.status}.`;
@@ -119,7 +123,7 @@ export default function GuestSessionView({ isOpen, onClose, propertyId, onAddIte
              sendNotification(title, body);
         }
       });
-      setPrevOrderStatuses(newStatuses);
+      prevOrderStatusesRef.current = newStatuses;
 
       // Infer table info from latest order
       if (allOrders.length > 0) {
@@ -132,10 +136,11 @@ export default function GuestSessionView({ isOpen, onClose, propertyId, onAddIte
     } finally {
       setLoading(false);
     }
-  }, [propertyId, supabase, prevOrderStatuses, restaurantName]);
+  }, [propertyId, supabase, restaurantName]);
 
   useEffect(() => {
     if (isOpen) {
+      setLoading(true); // Set loading true ONLY when opening the modal
       fetchOrders();
       // Realtime subscription
       const channel = supabase.channel('guest_session_tracking')
@@ -181,8 +186,9 @@ export default function GuestSessionView({ isOpen, onClose, propertyId, onAddIte
 
       if (!response.ok) throw new Error('Failed to call waiter');
 
-      setCallWaiterSuccess(true);
-      setTimeout(() => setCallWaiterSuccess(false), 3000); // Reset success state after 3s
+      setIsCallWaiterModalOpen(true);
+      // setCallWaiterSuccess(true); // Replaced by modal
+      // setTimeout(() => setCallWaiterSuccess(false), 3000); // Reset success state after 3s
 
     } catch (error) {
       console.error('Call Waiter Error:', error);
@@ -197,7 +203,37 @@ export default function GuestSessionView({ isOpen, onClose, propertyId, onAddIte
   const grandTotal = orders.reduce((sum, o) => sum + (o.status !== 'cancelled' ? o.total_amount : 0), 0);
 
   return (
-    <div className="fixed inset-0 z-[100] flex justify-end">
+    <>
+      {/* Call Waiter Confirmation Modal */}
+      {isCallWaiterModalOpen && (
+        <div className="fixed inset-0 z-[110] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-in zoom-in-95">
+             <div className="flex justify-center mb-4">
+               <div className="bg-green-100 p-4 rounded-full">
+                 <CheckCircle2 size={48} className="text-green-600" />
+               </div>
+             </div>
+             <h3 className="text-xl font-black text-center text-slate-900 mb-2">Waiter Called!</h3>
+             <p className="text-slate-500 text-center text-sm mb-6">
+               A notification has been sent to the staff. They will attend to your table shortly.
+             </p>
+             <div className="bg-amber-50 border border-amber-100 rounded-lg p-3 mb-6">
+                <p className="text-xs text-amber-700 text-center font-medium flex items-center justify-center gap-2">
+                   <AlertCircle size={14} />
+                   Note: If no one arrives within 5 minutes, please wave to a staff member.
+                </p>
+             </div>
+             <button 
+               onClick={() => setIsCallWaiterModalOpen(false)}
+               className="w-full py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-colors"
+             >
+               Okay, Got it
+             </button>
+          </div>
+        </div>
+      )}
+
+      <div className="fixed inset-0 z-[100] flex justify-end">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity animate-in fade-in" onClick={onClose} />
       
       <div className="relative w-full max-w-md bg-slate-50 h-full shadow-2xl flex flex-col animate-in slide-in-from-right">
@@ -214,7 +250,7 @@ export default function GuestSessionView({ isOpen, onClose, propertyId, onAddIte
 
         {/* Orders List */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {loading ? (
+          {loading && orders.length === 0 ? (
              <div className="flex justify-center py-10"><Loader2 className="animate-spin text-slate-400" /></div>
           ) : orders.length === 0 ? (
              <div className="text-center py-10 text-slate-500">No active orders found.</div>
@@ -264,20 +300,11 @@ export default function GuestSessionView({ isOpen, onClose, propertyId, onAddIte
            <div className="grid grid-cols-2 gap-3">
               <button 
                 onClick={handleCallWaiter}
-                disabled={isCallingWaiter || callWaiterSuccess}
-                className={`flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold transition-all shadow-sm ${
-                    callWaiterSuccess 
-                    ? 'bg-green-100 text-green-700 border border-green-200' 
-                    : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
-                }`}
+                disabled={isCallingWaiter}
+                className={`flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold transition-all shadow-sm bg-white border border-slate-200 text-slate-700 hover:bg-slate-50`}
               >
                 {isCallingWaiter ? (
                     <Loader2 size={18} className="animate-spin" />
-                ) : callWaiterSuccess ? (
-                    <>
-                        <CheckCircle2 size={18} />
-                        <span>Waiter Called</span>
-                    </>
                 ) : (
                     <>
                         <Bell size={18} />
@@ -302,5 +329,8 @@ export default function GuestSessionView({ isOpen, onClose, propertyId, onAddIte
         </div>
       </div>
     </div>
+    </>
+  );
+}
   );
 }
