@@ -48,8 +48,8 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
   if (!isOpen) return null;
 
   const cartTotal = cart.reduce((sum, item) => sum + (item.price || item.base_price) * item.quantity, 0);
-  const serviceCharge = cartTotal * 0.10; // 10% service charge example
-  const grandTotal = cartTotal + serviceCharge;
+  // const serviceCharge = cartTotal * 0.10; // Removed service charge
+  const grandTotal = cartTotal;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,8 +64,8 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
       if (foodCart.length > 0) {
         const foodOrderId = crypto.randomUUID();
         const foodTotal = foodCart.reduce((sum, i) => sum + (i.price || i.base_price) * i.quantity, 0);
-        const foodServiceCharge = foodTotal * 0.10;
-        const foodGrandTotal = foodTotal + foodServiceCharge;
+        // const foodServiceCharge = foodTotal * 0.10; // Removed service charge
+        const foodGrandTotal = foodTotal;
         
         // Determine location string and Table ID
         const locationString = formData.tableNumber 
@@ -308,10 +308,10 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
                         <span>Subtotal</span>
                         <span className="font-medium">K{(cartTotal || 0).toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between text-sm text-slate-500">
+                    {/* <div className="flex justify-between text-sm text-slate-500">
                         <span>Service Charge (10%)</span>
                         <span className="font-medium">K{(serviceCharge || 0).toFixed(2)}</span>
-                    </div>
+                    </div> */}
                     <div className="flex justify-between text-lg font-black text-slate-900 pt-2 border-t border-slate-200 mt-2">
                         <span>Total</span>
                         <span>K{(grandTotal || 0).toFixed(2)}</span>

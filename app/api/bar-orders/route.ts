@@ -45,8 +45,8 @@ export async function POST(req: NextRequest) {
 
     // 1. Calculate Totals
     const barTotal = barCart.reduce((sum: number, i: any) => sum + (i.price || i.base_price) * i.quantity, 0);
-    const barServiceCharge = barTotal * 0.10;
-    const barGrandTotal = barTotal + barServiceCharge;
+    // const barServiceCharge = barTotal * 0.10; // Removed service charge
+    const barGrandTotal = barTotal;
     const barOrderId = crypto.randomUUID();
 
     // 2. Insert Bar Order
