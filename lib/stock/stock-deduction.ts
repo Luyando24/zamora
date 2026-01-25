@@ -49,7 +49,7 @@ export async function deductStockForFoodOrder(
         }
 
         // 2. Get unique menu item IDs
-        const menuItemIds = [...new Set(orderItems.map(i => i.menu_item_id).filter(Boolean))];
+        const menuItemIds = Array.from(new Set(orderItems.map(i => i.menu_item_id).filter(Boolean)));
 
         if (menuItemIds.length === 0) {
             return { success: true, deductions, errors };
