@@ -176,11 +176,16 @@ export default function TableTypeWizard({ initialData }: TableTypeWizardProps) {
               </label>
               <input
                 type="text"
+                list="table-type-suggestions"
                 placeholder="e.g. Indoor, Outdoor, VIP Booth"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900 transition-all text-slate-900"
               />
+              <datalist id="table-type-suggestions">
+                <option value="Indoor" />
+                <option value="Outdoor" />
+              </datalist>
             </div>
 
             <div>
