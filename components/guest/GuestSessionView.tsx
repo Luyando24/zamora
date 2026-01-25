@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { createClient } from '@/utils/supabase/client';
 import {
   X, Clock, CheckCircle2, ChefHat, Truck, AlertCircle,
-  ShoppingBag, Plus, Receipt, Wine, Utensils, ArrowRight, Loader2
+  ShoppingBag, Plus, Receipt, Wine, Utensils, ArrowRight, Loader2, Bell
 } from 'lucide-react';
 
 interface GuestSessionViewProps {
@@ -13,6 +13,7 @@ interface GuestSessionViewProps {
   onClose: () => void;
   propertyId: string;
   onAddItems: () => void;
+  restaurantName?: string;
 }
 
 const STATUS_CONFIG: Record<string, any> = {
@@ -23,11 +24,13 @@ const STATUS_CONFIG: Record<string, any> = {
   cancelled: { label: 'Cancelled', icon: X, color: 'text-slate-400', bg: 'bg-slate-50' },
 };
 
-export default function GuestSessionView({ isOpen, onClose, propertyId, onAddItems, restaurantName }: GuestSessionViewProps & { restaurantName?: string }) {
+export default function GuestSessionView({ isOpen, onClose, propertyId, onAddItems, restaurantName }: GuestSessionViewProps) {
   const supabase = createClient();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [tableInfo, setTableInfo] = useState<string>('');
+  const [isCallingWaiter, setIsCallingWaiter] = useState(false);
+  const [callWaiterSuccess, setCallWaiterSuccess] = useState(false);
   
   // Track previous order statuses to trigger notifications
   const [prevOrderStatuses, setPrevOrderStatuses] = useState<Record<string, string>>({});
@@ -142,6 +145,51 @@ export default function GuestSessionView({ isOpen, onClose, propertyId, onAddIte
     }
   }, [isOpen, fetchOrders, supabase]);
 
+  const handleCallWaiter = async () => {
+    setIsCallingWaiter(true);
+    try {
+      const savedOrderIds = JSON.parse(localStorage.getItem('zamora_guest_order_ids') || '[]');
+      
+      // Determine table info from orders if not explicitly known (fallback)
+      let tableNum = null;
+      let roomNum = null;
+      
+      if (orders.length > 0) {
+          const latest = orders[0];
+          tableNum = latest.table_number;
+          roomNum = latest.guest_room_number;
+      }
+
+      if (!tableNum && !roomNum) {
+          alert("Cannot identify table. Please place an order first.");
+          return;
+      }
+
+      const response = await fetch('/api/mobile/service-requests/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          propertyId,
+          tableNumber: tableNum,
+          roomNumber: roomNum,
+          type: 'call_waiter',
+          notes: 'Guest requested waiter via app'
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to call waiter');
+
+      setCallWaiterSuccess(true);
+      setTimeout(() => setCallWaiterSuccess(false), 3000); // Reset success state after 3s
+
+    } catch (error) {
+      console.error('Call Waiter Error:', error);
+      alert('Failed to call waiter. Please try again.');
+    } finally {
+      setIsCallingWaiter(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   const grandTotal = orders.reduce((sum, o) => sum + (o.status !== 'cancelled' ? o.total_amount : 0), 0);
@@ -213,18 +261,42 @@ export default function GuestSessionView({ isOpen, onClose, propertyId, onAddIte
            
            <div className="grid grid-cols-2 gap-3">
               <button 
+                onClick={handleCallWaiter}
+                disabled={isCallingWaiter || callWaiterSuccess}
+                className={`flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold transition-all shadow-sm ${
+                    callWaiterSuccess 
+                    ? 'bg-green-100 text-green-700 border border-green-200' 
+                    : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                {isCallingWaiter ? (
+                    <Loader2 size={18} className="animate-spin" />
+                ) : callWaiterSuccess ? (
+                    <>
+                        <CheckCircle2 size={18} />
+                        <span>Waiter Called</span>
+                    </>
+                ) : (
+                    <>
+                        <Bell size={18} />
+                        <span>Call Waiter</span>
+                    </>
+                )}
+              </button>
+
+              <button 
                 onClick={onAddItems}
                 className="flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 border-slate-900 text-slate-900 font-bold hover:bg-slate-50 transition-colors"
               >
                 <Plus size={18} /> Add Items
               </button>
-              
-              <button 
-                className="flex items-center justify-center gap-2 py-3.5 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition-colors shadow-lg shadow-slate-200"
-              >
-                <Receipt size={18} /> Request Bill
-              </button>
            </div>
+           
+           <button 
+             className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition-colors shadow-lg shadow-slate-200"
+           >
+             <Receipt size={18} /> Request Bill
+           </button>
         </div>
       </div>
     </div>
