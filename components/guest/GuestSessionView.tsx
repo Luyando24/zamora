@@ -23,13 +23,32 @@ const STATUS_CONFIG: Record<string, any> = {
   cancelled: { label: 'Cancelled', icon: X, color: 'text-slate-400', bg: 'bg-slate-50' },
 };
 
-export default function GuestSessionView({ isOpen, onClose, propertyId, onAddItems }: GuestSessionViewProps) {
+export default function GuestSessionView({ isOpen, onClose, propertyId, onAddItems, restaurantName }: GuestSessionViewProps & { restaurantName?: string }) {
   const supabase = createClient();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [tableInfo, setTableInfo] = useState<string>('');
+  
+  // Track previous order statuses to trigger notifications
+  const [prevOrderStatuses, setPrevOrderStatuses] = useState<Record<string, string>>({});
 
-  const fetchOrders = useCallback(async () => {
+  // Request notification permission on mount
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  const sendNotification = (title: string, body: string) => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification(title, {
+        body,
+        icon: '/icons/icon-192x192.png', // Assuming a standard icon exists or fallback
+        badge: '/icons/icon-72x72.png',
+        tag: 'order-update' // Groups notifications
+      });
+    }
+  };
     setLoading(true);
     const savedOrderIds = JSON.parse(localStorage.getItem('zamora_guest_order_ids') || '[]');
 
@@ -58,6 +77,44 @@ export default function GuestSessionView({ isOpen, onClose, propertyId, onAddIte
       ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
       setOrders(allOrders);
+
+      // Check for status changes and trigger notifications
+      const newStatuses: Record<string, string> = {};
+      allOrders.forEach(order => {
+        newStatuses[order.id] = order.status;
+        
+        const oldStatus = prevOrderStatuses[order.id];
+        // Only notify if status changed AND it's not the initial load (unless we want initial notifications, but usually better on change)
+        // Actually, for initial load we might skip, but let's check if we have prevStatuses populated.
+        // Simple check: if oldStatus exists and is different.
+        if (oldStatus && oldStatus !== order.status) {
+             let title = 'Order Update';
+             let body = `Your order status has changed to ${order.status}.`;
+             const rName = restaurantName || 'The Restaurant';
+             const wName = order.waiter_name ? ` by ${order.waiter_name}` : '';
+
+             switch (order.status) {
+                 case 'preparing':
+                     title = '👨‍🍳 Kitchen is Cooking!';
+                     body = `Your order is being prepared at ${rName}.`;
+                     break;
+                 case 'ready':
+                     title = '🛎️ Order Ready!';
+                     body = `Your order is ready to serve${wName}.`;
+                     break;
+                 case 'delivered':
+                     title = '🍽️ Bon Appétit!';
+                     body = `Your order has been delivered${wName}. Enjoy your meal at ${rName}!`;
+                     break;
+                 case 'cancelled':
+                     title = '⚠️ Order Update';
+                     body = `Your order was cancelled. Please ask a staff member for details.`;
+                     break;
+             }
+             sendNotification(title, body);
+        }
+      });
+      setPrevOrderStatuses(newStatuses);
 
       // Infer table info from latest order
       if (allOrders.length > 0) {

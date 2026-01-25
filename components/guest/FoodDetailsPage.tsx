@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { X, Plus, Minus, ArrowLeft, Heart, Share2, Star, Check, Wine, Utensils } from 'lucide-react';
+import { X, Plus, Minus, ArrowLeft, Heart, Share2, Star, Check, Wine, Utensils, ArrowRight } from 'lucide-react';
 
 interface FoodDetailsPageProps {
   item: any;

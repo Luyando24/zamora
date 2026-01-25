@@ -540,6 +540,7 @@ export default function MenuStorefront({
         onClose={() => setIsSessionOpen(false)}
         propertyId={property.id}
         onAddItems={() => setIsSessionOpen(false)}
+        restaurantName={property.name}
       />
 
     </div>
