@@ -191,7 +191,7 @@ export async function deductStockForBarOrder(
         }
 
         // 2. Get unique bar menu item IDs
-        const barMenuItemIds = [...new Set(orderItems.map(i => i.bar_menu_item_id).filter(Boolean))];
+        const barMenuItemIds = Array.from(new Set(orderItems.map(i => i.bar_menu_item_id).filter(Boolean)));
 
         if (barMenuItemIds.length === 0) {
             return { success: true, deductions, errors };
