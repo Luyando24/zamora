@@ -1,7 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { Plus, Calendar } from 'lucide-react';
+import { Plus, Calendar, X } from 'lucide-react';
+import { Supplier, InventoryItem } from '@/hooks/useERP';
 
 export default function StockItemModal({ 
   isOpen, 
