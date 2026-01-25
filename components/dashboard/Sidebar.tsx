@@ -149,13 +149,13 @@ export default function Sidebar({ onLinkClick }: { onLinkClick?: () => void }) {
                         href={item.href}
                         onClick={onLinkClick}
                         className={`group flex items-center justify-between rounded-xl px-4 py-3 text-sm font-bold transition-all duration-200 ${isActive
-                          ? 'bg-slate-900 text-white shadow-md shadow-slate-900/10'
-                          : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                          ? 'bg-blue-900 text-white shadow-md shadow-blue-900/10'
+                          : 'text-slate-500 hover:bg-blue-50 hover:text-blue-900'
                           }`}
                       >
                         <div className="flex items-center gap-3">
                           <item.icon
-                            className={`h-5 w-5 flex-shrink-0 transition-colors ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'
+                            className={`h-5 w-5 flex-shrink-0 transition-colors ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-blue-600'
                               }`}
                             strokeWidth={isActive ? 2.5 : 2}
                           />

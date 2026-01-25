@@ -130,7 +130,7 @@ export default function DashboardLayout({
             <div className="h-8 w-px bg-slate-200 mx-3"></div>
 
             <button className="flex items-center gap-3 hover:bg-slate-100 rounded-lg p-2 transition-colors">
-              <div className="h-9 w-9 rounded-full bg-slate-800 flex items-center justify-center text-white font-bold shadow-sm uppercase">
+              <div className="h-9 w-9 rounded-full bg-blue-900 flex items-center justify-center text-white font-bold shadow-sm uppercase">
                 {user?.email?.charAt(0) || 'U'}
               </div>
               <div className="text-right hidden sm:block">

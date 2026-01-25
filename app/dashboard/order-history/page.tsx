@@ -118,6 +118,33 @@ export default function OrderHistoryPage() {
     }
   };
 
+  const deleteAllOrders = async () => {
+    if (!selectedPropertyId) return;
+    const type = activeTab === 'food' ? 'food' : 'bar';
+    if (!confirm(`Are you sure you want to permanently delete ALL ${type} history records? This action cannot be undone.`)) return;
+
+    // Double confirmation for safety
+    if (!confirm(`This will wipe out the entire ${type} order history for this property. Are you ABSOLUTELY SURE?`)) return;
+
+    try {
+      const table = activeTab === 'food' ? 'orders' : 'bar_orders';
+      // Only delete orders that are in the "history" status
+      const { error } = await supabase
+        .from(table)
+        .delete()
+        .eq('property_id', selectedPropertyId)
+        .in('status', ['delivered', 'cancelled', 'pos_completed']);
+
+      if (error) throw error;
+
+      setOrders([]);
+      alert(`All ${type} history has been deleted.`);
+    } catch (error) {
+      console.error('Error deleting all orders:', error);
+      alert('Failed to delete orders');
+    }
+  };
+
   const filteredOrders = orders.filter(order => {
     const searchLower = searchTerm.toLowerCase();
     return (
