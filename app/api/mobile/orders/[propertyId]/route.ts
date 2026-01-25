@@ -12,6 +12,7 @@ export async function GET(
     const { searchParams } = new URL(req.url);
     const waiterName = searchParams.get('waiterName');
     const status = searchParams.get('status'); // e.g., "pending,preparing"
+    const tableNumber = searchParams.get('tableNumber');
 
     if (!propertyId) {
       return NextResponse.json({ error: 'Property ID is required' }, { status: 400 });
@@ -40,6 +41,10 @@ export async function GET(
       foodQuery = foodQuery.or(`waiter_name.eq."${waiterName}",notes.ilike."%Waiter: ${waiterName}%"`);
     }
 
+    if (tableNumber) {
+        foodQuery = foodQuery.eq('table_number', tableNumber);
+    }
+
     if (status) {
       const statusList = status.split(',').map(s => s.trim());
       foodQuery = foodQuery.in('status', statusList);
@@ -62,6 +67,10 @@ export async function GET(
       // Use the new waiter_name column if available, or fallback to notes for backward compatibility
       // Quote the values to handle spaces correctly in PostgREST
       barQuery = barQuery.or(`waiter_name.eq."${waiterName}",notes.ilike."%Waiter: ${waiterName}%"`);
+    }
+
+    if (tableNumber) {
+        barQuery = barQuery.eq('table_number', tableNumber);
     }
 
     if (status) {
