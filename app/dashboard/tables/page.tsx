@@ -331,20 +331,15 @@ export default function TablesPage() {
       </Modal>
 
       {/* QR Code Modal */}
-      <Modal
-        isOpen={qrModalOpen}
-        onClose={() => setQrModalOpen(false)}
-        title="Table QR Code"
-      >
-        {selectedTableForQr && selectedPropertyId && (
-            <div className="flex justify-center">
-                <QRCodeDisplay 
-                    tableNumber={selectedTableForQr.room_number}
-                    propertyId={selectedPropertyId}
-                />
-            </div>
-        )}
-      </Modal>
+      {selectedTableForQr && selectedPropertyId && (
+        <QRCodeDisplay 
+            isOpen={qrModalOpen}
+            onClose={() => setQrModalOpen(false)}
+            tableNumber={selectedTableForQr.room_number}
+            tableType={selectedTableForQr.room_types?.name}
+            propertyId={selectedPropertyId}
+        />
+      )}
 
       {/* Warning Modal */}
       <Modal
