@@ -51,6 +51,8 @@ export default function GuestSessionView({ isOpen, onClose, propertyId, onAddIte
         tag: 'order-update' // Groups notifications
       });
     }
+  };
+
   const fetchOrders = useCallback(async () => {
     setLoading(true);
     const savedOrderIds = JSON.parse(localStorage.getItem('zamora_guest_order_ids') || '[]');
