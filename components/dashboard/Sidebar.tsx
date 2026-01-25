@@ -104,6 +104,13 @@ export default function Sidebar({ onLinkClick }: { onLinkClick?: () => void }) {
               if (selectedProperty?.type === 'restaurant') {
                 const hotelOnlyItems = ['Room Bookings', 'Housekeeping', 'Rooms Setup', 'ZRA Reports'];
                 if (hotelOnlyItems.includes(item.name)) return false;
+              } else {
+                // For Hotels (or others), hide Restaurant-specific setup if needed
+                // But hotels can have tables too, so maybe we show both? 
+                // Let's assume for now Hotels might want tables. 
+                // But if strict, we could hide 'Tables Setup' for pure hotels.
+                // For now, let's keep it visible or hide if it's strictly a hotel without restaurant features.
+                // Let's hide 'Tables Setup' if it's strictly a hotel? No, keep it flexible.
               }
 
               // Filter items for waiters (regardless of property type)

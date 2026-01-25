@@ -24,3 +24,37 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
+
+export async function POST(req: NextRequest) {
+    try {
+        const body = await req.json();
+        const { propertyId, name, description, capacity, base_price, image_url } = body;
+
+        const access = await verifyManagerAccess(req, propertyId);
+        if (access.error || !access.user) return NextResponse.json({ error: access.error || 'Unauthorized' }, { status: access.status || 401 });
+
+        if (!name) {
+            return NextResponse.json({ error: 'Name is required' }, { status: 400 });
+        }
+
+        const supabase = getSupabaseAdmin();
+        const { data: type, error } = await supabase
+            .from('room_types')
+            .insert({
+                property_id: propertyId,
+                name,
+                description,
+                capacity: capacity || 4,
+                base_price: base_price || 0,
+                image_url
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        return NextResponse.json(type);
+    } catch (error: any) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+}

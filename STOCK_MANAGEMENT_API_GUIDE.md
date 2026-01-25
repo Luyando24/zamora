@@ -1,12 +1,12 @@
-# Stock Management Mobile API Guide
+# Stock Management Mobile and Desktop API Guide
 
-This guide provides all the necessary API endpoints and instructions for implementing stock management functionality in the mobile app. These endpoints are designed for managers and authorized staff to track inventory, perform restocks, and monitor stock levels.
+This guide provides all the necessary API endpoints and instructions for implementing stock management functionality in the mobile and desktop app. These endpoints are designed for managers and authorized staff to track inventory, perform restocks, and monitor stock levels.
 
 ## Base URL
 
 All endpoints are relative to your base URL:
 ```
-https://your-domain.com/api/mobile/manager/stock
+https://zamoraapp.com/api/mobile/manager/stock
 ```
 
 ## Authentication
