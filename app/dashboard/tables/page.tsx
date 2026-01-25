@@ -292,7 +292,7 @@ export default function TablesPage() {
                 <input 
                     type="text" 
                     placeholder="e.g. 1, 2, A1, B2"
-                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900"
+                    className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900 text-slate-900"
                     value={newTableNumber}
                     onChange={e => setNewTableNumber(e.target.value)}
                 />

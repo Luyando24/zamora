@@ -179,7 +179,7 @@ export default function TableTypeWizard({ initialData }: TableTypeWizardProps) {
                 placeholder="e.g. Indoor, Outdoor, VIP Booth"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900 transition-all"
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900 transition-all text-slate-900"
               />
             </div>
 
@@ -190,7 +190,7 @@ export default function TableTypeWizard({ initialData }: TableTypeWizardProps) {
                 placeholder="e.g. Tables located in the main dining hall..."
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900 transition-all resize-none"
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900 transition-all resize-none text-slate-900"
               />
             </div>
           </div>
@@ -217,7 +217,7 @@ export default function TableTypeWizard({ initialData }: TableTypeWizardProps) {
                   min="1"
                   value={formData.capacity}
                   onChange={(e) => setFormData({ ...formData, capacity: parseInt(e.target.value) || 0 })}
-                  className="w-24 text-center px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900 font-bold text-lg"
+                  className="w-24 text-center px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900 font-bold text-lg text-slate-900"
                 />
                 <button 
                   onClick={() => setFormData(prev => ({ ...prev, capacity: prev.capacity + 1 }))}
