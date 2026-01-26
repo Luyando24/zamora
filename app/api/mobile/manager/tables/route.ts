@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyManagerAccess } from '../utils';
+import { verifyStaffAccess, verifyManagerAccess } from '../utils';
 import { getSupabaseAdmin } from '@/lib/db/supabase-admin';
 
 export async function GET(req: NextRequest) {
@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
         const { searchParams } = new URL(req.url);
         const propertyId = searchParams.get('propertyId');
         
-        const access = await verifyManagerAccess(req, propertyId || '');
+        const access = await verifyStaffAccess(req, propertyId || '');
         if (access.error || !access.user) return NextResponse.json({ error: access.error || 'Unauthorized' }, { status: access.status || 401 });
 
         const supabase = getSupabaseAdmin();

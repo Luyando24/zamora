@@ -104,9 +104,10 @@ export async function verifyStaffAccess(req: NextRequest, propertyId: string) {
              return { success: true, user, role: profile.role };
          }
          
-         // Special case: Manager might be in profiles but not property_staff (legacy)
-         if (profile && profile.role === 'manager' && profile.property_id === propertyId) {
-             return { success: true, user, role: 'manager' };
+         // Special case: Staff might be in profiles but not property_staff (common in mobile app)
+         const staffRoles = ['manager', 'waiter', 'cashier', 'chef', 'bartender'];
+         if (profile && staffRoles.includes(profile.role) && profile.property_id === propertyId) {
+             return { success: true, user, role: profile.role };
          }
 
          return { error: 'Forbidden: You are not a staff member of this property', status: 403 };

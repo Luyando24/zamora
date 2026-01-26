@@ -568,6 +568,8 @@ export default function MenuStorefront({
         propertyId={property.id}
         onAddItems={() => setIsSessionOpen(false)}
         restaurantName={property.name}
+        tableNumber={activeTable}
+        roomNumber={activeRoom}
       />
 
     </div>

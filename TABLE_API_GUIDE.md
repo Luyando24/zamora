@@ -1,0 +1,110 @@
+# Table Number Fetching API Guide for Mobile Developers
+
+This guide explains how to fetch table information (table numbers, types, and details) for the Zamora mobile application.
+
+## Overview
+In the Zamora system, **Tables** are stored in the same table as hotel rooms but are distinguished by their category. When fetching tables, you are essentially querying "rooms" that have a type categorized as `table`.
+
+---
+
+## 1. Fetch All Tables
+Retrieve a list of all tables registered for a specific property. This is used by waiters and cashiers to select a table when placing or managing orders.
+
+- **Endpoint:** `GET /api/mobile/manager/tables`
+- **Query Parameters:**
+  - `propertyId` (Required): The UUID of the property.
+- **Authentication:** Bearer Token.
+- **Authorized Roles:** `waiter`, `cashier`, `manager`, `owner`, `admin`, `chef`, `bartender`.
+
+### Request Example:
+```bash
+GET /api/mobile/manager/tables?propertyId=YOUR_PROPERTY_ID
+Authorization: Bearer YOUR_JWT_TOKEN
+```
+
+### Response Example:
+```json
+[
+  {
+    "id": "table-uuid-1",
+    "property_id": "prop-uuid",
+    "room_number": "Table 1",
+    "room_type_id": "type-uuid-1",
+    "status": "clean",
+    "notes": "Near window",
+    "room_types": {
+      "name": "Standard Table",
+      "category": "table"
+    }
+  },
+  {
+    "id": "table-uuid-2",
+    "property_id": "prop-uuid",
+    "room_number": "Table 2",
+    "room_type_id": "type-uuid-1",
+    "status": "occupied",
+    "notes": null,
+    "room_types": {
+      "name": "Standard Table",
+      "category": "table"
+    }
+  }
+]
+```
+
+---
+
+## 2. Fetch Table Types
+Retrieve the available types of tables (e.g., "VIP Table", "Standard Table", "Bar Stool").
+
+- **Endpoint:** `GET /api/mobile/manager/table-types`
+- **Query Parameters:**
+  - `propertyId` (Required): The UUID of the property.
+- **Authentication:** Bearer Token.
+
+### Response Example:
+```json
+[
+  {
+    "id": "type-uuid-1",
+    "name": "Standard Table",
+    "description": "Seats 4 people",
+    "capacity": 4,
+    "base_price": 0,
+    "category": "table"
+  }
+]
+```
+
+---
+
+## 3. Fetch Single Table Details
+Retrieve details for a specific table by its ID.
+
+- **Endpoint:** `GET /api/mobile/manager/tables/[id]`
+- **Query Parameters:**
+  - `propertyId` (Required): Needed for access verification.
+- **Authentication:** Bearer Token.
+
+---
+
+## Common Issues & Troubleshooting
+
+### 1. "Unauthorized" or "Forbidden" Error
+- **Cause:** The user's JWT token is invalid, expired, or the user does not have permission for the property.
+- **Fix:** Ensure you are passing the `propertyId` in the query string and that the logged-in user is registered as staff for that property with an authorized role (`waiter`, `cashier`, etc.).
+
+### 2. Empty Array Returned
+- **Cause:** No tables have been created for this property yet, or they are categorized incorrectly.
+- **Fix:** Ask the manager to add tables via the Dashboard under "Tables".
+
+### 3. Missing `propertyId`
+- **Cause:** The API requires `propertyId` to filter results and verify access.
+- **Fix:** Always append `?propertyId=...` to your GET requests.
+
+## Data Schema Note
+| Field | Description |
+|-------|-------------|
+| `room_number` | This is the actual **Table Number** (e.g., "T1", "12"). |
+| `status` | Current status (e.g., "clean", "occupied", "dirty"). |
+| `room_types.name` | The descriptive name of the table type. |

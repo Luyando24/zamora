@@ -14,6 +14,8 @@ interface GuestSessionViewProps {
   propertyId: string;
   onAddItems: () => void;
   restaurantName?: string;
+  tableNumber?: string;
+  roomNumber?: string;
 }
 
 const STATUS_CONFIG: Record<string, any> = {
@@ -24,7 +26,15 @@ const STATUS_CONFIG: Record<string, any> = {
   cancelled: { label: 'Cancelled', icon: X, color: 'text-slate-400', bg: 'bg-slate-50' },
 };
 
-export default function GuestSessionView({ isOpen, onClose, propertyId, onAddItems, restaurantName }: GuestSessionViewProps) {
+export default function GuestSessionView({ 
+  isOpen, 
+  onClose, 
+  propertyId, 
+  onAddItems, 
+  restaurantName,
+  tableNumber: propTableNumber,
+  roomNumber: propRoomNumber
+}: GuestSessionViewProps) {
   const supabase = createClient();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -158,17 +168,30 @@ export default function GuestSessionView({ isOpen, onClose, propertyId, onAddIte
       const savedOrderIds = JSON.parse(localStorage.getItem('zamora_guest_order_ids') || '[]');
       
       // Determine table info from orders if not explicitly known (fallback)
-      let tableNum = null;
-      let roomNum = null;
+      let tableNum = propTableNumber || null;
+      let roomNum = propRoomNumber || null;
       
       if (orders.length > 0) {
           const latest = orders[0];
-          tableNum = latest.table_number;
-          roomNum = latest.guest_room_number;
+          // Prefer order data if available, as it's confirmed
+          if (latest.table_number) tableNum = latest.table_number;
+          if (latest.guest_room_number) roomNum = latest.guest_room_number;
       }
 
       if (!tableNum && !roomNum) {
-          alert("Cannot identify table. Please place an order first.");
+          // Check local storage location as last resort
+          const savedLoc = localStorage.getItem('zamora_guest_location');
+          if (savedLoc) {
+             try {
+                 const parsed = JSON.parse(savedLoc);
+                 if (parsed.table) tableNum = parsed.table;
+                 if (parsed.room) roomNum = parsed.room;
+             } catch(e) {}
+          }
+      }
+
+      if (!tableNum && !roomNum) {
+          alert("Cannot identify table. Please place an order first or scan the QR code again.");
           return;
       }
 
