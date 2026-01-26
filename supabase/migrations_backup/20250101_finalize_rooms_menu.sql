@@ -17,6 +17,6 @@ ALTER TABLE menu_items
 ADD COLUMN IF NOT EXISTS is_available BOOLEAN DEFAULT true;
 
 -- Create index for performance
-CREATE INDEX IF NOT EXISTS idx_rooms_hotel_id ON rooms(hotel_id);
-CREATE INDEX IF NOT EXISTS idx_menu_items_hotel_id ON menu_items(hotel_id);
+CREATE INDEX IF NOT EXISTS idx_rooms_property_id ON rooms(property_id);
+CREATE INDEX IF NOT EXISTS idx_menu_items_property_id ON menu_items(property_id);
 CREATE INDEX IF NOT EXISTS idx_menu_items_category ON menu_items(category);

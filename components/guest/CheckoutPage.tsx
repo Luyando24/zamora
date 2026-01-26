@@ -247,7 +247,7 @@ export default function CheckoutPage({ isOpen, onClose, cart, property, onOrderS
       <div className="flex-1 overflow-y-auto flex flex-col md:contents">
 
       {/* LEFT COLUMN: Order Summary */}
-      <div className="shrink-0 order-2 md:order-1 bg-white md:bg-slate-50 md:p-8 md:flex-1 md:overflow-y-auto">
+      <div className="shrink-0 order-2 md:order-1 bg-white md:bg-slate-50 md:p-8 md:flex-1 md:overflow-y-auto pb-32 md:pb-8">
         <div className="max-w-2xl mx-auto space-y-6 p-4 md:p-0">
             
             {/* Desktop Header */}

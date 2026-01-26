@@ -410,18 +410,16 @@ ALTER TABLE menu_items
 ADD COLUMN IF NOT EXISTS is_available BOOLEAN DEFAULT true;
 
 -- Create index for performance
-CREATE INDEX IF NOT EXISTS idx_rooms_hotel_id ON rooms(hotel_id);
-CREATE INDEX IF NOT EXISTS idx_menu_items_hotel_id ON menu_items(hotel_id);
+CREATE INDEX IF NOT EXISTS idx_rooms_property_id ON rooms(property_id);
+CREATE INDEX IF NOT EXISTS idx_menu_items_property_id ON menu_items(property_id);
 CREATE INDEX IF NOT EXISTS idx_menu_items_category ON menu_items(category);
 -- Fix missing columns in guests and folio_items
 
--- 1. Ensure guests has hotel_id
+-- 1. Ensure guests has property_id
 DO $$ 
 BEGIN 
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'guests' AND column_name = 'hotel_id') THEN 
-        ALTER TABLE guests ADD COLUMN hotel_id UUID REFERENCES hotels(id) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000'; -- Temporary default to avoid error on existing rows, ideally should be handled
-        -- If table is empty, NOT NULL is fine. If not, we might need to handle it.
-        -- Removing default after adding if needed, but for now keep simple.
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'guests' AND column_name = 'property_id') THEN 
+        ALTER TABLE guests ADD COLUMN property_id UUID REFERENCES properties(id) NOT NULL DEFAULT '00000000-0000-0000-0000-000000000000';
     END IF; 
 END $$;
 
@@ -436,7 +434,7 @@ BEGIN
 END $$;
 
 -- 3. Add indexes for foreign keys to improve performance
-CREATE INDEX IF NOT EXISTS idx_guests_hotel_id ON guests(hotel_id);
+CREATE INDEX IF NOT EXISTS idx_guests_property_id ON guests(property_id);
 CREATE INDEX IF NOT EXISTS idx_bookings_guest_id ON bookings(guest_id);
 CREATE INDEX IF NOT EXISTS idx_bookings_room_id ON bookings(room_id);
 CREATE INDEX IF NOT EXISTS idx_folios_booking_id ON folios(booking_id);
