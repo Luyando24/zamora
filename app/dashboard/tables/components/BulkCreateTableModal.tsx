@@ -127,7 +127,7 @@ export default function BulkCreateTableModal({
             property_id: propertyId,
             room_number: num,
             room_type_id: selectedTypeId,
-            status: 'clean'
+            status: 'available'
         }))
     );
 

@@ -320,7 +320,8 @@ export default function GuestSessionView({
               <span className="text-3xl font-black text-slate-900">K{grandTotal.toFixed(2)}</span>
            </div>
            
-           <div className="grid grid-cols-2 gap-3">
+           <div className="space-y-3">
+              {/* 
               <button 
                 onClick={handleCallWaiter}
                 disabled={isCallingWaiter}
@@ -335,20 +336,23 @@ export default function GuestSessionView({
                     </>
                 )}
               </button>
+              */}
 
               <button 
                 onClick={onAddItems}
-                className="flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 border-slate-900 text-slate-900 font-bold hover:bg-slate-50 transition-colors"
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl border-2 border-slate-900 text-slate-900 font-bold hover:bg-slate-50 transition-colors"
               >
                 <Plus size={18} /> Add Items
               </button>
+
+              {/* 
+              <button 
+                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition-colors shadow-lg shadow-slate-200"
+              >
+                <Receipt size={18} /> Request Bill
+              </button>
+              */}
            </div>
-           
-           <button 
-             className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition-colors shadow-lg shadow-slate-200"
-           >
-             <Receipt size={18} /> Request Bill
-           </button>
         </div>
       </div>
     </div>

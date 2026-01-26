@@ -90,13 +90,41 @@ Retrieves detailed information for a specific property, including its food and d
 ```
 
 ### Example Code
+---
+
+## 4. QR Scanning Integration
+
+To ensure a seamless guest experience, the mobile application should implement an internal QR code scanner.
+
+### Implementation Requirements for "Auto-Open"
+When a guest scans a Zamora QR code using the scanner **within your mobile app**, the app must automatically navigate to the menu without requiring the user to tap an intermediate link.
+
+**Logic Flow:**
+1.  **Detection**: Capture the QR code content (string).
+2.  **Validation**: Check if the string starts with your base URL (e.g., `https://zamoraapp.com/menu/`).
+3.  **Automatic Navigation**:
+    -   Parse the `propertyId` from the URL path.
+    -   Parse the `table` query parameter from the URL.
+    -   Immediately navigate the user to your internal `MenuScreen` or `PropertyDetails` screen using these values.
+    -   **DO NOT** show a "Link detected: Click to open" button; the transition should be immediate.
+
+**Example (React Native):**
 ```javascript
-async function fetchPropertyDetails(propertyId) {
-  const response = await fetch(`https://zamoraapp.com/api/mobile/menu/${propertyId}`);
-  if (!response.ok) throw new Error('Failed to fetch menu');
-  return await response.json();
-}
+const onCodeScanned = (code) => {
+  if (code.startsWith('https://zamoraapp.com/menu/')) {
+    const url = new URL(code);
+    const propertyId = url.pathname.split('/')[2];
+    const tableNumber = url.searchParams.get('table');
+    
+    // Immediate internal navigation
+    navigation.navigate('Menu', { propertyId, tableNumber });
+  }
+};
 ```
+
+*Note: Native system camera apps (iOS/Android) will always show a link banner for security reasons. This "Auto-Open" behavior is specifically for the scanner implemented inside the Zamora Mobile App.*
+
+---
 
 ---
 

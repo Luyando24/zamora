@@ -20,7 +20,32 @@ export async function GET(req: NextRequest) {
 
         if (error) throw error;
 
-        return NextResponse.json(tables);
+        // Fetch active orders to determine table status dynamically
+        // An "occupied" table has an ongoing or delivered order that isn't paid/cancelled
+        const [{ data: foodOrders }, { data: barOrders }] = await Promise.all([
+            supabase.from('orders')
+                .select('table_number')
+                .eq('property_id', propertyId)
+                .not('status', 'in', '("cancelled", "pos_completed")')
+                .neq('payment_status', 'paid'),
+            supabase.from('bar_orders')
+                .select('table_number')
+                .eq('property_id', propertyId)
+                .not('status', 'in', '("cancelled", "pos_completed")')
+                .neq('payment_status', 'paid')
+        ]);
+
+        const occupiedTables = new Set([
+            ...(foodOrders || []).map(o => String(o.table_number)),
+            ...(barOrders || []).map(o => String(o.table_number))
+        ]);
+
+        const enrichedTables = tables.map(table => ({
+            ...table,
+            status: occupiedTables.has(String(table.room_number)) ? 'occupied' : 'available'
+        }));
+
+        return NextResponse.json(enrichedTables);
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
@@ -45,7 +70,7 @@ export async function POST(req: NextRequest) {
                 property_id: propertyId,
                 room_number,
                 room_type_id,
-                status: status || 'clean',
+                status: status || 'available',
                 notes
             })
             .select()

@@ -123,7 +123,7 @@ export default function TablesPage() {
             property_id: selectedPropertyId,
             room_number: newTableNumber,
             room_type_id: newTableTypeId,
-            status: 'clean', // Default status
+            status: 'available', // Default status
           });
           
         if (error) throw error;
@@ -209,11 +209,9 @@ export default function TablesPage() {
                                     <div className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider w-fit ${
                                         table.status === 'occupied' 
                                             ? 'bg-red-50 text-red-600' 
-                                            : table.status === 'dirty'
-                                            ? 'bg-orange-50 text-orange-600'
                                             : 'bg-green-50 text-green-600'
                                     }`}>
-                                        {table.status || 'Available'}
+                                        {table.status === 'occupied' ? 'Occupied' : 'Available'}
                                     </div>
                                 </div>
                                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

@@ -267,7 +267,16 @@ const channel = supabase
 
 ---
 
-## 5. Data Models
+## 5. QR Scanner Implementation (Waiters)
+
+Waiters can scan Table QR codes to quickly jump to a table's active orders.
+
+### Auto-Open Logic
+The app's scanner should automatically parse the table number from the QR code URL (`.../menu/uuid?table=5`) and navigate the waiter to the table management screen. This must happen **immediately** upon detection to save time during busy shifts.
+
+---
+
+## 6. Data Models
 
 ### Order Object
 ```typescript

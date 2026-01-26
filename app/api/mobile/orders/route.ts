@@ -196,6 +196,15 @@ export async function POST(req: NextRequest) {
 
         if (orderError) throw orderError;
 
+        // Update Table Status to 'occupied'
+        if (tableNumber) {
+          await supabaseAdmin
+            .from('rooms')
+            .update({ status: 'occupied' })
+            .eq('property_id', propertyId)
+            .eq('room_number', String(tableNumber));
+        }
+
         // Insert Items
         const orderItems = foodCart.map((item: any) => ({
           order_id: foodOrderId,
@@ -280,6 +289,15 @@ export async function POST(req: NextRequest) {
           });
 
         if (orderError) throw orderError;
+
+        // Update Table Status to 'occupied'
+        if (tableNumber) {
+          await supabaseAdmin
+            .from('rooms')
+            .update({ status: 'occupied' })
+            .eq('property_id', propertyId)
+            .eq('room_number', String(tableNumber));
+        }
 
         // Insert Items
         const orderItems = barCart.map((item: any) => ({

@@ -65,12 +65,12 @@ export async function POST(
             }, { status: 404 });
         }
 
-        // Update Table Status to 'dirty' after payment/completion
+        // Update Table Status to 'available' after payment/completion
         const order = data[0];
         if (order.table_number) {
             await admin
                 .from('rooms')
-                .update({ status: 'dirty' })
+                .update({ status: 'available' })
                 .eq('property_id', order.property_id)
                 .eq('room_number', order.table_number);
         }

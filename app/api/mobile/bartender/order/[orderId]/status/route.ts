@@ -56,8 +56,9 @@ export async function POST(
 
         if (updateError) throw updateError;
 
-        // Update Table Status to 'occupied' when delivered
-        if (status === 'delivered') {
+        // Update Table Status to 'occupied' when any active status is set
+        const activeStatuses = ['pending', 'preparing', 'ready', 'delivered'];
+        if (activeStatuses.includes(status)) {
             const { data: order } = await admin
                 .from(table)
                 .select('table_number, property_id')
@@ -70,6 +71,40 @@ export async function POST(
                     .update({ status: 'occupied' })
                     .eq('property_id', order.property_id)
                     .eq('room_number', order.table_number);
+            }
+        } else if (status === 'cancelled') {
+            // Check if there are other active orders for this table before marking as available
+            const { data: order } = await admin
+                .from(table)
+                .select('table_number, property_id')
+                .eq('id', orderId)
+                .single();
+            
+            if (order && order.table_number) {
+                const [{ count: foodCount }, { count: barCount }] = await Promise.all([
+                    admin.from('orders')
+                        .select('id', { count: 'exact', head: true })
+                        .eq('property_id', order.property_id)
+                        .eq('table_number', order.table_number)
+                        .neq('id', orderId)
+                        .not('status', 'in', '("cancelled", "pos_completed")')
+                        .neq('payment_status', 'paid'),
+                    admin.from('bar_orders')
+                        .select('id', { count: 'exact', head: true })
+                        .eq('property_id', order.property_id)
+                        .eq('table_number', order.table_number)
+                        .neq('id', orderId)
+                        .not('status', 'in', '("cancelled", "pos_completed")')
+                        .neq('payment_status', 'paid')
+                ]);
+
+                if ((foodCount || 0) === 0 && (barCount || 0) === 0) {
+                    await admin
+                        .from('rooms')
+                        .update({ status: 'available' })
+                        .eq('property_id', order.property_id)
+                        .eq('room_number', order.table_number);
+                }
             }
         }
 

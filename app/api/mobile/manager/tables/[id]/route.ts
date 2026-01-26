@@ -19,7 +19,30 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 
         if (error) throw error;
 
-        return NextResponse.json(table);
+        // Fetch active orders for this specific table to determine status
+        const [{ data: foodOrders }, { data: barOrders }] = await Promise.all([
+            supabase.from('orders')
+                .select('id')
+                .eq('property_id', table.property_id)
+                .eq('table_number', table.room_number)
+                .not('status', 'in', '("cancelled", "pos_completed")')
+                .neq('payment_status', 'paid')
+                .limit(1),
+            supabase.from('bar_orders')
+                .select('id')
+                .eq('property_id', table.property_id)
+                .eq('table_number', table.room_number)
+                .not('status', 'in', '("cancelled", "pos_completed")')
+                .neq('payment_status', 'paid')
+                .limit(1)
+        ]);
+
+        const isOccupied = (foodOrders?.length || 0) > 0 || (barOrders?.length || 0) > 0;
+
+        return NextResponse.json({
+            ...table,
+            status: isOccupied ? 'occupied' : 'available'
+        });
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
