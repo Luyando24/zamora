@@ -8,7 +8,7 @@ DO $$
 BEGIN 
     IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'rooms_status_check') THEN 
         ALTER TABLE rooms ADD CONSTRAINT rooms_status_check 
-        CHECK (status IN ('clean', 'dirty', 'maintenance', 'occupied'));
+        CHECK (status IN ('clean', 'dirty', 'maintenance', 'occupied', 'available'));
     END IF; 
 END $$;
 
