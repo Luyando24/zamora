@@ -18,7 +18,7 @@ export async function GET(
 
     const { data: property, error } = await supabaseAdmin
       .from('properties')
-      .select('name, logo_url, type, whatsapp_booking_phone')
+      .select('name, logo_url, type, whatsapp_booking_phone, address')
       .eq('id', propertyId)
       .single();
 

@@ -92,6 +92,31 @@ Retrieves detailed information for a specific property, including its food and d
 ### Example Code
 ---
 
+## 3. Fetch Specific Property Details
+
+Retrieves concise details for a single property, including its address.
+
+- **Endpoint**: `/api/mobile/properties/[propertyId]`
+- **Method**: `GET`
+- **Params**: 
+  - `propertyId`: The UUID of the property.
+- **Auth**: Public
+
+### Response
+```json
+{
+  "property": {
+    "name": "Property Name",
+    "logo_url": "https://...",
+    "type": "hotel",
+    "whatsapp_booking_phone": "260...",
+    "address": "Plot 123, Street Name, Lusaka"
+  }
+}
+```
+
+---
+
 ## 4. QR Scanning Integration
 
 To ensure a seamless guest experience, the mobile application should implement an internal QR code scanner.
