@@ -51,7 +51,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
     try {
         const body = await req.json();
-        const { propertyId, room_number, room_type_id, status, notes } = body;
+        const { propertyId, room_number, room_type_id, status, notes, qr_url } = body;
 
         const access = await verifyManagerAccess(req, propertyId);
         if (access.error || !access.user) return NextResponse.json({ error: access.error || 'Unauthorized' }, { status: access.status || 401 });
@@ -64,6 +64,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
                 room_type_id,
                 status,
                 notes,
+                qr_url,
                 updated_at: new Date().toISOString()
             })
             .eq('id', params.id);

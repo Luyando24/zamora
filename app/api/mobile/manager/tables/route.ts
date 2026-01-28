@@ -54,7 +54,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { propertyId, room_number, room_type_id, status, notes } = body;
+        const { propertyId, room_number, room_type_id, status, notes, qr_url } = body;
 
         const access = await verifyManagerAccess(req, propertyId);
         if (access.error || !access.user) return NextResponse.json({ error: access.error || 'Unauthorized' }, { status: access.status || 401 });
@@ -71,7 +71,8 @@ export async function POST(req: NextRequest) {
                 room_number,
                 room_type_id,
                 status: status || 'available',
-                notes
+                notes,
+                qr_url
             })
             .select()
             .single();
