@@ -484,6 +484,27 @@ export default function SettingsPage() {
                                                     />
                                                 </div>
                                             </div>
+                                            <div className="mt-4 flex items-center gap-3">
+                                                <div className="flex items-center h-5">
+                                                    <input
+                                                        id="require_wifi_for_orders"
+                                                        type="checkbox"
+                                                        className="h-4 w-4 rounded border-slate-300 text-zambia-green focus:ring-zambia-green"
+                                                        checked={hotel.settings?.require_wifi_for_orders || false}
+                                                        onChange={e => setHotel({ 
+                                                            ...hotel, 
+                                                            settings: { 
+                                                                ...hotel.settings, 
+                                                                require_wifi_for_orders: e.target.checked 
+                                                            } 
+                                                        })}
+                                                    />
+                                                </div>
+                                                <div className="text-sm">
+                                                    <label htmlFor="require_wifi_for_orders" className="font-medium text-slate-700">Prompt guests to connect to Wi-Fi</label>
+                                                    <p className="text-slate-500 text-xs">Recommended for local POS ordering (offline support).</p>
+                                                </div>
+                                            </div>
                                         </div>
 
                                         <div>

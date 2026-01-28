@@ -4,7 +4,8 @@ import { useState, useRef, useEffect } from 'react';
 import { 
   ShoppingBag, Utensils, Search, Plus, Minus, X, 
   MapPin, Phone, Clock, Star, ArrowRight, CheckCircle,
-  Instagram, Facebook, Twitter, ChefHat, Coffee, Mail, Home, Wine
+  Instagram, Facebook, Twitter, ChefHat, Coffee, Mail, Home, Wine,
+  Wifi, Copy, Check
 } from 'lucide-react';
 import Image from 'next/image';
 import Breadcrumb from '@/components/ui/Breadcrumb';
@@ -41,6 +42,8 @@ export default function MenuStorefront({
   const [isSessionOpen, setIsSessionOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [showWifiPrompt, setShowWifiPrompt] = useState(false);
+  const [copiedWifi, setCopiedWifi] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   
@@ -82,7 +85,15 @@ export default function MenuStorefront({
     }
 
     setIsLoaded(true);
-  }, [roomNumber, tableNumber]);
+
+    // Check if we should show WiFi prompt
+    if (property.settings?.require_wifi_for_orders && property.wifi_ssid) {
+        const dismissed = localStorage.getItem(`zamora_wifi_dismissed_${property.id}`);
+        if (!dismissed) {
+            setShowWifiPrompt(true);
+        }
+    }
+  }, [roomNumber, tableNumber, property.id, property.settings?.require_wifi_for_orders, property.wifi_ssid]);
 
   // Save cart to localStorage
   useEffect(() => {
@@ -571,6 +582,88 @@ export default function MenuStorefront({
         tableNumber={activeTable}
         roomNumber={activeRoom}
       />
+
+      {/* Wi-Fi Connection Prompt */}
+      {showWifiPrompt && property.wifi_ssid && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+            <div className="bg-white rounded-[2rem] w-full max-w-sm overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
+                <div className="bg-zambia-green p-8 text-white text-center relative">
+                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-md">
+                        <Wifi size={32} />
+                    </div>
+                    <h3 className="text-xl font-black mb-1">Connect to Wi-Fi</h3>
+                    <p className="text-white/80 text-sm font-medium">Recommended for local ordering</p>
+                    
+                    <button 
+                        onClick={() => {
+                            setShowWifiPrompt(false);
+                            localStorage.setItem(`zamora_wifi_dismissed_${property.id}`, 'true');
+                        }}
+                        className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full transition-colors"
+                    >
+                        <X size={20} />
+                    </button>
+                </div>
+
+                <div className="p-8 space-y-6">
+                    <div className="space-y-4">
+                        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Network Name</label>
+                            <div className="text-slate-900 font-bold font-mono">{property.wifi_ssid}</div>
+                        </div>
+
+                        {property.wifi_password && (
+                            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex justify-between items-center group">
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Password</label>
+                                    <div className="text-slate-900 font-bold font-mono">{property.wifi_password}</div>
+                                </div>
+                                <button 
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(property.wifi_password);
+                                        setCopiedWifi(true);
+                                        setTimeout(() => setCopiedWifi(false), 2000);
+                                    }}
+                                    className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-zambia-green hover:border-zambia-green transition-all shadow-sm"
+                                >
+                                    {copiedWifi ? <Check size={18} className="text-zambia-green" /> : <Copy size={18} />}
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="space-y-3">
+                        <button 
+                            onClick={() => {
+                                navigator.clipboard.writeText(property.wifi_password || '');
+                                setCopiedWifi(true);
+                                setTimeout(() => {
+                                    setCopiedWifi(false);
+                                    setShowWifiPrompt(false);
+                                    localStorage.setItem(`zamora_wifi_dismissed_${property.id}`, 'true');
+                                }, 1500);
+                            }}
+                            className="w-full py-4 bg-zambia-green text-white rounded-2xl font-bold shadow-lg shadow-zambia-green/20 hover:bg-zambia-green/90 transition-all flex items-center justify-center gap-2"
+                        >
+                            {copiedWifi ? (
+                                <>
+                                    <Check size={20} /> Password Copied!
+                                </>
+                            ) : (
+                                <>
+                                    <Wifi size={20} /> {property.wifi_password ? 'Copy & Connect' : 'Got it!'}
+                                </>
+                            )}
+                        </button>
+                        
+                        <p className="text-center text-[10px] text-slate-400 font-medium px-4">
+                            Connect to the property Wi-Fi to ensure your orders are processed even if the internet is slow.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+      )}
 
     </div>
   );

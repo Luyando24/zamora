@@ -151,6 +151,31 @@ const onCodeScanned = (code) => {
 
 ---
 
+## 5. Wi-Fi Connectivity for Local Ordering (POS)
+
+For properties where the POS system relies on a local network (offline support), guests should be prompted to connect to the property's Wi-Fi.
+
+### Flow
+1. **Scan QR Code**: App parses the property ID and table/room number.
+2. **Fetch Property**: Call `GET /api/mobile/properties/[propertyId]`.
+3. **Check Settings**:
+   - If `settings.require_wifi_for_orders` is `true`:
+     - Compare current device Wi-Fi SSID with `property.wifi_ssid`.
+     - If they don't match, show a prompt.
+4. **Auto-Connect (Mobile App)**:
+   - Use a library (like `react-native-wifi-reborn` or native iOS/Android APIs) to connect to `property.wifi_ssid` using `property.wifi_password`.
+   - On iOS, use `NEHotspotConfigurationManager`.
+   - On Android, use `WifiNetworkSpecifier`.
+
+### Data Fields
+- `wifi_ssid`: The SSID of the property network.
+- `wifi_password`: The password for the property network.
+- `settings.require_wifi_for_orders`: Boolean flag to trigger the prompt.
+
+---
+
+## 6. Error Handling
+
 ---
 
 ## 3. Fetch Property Rooms
