@@ -24,8 +24,8 @@ export async function GET(req: NextRequest) {
         
         switch (period) {
             case 'today':
-                // Last 24 hours in UTC
-                startDate.setUTCHours(now.getUTCHours() - 24, 0, 0, 0);
+                // Exactly last 24 hours to ensure "Today" data is always visible regardless of midnight cross
+                startDate.setTime(now.getTime() - (24 * 60 * 60 * 1000));
                 break;
             case 'week':
                 // Last 7 days in UTC
@@ -39,12 +39,12 @@ export async function GET(req: NextRequest) {
                 break;
             case 'year':
                 // Last 365 days in UTC
-                startDate.setUTCFullYear(now.getUTCFullYear() - 1);
+                startDate.setUTCDate(now.getUTCDate() - 365);
                 startDate.setUTCHours(0, 0, 0, 0);
                 break;
             default:
-                // Default to last 24 hours in UTC
-                startDate.setUTCHours(now.getUTCHours() - 24, 0, 0, 0);
+                // Default to last 24 hours
+                startDate.setTime(now.getTime() - (24 * 60 * 60 * 1000));
         }
 
         const startDateStr = startDate.toISOString();
@@ -54,7 +54,9 @@ export async function GET(req: NextRequest) {
             .from('orders')
             .select('id, status, total_amount, created_at, order_items(item_name, quantity, unit_price)')
             .eq('property_id', propertyId)
-            .gte('created_at', startDateStr);
+            .gte('created_at', startDateStr)
+            .order('created_at', { ascending: false })
+            .limit(5000);
 
         if (foodError) throw foodError;
 
@@ -63,7 +65,9 @@ export async function GET(req: NextRequest) {
             .from('bar_orders')
             .select('id, status, total_amount, created_at, bar_order_items(item_name, quantity, unit_price)')
             .eq('property_id', propertyId)
-            .gte('created_at', startDateStr);
+            .gte('created_at', startDateStr)
+            .order('created_at', { ascending: false })
+            .limit(5000);
 
         if (barError) throw barError;
 
