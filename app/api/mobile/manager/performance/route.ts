@@ -18,25 +18,33 @@ export async function GET(req: NextRequest) {
 
         const supabase = getSupabaseAdmin();
 
-        // Determine Date Range
+        // Determine Date Range - Use UTC consistently since DB stores timestamps in UTC
         const now = new Date();
         let startDate = new Date();
         
         switch (period) {
             case 'today':
-                startDate.setHours(0, 0, 0, 0);
+                // Last 24 hours in UTC
+                startDate.setUTCHours(now.getUTCHours() - 24, 0, 0, 0);
                 break;
             case 'week':
-                startDate.setDate(now.getDate() - 7);
+                // Last 7 days in UTC
+                startDate.setUTCDate(now.getUTCDate() - 7);
+                startDate.setUTCHours(0, 0, 0, 0);
                 break;
             case 'month':
-                startDate.setMonth(now.getMonth() - 1);
+                // Last 30 days in UTC
+                startDate.setUTCDate(now.getUTCDate() - 30);
+                startDate.setUTCHours(0, 0, 0, 0);
                 break;
             case 'year':
-                startDate.setFullYear(now.getFullYear() - 1);
+                // Last 365 days in UTC
+                startDate.setUTCFullYear(now.getUTCFullYear() - 1);
+                startDate.setUTCHours(0, 0, 0, 0);
                 break;
             default:
-                startDate.setHours(0, 0, 0, 0); // Default to today
+                // Default to last 24 hours in UTC
+                startDate.setUTCHours(now.getUTCHours() - 24, 0, 0, 0);
         }
 
         const startDateStr = startDate.toISOString();
@@ -115,6 +123,9 @@ export async function GET(req: NextRequest) {
 
         return NextResponse.json({
             period,
+            totalOrders,
+            totalRevenue,
+            averageOrderValue,
             summary: {
                 totalOrders,
                 totalRevenue,
