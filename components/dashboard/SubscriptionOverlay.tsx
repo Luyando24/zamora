@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Key, Send, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import { useProperty } from '@/app/dashboard/context/PropertyContext';
+import { addDays } from 'date-fns';
 
 export default function SubscriptionOverlay() {
   const { isTrialExpired, daysRemaining, selectedProperty, refreshProperties } = useProperty();
@@ -24,52 +25,57 @@ export default function SubscriptionOverlay() {
     setError(null);
 
     try {
-      // In a real app, you'd call an edge function or API to verify the key
-      // For this implementation, we'll check if it matches a generated format or dummy verification
-      // Actually, let's look for a license in a hypothetical 'licenses' table or just verify via API
-      
-      const { data, error: verifyError } = await supabase
+      // 1. Verify license key
+      const { data: license, error: verifyError } = await supabase
         .from('licenses')
         .select('*')
         .eq('key', licenseKey.trim())
         .eq('status', 'unused')
         .single();
 
-      if (verifyError || !data) {
+      if (verifyError || !license) {
         throw new Error('Invalid or already used license key.');
       }
 
-      // Update property subscription
+      // 2. Calculate expiration date
+      const expirationDate = addDays(new Date(), license.duration_days).toISOString();
+
+      // 3. Update property subscription
       const { error: updateError } = await supabase
         .from('properties')
         .update({
           subscription_plan: 'pro',
           subscription_status: 'active_licensed',
+          license_expires_at: expirationDate, // Using our new column
           settings: {
             ...(selectedProperty?.settings || {}),
             license_key: licenseKey.trim(),
-            licensed_at: new Date().toISOString()
+            licensed_at: new Date().toISOString(),
+            license_duration: license.duration_days,
+            license_expires_at: expirationDate
           }
         })
         .eq('id', selectedProperty?.id);
 
       if (updateError) throw updateError;
 
-      // Mark license as used
+      // 4. Mark license as used and set its expiration
       await supabase
         .from('licenses')
         .update({ 
           status: 'used', 
           used_by_property_id: selectedProperty?.id,
-          used_at: new Date().toISOString()
+          used_at: new Date().toISOString(),
+          expires_at: expirationDate
         })
-        .eq('id', data.id);
+        .eq('id', license.id);
 
       setSuccess(true);
       setTimeout(() => {
         refreshProperties();
       }, 2000);
     } catch (err: any) {
+      console.error('License activation error:', err);
       setError(err.message || 'Failed to verify license key.');
     } finally {
       setIsSubmitting(false);
@@ -77,7 +83,6 @@ export default function SubscriptionOverlay() {
   };
 
   const handleRequestLicense = async () => {
-    // Logic to notify admin or create a request
     alert('License request sent to admin. You will be contacted via email.');
   };
 
@@ -115,7 +120,7 @@ export default function SubscriptionOverlay() {
                       required
                       value={licenseKey}
                       onChange={(e) => setLicenseKey(e.target.value.toUpperCase())}
-                      placeholder="XXXX-XXXX-XXXX-XXXX"
+                      placeholder="ZAM-XXXX-XXXX-XXXX"
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono"
                     />
                   </div>

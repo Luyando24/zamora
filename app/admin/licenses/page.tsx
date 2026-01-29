@@ -3,12 +3,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Plus, Key, Search, Filter, RefreshCw, 
+  Plus, Key, Search, RefreshCw, 
   CheckCircle2, AlertCircle, Copy, ExternalLink,
-  ShieldCheck, CreditCard, Calendar, Building2
+  ShieldCheck, CreditCard, Calendar, Building2,
+  Clock, Check
 } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
-import { format } from 'date-fns';
+import { format, addDays } from 'date-fns';
 import { useRouter } from 'next/navigation';
 
 interface License {
@@ -16,13 +17,23 @@ interface License {
   key: string;
   plan: string;
   status: 'unused' | 'used' | 'revoked';
+  duration_days: number;
   created_at: string;
   used_at: string | null;
+  expires_at: string | null;
   used_by_property_id: string | null;
   property?: {
     name: string;
   };
 }
+
+const DURATION_OPTIONS = [
+  { label: '1 Month', days: 30 },
+  { label: '3 Months', days: 90 },
+  { label: '6 Months', days: 180 },
+  { label: '1 Year', days: 365 },
+  { label: 'Lifetime', days: 36500 },
+];
 
 export default function SubscriptionManagementPage() {
   const [licenses, setLicenses] = useState<License[]>([]);
@@ -30,13 +41,15 @@ export default function SubscriptionManagementPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'unused' | 'used'>('all');
+  const [selectedDuration, setSelectedDuration] = useState(365);
+  const [showGenerateModal, setShowGenerateModal] = useState(false);
+  
   const supabase = createClient();
   const router = useRouter();
 
   const fetchLicenses = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Security check: Only super_admin or admin can access
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data: profile } = await supabase
@@ -77,10 +90,11 @@ export default function SubscriptionManagementPage() {
   const generateLicense = async () => {
     setIsGenerating(true);
     try {
-      // Generate a random key: XXXX-XXXX-XXXX-XXXX
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      // Enhanced key generation: Prefix + Random alphanumeric
+      // ZAM-XXXX-XXXX-XXXX
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Removed ambiguous chars like 0, O, 1, I
       const segment = () => Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-      const key = `${segment()}-${segment()}-${segment()}-${segment()}`;
+      const key = `ZAM-${segment()}-${segment()}-${segment()}`;
 
       const { data: { user } } = await supabase.auth.getUser();
 
@@ -90,10 +104,12 @@ export default function SubscriptionManagementPage() {
           key,
           plan: 'pro',
           status: 'unused',
+          duration_days: selectedDuration,
           created_by: user?.id
         });
 
       if (error) throw error;
+      setShowGenerateModal(false);
       await fetchLicenses();
     } catch (err) {
       console.error('Error generating license:', err);
@@ -105,7 +121,6 @@ export default function SubscriptionManagementPage() {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    // You could add a toast notification here
   };
 
   const filteredLicenses = licenses.filter(l => {
@@ -128,15 +143,10 @@ export default function SubscriptionManagementPage() {
           </p>
         </div>
         <button
-          onClick={generateLicense}
-          disabled={isGenerating}
-          className="bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 px-6 rounded-2xl shadow-lg shadow-blue-900/20 transition-all active:scale-[0.98] flex items-center gap-2 disabled:opacity-50"
+          onClick={() => setShowGenerateModal(true)}
+          className="bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 px-6 rounded-2xl shadow-lg shadow-blue-900/20 transition-all active:scale-[0.98] flex items-center gap-2"
         >
-          {isGenerating ? (
-            <RefreshCw className="w-5 h-5 animate-spin" />
-          ) : (
-            <Plus className="w-5 h-5" />
-          )}
+          <Plus className="w-5 h-5" />
           Generate New License
         </button>
       </div>
@@ -224,7 +234,7 @@ export default function SubscriptionManagementPage() {
               <tr className="bg-slate-50/50 border-b border-slate-100">
                 <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">License Key</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Status</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Created</th>
+                <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Duration</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Used By</th>
                 <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-widest text-right">Actions</th>
               </tr>
@@ -281,9 +291,14 @@ export default function SubscriptionManagementPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-2 text-sm text-slate-500 font-medium">
-                          <Calendar size={14} />
-                          {format(new Date(license.created_at), 'MMM d, yyyy')}
+                        <div className="flex flex-col gap-0.5">
+                          <div className="flex items-center gap-2 text-sm text-slate-900 font-bold">
+                            <Clock size={14} className="text-slate-400" />
+                            {license.duration_days >= 36500 ? 'Lifetime' : `${license.duration_days} Days`}
+                          </div>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                            Created {format(new Date(license.created_at), 'MMM d, yyyy')}
+                          </p>
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -295,7 +310,7 @@ export default function SubscriptionManagementPage() {
                             <div className="min-w-0">
                               <p className="text-sm font-bold text-slate-900 truncate">{license.property.name}</p>
                               <p className="text-[10px] font-bold text-slate-400 uppercase">
-                                {license.used_at ? format(new Date(license.used_at), 'MMM d, yyyy') : '-'}
+                                Expires {license.expires_at ? format(new Date(license.expires_at), 'MMM d, yyyy') : '-'}
                               </p>
                             </div>
                           </div>
@@ -330,6 +345,93 @@ export default function SubscriptionManagementPage() {
           </table>
         </div>
       </div>
+
+      {/* Generate License Modal */}
+      <AnimatePresence>
+        {showGenerateModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowGenerateModal(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative bg-white rounded-[32px] shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden"
+            >
+              <div className="p-8">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
+                    <Key size={24} />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-black text-slate-900">Generate License</h2>
+                    <p className="text-sm font-medium text-slate-500">Select duration and plan</p>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <div>
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3 block">
+                      License Duration
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {DURATION_OPTIONS.map((opt) => (
+                        <button
+                          key={opt.days}
+                          onClick={() => setSelectedDuration(opt.days)}
+                          className={`px-4 py-3 rounded-2xl text-sm font-bold transition-all flex items-center justify-between ${
+                            selectedDuration === opt.days 
+                              ? 'bg-blue-900 text-white shadow-lg shadow-blue-900/20' 
+                              : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                          }`}
+                        >
+                          {opt.label}
+                          {selectedDuration === opt.days && <Check size={16} />}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div className="flex items-center gap-3 text-slate-600">
+                      <ShieldCheck size={18} className="text-blue-600" />
+                      <span className="text-sm font-bold">Pro Plan Features Included</span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      onClick={() => setShowGenerateModal(false)}
+                      className="flex-1 px-6 py-4 rounded-2xl font-bold text-slate-500 hover:bg-slate-50 transition-all"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={generateLicense}
+                      disabled={isGenerating}
+                      className="flex-[2] bg-blue-900 hover:bg-blue-800 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-blue-900/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      {isGenerating ? (
+                        <RefreshCw className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <>
+                          <Plus className="w-5 h-5" />
+                          Generate Key
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
