@@ -260,8 +260,70 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Pricing Section */}
+      <section id="pricing" className="py-24 bg-[#030712] relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-4xl lg:text-5xl font-bold mb-6">Simple, Transparent Pricing</h2>
+            <p className="text-xl text-gray-400">
+              Choose the plan that fits your business. All plans include ZRA compliance and cloud sync.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Starter Plan */}
+            <PricingCard 
+              title="Starter"
+              price="$49"
+              description="Perfect for small cafes or guest houses."
+              features={[
+                "Up to 10 Rooms / 5 Tables",
+                "Basic POS & Inventory",
+                "ZRA Fiscalization",
+                "1 User Account",
+                "Email Support"
+              ]}
+              buttonText="Start with Starter"
+              isPopular={false}
+            />
+
+            {/* Pro Plan */}
+            <PricingCard 
+              title="Professional"
+              price="$99"
+              description="Ideal for growing hotels and restaurants."
+              features={[
+                "Unlimited Rooms & Tables",
+                "Advanced Analytics",
+                "Multi-device Waiter App",
+                "QR Code Ordering",
+                "Priority 24/7 Support"
+              ]}
+              buttonText="Get Pro Now"
+              isPopular={true}
+            />
+
+            {/* Enterprise Plan */}
+            <PricingCard 
+              title="Enterprise"
+              price="Custom"
+              description="For large-scale hospitality groups."
+              features={[
+                "Multi-property Management",
+                "Custom API Integrations",
+                "Dedicated Account Manager",
+                "White-label Options",
+                "On-site Training"
+              ]}
+              buttonText="Contact Sales"
+              isPopular={false}
+            />
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
-      <section id="pricing" className="py-32 relative overflow-hidden">
+      <section id="cta" className="py-32 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-[#030712] to-emerald-600/20"></div>
         <div className="max-w-4xl mx-auto px-6 relative z-10 text-center">
           <h2 className="text-4xl lg:text-6xl font-bold mb-8">Ready to modernize?</h2>
@@ -297,6 +359,50 @@ export default function LandingPage() {
         </div>
       </footer>
     </div>
+  );
+}
+
+function PricingCard({ title, price, description, features, buttonText, isPopular }: { title: string, price: string, description: string, features: string[], buttonText: string, isPopular: boolean }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      whileHover={{ y: -10 }}
+      className={`relative p-8 rounded-3xl border ${isPopular ? 'border-emerald-500 bg-emerald-500/5' : 'border-white/10 bg-white/5'} flex flex-col`}
+    >
+      {isPopular && (
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-emerald-500 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+          Most Popular
+        </div>
+      )}
+      <div className="mb-8">
+        <h3 className="text-xl font-bold mb-2">{title}</h3>
+        <div className="flex items-baseline gap-1 mb-4">
+          <span className="text-4xl font-bold">{price}</span>
+          {price !== 'Custom' && <span className="text-gray-400">/mo</span>}
+        </div>
+        <p className="text-gray-400 text-sm">{description}</p>
+      </div>
+      <div className="space-y-4 mb-8 flex-grow">
+        {features.map((feature, index) => (
+          <div key={index} className="flex items-center gap-3 text-sm text-gray-300">
+            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            {feature}
+          </div>
+        ))}
+      </div>
+      <Link
+        href="/signup"
+        className={`w-full py-4 rounded-xl font-bold text-center transition-all ${
+          isPopular 
+            ? 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-lg shadow-emerald-600/25' 
+            : 'bg-white/10 text-white hover:bg-white/20'
+        }`}
+      >
+        {buttonText}
+      </Link>
+    </motion.div>
   );
 }
 
