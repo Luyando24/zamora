@@ -5,11 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, Key, Search, RefreshCw, 
   CheckCircle2, AlertCircle, Copy, ExternalLink,
-  ShieldCheck, CreditCard, Calendar, Building2,
+  ShieldCheck, CreditCard, Calendar as CalendarIcon, Building2,
   Clock, Check
 } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
-import { format, addDays } from 'date-fns';
+import { format, addDays, differenceInDays, startOfDay } from 'date-fns';
 import { useRouter } from 'next/navigation';
 
 interface License {
@@ -32,6 +32,7 @@ const DURATION_OPTIONS = [
   { label: '3 Months', days: 90 },
   { label: '6 Months', days: 180 },
   { label: '1 Year', days: 365 },
+  { label: '2 Years', days: 730 },
   { label: 'Lifetime', days: 36500 },
 ];
 
@@ -41,7 +42,8 @@ export default function SubscriptionManagementPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'unused' | 'used'>('all');
-  const [selectedDuration, setSelectedDuration] = useState(365);
+  const [selectedDuration, setSelectedDuration] = useState<number | 'custom'>(365);
+  const [customEndDate, setCustomEndDate] = useState<string>(format(addDays(new Date(), 30), 'yyyy-MM-dd'));
   const [showGenerateModal, setShowGenerateModal] = useState(false);
   
   const supabase = createClient();
@@ -90,9 +92,15 @@ export default function SubscriptionManagementPage() {
   const generateLicense = async () => {
     setIsGenerating(true);
     try {
-      // Enhanced key generation: Prefix + Random alphanumeric
-      // ZAM-XXXX-XXXX-XXXX
-      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Removed ambiguous chars like 0, O, 1, I
+      let finalDurationDays = typeof selectedDuration === 'number' ? selectedDuration : 30;
+      
+      if (selectedDuration === 'custom') {
+        const end = startOfDay(new Date(customEndDate));
+        const start = startOfDay(new Date());
+        finalDurationDays = Math.max(1, differenceInDays(end, start));
+      }
+
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; 
       const segment = () => Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
       const key = `ZAM-${segment()}-${segment()}-${segment()}`;
 
@@ -104,7 +112,7 @@ export default function SubscriptionManagementPage() {
           key,
           plan: 'pro',
           status: 'unused',
-          duration_days: selectedDuration,
+          duration_days: finalDurationDays,
           created_by: user?.id
         });
 
@@ -379,7 +387,7 @@ export default function SubscriptionManagementPage() {
                     <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3 block">
                       License Duration
                     </label>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-2 mb-4">
                       {DURATION_OPTIONS.map((opt) => (
                         <button
                           key={opt.days}
@@ -394,7 +402,45 @@ export default function SubscriptionManagementPage() {
                           {selectedDuration === opt.days && <Check size={16} />}
                         </button>
                       ))}
+                      <button
+                        onClick={() => setSelectedDuration('custom')}
+                        className={`px-4 py-3 rounded-2xl text-sm font-bold transition-all flex items-center justify-between col-span-2 ${
+                          selectedDuration === 'custom' 
+                            ? 'bg-blue-900 text-white shadow-lg shadow-blue-900/20' 
+                            : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <CalendarIcon size={16} />
+                          Custom Period
+                        </div>
+                        {selectedDuration === 'custom' && <Check size={16} />}
+                      </button>
                     </div>
+
+                    {selectedDuration === 'custom' && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        className="space-y-2 p-4 bg-blue-50 rounded-2xl border border-blue-100"
+                      >
+                        <label className="text-xs font-bold text-blue-900 uppercase tracking-wider">
+                          Select Expiration Date
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="date"
+                            min={format(addDays(new Date(), 1), 'yyyy-MM-dd')}
+                            value={customEndDate}
+                            onChange={(e) => setCustomEndDate(e.target.value)}
+                            className="w-full bg-white border border-blue-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                          />
+                        </div>
+                        <p className="text-[10px] text-blue-600 font-bold uppercase">
+                          Duration: {differenceInDays(startOfDay(new Date(customEndDate)), startOfDay(new Date()))} Days
+                        </p>
+                      </motion.div>
+                    )}
                   </div>
 
                   <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
