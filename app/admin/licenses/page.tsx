@@ -6,7 +6,7 @@ import {
   Plus, Key, Search, RefreshCw, 
   CheckCircle2, AlertCircle, Copy, ExternalLink,
   ShieldCheck, CreditCard, Calendar as CalendarIcon, Building2,
-  Clock, Check
+  Clock, Check, Trash2, Ban, ArrowUpCircle
 } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import { format, addDays, differenceInDays, startOfDay } from 'date-fns';
@@ -48,6 +48,8 @@ export default function SubscriptionManagementPage() {
   const [customEndDate, setCustomEndDate] = useState<string>(format(addDays(new Date(), 30), 'yyyy-MM-dd'));
   const [showGenerateModal, setShowGenerateModal] = useState(false);
   const [showPlanModal, setShowPlanModal] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [selectedLicense, setSelectedLicense] = useState<License | null>(null);
   const [editingPlan, setEditingPlan] = useState<LicensePlan | null>(null);
   
   const supabase = createClient();
@@ -198,6 +200,131 @@ export default function SubscriptionManagementPage() {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
+  };
+
+  const deactivateLicense = async (license: License) => {
+    if (!confirm(`Are you sure you want to deactivate license ${license.key}?`)) return;
+    
+    try {
+      // 1. Update license status
+      const { error: licenseError } = await supabase
+        .from('licenses')
+        .update({ status: 'revoked' })
+        .eq('id', license.id);
+
+      if (licenseError) throw licenseError;
+
+      // 2. If it was used by a property, update the property
+      if (license.used_by_property_id) {
+        const { error: propError } = await supabase
+          .from('properties')
+          .update({ 
+            subscription_status: 'trial', // Revert to trial or some other status
+            license_expires_at: new Date().toISOString() // Expire immediately
+          })
+          .eq('id', license.used_by_property_id);
+        
+        if (propError) throw propError;
+      }
+
+      await fetchData();
+    } catch (err) {
+      console.error('Error deactivating license:', err);
+      alert('Failed to deactivate license.');
+    }
+  };
+
+  const deleteLicense = async (license: License) => {
+    if (license.status === 'used') {
+      if (!confirm(`This license is currently IN USE by ${license.property?.name}. Deleting it will also deactivate their subscription. Continue?`)) return;
+    } else {
+      if (!confirm(`Are you sure you want to delete license ${license.key}?`)) return;
+    }
+
+    try {
+      // If used, handle property update first
+      if (license.used_by_property_id) {
+        await supabase
+          .from('properties')
+          .update({ 
+            subscription_status: 'trial',
+            license_expires_at: new Date().toISOString()
+          })
+          .eq('id', license.used_by_property_id);
+      }
+
+      const { error } = await supabase
+        .from('licenses')
+        .delete()
+        .eq('id', license.id);
+
+      if (error) throw error;
+      await fetchData();
+    } catch (err) {
+      console.error('Error deleting license:', err);
+      alert('Failed to delete license.');
+    }
+  };
+
+  const handleUpgradeLicense = async () => {
+    if (!selectedLicense) return;
+    setIsGenerating(true);
+
+    try {
+      let finalDurationDays = typeof selectedDuration === 'number' ? selectedDuration : 30;
+      let planName = 'Pro Plan';
+      
+      if (selectedDuration === 'custom') {
+        const end = startOfDay(new Date(customEndDate));
+        const start = startOfDay(new Date());
+        finalDurationDays = Math.max(1, differenceInDays(end, start));
+        planName = `Custom (${finalDurationDays} Days)`;
+      } else {
+        const selectedPlan = plans.find(p => p.duration_days === selectedDuration);
+        if (selectedPlan) {
+          planName = selectedPlan.name;
+        }
+      }
+
+      // Calculate new expiration date if it's already used
+      let newExpiresAt = selectedLicense.expires_at;
+      if (selectedLicense.used_at) {
+        newExpiresAt = addDays(new Date(selectedLicense.used_at), finalDurationDays).toISOString();
+      }
+
+      // 1. Update license
+      const { error: licenseError } = await supabase
+        .from('licenses')
+        .update({
+          duration_days: finalDurationDays,
+          plan: planName,
+          expires_at: newExpiresAt
+        })
+        .eq('id', selectedLicense.id);
+
+      if (licenseError) throw licenseError;
+
+      // 2. Update property if used
+      if (selectedLicense.used_by_property_id && newExpiresAt) {
+        const { error: propError } = await supabase
+          .from('properties')
+          .update({
+            license_expires_at: newExpiresAt
+          })
+          .eq('id', selectedLicense.used_by_property_id);
+        
+        if (propError) throw propError;
+      }
+
+      setShowUpgradeModal(false);
+      setSelectedLicense(null);
+      await fetchData();
+    } catch (err) {
+      console.error('Error upgrading license:', err);
+      alert('Failed to upgrade license.');
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const filteredLicenses = licenses.filter(l => {
@@ -434,6 +561,37 @@ export default function SubscriptionManagementPage() {
                           >
                             <Copy size={18} />
                           </button>
+                          
+                          <button
+                            onClick={() => {
+                              setSelectedLicense(license);
+                              setSelectedDuration(license.duration_days);
+                              setShowUpgradeModal(true);
+                            }}
+                            className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                            title="Upgrade/Edit License"
+                          >
+                            <ArrowUpCircle size={18} />
+                          </button>
+
+                          {license.status !== 'revoked' && (
+                            <button
+                              onClick={() => deactivateLicense(license)}
+                              className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
+                              title="Deactivate/Revoke License"
+                            >
+                              <Ban size={18} />
+                            </button>
+                          )}
+
+                          <button
+                            onClick={() => deleteLicense(license)}
+                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                            title="Delete License"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+
                           {license.used_by_property_id && (
                             <button
                               className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all"
@@ -626,6 +784,146 @@ export default function SubscriptionManagementPage() {
                         <>
                           <Plus className="w-5 h-5" />
                           Generate Key
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+      
+      {/* Upgrade/Edit License Modal */}
+      <AnimatePresence>
+        {showUpgradeModal && selectedLicense && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => {
+                setShowUpgradeModal(false);
+                setSelectedLicense(null);
+              }}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative bg-white rounded-[32px] shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden"
+            >
+              <div className="p-8">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
+                    <ArrowUpCircle size={24} />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-black text-slate-900">Upgrade License</h2>
+                    <p className="text-sm font-medium text-slate-500">Key: {selectedLicense.key}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <div>
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3 block">
+                      New Duration / Plan
+                    </label>
+                    <div className="grid grid-cols-2 gap-2 mb-4">
+                      {plans.map((plan) => (
+                        <button
+                          key={plan.id}
+                          onClick={() => setSelectedDuration(plan.duration_days)}
+                          className={`px-4 py-3 rounded-2xl text-sm font-bold transition-all flex flex-col items-start gap-0.5 ${
+                            selectedDuration === plan.duration_days 
+                              ? 'bg-blue-900 text-white shadow-lg shadow-blue-900/20' 
+                              : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between w-full">
+                            <span>{plan.name}</span>
+                            {selectedDuration === plan.duration_days && <Check size={16} />}
+                          </div>
+                          <span className={`text-[10px] font-bold uppercase tracking-wider ${selectedDuration === plan.duration_days ? 'text-blue-200' : 'text-slate-400'}`}>
+                            {plan.currency} {plan.price.toLocaleString()}
+                          </span>
+                        </button>
+                      ))}
+                      <button
+                        onClick={() => setSelectedDuration('custom')}
+                        className={`px-4 py-3 rounded-2xl text-sm font-bold transition-all flex items-center justify-between col-span-2 ${
+                          selectedDuration === 'custom' 
+                            ? 'bg-blue-900 text-white shadow-lg shadow-blue-900/20' 
+                            : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <CalendarIcon size={16} />
+                          Custom Period
+                        </div>
+                        {selectedDuration === 'custom' && <Check size={16} />}
+                      </button>
+                    </div>
+
+                    {selectedDuration === 'custom' && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        className="space-y-2 p-4 bg-blue-50 rounded-2xl border border-blue-100"
+                      >
+                        <label className="text-xs font-bold text-blue-900 uppercase tracking-wider">
+                          Select Expiration Date
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="date"
+                            min={format(addDays(new Date(), 1), 'yyyy-MM-dd')}
+                            value={customEndDate}
+                            onChange={(e) => setCustomEndDate(e.target.value)}
+                            className="w-full bg-white border border-blue-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                          />
+                        </div>
+                        <p className="text-[10px] text-blue-600 font-bold uppercase">
+                          Duration: {differenceInDays(startOfDay(new Date(customEndDate)), startOfDay(new Date()))} Days
+                        </p>
+                      </motion.div>
+                    )}
+                  </div>
+
+                  {selectedLicense.status === 'used' && (
+                    <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100">
+                      <div className="flex items-start gap-3 text-amber-800">
+                        <AlertCircle size={18} className="text-amber-600 shrink-0 mt-0.5" />
+                        <div className="text-xs font-medium">
+                          This license is currently in use. Upgrading it will update the expiration date for <strong>{selectedLicense.property?.name}</strong> immediately.
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      onClick={() => {
+                        setShowUpgradeModal(false);
+                        setSelectedLicense(null);
+                      }}
+                      className="flex-1 px-6 py-4 rounded-2xl font-bold text-slate-500 hover:bg-slate-50 transition-all"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleUpgradeLicense}
+                      disabled={isGenerating}
+                      className="flex-[2] bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-emerald-600/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      {isGenerating ? (
+                        <RefreshCw className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <>
+                          <ArrowUpCircle className="w-5 h-5" />
+                          Apply Upgrade
                         </>
                       )}
                     </button>
