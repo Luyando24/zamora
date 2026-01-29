@@ -13,6 +13,7 @@ const navigation = [
   { name: 'Overview', href: '/admin', icon: LayoutDashboard },
   { name: 'Analytics', href: '/admin/analytics', icon: Activity },
   { name: 'Properties', href: '/admin/hotels', icon: Building2 },
+  { name: 'Licenses', href: '/admin/licenses', icon: ShieldCheck },
   { name: 'Users', href: '/admin/users', icon: Users },
   { name: 'Revenue', href: '/admin/revenue', icon: CreditCard },
   { name: 'System Health', href: '/admin/health', icon: BarChart3 },

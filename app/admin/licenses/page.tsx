@@ -36,7 +36,7 @@ export default function SubscriptionManagementPage() {
   const fetchLicenses = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Security check: Only super_admin can access
+      // Security check: Only super_admin or admin can access
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data: profile } = await supabase
@@ -68,7 +68,7 @@ export default function SubscriptionManagementPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [supabase]);
+  }, [supabase, router]);
 
   useEffect(() => {
     fetchLicenses();
