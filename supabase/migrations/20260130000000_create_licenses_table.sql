@@ -24,7 +24,7 @@ USING (
     EXISTS (
         SELECT 1 FROM public.profiles
         WHERE profiles.id = auth.uid()
-        AND profiles.role = 'admin'
+        AND profiles.role IN ('admin', 'super_admin')
     )
 );
 

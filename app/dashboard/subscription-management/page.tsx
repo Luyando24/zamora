@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import { format } from 'date-fns';
+import { useRouter } from 'next/navigation';
 
 interface License {
   id: string;
@@ -30,10 +31,26 @@ export default function SubscriptionManagementPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'unused' | 'used'>('all');
   const supabase = createClient();
+  const router = useRouter();
 
   const fetchLicenses = useCallback(async () => {
     setIsLoading(true);
     try {
+      // Security check: Only super_admin can access
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+
+        if (profile?.role !== 'super_admin' && profile?.role !== 'admin') {
+          router.push('/dashboard');
+          return;
+        }
+      }
+
       const { data, error } = await supabase
         .from('licenses')
         .select(`

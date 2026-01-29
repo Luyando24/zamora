@@ -16,7 +16,7 @@ import { useEffect, useState, useCallback } from 'react';
 export const navigationGroups = [
   {
     title: 'Main',
-    roles: ['admin', 'manager', 'cashier', 'waiter', 'chef'],
+    roles: ['admin', 'manager', 'cashier', 'waiter', 'chef', 'super_admin'],
     items: [
       { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
       { name: 'Kitchen Dashboard', href: '/dashboard/kitchen', icon: ChefHat },
@@ -24,7 +24,7 @@ export const navigationGroups = [
   },
   {
     title: 'Operations',
-    roles: ['admin', 'manager', 'cashier', 'waiter', 'chef'],
+    roles: ['admin', 'manager', 'cashier', 'waiter', 'chef', 'super_admin'],
     items: [
       { name: 'Room Bookings', href: '/dashboard/inventory', icon: CalendarDays },
       { name: 'Stock Management', href: '/dashboard/stock', icon: Package },
@@ -37,7 +37,7 @@ export const navigationGroups = [
   },
   {
     title: 'Management',
-    roles: ['admin', 'manager'],
+    roles: ['admin', 'manager', 'super_admin'],
     items: [
       { name: 'Properties', href: '/dashboard/properties', icon: Building2 },
       { name: 'Rooms Setup', href: '/dashboard/rooms', icon: DoorOpen },
@@ -49,7 +49,7 @@ export const navigationGroups = [
   },
   {
     title: 'System',
-    roles: ['admin', 'manager'],
+    roles: ['admin', 'manager', 'super_admin'],
     items: [
       { name: 'Settings', href: '/dashboard/settings', icon: Settings },
     ]
@@ -135,8 +135,8 @@ export default function Sidebar({ onLinkClick }: { onLinkClick?: () => void }) {
                 return cashierAllowedItems.includes(item.name);
               }
 
-              // Hide Kitchen Dashboard for other roles (except admin/manager)
-              if (item.name === 'Kitchen Dashboard' && !['admin', 'manager', 'chef'].includes(userRole)) {
+              // Hide Kitchen Dashboard for other roles (except admin/manager/super_admin)
+              if (item.name === 'Kitchen Dashboard' && !['admin', 'manager', 'chef', 'super_admin'].includes(userRole)) {
                 return false;
               }
 
