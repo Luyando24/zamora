@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, CheckCircle2, BarChart3, ShieldCheck, Zap, Smartphone, Menu, X } from 'lucide-react';
+import { ArrowRight, CheckCircle2, BarChart3, ShieldCheck, Zap, Smartphone, Menu, X, Globe, WifiOff, MousePointerClick, Layout } from 'lucide-react';
 import { useState } from 'react';
 
 export default function LandingPage() {
@@ -22,6 +22,10 @@ export default function LandingPage() {
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-300">
             <Link href="#features" className="hover:text-white transition-colors relative group">
               Features
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-600 transition-all group-hover:w-full"></span>
+            </Link>
+            <Link href="#benefits" className="hover:text-white transition-colors relative group">
+              Benefits
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-600 transition-all group-hover:w-full"></span>
             </Link>
             <Link href="#compliance" className="hover:text-white transition-colors relative group">
@@ -75,6 +79,13 @@ export default function LandingPage() {
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Features
+                </Link>
+                <Link 
+                  href="#benefits" 
+                  className="text-lg font-medium text-gray-300 hover:text-white"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Benefits
                 </Link>
                 <Link 
                   href="#compliance" 
@@ -260,6 +271,57 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Benefits Section */}
+      <section id="benefits" className="py-24 bg-[#020617] relative">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center max-w-3xl mx-auto mb-20">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <h2 className="text-4xl lg:text-5xl font-bold mb-6">More Than Just a POS</h2>
+              <p className="text-xl text-gray-400">
+                We don&apos;t just provide software; we provide a platform for your growth with exclusive benefits you won&apos;t find anywhere else.
+              </p>
+            </motion.div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <BenefitCard 
+              icon={<Globe className="w-8 h-8 text-emerald-400" />}
+              title="Free Public Listings"
+              description="Get your food menu and hotel rooms listed for free on our Zamora public website and mobile app. Reach thousands of potential customers instantly."
+            />
+            <BenefitCard 
+              icon={<Layout className="w-8 h-8 text-blue-400" />}
+              title="Free Dedicated Website"
+              description="Every partner gets a free, professional hotel/lodge and restaurant website with a custom zamora.app subdomain. No coding required."
+            />
+            <BenefitCard 
+              icon={<WifiOff className="w-8 h-8 text-orange-400" />}
+              title="Offline-First POS"
+              description="Internet down? No problem. Our POS works perfectly offline and syncs automatically when you're back online. Your business never stops."
+            />
+            <BenefitCard 
+              icon={<MousePointerClick className="w-8 h-8 text-purple-400" />}
+              title="One-Step Ordering"
+              description="Say goodbye to tedious multi-step processes. Our one-step food ordering is designed for speed, allowing your staff to serve customers faster."
+            />
+            <BenefitCard 
+              icon={<Zap className="w-8 h-8 text-yellow-400" />}
+              title="Instant Cloud Sync"
+              description="Real-time data synchronization across all your devices. Manage your kitchen, bar, and front desk from one unified dashboard."
+            />
+            <BenefitCard 
+              icon={<ShieldCheck className="w-8 h-8 text-emerald-500" />}
+              title="Built-in Compliance"
+              description="ZRA Smart Invoice integration is standard. Generate tax-compliant receipts for every sale without extra hardware or complex setups."
+            />
+          </div>
+        </div>
+      </section>
+
       {/* Pricing Section */}
       <section id="pricing" className="py-24 bg-[#030712] relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -359,6 +421,26 @@ export default function LandingPage() {
         </div>
       </footer>
     </div>
+  );
+}
+
+function BenefitCard({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      whileHover={{ y: -5 }}
+      className="p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all group"
+    >
+      <div className="mb-6 p-3 bg-white/5 rounded-2xl w-fit group-hover:scale-110 transition-transform duration-300">
+        {icon}
+      </div>
+      <h3 className="text-xl font-bold mb-3 group-hover:text-emerald-400 transition-colors">{title}</h3>
+      <p className="text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors">
+        {description}
+      </p>
+    </motion.div>
   );
 }
 
