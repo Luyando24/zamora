@@ -7,7 +7,8 @@ import { useProperty } from '@/app/dashboard/context/PropertyContext';
 import {
   LayoutDashboard, CalendarDays, BedDouble, FileText,
   Settings, LogOut, DoorOpen, Utensils, Building2,
-  ChevronRight, User, Wine, Users, History, Package, Truck, ChefHat, LayoutGrid
+  ChevronRight, User, Wine, Users, History, Package, Truck, ChefHat, LayoutGrid,
+  CreditCard
 } from 'lucide-react';
 import { useEffect, useState, useCallback } from 'react';
 
@@ -43,6 +44,7 @@ export const navigationGroups = [
       { name: 'Tables', href: '/dashboard/tables', icon: LayoutGrid },
       { name: 'Team Members', href: '/dashboard/users', icon: Users },
       { name: 'ZRA Reports', href: '/dashboard/zra', icon: FileText },
+      { name: 'Subscriptions', href: '/dashboard/subscription-management', icon: CreditCard },
     ]
   },
   {

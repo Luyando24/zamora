@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { 
   Building2, Save, Globe, Mail, Phone, Facebook, Instagram, Twitter, 
-  Wifi, ChevronDown, Plus, Baby, Utensils, CreditCard, LayoutDashboard 
+  Wifi, ChevronDown, Plus, Baby, Utensils, CreditCard, LayoutDashboard, Key 
 } from 'lucide-react';
 import ImageUpload from '@/components/ui/ImageUpload';
 import Link from 'next/link';
@@ -150,6 +150,39 @@ export default function SettingsPage() {
 
             alert('Property created successfully!');
         } else {
+            // Check if license key is being updated
+            const originalProperty = properties.find(p => p.id === hotel.id);
+            const newLicenseKey = hotel.settings?.license_key;
+            const oldLicenseKey = originalProperty?.settings?.license_key;
+
+            if (newLicenseKey && newLicenseKey !== oldLicenseKey) {
+                // Verify license key
+                const { data: license, error: licenseError } = await supabase
+                    .from('licenses')
+                    .select('*')
+                    .eq('key', newLicenseKey)
+                    .eq('status', 'unused')
+                    .single();
+
+                if (licenseError || !license) {
+                    throw new Error('Invalid or already used license key.');
+                }
+
+                // Update property with licensed status
+                hotel.subscription_status = 'active_licensed';
+                hotel.subscription_plan = 'pro';
+
+                // Mark license as used
+                await supabase
+                    .from('licenses')
+                    .update({ 
+                        status: 'used', 
+                        used_by_property_id: hotel.id,
+                        used_at: new Date().toISOString()
+                    })
+                    .eq('id', license.id);
+            }
+
             // Update existing
             const { error } = await supabase.from('properties').update(hotel).eq('id', hotel.id);
             if (error) throw error;
@@ -460,6 +493,52 @@ export default function SettingsPage() {
                                     </div>
                                 ) : (
                                     <div className="grid grid-cols-1 gap-6">
+                                        <div className="bg-slate-50 p-6 rounded-xl border border-slate-100">
+                                            <h3 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                                <CreditCard size={16} /> Subscription & License
+                                            </h3>
+                                            <div className="space-y-4">
+                                                <div>
+                                                  <label className="block text-xs font-semibold text-slate-500 mb-1">License Key</label>
+                                                  <div className="flex gap-2">
+                                                    <div className="relative flex-1">
+                                                      <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                                      <input
+                                                          type="text"
+                                                          placeholder="XXXX-XXXX-XXXX-XXXX"
+                                                          className="block w-full rounded-lg border-slate-200 shadow-sm focus:border-zambia-green focus:ring-zambia-green/20 px-3 py-2 pl-9 border text-slate-900 bg-white font-mono"
+                                                          value={hotel.settings?.license_key || ''}
+                                                          onChange={e => setHotel({ 
+                                                              ...hotel, 
+                                                              settings: { 
+                                                                  ...hotel.settings, 
+                                                                  license_key: e.target.value.toUpperCase() 
+                                                              } 
+                                                          })}
+                                                      />
+                                                    </div>
+                                                    <button 
+                                                      type="button"
+                                                      className="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-bold hover:bg-slate-800 transition-colors"
+                                                      onClick={async () => {
+                                                        const key = hotel.settings?.license_key;
+                                                        if (!key) return;
+                                                        // Activation logic will be handled on Save, but we could add a verify button here
+                                                        alert('License key will be verified when you click Save Changes.');
+                                                      }}
+                                                    >
+                                                      Verify
+                                                    </button>
+                                                  </div>
+                                                  <p className="mt-2 text-[10px] text-slate-400 font-medium">
+                                                    Status: <span className={hotel.subscription_status === 'active_licensed' ? 'text-emerald-600' : 'text-amber-600'}>
+                                                      {hotel.subscription_status === 'active_licensed' ? 'Licensed' : 'Trial'}
+                                                    </span>
+                                                  </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <div className="bg-slate-50 p-6 rounded-xl border border-slate-100">
                                             <h3 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
                                                 <Wifi size={16} /> Wi-Fi Access

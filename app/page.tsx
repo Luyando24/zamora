@@ -36,6 +36,10 @@ export default function LandingPage() {
               Pricing
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-600 transition-all group-hover:w-full"></span>
             </Link>
+            <Link href="/contact" className="hover:text-white transition-colors relative group">
+              Contact
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-600 transition-all group-hover:w-full"></span>
+            </Link>
           </div>
 
           <div className="flex items-center gap-4">
@@ -100,6 +104,13 @@ export default function LandingPage() {
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Pricing
+                </Link>
+                <Link 
+                  href="/contact" 
+                  className="text-lg font-medium text-gray-300 hover:text-white"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Contact
                 </Link>
                 <div className="h-px bg-white/10 my-2"></div>
                 <Link 
@@ -416,7 +427,7 @@ export default function LandingPage() {
           <div className="flex gap-6">
             <Link href="/privacy-policy" className="text-gray-500 hover:text-white transition-colors">Privacy</Link>
             <a href="#" className="text-gray-500 hover:text-white transition-colors">Terms</a>
-            <a href="#" className="text-gray-500 hover:text-white transition-colors">Contact</a>
+            <Link href="/contact" className="text-gray-500 hover:text-white transition-colors">Contact</Link>
           </div>
         </div>
       </footer>
