@@ -10,7 +10,7 @@ export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#030712] text-white overflow-x-hidden selection:bg-pink-600 selection:text-white">
+    <div className="min-h-screen bg-[#030712] text-white overflow-x-hidden selection:bg-emerald-600 selection:text-white">
       
       {/* Navigation */}
       <nav className="fixed w-full z-50 bg-[#030712]/80 backdrop-blur-md border-b border-white/10">
@@ -22,15 +22,15 @@ export default function LandingPage() {
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-300">
             <Link href="#features" className="hover:text-white transition-colors relative group">
               Features
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-pink-600 transition-all group-hover:w-full"></span>
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-600 transition-all group-hover:w-full"></span>
             </Link>
             <Link href="#compliance" className="hover:text-white transition-colors relative group">
               Compliance
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-pink-600 transition-all group-hover:w-full"></span>
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-600 transition-all group-hover:w-full"></span>
             </Link>
             <Link href="#pricing" className="hover:text-white transition-colors relative group">
               Pricing
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-pink-600 transition-all group-hover:w-full"></span>
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-600 transition-all group-hover:w-full"></span>
             </Link>
           </div>
 
@@ -115,8 +115,8 @@ export default function LandingPage() {
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
         {/* Background Elements */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-pink-600/20 rounded-full blur-[100px] animate-pulse"></div>
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] animate-pulse delay-1000"></div>
+          <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-600/20 rounded-full blur-[100px] animate-pulse"></div>
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-600/20 rounded-full blur-[120px] animate-pulse delay-1000"></div>
         </div>
 
         <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -126,8 +126,8 @@ export default function LandingPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <span className="inline-block py-1 px-3 rounded-full bg-white/5 border border-white/10 text-pink-500 text-xs font-bold tracking-wider mb-6">
-                NEXT-GEN HOSPITALITY OS
+              <span className="inline-block py-1 px-3 rounded-full bg-white/5 border border-white/10 text-emerald-500 text-xs font-bold tracking-wider mb-6">
+                NEXT-GEN HOSPITALITY & POS OS
               </span>
             </motion.div>
             
@@ -137,7 +137,7 @@ export default function LandingPage() {
               transition={{ duration: 0.5, delay: 0.1 }}
               className="text-5xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-8 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/50"
             >
-              Manage your hotel like <br />
+              Manage your hotel & restaurant like <br />
               <span className="text-white">it&apos;s 2050.</span>
             </motion.h1>
 
@@ -147,7 +147,7 @@ export default function LandingPage() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-lg text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed"
             >
-              Zamora is the all-in-one Property Management System built for speed, compliance, and growth. ZRA-integrated, cloud-native, and beautifully designed.
+              Zamora is the all-in-one Property Management & POS System built for speed, compliance, and growth. ZRA-integrated, cloud-native, and beautifully designed for hotels and restaurants.
             </motion.p>
 
             <motion.div
@@ -159,7 +159,7 @@ export default function LandingPage() {
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Link
                   href="/dashboard"
-                  className="w-full sm:w-auto px-8 py-4 bg-pink-600 text-white rounded-full font-bold text-lg hover:bg-pink-500 transition-all flex items-center justify-center gap-2 group shadow-lg shadow-pink-600/25"
+                  className="w-full sm:w-auto px-8 py-4 bg-emerald-600 text-white rounded-full font-bold text-lg hover:bg-emerald-500 transition-all flex items-center justify-center gap-2 group shadow-lg shadow-emerald-600/25"
                 >
                   Start Free Trial
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -183,12 +183,12 @@ export default function LandingPage() {
             transition={{ duration: 0.8, delay: 0.5 }}
             className="mt-20 relative mx-auto max-w-5xl perspective-1000"
           >
-            <div className="absolute -inset-1 bg-gradient-to-r from-pink-600 to-purple-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
+            <div className="absolute -inset-1 bg-gradient-to-r from-emerald-600 to-blue-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-opacity duration-500"></div>
             <div className="relative bg-[#0f1623] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
               <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-[#030712]">
                 <div className="w-3 h-3 rounded-full bg-red-500/50"></div>
                 <div className="w-3 h-3 rounded-full bg-yellow-500/50"></div>
-                <div className="w-3 h-3 rounded-full bg-green-500/50"></div>
+                <div className="w-3 h-3 rounded-full bg-emerald-500/50"></div>
               </div>
               <Image 
                 src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop" 
@@ -217,23 +217,23 @@ export default function LandingPage() {
             <FeatureCard 
               icon={<BarChart3 className="w-8 h-8 text-blue-400" />}
               title="Real-time Analytics"
-              description="Track occupancy, RevPAR, and revenue in real-time with beautiful, actionable charts."
+              description="Track occupancy, restaurant sales, and revenue in real-time with beautiful, actionable charts."
             />
             <FeatureCard 
               id="compliance"
-              icon={<ShieldCheck className="w-8 h-8 text-pink-500" />}
+              icon={<ShieldCheck className="w-8 h-8 text-emerald-500" />}
               title="ZRA Compliance"
-              description="Automated Smart Invoice fiscalization. Never worry about tax compliance again."
+              description="Automated Smart Invoice fiscalization for both hotel bookings and restaurant orders."
             />
             <FeatureCard 
               icon={<Zap className="w-8 h-8 text-yellow-400" />}
-              title="Instant Booking"
-              description="Lightning fast booking engine for your front desk and public website."
+              title="Smart POS & Table"
+              description="Modern POS with table management, QR code ordering, and kitchen/bar display systems."
             />
             <FeatureCard 
-              icon={<Smartphone className="w-8 h-8 text-purple-400" />}
+              icon={<Smartphone className="w-8 h-8 text-blue-400" />}
               title="Mobile First"
-              description="Manage your property from anywhere. Fully responsive design for all devices."
+              description="Manage your property and take orders from anywhere with our dedicated waiter and owner apps."
             />
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
@@ -244,16 +244,16 @@ export default function LandingPage() {
               className="md:col-span-2 bg-gradient-to-br from-white/5 to-transparent p-8 rounded-3xl border border-white/10 hover:bg-white/5 transition-colors group"
             >
               <div className="mb-6 p-3 bg-white/5 rounded-2xl w-fit group-hover:scale-110 transition-transform duration-300">
-                <CheckCircle2 className="w-8 h-8 text-pink-500" />
+                <CheckCircle2 className="w-8 h-8 text-emerald-500" />
               </div>
-              <h3 className="text-2xl font-bold mb-4 group-hover:text-pink-500 transition-colors">Integrated Food & Beverage</h3>
+              <h3 className="text-2xl font-bold mb-4 group-hover:text-emerald-500 transition-colors">Unified Hospitality Ecosystem</h3>
               <p className="text-gray-400 mb-8 max-w-md group-hover:text-gray-300 transition-colors">
-                Seamlessly manage your restaurant and bar. Orders are automatically linked to guest folios for a unified billing experience.
+                Seamlessly bridge your front desk and dining room. Orders are automatically linked to guest folios for a unified billing experience, or processed as walk-ins.
               </p>
               <div className="grid grid-cols-3 gap-4 opacity-50 group-hover:opacity-100 transition-opacity duration-500">
-                <motion.div whileHover={{ y: -5 }} className="h-20 bg-white/5 rounded-xl border border-white/5"></motion.div>
-                <motion.div whileHover={{ y: -5 }} className="h-20 bg-white/5 rounded-xl border border-white/5"></motion.div>
-                <motion.div whileHover={{ y: -5 }} className="h-20 bg-white/5 rounded-xl border border-white/5"></motion.div>
+                <motion.div whileHover={{ y: -5 }} className="h-20 bg-emerald-600/10 rounded-xl border border-emerald-500/20 flex items-center justify-center text-[10px] font-mono">ROOMS</motion.div>
+                <motion.div whileHover={{ y: -5 }} className="h-20 bg-emerald-600/10 rounded-xl border border-emerald-500/20 flex items-center justify-center text-[10px] font-mono">POS</motion.div>
+                <motion.div whileHover={{ y: -5 }} className="h-20 bg-emerald-600/10 rounded-xl border border-emerald-500/20 flex items-center justify-center text-[10px] font-mono">TABLES</motion.div>
               </div>
             </motion.div>
           </div>
@@ -262,11 +262,11 @@ export default function LandingPage() {
 
       {/* CTA Section */}
       <section id="pricing" className="py-32 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#030712] to-pink-600/20"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#030712] to-emerald-600/20"></div>
         <div className="max-w-4xl mx-auto px-6 relative z-10 text-center">
           <h2 className="text-4xl lg:text-6xl font-bold mb-8">Ready to modernize?</h2>
           <p className="text-xl text-gray-300 mb-12">
-            Join the forward-thinking hotels using Zamora to streamline operations and delight guests.
+            Join the forward-thinking hotels and restaurants using Zamora to streamline operations and delight guests.
           </p>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Link
