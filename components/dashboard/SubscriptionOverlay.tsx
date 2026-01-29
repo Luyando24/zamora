@@ -2,19 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Key, Send, AlertCircle, CheckCircle2, ChevronLeft, Check, Calendar } from 'lucide-react';
+import { Key, Send, AlertCircle, CheckCircle2, ChevronLeft, Check, Calendar, CreditCard } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import { useProperty } from '@/app/dashboard/context/PropertyContext';
 import { addDays, format, differenceInDays, startOfDay } from 'date-fns';
 
-const REQUEST_DURATIONS = [
-  { label: '1 Month', days: 30 },
-  { label: '3 Months', days: 90 },
-  { label: '6 Months', days: 180 },
-  { label: '1 Year', days: 365 },
-  { label: '2 Years', days: 730 },
-  { label: 'Lifetime', days: 36500 },
-];
+interface LicensePlan {
+  id: string;
+  name: string;
+  duration_days: number;
+  price: number;
+  currency: string;
+}
 
 export default function SubscriptionOverlay() {
   const { isTrialExpired, daysRemaining, selectedProperty, refreshProperties } = useProperty();
@@ -25,14 +24,16 @@ export default function SubscriptionOverlay() {
   const [view, setView] = useState<'main' | 'request'>('main');
   
   // Request Form State
+  const [plans, setPlans] = useState<LicensePlan[]>([]);
   const [selectedDuration, setSelectedDuration] = useState<number | 'custom'>(365);
   const [customEndDate, setCustomEndDate] = useState<string>(format(addDays(new Date(), 30), 'yyyy-MM-dd'));
+  const [feedback, setFeedback] = useState('');
   const [userProfile, setUserProfile] = useState<{ email: string; full_name: string } | null>(null);
 
   const supabase = createClient();
 
   useEffect(() => {
-    async function getUser() {
+    async function fetchData() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data: profile } = await supabase
@@ -42,9 +43,49 @@ export default function SubscriptionOverlay() {
           .single();
         setUserProfile(profile);
       }
+
+      const { data: plansData } = await supabase
+        .from('license_plans')
+        .select('*')
+        .eq('is_active', true)
+        .order('duration_days', { ascending: true });
+      
+      if (plansData) {
+        setPlans(plansData);
+        // Set initial selected duration to the 1 year plan if available
+        const yearPlan = plansData.find(p => p.duration_days === 365);
+        if (yearPlan) setSelectedDuration(365);
+      }
     }
-    getUser();
+    fetchData();
   }, [supabase]);
+
+  const getSelectedPlanPrice = () => {
+    if (selectedDuration === 'custom') {
+      const end = startOfDay(new Date(customEndDate));
+      const start = startOfDay(new Date());
+      const days = Math.max(1, differenceInDays(end, start));
+      
+      if (plans.length === 0) return 0;
+      
+      // Find the closest plan to determine a daily rate
+      const basePlan = [...plans].reverse().find(p => p.duration_days <= days) || plans[0];
+      const dailyRate = basePlan.price / basePlan.duration_days;
+      return dailyRate * days;
+    }
+    
+    const plan = plans.find(p => p.duration_days === selectedDuration);
+    return plan ? plan.price : 0;
+  };
+
+  const getCurrentDays = () => {
+    if (selectedDuration === 'custom') {
+      const end = startOfDay(new Date(customEndDate));
+      const start = startOfDay(new Date());
+      return Math.max(1, differenceInDays(end, start));
+    }
+    return typeof selectedDuration === 'number' ? selectedDuration : 30;
+  };
 
   if (!isTrialExpired && daysRemaining > 3) return null;
 
@@ -110,15 +151,13 @@ export default function SubscriptionOverlay() {
   };
 
   const handleWhatsAppRequest = () => {
-    let finalDays = typeof selectedDuration === 'number' ? selectedDuration : 30;
-    if (selectedDuration === 'custom') {
-      const end = startOfDay(new Date(customEndDate));
-      const start = startOfDay(new Date());
-      finalDays = Math.max(1, differenceInDays(end, start));
-    }
+    const finalDays = getCurrentDays();
+    const finalPrice = getSelectedPlanPrice();
+    const currency = plans[0]?.currency || 'USD';
+    const selectedPlan = typeof selectedDuration === 'number' ? plans.find(p => p.duration_days === selectedDuration) : null;
 
-    const durationText = finalDays >= 36500 ? 'Lifetime' : `${finalDays} Days`;
-    const message = `Hello Zamora Admin,\n\nI would like to request a new license key.\n\n*Property Details:*\n- Name: ${selectedProperty?.name}\n- ID: ${selectedProperty?.id}\n\n*User Details:*\n- Name: ${userProfile?.full_name || 'N/A'}\n- Email: ${userProfile?.email || 'N/A'}\n\n*Requested Validity:* ${durationText}\n${selectedDuration === 'custom' ? `*Target Expiration:* ${customEndDate}` : ''}\n\nPlease let me know the next steps. Thank you!`;
+    const durationText = selectedPlan ? selectedPlan.name : (finalDays >= 36500 ? 'Lifetime' : `${finalDays} Days`);
+    const message = `Hello Zamora Admin,\n\nI would like to request a new license key.\n\n*Property Details:*\n- Name: ${selectedProperty?.name}\n- ID: ${selectedProperty?.id}\n\n*User Details:*\n- Name: ${userProfile?.full_name || 'N/A'}\n- Email: ${userProfile?.email || 'N/A'}\n\n*Requested Validity:* ${durationText}\n*Estimated Cost:* ${currency} ${finalPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n${selectedDuration === 'custom' ? `*Target Expiration:* ${customEndDate}` : ''}${feedback ? `\n\n*User Feedback:* ${feedback}` : ''}\n\nPlease let me know the next steps. Thank you!`;
 
     const whatsappUrl = `https://wa.me/8614768628270?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
@@ -249,18 +288,23 @@ export default function SubscriptionOverlay() {
                     Select Validity
                   </label>
                   <div className="grid grid-cols-2 gap-2 mb-4">
-                    {REQUEST_DURATIONS.map((opt) => (
+                    {plans.map((plan) => (
                       <button
-                        key={opt.days}
-                        onClick={() => setSelectedDuration(opt.days)}
-                        className={`px-4 py-4 rounded-2xl text-sm font-black transition-all flex items-center justify-between ${
-                          selectedDuration === opt.days 
+                        key={plan.id}
+                        onClick={() => setSelectedDuration(plan.duration_days)}
+                        className={`px-4 py-4 rounded-2xl text-sm font-black transition-all flex flex-col items-start gap-1 ${
+                          selectedDuration === plan.duration_days 
                             ? 'bg-blue-900 text-white shadow-lg shadow-blue-900/20' 
                             : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-100'
                         }`}
                       >
-                        {opt.label}
-                        {selectedDuration === opt.days && <Check size={16} />}
+                        <div className="flex items-center justify-between w-full">
+                          <span>{plan.name}</span>
+                          {selectedDuration === plan.duration_days && <Check size={16} />}
+                        </div>
+                        <span className={`text-[10px] uppercase tracking-wider ${selectedDuration === plan.duration_days ? 'text-blue-200' : 'text-slate-400'}`}>
+                          {plan.currency} {plan.price.toLocaleString()}
+                        </span>
                       </button>
                     ))}
                     <button
@@ -278,6 +322,42 @@ export default function SubscriptionOverlay() {
                       {selectedDuration === 'custom' && <Check size={16} />}
                     </button>
                   </div>
+
+                  <AnimatePresence>
+                    {(selectedDuration === 'custom' || plans.length > 0) && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="p-5 bg-slate-900 rounded-3xl border border-slate-800 mb-6 relative overflow-hidden group"
+                      >
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
+                          <CreditCard size={48} className="text-white" />
+                        </div>
+                        
+                        <div className="relative z-10">
+                          <div className="flex items-center justify-between mb-4">
+                            <span className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Pricing Summary</span>
+                            <div className="px-2 py-1 bg-blue-500/20 rounded-lg">
+                              <span className="text-[10px] font-black text-blue-400 uppercase tracking-wider">Estimated</span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-end justify-between">
+                            <div>
+                              <div className="flex items-baseline gap-2">
+                                <span className="text-3xl font-black text-white">
+                                  {plans[0]?.currency || 'USD'} {getSelectedPlanPrice().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </span>
+                              </div>
+                              <p className="text-xs font-bold text-slate-500 mt-1">
+                                For {getCurrentDays()} {getCurrentDays() === 1 ? 'day' : 'days'} of full access
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   {selectedDuration === 'custom' && (
                     <motion.div
@@ -297,6 +377,19 @@ export default function SubscriptionOverlay() {
                       />
                     </motion.div>
                   )}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-widest block ml-1">
+                    Feedback (Optional)
+                  </label>
+                  <textarea
+                    value={feedback}
+                    onChange={(e) => setFeedback(e.target.value)}
+                    placeholder="Tell us about your experience or special requirements..."
+                    rows={3}
+                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all resize-none placeholder:text-slate-300"
+                  />
                 </div>
 
                 <button 

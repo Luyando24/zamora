@@ -27,17 +27,19 @@ interface License {
   };
 }
 
-const DURATION_OPTIONS = [
-  { label: '1 Month', days: 30 },
-  { label: '3 Months', days: 90 },
-  { label: '6 Months', days: 180 },
-  { label: '1 Year', days: 365 },
-  { label: '2 Years', days: 730 },
-  { label: 'Lifetime', days: 36500 },
-];
+interface LicensePlan {
+  id: string;
+  name: string;
+  duration_days: number;
+  price: number;
+  currency: string;
+  is_active: boolean;
+}
 
 export default function SubscriptionManagementPage() {
   const [licenses, setLicenses] = useState<License[]>([]);
+  const [plans, setPlans] = useState<LicensePlan[]>([]);
+  const [activeTab, setActiveTab] = useState<'licenses' | 'plans'>('licenses');
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -45,11 +47,13 @@ export default function SubscriptionManagementPage() {
   const [selectedDuration, setSelectedDuration] = useState<number | 'custom'>(365);
   const [customEndDate, setCustomEndDate] = useState<string>(format(addDays(new Date(), 30), 'yyyy-MM-dd'));
   const [showGenerateModal, setShowGenerateModal] = useState(false);
+  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [editingPlan, setEditingPlan] = useState<LicensePlan | null>(null);
   
   const supabase = createClient();
   const router = useRouter();
 
-  const fetchLicenses = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -66,7 +70,8 @@ export default function SubscriptionManagementPage() {
         }
       }
 
-      const { data, error } = await supabase
+      // Fetch Licenses
+      const { data: licensesData, error: licensesError } = await supabase
         .from('licenses')
         .select(`
           *,
@@ -76,28 +81,44 @@ export default function SubscriptionManagementPage() {
         `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setLicenses(data || []);
+      if (licensesError) throw licensesError;
+      setLicenses(licensesData || []);
+
+      // Fetch Plans
+      const { data: plansData, error: plansError } = await supabase
+        .from('license_plans')
+        .select('*')
+        .order('duration_days', { ascending: true });
+
+      if (plansError) throw plansError;
+      setPlans(plansData || []);
     } catch (err) {
-      console.error('Error fetching licenses:', err);
+      console.error('Error fetching data:', err);
     } finally {
       setIsLoading(false);
     }
   }, [supabase, router]);
 
   useEffect(() => {
-    fetchLicenses();
-  }, [fetchLicenses]);
+    fetchData();
+  }, [fetchData]);
 
   const generateLicense = async () => {
     setIsGenerating(true);
     try {
       let finalDurationDays = typeof selectedDuration === 'number' ? selectedDuration : 30;
+      let planName = 'Pro Plan';
       
       if (selectedDuration === 'custom') {
         const end = startOfDay(new Date(customEndDate));
         const start = startOfDay(new Date());
         finalDurationDays = Math.max(1, differenceInDays(end, start));
+        planName = `Custom (${finalDurationDays} Days)`;
+      } else {
+        const selectedPlan = plans.find(p => p.duration_days === selectedDuration);
+        if (selectedPlan) {
+          planName = selectedPlan.name;
+        }
       }
 
       const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; 
@@ -110,7 +131,7 @@ export default function SubscriptionManagementPage() {
         .from('licenses')
         .insert({
           key,
-          plan: 'pro',
+          plan: planName,
           status: 'unused',
           duration_days: finalDurationDays,
           created_by: user?.id
@@ -118,12 +139,60 @@ export default function SubscriptionManagementPage() {
 
       if (error) throw error;
       setShowGenerateModal(false);
-      await fetchLicenses();
+      await fetchData();
     } catch (err) {
       console.error('Error generating license:', err);
       alert('Failed to generate license key.');
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const savePlan = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const planData = {
+      name: formData.get('name') as string,
+      duration_days: parseInt(formData.get('duration_days') as string),
+      price: parseFloat(formData.get('price') as string),
+      currency: formData.get('currency') as string,
+      is_active: true
+    };
+
+    try {
+      if (editingPlan) {
+        const { error } = await supabase
+          .from('license_plans')
+          .update(planData)
+          .eq('id', editingPlan.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('license_plans')
+          .insert(planData);
+        if (error) throw error;
+      }
+      setShowPlanModal(false);
+      setEditingPlan(null);
+      await fetchData();
+    } catch (err) {
+      console.error('Error saving plan:', err);
+      alert('Failed to save plan.');
+    }
+  };
+
+  const deletePlan = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this plan?')) return;
+    try {
+      const { error } = await supabase
+        .from('license_plans')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+      await fetchData();
+    } catch (err) {
+      console.error('Error deleting plan:', err);
+      alert('Failed to delete plan.');
     }
   };
 
@@ -147,19 +216,49 @@ export default function SubscriptionManagementPage() {
             Subscription Management
           </h1>
           <p className="text-slate-500 font-medium">
-            Generate and manage license keys for properties.
+            Generate licenses and manage pricing plans.
           </p>
         </div>
+        <div className="flex gap-3">
+          <button
+            onClick={() => {
+              setEditingPlan(null);
+              setShowPlanModal(true);
+            }}
+            className="bg-white border-2 border-slate-100 text-slate-700 font-bold py-3 px-6 rounded-2xl hover:bg-slate-50 transition-all flex items-center gap-2"
+          >
+            <Plus className="w-5 h-5" />
+            New Plan
+          </button>
+          <button
+            onClick={() => setShowGenerateModal(true)}
+            className="bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 px-6 rounded-2xl shadow-lg shadow-blue-900/20 transition-all active:scale-[0.98] flex items-center gap-2"
+          >
+            <Key className="w-5 h-5" />
+            Generate License
+          </button>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-1 p-1 bg-slate-100 rounded-2xl w-fit">
         <button
-          onClick={() => setShowGenerateModal(true)}
-          className="bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 px-6 rounded-2xl shadow-lg shadow-blue-900/20 transition-all active:scale-[0.98] flex items-center gap-2"
+          onClick={() => setActiveTab('licenses')}
+          className={`px-6 py-2.5 rounded-xl font-bold transition-all ${activeTab === 'licenses' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
         >
-          <Plus className="w-5 h-5" />
-          Generate New License
+          Licenses
+        </button>
+        <button
+          onClick={() => setActiveTab('plans')}
+          className={`px-6 py-2.5 rounded-xl font-bold transition-all ${activeTab === 'plans' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+        >
+          Pricing Plans
         </button>
       </div>
 
-      {/* Stats Overview */}
+      {activeTab === 'licenses' ? (
+        <>
+          {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
           <div className="flex items-center gap-4 mb-4">
@@ -353,6 +452,60 @@ export default function SubscriptionManagementPage() {
           </table>
         </div>
       </div>
+        </>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {plans.map((plan) => (
+            <div key={plan.id} className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm hover:shadow-md transition-all group">
+              <div className="flex justify-between items-start mb-6">
+                <div className="p-4 bg-blue-50 rounded-2xl text-blue-600 group-hover:scale-110 transition-transform">
+                  <CreditCard size={24} />
+                </div>
+                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => {
+                      setEditingPlan(plan);
+                      setShowPlanModal(true);
+                    }}
+                    className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                  >
+                    <RefreshCw size={18} />
+                  </button>
+                  <button
+                    onClick={() => deletePlan(plan.id)}
+                    className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                  >
+                    <AlertCircle size={18} />
+                  </button>
+                </div>
+              </div>
+              
+              <h3 className="text-xl font-black text-slate-900 mb-1">{plan.name}</h3>
+              <p className="text-slate-500 font-medium mb-6">
+                {plan.duration_days >= 36500 ? 'Lifetime access' : `${plan.duration_days} days validity`}
+              </p>
+              
+              <div className="flex items-baseline gap-1">
+                <span className="text-sm font-black text-slate-400 uppercase tracking-wider">{plan.currency}</span>
+                <span className="text-4xl font-black text-slate-900">{plan.price.toLocaleString()}</span>
+              </div>
+            </div>
+          ))}
+          
+          <button
+            onClick={() => {
+              setEditingPlan(null);
+              setShowPlanModal(true);
+            }}
+            className="border-2 border-dashed border-slate-200 rounded-[32px] p-8 flex flex-col items-center justify-center gap-4 text-slate-400 hover:border-blue-200 hover:bg-blue-50/50 hover:text-blue-600 transition-all group"
+          >
+            <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+              <Plus size={24} />
+            </div>
+            <span className="font-bold">Add New Pricing Plan</span>
+          </button>
+        </div>
+      )}
 
       {/* Generate License Modal */}
       <AnimatePresence>
@@ -388,18 +541,23 @@ export default function SubscriptionManagementPage() {
                       License Duration
                     </label>
                     <div className="grid grid-cols-2 gap-2 mb-4">
-                      {DURATION_OPTIONS.map((opt) => (
+                      {plans.map((plan) => (
                         <button
-                          key={opt.days}
-                          onClick={() => setSelectedDuration(opt.days)}
-                          className={`px-4 py-3 rounded-2xl text-sm font-bold transition-all flex items-center justify-between ${
-                            selectedDuration === opt.days 
+                          key={plan.id}
+                          onClick={() => setSelectedDuration(plan.duration_days)}
+                          className={`px-4 py-3 rounded-2xl text-sm font-bold transition-all flex flex-col items-start gap-0.5 ${
+                            selectedDuration === plan.duration_days 
                               ? 'bg-blue-900 text-white shadow-lg shadow-blue-900/20' 
                               : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                           }`}
                         >
-                          {opt.label}
-                          {selectedDuration === opt.days && <Check size={16} />}
+                          <div className="flex items-center justify-between w-full">
+                            <span>{plan.name}</span>
+                            {selectedDuration === plan.duration_days && <Check size={16} />}
+                          </div>
+                          <span className={`text-[10px] font-bold uppercase tracking-wider ${selectedDuration === plan.duration_days ? 'text-blue-200' : 'text-slate-400'}`}>
+                            {plan.currency} {plan.price.toLocaleString()}
+                          </span>
                         </button>
                       ))}
                       <button
@@ -474,6 +632,106 @@ export default function SubscriptionManagementPage() {
                   </div>
                 </div>
               </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Pricing Plan Modal */}
+      <AnimatePresence>
+        {showPlanModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowPlanModal(false)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative bg-white rounded-[32px] shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden"
+            >
+              <form onSubmit={savePlan} className="p-8">
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
+                    <CreditCard size={24} />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-black text-slate-900">{editingPlan ? 'Edit Pricing Plan' : 'New Pricing Plan'}</h2>
+                    <p className="text-sm font-medium text-slate-500">Define license cost and duration</p>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Plan Name</label>
+                    <input
+                      name="name"
+                      required
+                      defaultValue={editingPlan?.name}
+                      placeholder="e.g. 1 Year Pro"
+                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 font-bold text-slate-700 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Duration (Days)</label>
+                      <input
+                        name="duration_days"
+                        type="number"
+                        required
+                        defaultValue={editingPlan?.duration_days}
+                        placeholder="365"
+                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 font-bold text-slate-700 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Price</label>
+                      <input
+                        name="price"
+                        type="number"
+                        step="0.01"
+                        required
+                        defaultValue={editingPlan?.price}
+                        placeholder="450.00"
+                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 font-bold text-slate-700 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Currency</label>
+                    <select
+                      name="currency"
+                      defaultValue={editingPlan?.currency || 'USD'}
+                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 font-bold text-slate-700 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all appearance-none"
+                    >
+                      <option value="USD">USD ($)</option>
+                      <option value="ZMW">ZMW (K)</option>
+                    </select>
+                  </div>
+
+                  <div className="flex gap-3 pt-4">
+                    <button
+                      type="button"
+                      onClick={() => setShowPlanModal(false)}
+                      className="flex-1 bg-slate-50 text-slate-600 font-bold py-4 rounded-2xl hover:bg-slate-100 transition-all"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex-1 bg-blue-900 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-900/20 hover:bg-blue-800 transition-all"
+                    >
+                      {editingPlan ? 'Update Plan' : 'Create Plan'}
+                    </button>
+                  </div>
+                </div>
+              </form>
             </motion.div>
           </div>
         )}
