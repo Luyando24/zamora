@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Key, Send, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
-import { useProperty } from '../dashboard/context/PropertyContext';
+import { useProperty } from '@/app/dashboard/context/PropertyContext';
 
 export default function SubscriptionOverlay() {
   const { isTrialExpired, daysRemaining, selectedProperty, refreshProperties } = useProperty();
