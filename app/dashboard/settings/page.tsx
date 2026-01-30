@@ -41,6 +41,7 @@ const CUISINE_OPTIONS = [
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [activeTab, setActiveTab] = useState('general');
   const [userRole, setUserRole] = useState<string | null>(null);
   const supabase = createClient();
@@ -198,6 +199,42 @@ export default function SettingsPage() {
       alert('Failed to delete license: ' + err.message);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleVerifyLicense = async () => {
+    const key = hotel.settings?.license_key;
+    if (!key) return;
+
+    setVerifying(true);
+    try {
+        // Check if the license is already active for this property
+        const originalProperty = properties.find(p => p.id === hotel.id);
+        const oldLicenseKey = originalProperty?.settings?.license_key;
+
+        if (key === oldLicenseKey && hotel.subscription_status === 'active_licensed') {
+            alert('This license is already active for your property.');
+            return;
+        }
+
+        const { data: license, error } = await supabase
+            .from('licenses')
+            .select('*')
+            .eq('key', key)
+            .maybeSingle();
+
+        if (error || !license) {
+            alert('Invalid license key. Please check and try again.');
+        } else if (license.status !== 'unused') {
+            alert(`This license key is already ${license.status}.`);
+        } else {
+            alert(`Valid License! This is a ${license.plan} license for ${license.duration_days} days. Click "Save Changes" to activate it.`);
+        }
+    } catch (err) {
+        console.error('Error verifying license:', err);
+        alert('Failed to verify license key.');
+    } finally {
+        setVerifying(false);
     }
   };
 
@@ -602,15 +639,13 @@ export default function SettingsPage() {
                                                     </div>
                                                     <button 
                                                       type="button"
-                                                      className="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-bold hover:bg-slate-800 transition-colors"
-                                                      onClick={async () => {
-                                                        const key = hotel.settings?.license_key;
-                                                        if (!key) return;
-                                                        // Activation logic will be handled on Save, but we could add a verify button here
-                                                        alert('License key will be verified when you click Save Changes.');
-                                                      }}
+                                                      disabled={verifying}
+                                                      className="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-bold hover:bg-slate-800 transition-colors disabled:opacity-50 min-w-[80px] flex items-center justify-center"
+                                                      onClick={handleVerifyLicense}
                                                     >
-                                                      Verify
+                                                      {verifying ? (
+                                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                                      ) : 'Verify'}
                                                     </button>
                                                     {userRole === 'super_admin' && hotel.subscription_status === 'active_licensed' && (
                                                       <button 
