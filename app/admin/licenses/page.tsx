@@ -664,7 +664,7 @@ export default function SubscriptionManagementPage() {
         </>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {plans.map((plan) => (
+          {Array.from(new Map(plans.map(p => [p.duration_days, p])).values()).map((plan) => (
             <div key={plan.id} className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm hover:shadow-md transition-all group">
               <div className="flex justify-between items-start mb-6">
                 <div className="p-4 bg-blue-50 rounded-2xl text-blue-600 group-hover:scale-110 transition-transform">
@@ -750,7 +750,7 @@ export default function SubscriptionManagementPage() {
                       License Duration
                     </label>
                     <div className="grid grid-cols-2 gap-2 mb-4">
-                      {plans.map((plan) => (
+                      {Array.from(new Map(plans.map(p => [p.duration_days, p])).values()).map((plan) => (
                         <button
                           key={plan.id}
                           onClick={() => setSelectedDuration(plan.duration_days)}
@@ -883,7 +883,7 @@ export default function SubscriptionManagementPage() {
                       New Duration / Plan
                     </label>
                     <div className="grid grid-cols-2 gap-2 mb-4">
-                      {plans.map((plan) => (
+                      {Array.from(new Map(plans.map(p => [p.duration_days, p])).values()).map((plan) => (
                         <button
                           key={plan.id}
                           onClick={() => setSelectedDuration(plan.duration_days)}
