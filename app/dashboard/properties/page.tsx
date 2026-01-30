@@ -82,7 +82,7 @@ export default function PropertiesPage() {
           <h1 className="text-2xl font-bold text-slate-900">My Properties</h1>
           <p className="text-slate-500">Manage your property listings.</p>
         </div>
-        <Link href="/dashboard/setup" className="px-4 py-2 bg-zambia-green text-white rounded-lg hover:bg-green-700 font-medium shadow-sm flex items-center gap-2">
+        <Link href="/dashboard/setup" className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 font-medium shadow-sm flex items-center gap-2 transition-all">
           <Plus size={18} />
           Add Property
         </Link>
@@ -109,13 +109,13 @@ export default function PropertiesPage() {
                 <tr key={property.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-lg">
                         <Building2 size={20} />
                       </div>
                       <div>
                         <p className="font-bold text-slate-900">{property.name}</p>
                         {property.slug ? (
-                          <p className="text-xs text-blue-600 font-medium hover:underline">
+                          <p className="text-xs text-primary font-medium hover:underline">
                              {property.slug}.zamoraapp.com
                           </p>
                         ) : (
@@ -132,10 +132,10 @@ export default function PropertiesPage() {
                   </td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      property.subscription_status === 'active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                      property.subscription_status === 'active' ? 'bg-primary/10 text-primary' : 'bg-yellow-100 text-yellow-800'
                     }`}>
                       <span className={`w-1.5 h-1.5 rounded-full ${
-                        property.subscription_status === 'active' ? 'bg-green-600' : 'bg-yellow-600'
+                        property.subscription_status === 'active' ? 'bg-primary' : 'bg-yellow-600'
                       }`}></span>
                       {property.subscription_status || 'Trial'}
                     </span>
@@ -144,7 +144,7 @@ export default function PropertiesPage() {
                     <div className="flex items-center justify-end gap-2">
                       <button 
                         onClick={() => handleSwitchProperty(property.id)}
-                        className="p-2 text-slate-400 hover:text-zambia-green hover:bg-green-50 rounded-lg transition-colors"
+                        className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
                         title="Switch Dashboard to this Property"
                       >
                         <LayoutDashboard size={18} />
@@ -157,21 +157,21 @@ export default function PropertiesPage() {
                           : `/book/${property.id}`}
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" 
+                        className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors" 
                         title="View Public Page"
                       >
                         <ExternalLink size={18} />
                       </Link>
                       <Link 
                         href={`/dashboard/properties/${property.id}`}
-                        className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                        className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
                         title="View Details"
                       >
                         <Eye size={18} />
                       </Link>
                       <Link 
                         href={`/dashboard/properties/${property.id}/edit`}
-                        className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                        className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
                         title="Edit Property"
                       >
                         <Edit size={18} />

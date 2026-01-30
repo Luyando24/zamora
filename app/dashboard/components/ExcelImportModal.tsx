@@ -152,7 +152,7 @@ export default function ExcelImportModal({ isOpen, onClose, type, propertyId, on
             <p className="text-xs text-slate-500 mb-3">Use this template to format your menu items correctly.</p>
             <button 
               onClick={downloadTemplate}
-              className="flex items-center gap-2 text-sm font-medium text-pink-600 hover:text-pink-700 transition-colors"
+              className="flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
             >
               <Download size={16} />
               Download Excel Template
@@ -165,7 +165,7 @@ export default function ExcelImportModal({ isOpen, onClose, type, propertyId, on
             <div 
               onClick={() => fileInputRef.current?.click()}
               className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer transition-all ${
-                file ? 'border-green-500 bg-green-50' : 'border-slate-200 hover:border-pink-400 hover:bg-slate-50'
+                file ? 'border-green-500 bg-green-50' : 'border-slate-200 hover:border-primary/40 hover:bg-slate-50'
               }`}
             >
               <input 
@@ -214,7 +214,7 @@ export default function ExcelImportModal({ isOpen, onClose, type, propertyId, on
           <button 
             onClick={processFile}
             disabled={!file || uploading}
-            className="flex items-center gap-2 px-6 py-2 bg-pink-600 text-white text-sm font-bold rounded-xl hover:bg-pink-700 transition-all shadow-lg shadow-pink-200 disabled:opacity-50 disabled:shadow-none"
+            className="flex items-center gap-2 px-6 py-2 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 disabled:opacity-50 disabled:shadow-none"
           >
             {uploading ? (
               <>

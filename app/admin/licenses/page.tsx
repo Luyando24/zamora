@@ -400,7 +400,7 @@ export default function SubscriptionManagementPage() {
           </button>
           <button
             onClick={() => setShowGenerateModal(true)}
-            className="bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 px-6 rounded-2xl shadow-lg shadow-blue-900/20 transition-all active:scale-[0.98] flex items-center gap-2"
+            className="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-2xl shadow-lg shadow-primary/20 transition-all active:scale-[0.98] flex items-center gap-2"
           >
             <Key className="w-5 h-5" />
             Generate License
@@ -430,7 +430,7 @@ export default function SubscriptionManagementPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
           <div className="flex items-center gap-4 mb-4">
-            <div className="p-3 bg-blue-50 rounded-2xl text-blue-600">
+            <div className="p-3 bg-primary/10 rounded-2xl text-primary">
               <CreditCard size={24} />
             </div>
             <div>
@@ -476,7 +476,7 @@ export default function SubscriptionManagementPage() {
             placeholder="Search by license key or property name..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-700"
+            className="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium text-slate-700"
           />
         </div>
         <div className="flex gap-2">
@@ -494,7 +494,7 @@ export default function SubscriptionManagementPage() {
           </button>
           <button
             onClick={() => setStatusFilter('used')}
-            className={`px-6 py-3 rounded-2xl font-bold transition-all ${statusFilter === 'used' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'}`}
+            className={`px-6 py-3 rounded-2xl font-bold transition-all ${statusFilter === 'used' ? 'bg-primary text-white shadow-lg' : 'bg-slate-50 text-slate-500 hover:bg-slate-100'}`}
           >
             Used
           </button>
@@ -557,7 +557,7 @@ export default function SubscriptionManagementPage() {
                           license.status === 'unused' 
                             ? 'bg-amber-100 text-amber-700' 
                             : license.status === 'used'
-                            ? 'bg-emerald-100 text-emerald-700'
+                            ? 'bg-primary/10 text-primary'
                             : 'bg-red-100 text-red-700'
                         }`}>
                           {license.status === 'unused' && <AlertCircle size={12} />}
@@ -579,7 +579,7 @@ export default function SubscriptionManagementPage() {
                       <td className="px-6 py-4">
                         {license.property ? (
                           <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600">
+                            <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
                               <Building2 size={14} />
                             </div>
                             <div className="min-w-0">
@@ -597,7 +597,7 @@ export default function SubscriptionManagementPage() {
                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => copyToClipboard(license.key)}
-                            className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                            className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
                             title="Copy Key"
                           >
                             <Copy size={18} />
@@ -609,7 +609,7 @@ export default function SubscriptionManagementPage() {
                               setSelectedDuration(license.duration_days);
                               setShowUpgradeModal(true);
                             }}
-                            className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                            className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
                             title="Upgrade/Edit License"
                           >
                             <ArrowUpCircle size={18} />
@@ -628,7 +628,7 @@ export default function SubscriptionManagementPage() {
                           {userRole === 'super_admin' && license.used_by_property_id && (
                             <button
                               onClick={() => unassignLicense(license)}
-                              className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                              className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
                               title="Release/Unassign License from Property"
                             >
                               <Link2Off size={18} />
@@ -667,7 +667,7 @@ export default function SubscriptionManagementPage() {
           {Array.from(new Map(plans.map(p => [p.duration_days, p])).values()).map((plan) => (
             <div key={plan.id} className="bg-white p-8 rounded-[32px] border border-slate-200 shadow-sm hover:shadow-md transition-all group">
               <div className="flex justify-between items-start mb-6">
-                <div className="p-4 bg-blue-50 rounded-2xl text-blue-600 group-hover:scale-110 transition-transform">
+                <div className="p-4 bg-primary/10 rounded-2xl text-primary group-hover:scale-110 transition-transform">
                   <CreditCard size={24} />
                 </div>
                 <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -676,7 +676,7 @@ export default function SubscriptionManagementPage() {
                       setEditingPlan(plan);
                       setShowPlanModal(true);
                     }}
-                    className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                    className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all"
                   >
                     <RefreshCw size={18} />
                   </button>
@@ -706,9 +706,9 @@ export default function SubscriptionManagementPage() {
               setEditingPlan(null);
               setShowPlanModal(true);
             }}
-            className="border-2 border-dashed border-slate-200 rounded-[32px] p-8 flex flex-col items-center justify-center gap-4 text-slate-400 hover:border-blue-200 hover:bg-blue-50/50 hover:text-blue-600 transition-all group"
+            className="border-2 border-dashed border-slate-200 rounded-[32px] p-8 flex flex-col items-center justify-center gap-4 text-slate-400 hover:border-primary/20 hover:bg-primary/5 hover:text-primary transition-all group"
           >
-            <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+            <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
               <Plus size={24} />
             </div>
             <span className="font-bold">Add New Pricing Plan</span>
@@ -735,7 +735,7 @@ export default function SubscriptionManagementPage() {
             >
               <div className="p-8">
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
+                  <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
                     <Key size={24} />
                   </div>
                   <div>
@@ -756,7 +756,7 @@ export default function SubscriptionManagementPage() {
                           onClick={() => setSelectedDuration(plan.duration_days)}
                           className={`px-4 py-3 rounded-2xl text-sm font-bold transition-all flex flex-col items-start gap-0.5 ${
                             selectedDuration === plan.duration_days 
-                              ? 'bg-blue-900 text-white shadow-lg shadow-blue-900/20' 
+                              ? 'bg-primary text-white shadow-lg shadow-primary/20' 
                               : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                           }`}
                         >
@@ -764,7 +764,7 @@ export default function SubscriptionManagementPage() {
                             <span>{plan.name}</span>
                             {selectedDuration === plan.duration_days && <Check size={16} />}
                           </div>
-                          <span className={`text-[10px] font-bold uppercase tracking-wider ${selectedDuration === plan.duration_days ? 'text-blue-200' : 'text-slate-400'}`}>
+                          <span className={`text-[10px] font-bold uppercase tracking-wider ${selectedDuration === plan.duration_days ? 'text-primary-foreground/70' : 'text-slate-400'}`}>
                             {plan.currency} {plan.price.toLocaleString()}
                           </span>
                         </button>
@@ -773,7 +773,7 @@ export default function SubscriptionManagementPage() {
                         onClick={() => setSelectedDuration('custom')}
                         className={`px-4 py-3 rounded-2xl text-sm font-bold transition-all flex items-center justify-between col-span-2 ${
                           selectedDuration === 'custom' 
-                            ? 'bg-blue-900 text-white shadow-lg shadow-blue-900/20' 
+                            ? 'bg-primary text-white shadow-lg shadow-primary/20' 
                             : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                         }`}
                       >
@@ -789,9 +789,9 @@ export default function SubscriptionManagementPage() {
                       <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
-                        className="space-y-2 p-4 bg-blue-50 rounded-2xl border border-blue-100"
+                        className="space-y-2 p-4 bg-primary/5 rounded-2xl border border-primary/10"
                       >
-                        <label className="text-xs font-bold text-blue-900 uppercase tracking-wider">
+                        <label className="text-xs font-bold text-primary uppercase tracking-wider">
                           Select Expiration Date
                         </label>
                         <div className="relative">
@@ -800,10 +800,10 @@ export default function SubscriptionManagementPage() {
                             min={format(addDays(new Date(), 1), 'yyyy-MM-dd')}
                             value={customEndDate}
                             onChange={(e) => setCustomEndDate(e.target.value)}
-                            className="w-full bg-white border border-blue-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                            className="w-full bg-white border border-primary/20 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/20"
                           />
                         </div>
-                        <p className="text-[10px] text-blue-600 font-bold uppercase">
+                        <p className="text-[10px] text-primary font-bold uppercase">
                           Duration: {differenceInDays(startOfDay(new Date(customEndDate)), startOfDay(new Date()))} Days
                         </p>
                       </motion.div>
@@ -812,7 +812,7 @@ export default function SubscriptionManagementPage() {
 
                   <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
                     <div className="flex items-center gap-3 text-slate-600">
-                      <ShieldCheck size={18} className="text-blue-600" />
+                      <ShieldCheck size={18} className="text-primary" />
                       <span className="text-sm font-bold">Pro Plan Features Included</span>
                     </div>
                   </div>
@@ -827,7 +827,7 @@ export default function SubscriptionManagementPage() {
                     <button
                       onClick={generateLicense}
                       disabled={isGenerating}
-                      className="flex-[2] bg-blue-900 hover:bg-blue-800 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-blue-900/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
+                      className="flex-[2] bg-primary hover:bg-primary/90 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-primary/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                       {isGenerating ? (
                         <RefreshCw className="w-5 h-5 animate-spin" />
@@ -868,7 +868,7 @@ export default function SubscriptionManagementPage() {
             >
               <div className="p-8">
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
+                  <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
                     <ArrowUpCircle size={24} />
                   </div>
                   <div>
@@ -889,7 +889,7 @@ export default function SubscriptionManagementPage() {
                           onClick={() => setSelectedDuration(plan.duration_days)}
                           className={`px-4 py-3 rounded-2xl text-sm font-bold transition-all flex flex-col items-start gap-0.5 ${
                             selectedDuration === plan.duration_days 
-                              ? 'bg-blue-900 text-white shadow-lg shadow-blue-900/20' 
+                              ? 'bg-primary text-white shadow-lg shadow-primary/20' 
                               : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                           }`}
                         >
@@ -897,7 +897,7 @@ export default function SubscriptionManagementPage() {
                             <span>{plan.name}</span>
                             {selectedDuration === plan.duration_days && <Check size={16} />}
                           </div>
-                          <span className={`text-[10px] font-bold uppercase tracking-wider ${selectedDuration === plan.duration_days ? 'text-blue-200' : 'text-slate-400'}`}>
+                          <span className={`text-[10px] font-bold uppercase tracking-wider ${selectedDuration === plan.duration_days ? 'text-primary-foreground/70' : 'text-slate-400'}`}>
                             {plan.currency} {plan.price.toLocaleString()}
                           </span>
                         </button>
@@ -906,7 +906,7 @@ export default function SubscriptionManagementPage() {
                         onClick={() => setSelectedDuration('custom')}
                         className={`px-4 py-3 rounded-2xl text-sm font-bold transition-all flex items-center justify-between col-span-2 ${
                           selectedDuration === 'custom' 
-                            ? 'bg-blue-900 text-white shadow-lg shadow-blue-900/20' 
+                            ? 'bg-primary text-white shadow-lg shadow-primary/20' 
                             : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                         }`}
                       >
@@ -922,9 +922,9 @@ export default function SubscriptionManagementPage() {
                       <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
-                        className="space-y-2 p-4 bg-blue-50 rounded-2xl border border-blue-100"
+                        className="space-y-2 p-4 bg-primary/5 rounded-2xl border border-primary/10"
                       >
-                        <label className="text-xs font-bold text-blue-900 uppercase tracking-wider">
+                        <label className="text-xs font-bold text-primary uppercase tracking-wider">
                           Select Expiration Date
                         </label>
                         <div className="relative">
@@ -933,10 +933,10 @@ export default function SubscriptionManagementPage() {
                             min={format(addDays(new Date(), 1), 'yyyy-MM-dd')}
                             value={customEndDate}
                             onChange={(e) => setCustomEndDate(e.target.value)}
-                            className="w-full bg-white border border-blue-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                            className="w-full bg-white border border-primary/20 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/20"
                           />
                         </div>
-                        <p className="text-[10px] text-blue-600 font-bold uppercase">
+                        <p className="text-[10px] text-primary font-bold uppercase">
                           Duration: {differenceInDays(startOfDay(new Date(customEndDate)), startOfDay(new Date()))} Days
                         </p>
                       </motion.div>
@@ -967,7 +967,7 @@ export default function SubscriptionManagementPage() {
                     <button
                       onClick={handleUpgradeLicense}
                       disabled={isGenerating}
-                      className="flex-[2] bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-emerald-600/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
+                      className="flex-[2] bg-primary hover:bg-primary/90 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-primary/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
                     >
                       {isGenerating ? (
                         <RefreshCw className="w-5 h-5 animate-spin" />
@@ -1005,7 +1005,7 @@ export default function SubscriptionManagementPage() {
             >
               <form onSubmit={savePlan} className="p-8">
                 <div className="flex items-center gap-4 mb-8">
-                  <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
+                  <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
                     <CreditCard size={24} />
                   </div>
                   <div>
@@ -1022,7 +1022,7 @@ export default function SubscriptionManagementPage() {
                       required
                       defaultValue={editingPlan?.name}
                       placeholder="e.g. 1 Year Pro"
-                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 font-bold text-slate-700 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all"
+                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 font-bold text-slate-700 focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all"
                     />
                   </div>
 
@@ -1035,7 +1035,7 @@ export default function SubscriptionManagementPage() {
                         required
                         defaultValue={editingPlan?.duration_days}
                         placeholder="365"
-                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 font-bold text-slate-700 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all"
+                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 font-bold text-slate-700 focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all"
                       />
                     </div>
                     <div className="space-y-2">
@@ -1047,7 +1047,7 @@ export default function SubscriptionManagementPage() {
                         required
                         defaultValue={editingPlan?.price}
                         placeholder="450.00"
-                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 font-bold text-slate-700 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all"
+                        className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 font-bold text-slate-700 focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all"
                       />
                     </div>
                   </div>
@@ -1057,7 +1057,7 @@ export default function SubscriptionManagementPage() {
                     <select
                       name="currency"
                       defaultValue={editingPlan?.currency || 'USD'}
-                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 font-bold text-slate-700 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all appearance-none"
+                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 font-bold text-slate-700 focus:outline-none focus:ring-4 focus:ring-primary/10 transition-all appearance-none"
                     >
                       <option value="USD">USD ($)</option>
                       <option value="ZMW">ZMW (K)</option>
@@ -1074,7 +1074,7 @@ export default function SubscriptionManagementPage() {
                     </button>
                     <button
                       type="submit"
-                      className="flex-1 bg-blue-900 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-900/20 hover:bg-blue-800 transition-all"
+                      className="flex-1 bg-primary text-white font-bold py-4 rounded-2xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all"
                     >
                       {editingPlan ? 'Update Plan' : 'Create Plan'}
                     </button>

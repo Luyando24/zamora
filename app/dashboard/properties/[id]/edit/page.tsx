@@ -169,7 +169,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-zambia-green"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -180,7 +180,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
     <div className="max-w-4xl mx-auto pb-12">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <Link href={`/dashboard/properties/${id}`} className="inline-flex items-center text-slate-500 hover:text-blue-600 mb-2 transition-colors text-sm">
+          <Link href={`/dashboard/properties/${id}`} className="inline-flex items-center text-slate-500 hover:text-primary mb-2 transition-colors text-sm">
             <ArrowLeft size={16} className="mr-1" /> Back to Details
           </Link>
           <h1 className="text-2xl font-bold text-slate-900">Edit Property</h1>
@@ -196,7 +196,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
           <button
             onClick={handleSubmit}
             disabled={saving}
-            className="px-4 py-2 bg-zambia-green text-white rounded-lg hover:bg-green-700 font-medium shadow-sm flex items-center gap-2 disabled:opacity-50"
+            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 font-medium shadow-sm flex items-center gap-2 disabled:opacity-50"
           >
             {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
             Save Changes
@@ -209,7 +209,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
         {/* Basic Information */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
           <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-            <Building2 size={20} className="text-blue-600" />
+            <Building2 size={20} className="text-primary" />
             Basic Information
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -220,7 +220,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 bg-white"
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-slate-900 bg-white"
               />
             </div>
             
@@ -235,14 +235,14 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
                       key={type.id}
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, type: type.id }))}
-                      className={`flex flex-col items-center justify-center p-3 rounded-lg border text-center transition-all ${
-                        isSelected 
-                          ? 'border-zambia-green bg-green-50 text-zambia-green ring-1 ring-zambia-green' 
-                          : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-600'
+                      className={`flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all ${
+                        isSelected
+                          ? 'border-primary bg-primary/5 text-primary'
+                          : 'border-slate-100 hover:border-slate-200 hover:bg-slate-50 text-slate-600'
                       }`}
                     >
-                      <Icon size={24} className="mb-2" />
-                      <span className="text-xs font-medium">{type.label}</span>
+                      <Icon className={`h-6 w-6 ${isSelected ? 'text-primary' : 'text-slate-400'}`} />
+                      <span className="text-sm font-medium">{type.label}</span>
                     </button>
                   );
                 })}
@@ -259,7 +259,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
                     name="check_in_time"
                     value={formData.check_in_time}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 bg-white"
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-slate-900 bg-white"
                   />
                 </div>
                 <div>
@@ -269,7 +269,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
                     name="check_out_time"
                     value={formData.check_out_time}
                     onChange={handleChange}
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 bg-white"
+                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-slate-900 bg-white"
                   />
                 </div>
               </div>
@@ -280,7 +280,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
         {/* Media */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
           <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-            <Sun size={20} className="text-orange-500" />
+            <Sun size={20} className="text-primary" />
             Media
           </h3>
           
@@ -309,7 +309,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
         {/* Contact Information */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
           <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-            <Phone size={20} className="text-green-600" />
+            <Phone size={20} className="text-primary" />
             Contact Information
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -322,7 +322,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
                   name="address"
                   value={formData.address}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 bg-white"
+                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-slate-900 bg-white"
                   placeholder="Street address, City"
                 />
               </div>
@@ -338,7 +338,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 bg-white"
+                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-slate-900 bg-white"
                 />
               </div>
             </div>
@@ -352,7 +352,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 bg-white"
+                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-slate-900 bg-white"
                 />
               </div>
             </div>
@@ -366,7 +366,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
                   name="website_url"
                   value={formData.website_url}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 bg-white"
+                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-slate-900 bg-white"
                   placeholder="https://"
                 />
               </div>
@@ -377,7 +377,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
         {/* Amenities */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
           <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-            <CheckCircle size={20} className="text-purple-600" />
+            <CheckCircle size={20} className="text-primary" />
             Amenities
           </h3>
           
@@ -390,7 +390,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
                     type="checkbox"
                     checked={formData.amenities.includes(amenity)}
                     onChange={() => toggleAmenity(amenity)}
-                    className="h-4 w-4 text-zambia-green rounded border-gray-300 focus:ring-zambia-green"
+                    className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary"
                   />
                   <span className="text-sm text-slate-700">{amenity}</span>
                 </label>
@@ -406,7 +406,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
                 value={newAmenity}
                 onChange={(e) => setNewAmenity(e.target.value)}
                 placeholder="e.g. Helipad"
-                className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 bg-white"
+                className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-slate-900 bg-white"
                 onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomAmenity())}
               />
               <button
@@ -422,9 +422,9 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
             {formData.amenities.filter(a => !suggestedAmenities.includes(a)).length > 0 && (
               <div className="mt-4 flex flex-wrap gap-2">
                 {formData.amenities.filter(a => !suggestedAmenities.includes(a)).map(amenity => (
-                  <span key={amenity} className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-sm border border-blue-100">
+                  <span key={amenity} className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm border border-primary/20">
                     {amenity}
-                    <button type="button" onClick={() => toggleAmenity(amenity)} className="hover:text-blue-900">
+                    <button type="button" onClick={() => toggleAmenity(amenity)} className="hover:text-primary/80">
                       <X size={14} />
                     </button>
                   </span>
@@ -444,7 +444,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
           <button
             type="submit"
             disabled={saving}
-            className="px-6 py-3 bg-zambia-green text-white rounded-xl hover:bg-green-700 font-bold shadow-lg shadow-green-900/20 flex items-center gap-2 disabled:opacity-50"
+            className="px-6 py-3 bg-primary text-white rounded-xl hover:bg-primary/90 font-bold shadow-lg shadow-primary/20 flex items-center gap-2 disabled:opacity-50"
           >
             {saving ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}
             Save Changes

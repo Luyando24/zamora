@@ -83,7 +83,7 @@ export default function BarMenuPage() {
     return (
       <div className="p-6 max-w-7xl mx-auto flex items-center justify-center min-h-[400px]">
         <div className="flex flex-col items-center gap-4">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-pink-500" />
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
             <p className="text-slate-500 font-medium">Mixing your menu...</p>
         </div>
       </div>
@@ -104,11 +104,11 @@ export default function BarMenuPage() {
                {/* Property Selector */}
                {properties.length > 1 && (
                    <div className="relative group">
-                       <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-pink-500 transition-colors" size={18} />
+                       <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-primary transition-colors" size={18} />
                        <select 
                            value={selectedPropertyId || ''}
                            onChange={handlePropertyChange}
-                           className="pl-10 pr-8 py-2.5 bg-slate-50 border border-slate-200 text-slate-700 rounded-xl hover:bg-white hover:border-pink-200 hover:ring-2 hover:ring-pink-50 font-bold transition-all appearance-none outline-none cursor-pointer w-full md:w-auto"
+                           className="pl-10 pr-8 py-2.5 bg-slate-50 border border-slate-200 text-slate-700 rounded-xl hover:bg-white hover:border-primary/20 hover:ring-2 hover:ring-primary/5 font-bold transition-all appearance-none outline-none cursor-pointer w-full md:w-auto"
                        >
                            <option value="all">All Locations</option>
                            {properties.map(p => (
@@ -173,7 +173,7 @@ export default function BarMenuPage() {
                     onClick={() => setFilter(cat)}
                     className={`px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all ${
                     filter === cat 
-                        ? 'bg-pink-600 text-white shadow-md shadow-pink-200' 
+                        ? 'bg-primary text-white shadow-md shadow-primary/20' 
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                     }`}
                 >
@@ -190,7 +190,7 @@ export default function BarMenuPage() {
                     placeholder="Search drinks..." 
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-all"
+                    className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                 />
             </div>
         </div>
@@ -208,7 +208,7 @@ export default function BarMenuPage() {
             </p>
             <Link
                 href="/dashboard/bar-menu/new"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-pink-600 text-white rounded-xl font-bold hover:bg-pink-500 transition-all shadow-lg shadow-pink-200"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
             >
                 <Plus size={18} strokeWidth={3} /> Add First Drink
             </Link>
@@ -241,7 +241,7 @@ export default function BarMenuPage() {
                         </span>
                     )}
                     {item.discount_badge && (
-                        <span className="bg-pink-500/90 backdrop-blur-sm text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm flex items-center gap-1">
+                        <span className="bg-primary/90 backdrop-blur-sm text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm flex items-center gap-1">
                             <SparklesIcon className="w-3 h-3" /> {item.discount_badge}
                         </span>
                     )}
@@ -259,14 +259,14 @@ export default function BarMenuPage() {
             <div className="p-5 flex-1 flex flex-col">
                 <div className="mb-3">
                     <div className="flex justify-between items-start mb-1">
-                        <p className="text-xs font-bold text-pink-600 uppercase tracking-wider">{item.category}</p>
+                        <p className="text-xs font-bold text-primary uppercase tracking-wider">{item.category}</p>
                         {item.weight && (
                             <span className="text-xs font-medium text-slate-400 bg-slate-50 px-2 py-1 rounded-md">
                                 {item.weight}
                             </span>
                         )}
                     </div>
-                    <h3 className="text-lg font-bold text-slate-900 leading-tight group-hover:text-pink-600 transition-colors">
+                    <h3 className="text-lg font-bold text-slate-900 leading-tight group-hover:text-primary transition-colors">
                         {item.name}
                     </h3>
                 </div>
@@ -284,7 +284,7 @@ export default function BarMenuPage() {
                     <div className="flex gap-2">
                         <Link 
                             href={`/dashboard/bar-menu/${item.id}`}
-                            className="p-2 text-slate-400 hover:text-pink-600 hover:bg-pink-50 rounded-lg transition-colors"
+                            className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
                             title="Edit"
                         >
                             <Edit size={18} />

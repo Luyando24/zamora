@@ -267,13 +267,13 @@ export default function PropertySetupPage() {
       <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 animate-in fade-in duration-500">
         <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
           <div className="bg-white py-12 px-4 shadow-xl sm:rounded-xl sm:px-10 text-center border border-gray-100">
-            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-6 animate-bounce">
-              <CheckCircle className="h-8 w-8 text-zambia-green" />
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 mb-6 animate-bounce">
+              <CheckCircle className="h-8 w-8 text-primary" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">{isRestaurant ? 'Restaurant Created!' : 'Property Created!'}</h2>
             <p className="text-gray-500">Setting up your dashboard...</p>
             <div className="mt-6 flex justify-center">
-              <Loader2 className="h-6 w-6 text-zambia-green animate-spin" />
+              <Loader2 className="h-6 w-6 text-primary animate-spin" />
             </div>
           </div>
         </div>
@@ -285,7 +285,7 @@ export default function PropertySetupPage() {
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-zambia-green shadow-lg mb-6 transform rotate-3 hover:rotate-0 transition-transform duration-300">
+          <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-primary shadow-lg mb-6 transform rotate-3 hover:rotate-0 transition-transform duration-300">
             {isRestaurant ? <Utensils className="h-8 w-8 text-white" /> : <Building2 className="h-8 w-8 text-white" />}
           </div>
           <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
@@ -305,22 +305,22 @@ export default function PropertySetupPage() {
                   <div 
                     key={s}
                     className={`h-2 flex-1 rounded-full transition-all duration-500 ease-out ${
-                      step >= s ? 'bg-zambia-green' : 'bg-gray-100'
+                      step >= s ? 'bg-primary' : 'bg-gray-100'
                     }`}
                   />
                 ))}
               </div>
               <div className="flex justify-between px-1">
-                <span className={`text-xs font-bold uppercase tracking-wider transition-colors duration-300 ${step >= 1 ? 'text-zambia-green' : 'text-gray-400'}`}>
+                <span className={`text-xs font-bold uppercase tracking-wider transition-colors duration-300 ${step >= 1 ? 'text-primary' : 'text-gray-400'}`}>
                   Details
                 </span>
-                <span className={`text-xs font-bold uppercase tracking-wider transition-colors duration-300 ${step >= 2 ? 'text-zambia-green' : 'text-gray-400'}`}>
+                <span className={`text-xs font-bold uppercase tracking-wider transition-colors duration-300 ${step >= 2 ? 'text-primary' : 'text-gray-400'}`}>
                   Media
                 </span>
-                <span className={`text-xs font-bold uppercase tracking-wider transition-colors duration-300 ${step >= 3 ? 'text-zambia-green' : 'text-gray-400'}`}>
+                <span className={`text-xs font-bold uppercase tracking-wider transition-colors duration-300 ${step >= 3 ? 'text-primary' : 'text-gray-400'}`}>
                   Amenities
                 </span>
-                <span className={`text-xs font-bold uppercase tracking-wider transition-colors duration-300 ${step >= 4 ? 'text-zambia-green' : 'text-gray-400'}`}>
+                <span className={`text-xs font-bold uppercase tracking-wider transition-colors duration-300 ${step >= 4 ? 'text-primary' : 'text-gray-400'}`}>
                   Contact
                 </span>
               </div>
@@ -350,7 +350,7 @@ export default function PropertySetupPage() {
                             required
                             value={formData.name}
                             onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                            className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-zambia-green focus:border-transparent transition-all text-gray-900"
+                            className="appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-gray-900"
                             placeholder={isRestaurant ? "e.g. The Mint Cafe" : "e.g. The Royal Zambezi Lodge"}
                           />
                         </div>
@@ -371,12 +371,12 @@ export default function PropertySetupPage() {
                                 className={`
                                   cursor-pointer relative rounded-xl border p-4 flex flex-col items-center text-center transition-all duration-200
                                   ${isSelected 
-                                    ? 'border-zambia-green bg-green-50 ring-1 ring-zambia-green' 
-                                    : 'border-gray-200 hover:border-zambia-green hover:bg-gray-50'}
+                                    ? 'border-primary bg-primary/5 ring-1 ring-primary' 
+                                    : 'border-gray-200 hover:border-primary hover:bg-gray-50'}
                                 `}
                               >
-                                <Icon className={`h-6 w-6 mb-2 ${isSelected ? 'text-zambia-green' : 'text-gray-500'}`} />
-                                <span className={`text-sm font-medium ${isSelected ? 'text-zambia-green' : 'text-gray-900'}`}>
+                                <Icon className={`h-6 w-6 mb-2 ${isSelected ? 'text-primary' : 'text-gray-500'}`} />
+                                <span className={`text-sm font-medium ${isSelected ? 'text-primary' : 'text-gray-900'}`}>
                                   {type.label}
                                 </span>
                               </div>
@@ -415,8 +415,8 @@ export default function PropertySetupPage() {
                                       className={`
                                         px-3 py-1.5 rounded-lg text-sm font-medium border transition-all duration-200
                                         ${isSelected 
-                                          ? 'bg-zambia-green text-white border-zambia-green shadow-sm' 
-                                          : 'bg-white text-gray-600 border-gray-200 hover:border-zambia-green hover:text-zambia-green'}
+                                          ? 'bg-primary text-white border-primary shadow-sm' 
+                                          : 'bg-white text-gray-600 border-gray-200 hover:border-primary hover:text-primary'}
                                       `}
                                     >
                                       {cuisine.label}
@@ -436,7 +436,7 @@ export default function PropertySetupPage() {
                                 placeholder="e.g. 08:00 - 22:00"
                                 value={formData.opening_hours}
                                 onChange={(e) => setFormData(prev => ({ ...prev, opening_hours: e.target.value }))}
-                                className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-zambia-green focus:border-transparent text-gray-900"
+                                className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-gray-900"
                               />
                             </div>
 
@@ -449,7 +449,7 @@ export default function PropertySetupPage() {
                                 placeholder="e.g. 10"
                                 value={formData.delivery_radius}
                                 onChange={(e) => setFormData(prev => ({ ...prev, delivery_radius: e.target.value }))}
-                                className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-zambia-green focus:border-transparent text-gray-900"
+                                className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-gray-900"
                               />
                             </div>
                           </div>
@@ -529,13 +529,13 @@ export default function PropertySetupPage() {
                             className={`
                               cursor-pointer flex items-center p-3 rounded-lg border transition-all duration-200
                               ${isSelected 
-                                ? 'border-zambia-green bg-green-50 text-zambia-green' 
-                                : 'border-gray-200 hover:border-zambia-green hover:bg-gray-50 text-gray-700'}
+                                ? 'border-primary bg-primary/5 text-primary' 
+                                : 'border-gray-200 hover:border-primary hover:bg-gray-50 text-gray-700'}
                             `}
                           >
                             <div className={`
                               w-5 h-5 rounded border mr-3 flex items-center justify-center transition-colors
-                              ${isSelected ? 'bg-zambia-green border-zambia-green' : 'border-gray-300 bg-white'}
+                              ${isSelected ? 'bg-primary border-primary' : 'border-gray-300 bg-white'}
                             `}>
                               {isSelected && <Check className="h-3.5 w-3.5 text-white" />}
                             </div>
@@ -560,7 +560,7 @@ export default function PropertySetupPage() {
                               addCustomAmenity();
                             }
                           }}
-                          className="flex-1 appearance-none block px-4 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-zambia-green focus:border-transparent transition-all text-gray-900"
+                          className="flex-1 appearance-none block px-4 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-gray-900"
                           placeholder="e.g. Helipad"
                         />
                         <button
@@ -576,12 +576,12 @@ export default function PropertySetupPage() {
                       {/* Selected Custom Amenities (that aren't in popular list) */}
                       <div className="flex flex-wrap gap-2 mt-4">
                         {formData.amenities.filter(a => !(AMENITIES_BY_TYPE[formData.type] || AMENITIES_BY_TYPE.hotel).includes(a)).map((amenity) => (
-                          <div key={amenity} className="inline-flex items-center px-3 py-1 rounded-full bg-zambia-green/10 text-zambia-green text-sm font-medium border border-zambia-green/20">
+                          <div key={amenity} className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium border border-primary/20">
                             {amenity}
                             <button
                               type="button"
                               onClick={() => toggleAmenity(amenity)}
-                              className="ml-2 hover:text-green-800 focus:outline-none"
+                              className="ml-2 hover:text-primary-800 focus:outline-none"
                             >
                               <X className="h-3.5 w-3.5" />
                             </button>
@@ -616,7 +616,7 @@ export default function PropertySetupPage() {
                             id="email"
                             value={formData.email}
                             onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                            className="block w-full pl-10 px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-zambia-green focus:border-transparent transition-all text-gray-900"
+                            className="block w-full pl-10 px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-gray-900"
                             placeholder="reservations@hotel.com"
                           />
                         </div>
@@ -636,7 +636,7 @@ export default function PropertySetupPage() {
                             id="phone"
                             value={formData.phone}
                             onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                            className="block w-full pl-10 px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-zambia-green focus:border-transparent transition-all text-gray-900"
+                            className="block w-full pl-10 px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-gray-900"
                             placeholder="+260 97 1234567"
                           />
                         </div>
@@ -656,7 +656,7 @@ export default function PropertySetupPage() {
                             rows={3}
                             value={formData.address}
                             onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
-                            className="block w-full pl-10 px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-zambia-green focus:border-transparent transition-all text-gray-900"
+                            className="block w-full pl-10 px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-gray-900"
                             placeholder="Plot 123, Great East Road, Lusaka"
                           />
                         </div>
@@ -676,7 +676,7 @@ export default function PropertySetupPage() {
                             id="website_url"
                             value={formData.website_url}
                             onChange={(e) => setFormData(prev => ({ ...prev, website_url: e.target.value }))}
-                            className="block w-full pl-10 px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-zambia-green focus:border-transparent transition-all text-gray-900"
+                            className="block w-full pl-10 px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-gray-900"
                             placeholder="www.yourhotel.com"
                           />
                         </div>
@@ -692,7 +692,7 @@ export default function PropertySetupPage() {
                               type="text"
                               value={formData.delivery_contact}
                               onChange={(e) => setFormData(prev => ({ ...prev, delivery_contact: e.target.value }))}
-                              className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-zambia-green focus:border-transparent text-gray-900"
+                              className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-gray-900"
                               placeholder="+260..."
                             />
                           </div>
@@ -705,7 +705,7 @@ export default function PropertySetupPage() {
                               type="text"
                               value={formData.online_ordering_link}
                               onChange={(e) => setFormData(prev => ({ ...prev, online_ordering_link: e.target.value }))}
-                              className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-zambia-green focus:border-transparent text-gray-900"
+                              className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-gray-900"
                               placeholder="https://..."
                             />
                           </div>
@@ -734,7 +734,7 @@ export default function PropertySetupPage() {
                   <button
                     type="button"
                     onClick={handleBack}
-                    className="flex items-center justify-center px-6 py-4 border border-gray-300 shadow-sm text-base font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zambia-green transition-all"
+                    className="flex items-center justify-center px-6 py-4 border border-gray-300 shadow-sm text-base font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all"
                   >
                     <ArrowLeft className="h-5 w-5 mr-2" />
                     Back
@@ -744,7 +744,7 @@ export default function PropertySetupPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 flex justify-center items-center py-4 px-6 border border-transparent rounded-xl shadow-sm text-base font-bold text-white bg-zambia-green hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zambia-green disabled:opacity-50 disabled:cursor-not-allowed transition-all transform active:scale-[0.98]"
+                  className="flex-1 flex justify-center items-center py-4 px-6 border border-transparent rounded-xl shadow-sm text-base font-bold text-white bg-primary hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all transform active:scale-[0.98]"
                 >
                   {loading ? (
                     <>
@@ -764,7 +764,7 @@ export default function PropertySetupPage() {
         </div>
         
         <p className="text-center text-gray-400 text-sm mt-8">
-          Need help? <a href="#" className="text-zambia-green hover:underline">Contact Support</a>
+          Need help? <a href="#" className="text-primary hover:underline">Contact Support</a>
         </p>
       </div>
     </div>

@@ -143,9 +143,9 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-        // Decorative Pink/Purple glow top
+        // Decorative Primary glow top
         const topGlow = ctx.createLinearGradient(0, 0, 0, 1000);
-        topGlow.addColorStop(0, 'rgba(236, 72, 153, 0.15)'); // Pink 500
+        topGlow.addColorStop(0, 'rgba(16, 185, 129, 0.15)'); // Primary 500
         topGlow.addColorStop(1, 'transparent');
         ctx.fillStyle = topGlow;
         ctx.fillRect(0, 0, WIDTH, 1000);
@@ -276,8 +276,8 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
 
             // --- Gradient Glow Effect ---
             const glowGradient = ctx.createLinearGradient(cardX, cardY + cardHeight, cardX + cardWidth, cardY);
-            glowGradient.addColorStop(0, '#ec4899'); // Pink 500
-            glowGradient.addColorStop(0.5, '#a855f7'); // Purple 500
+            glowGradient.addColorStop(0, '#10b981'); // Primary 500
+            glowGradient.addColorStop(0.5, '#3b82f6'); // Blue 500
             glowGradient.addColorStop(1, '#6366f1'); // Indigo 500
 
             ctx.save();
@@ -416,7 +416,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
             
             ctx.textAlign = 'left';
             ctx.font = 'bold 60px sans-serif';
-            ctx.fillStyle = '#ec4899'; // Pink 500
+            ctx.fillStyle = '#10b981'; // Primary 500
             ctx.fillText('GUEST WI-FI', contentX, contentY);
 
             // Network Row
@@ -527,8 +527,8 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         onClick={(e) => e.stopPropagation()}
       >
         {/* Futuristic Header Graphic */}
-        <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-pink-500/10 to-transparent pointer-events-none" />
-        <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-pink-500/50 to-transparent" />
+        <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
+        <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
         
         {/* Close Button */}
         <button 
@@ -541,7 +541,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
         <div className="pt-12 pb-8 px-8 flex flex-col items-center w-full relative z-0">
           
           {/* Badge */}
-          <div className="mb-6 flex items-center gap-2 px-3 py-1 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-400 text-[10px] font-bold uppercase tracking-widest">
+          <div className="mb-6 flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-widest">
             <Smartphone size={12} />
             <span>Touchless Menu</span>
           </div>
@@ -559,11 +559,11 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
               {/* Property Selector */}
               {properties && properties.length > 1 && (
                   <div className="relative group">
-                      <Building2 className="absolute left-3 top-2.5 text-slate-500 group-hover:text-pink-400 transition-colors" size={16} />
+                      <Building2 className="absolute left-3 top-2.5 text-slate-500 group-hover:text-primary transition-colors" size={16} />
                       <select 
                           value={selectedPropertyId || ''}
                           onChange={(e) => setSelectedPropertyId(e.target.value)}
-                          className="w-full pl-9 pr-8 py-2 bg-slate-900 border border-slate-800 rounded-lg text-slate-300 text-sm focus:ring-1 focus:ring-pink-500 focus:border-pink-500 outline-none appearance-none cursor-pointer hover:bg-slate-800 transition-colors"
+                          className="w-full pl-9 pr-8 py-2 bg-slate-900 border border-slate-800 rounded-lg text-slate-300 text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none appearance-none cursor-pointer hover:bg-slate-800 transition-colors"
                       >
                           {properties.map(p => (
                               <option key={p.id} value={p.id}>{p.name}</option>
@@ -619,16 +619,16 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
               {/* Number Input */}
               <div className="relative group">
                   {locationType === 'room' ? (
-                      <MapPin className="absolute left-3 top-2.5 text-slate-500 group-focus-within:text-pink-400 transition-colors" size={16} />
+                      <MapPin className="absolute left-3 top-2.5 text-slate-500 group-focus-within:text-primary transition-colors" size={16} />
                   ) : (
-                      <UtensilsCrossed className="absolute left-3 top-2.5 text-slate-500 group-focus-within:text-pink-400 transition-colors" size={16} />
+                      <UtensilsCrossed className="absolute left-3 top-2.5 text-slate-500 group-focus-within:text-primary transition-colors" size={16} />
                   )}
                   <input 
                       type="text"
                       placeholder={locationType === 'room' ? "Room Number (Optional)" : (tableType === 'outdoor' ? "Outdoor Table Number" : "Table Number (Optional)")}
                       value={locationValue}
                       onChange={(e) => setLocationValue(e.target.value)}
-                      className="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-sm focus:ring-1 focus:ring-pink-500 focus:border-pink-500 outline-none placeholder:text-slate-600 hover:bg-slate-800 transition-colors"
+                      className="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-800 rounded-lg text-white text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none placeholder:text-slate-600 hover:bg-slate-800 transition-colors"
                   />
               </div>
           </div>
@@ -636,7 +636,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
           {/* QR Container */}
           <div className="relative group">
             {/* Glow Effect */}
-            <div className="absolute -inset-1 bg-gradient-to-tr from-pink-500 via-purple-500 to-indigo-500 rounded-[1.7rem] opacity-75 blur-md group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute -inset-1 bg-gradient-to-tr from-primary via-blue-500 to-indigo-500 rounded-[1.7rem] opacity-75 blur-md group-hover:opacity-100 transition-opacity duration-500" />
             
             {/* White Card */}
             <div 
@@ -668,8 +668,8 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
           {currentProperty.wifi_ssid && (
             <div className="w-full mt-6 mb-2 bg-slate-900/50 border border-slate-800/50 rounded-2xl p-4 backdrop-blur-sm">
                 <div className="flex items-center gap-2 mb-3">
-                    <Wifi size={14} className="text-pink-500" />
-                    <span className="text-pink-500 text-[10px] font-bold uppercase tracking-wider">Guest Wi-Fi</span>
+                    <Wifi size={14} className="text-primary" />
+                    <span className="text-primary text-[10px] font-bold uppercase tracking-wider">Guest Wi-Fi</span>
                 </div>
                 
                 <div className="space-y-2">
@@ -695,7 +695,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
              <button 
                 onClick={handleDownload}
                 disabled={isDownloading}
-                className="w-full py-3.5 bg-white text-black rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-pink-50 transition-colors shadow-lg shadow-pink-500/10 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3.5 bg-white text-black rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-primary/5 transition-colors shadow-lg shadow-primary/10 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
              >
                 {isDownloading ? (
                     <>
@@ -713,7 +713,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
                   onClick={handleCopy}
                   className="flex-1 py-3 bg-slate-900 border border-slate-800 text-slate-300 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-slate-800 hover:text-white transition-colors active:scale-[0.98] group"
                 >
-                  <Copy size={14} className="group-hover:text-pink-400 transition-colors" /> 
+                  <Copy size={14} className="group-hover:text-primary transition-colors" /> 
                   {copied ? 'Copied!' : 'Copy Link'}
                 </button>
                 <a 
@@ -722,7 +722,7 @@ export default function ShareMenuModal({ isOpen, onClose, hotelId, hotelName, pr
                   rel="noopener noreferrer"
                   className="flex-1 py-3 bg-slate-900 border border-slate-800 text-slate-300 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-slate-800 hover:text-white transition-colors active:scale-[0.98] group"
                 >
-                  <ExternalLink size={14} className="group-hover:text-pink-400 transition-colors" /> Open Menu
+                  <ExternalLink size={14} className="group-hover:text-primary transition-colors" /> Open Menu
                 </a>
              </div>
           </div>

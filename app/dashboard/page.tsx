@@ -18,10 +18,10 @@ export default function DashboardPage() {
     const { selectedPropertyId } = useProperty();
     const [userName, setUserName] = useState<string>('User');
     const [stats, setStats] = useState([
-        { name: 'Today\'s Check-ins', value: '0', change: '+0%', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
+        { name: 'Today\'s Check-ins', value: '0', change: '+0%', icon: Users, color: 'text-primary', bg: 'bg-primary/10' },
         { name: 'Occupancy Rate', value: '0%', change: '+0%', icon: BedDouble, color: 'text-amber-600', bg: 'bg-amber-50' },
         { name: 'Pending Folios', value: '0', change: '0', icon: FileCheck, color: 'text-rose-600', bg: 'bg-rose-50' },
-        { name: 'Available Rooms', value: '0', change: '-0', icon: CalendarCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+        { name: 'Available Rooms', value: '0', change: '-0', icon: CalendarCheck, color: 'text-primary', bg: 'bg-primary/10' },
         { name: 'Food & Bar Orders', value: '0', change: '0', icon: Utensils, color: 'text-purple-600', bg: 'bg-purple-50' },
     ]);
     const [financialStats, setFinancialStats] = useState({
@@ -261,10 +261,10 @@ export default function DashboardPage() {
             const availableRooms = Math.max(0, safeTotalRooms - safeOccupied - safeMaintenance);
 
             setStats([
-                { name: 'Today\'s Check-ins', value: (checkIns || 0).toString(), change: '', icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
+                { name: 'Today\'s Check-ins', value: (checkIns || 0).toString(), change: '', icon: Users, color: 'text-primary', bg: 'bg-primary/10' },
                 { name: 'Occupancy Rate', value: `${occupancyRate}%`, change: '', icon: BedDouble, color: 'text-amber-600', bg: 'bg-amber-50' },
                 { name: 'Pending Folios', value: (pendingFolios || 0).toString(), change: '', icon: FileCheck, color: 'text-rose-600', bg: 'bg-rose-50' },
-                { name: 'Available Rooms', value: availableRooms.toString(), change: '', icon: CalendarCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+                { name: 'Available Rooms', value: availableRooms.toString(), change: '', icon: CalendarCheck, color: 'text-primary', bg: 'bg-primary/10' },
                 { name: 'Food & Bar Orders', value: totalOrders.toString(), change: '', icon: Utensils, color: 'text-purple-600', bg: 'bg-purple-50' },
             ]);
         };
@@ -309,7 +309,7 @@ export default function DashboardPage() {
                     time: formatDistanceToNow(new Date(b.created_at), { addSuffix: true }),
                     originalTime: new Date(b.created_at),
                     icon: CalendarCheck,
-                    color: 'text-blue-600 bg-blue-50'
+                    color: 'text-primary bg-primary/10'
                 });
             });
 
@@ -410,7 +410,7 @@ export default function DashboardPage() {
             {/* Financial Overview */}
             <div className="space-y-4">
                 <h3 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                    <DollarSign className="w-5 h-5 text-emerald-600" />
+                    <DollarSign className="w-5 h-5 text-primary" />
                     Financial Performance
                 </h3>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -421,7 +421,7 @@ export default function DashboardPage() {
                                 <p className="text-sm font-medium text-slate-500">Revenue Today</p>
                                 <p className="text-2xl font-bold text-slate-900">K{financialStats.today.toLocaleString()}</p>
                             </div>
-                            <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600">
+                            <div className="p-2 bg-primary/10 rounded-lg text-primary">
                                 <TrendingUp size={20} />
                             </div>
                         </div>
@@ -430,7 +430,7 @@ export default function DashboardPage() {
                                 <p className="text-sm font-medium text-slate-500">Revenue This Week</p>
                                 <p className="text-2xl font-bold text-slate-900">K{financialStats.week.toLocaleString()}</p>
                             </div>
-                            <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                            <div className="p-2 bg-primary/10 rounded-lg text-primary">
                                 <BarChart3 size={20} />
                             </div>
                         </div>
@@ -439,7 +439,7 @@ export default function DashboardPage() {
                                 <p className="text-sm font-medium text-slate-500">Revenue This Month</p>
                                 <p className="text-2xl font-bold text-slate-900">K{financialStats.month.toLocaleString()}</p>
                             </div>
-                            <div className="p-2 bg-purple-50 rounded-lg text-purple-600">
+                            <div className="p-2 bg-primary/10 rounded-lg text-primary">
                                 <CalendarCheck size={20} />
                             </div>
                         </div>
@@ -450,9 +450,9 @@ export default function DashboardPage() {
                         <div className="mb-4 flex items-center justify-between">
                             <h4 className="font-bold text-slate-800">Revenue Trend (Last 7 Days)</h4>
                             <div className="flex gap-4 text-xs">
-                                <div className="flex items-center gap-1"><div className="w-3 h-3 bg-blue-500 rounded-sm"></div> Rooms</div>
+                                <div className="flex items-center gap-1"><div className="w-3 h-3 bg-primary rounded-sm"></div> Rooms</div>
                                 <div className="flex items-center gap-1"><div className="w-3 h-3 bg-amber-500 rounded-sm"></div> Food</div>
-                                <div className="flex items-center gap-1"><div className="w-3 h-3 bg-purple-600 rounded-sm"></div> Bar</div>
+                                <div className="flex items-center gap-1"><div className="w-3 h-3 bg-slate-400 rounded-sm"></div> Bar</div>
                             </div>
                         </div>
                         <div className="h-[250px] w-full">
@@ -465,9 +465,9 @@ export default function DashboardPage() {
                                         contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                                         cursor={{ fill: '#f8fafc' }}
                                     />
-                                    <Bar dataKey="Rooms" stackId="a" fill="#3b82f6" radius={[0, 0, 0, 0]} />
+                                    <Bar dataKey="Rooms" stackId="a" fill="#10B981" radius={[0, 0, 0, 0]} />
                                     <Bar dataKey="Food" stackId="a" fill="#f59e0b" radius={[0, 0, 0, 0]} />
-                                    <Bar dataKey="Bar" stackId="a" fill="#9333ea" radius={[4, 4, 0, 0]} />
+                                    <Bar dataKey="Bar" stackId="a" fill="#94a3b8" radius={[4, 4, 0, 0]} />
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>
@@ -480,7 +480,7 @@ export default function DashboardPage() {
                 <div className="lg:col-span-2 rounded-xl bg-white p-5 shadow-sm border border-slate-200">
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="text-lg font-bold text-slate-800">Recent Activity</h3>
-                        <button className="text-sm text-blue-600 font-semibold hover:underline">View All</button>
+                        <button className="text-sm text-primary font-semibold hover:underline">View All</button>
                     </div>
                     <div className="-mx-5">
                         {/* Activity Feed */}
@@ -513,21 +513,21 @@ export default function DashboardPage() {
                         <h3 className="text-lg font-bold text-slate-800">Quick Actions</h3>
                     </div>
                     <div className="grid grid-cols-2 gap-4 flex-1">
-                        <Link href="/dashboard/inventory" className="flex flex-col items-center justify-center p-4 rounded-lg border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition-colors group gap-1">
-                            <CalendarCheck size={22} className="text-slate-500 group-hover:text-blue-600" />
-                            <span className="text-sm font-semibold text-slate-600 group-hover:text-blue-700">New Booking</span>
+                        <Link href="/dashboard/inventory" className="flex flex-col items-center justify-center p-4 rounded-lg border border-slate-200 hover:border-primary hover:bg-primary/5 transition-colors group gap-1">
+                            <CalendarCheck size={22} className="text-slate-500 group-hover:text-primary" />
+                            <span className="text-sm font-semibold text-slate-600 group-hover:text-primary">New Booking</span>
                         </Link>
-                        <Link href="/dashboard/inventory" className="flex flex-col items-center justify-center p-4 rounded-lg border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50 transition-colors group gap-1">
-                            <Users size={22} className="text-slate-500 group-hover:text-emerald-600" />
-                            <span className="text-sm font-semibold text-slate-600 group-hover:text-emerald-700">Check In</span>
+                        <Link href="/dashboard/inventory" className="flex flex-col items-center justify-center p-4 rounded-lg border border-slate-200 hover:border-primary hover:bg-primary/5 transition-colors group gap-1">
+                            <Users size={22} className="text-slate-500 group-hover:text-primary" />
+                            <span className="text-sm font-semibold text-slate-600 group-hover:text-primary">Check In</span>
                         </Link>
                         <Link href="/dashboard/rooms" className="flex flex-col items-center justify-center p-4 rounded-lg border border-slate-200 hover:border-amber-500 hover:bg-amber-50 transition-colors group gap-1">
                             <BedDouble size={22} className="text-slate-500 group-hover:text-amber-600" />
                             <span className="text-sm font-semibold text-slate-600 group-hover:text-amber-700">Room Status</span>
                         </Link>
-                        <Link href="/dashboard/zra" className="flex flex-col items-center justify-center p-4 rounded-lg border border-slate-200 hover:border-purple-500 hover:bg-purple-50 transition-colors group gap-1">
-                            <FileCheck size={22} className="text-slate-500 group-hover:text-purple-600" />
-                            <span className="text-sm font-semibold text-slate-600 group-hover:text-purple-700">Reports</span>
+                        <Link href="/dashboard/zra" className="flex flex-col items-center justify-center p-4 rounded-lg border border-slate-200 hover:border-primary hover:bg-primary/5 transition-colors group gap-1">
+                            <FileCheck size={22} className="text-slate-500 group-hover:text-primary" />
+                            <span className="text-sm font-semibold text-slate-600 group-hover:text-primary">Reports</span>
                         </Link>
                     </div>
                 </div>

@@ -135,12 +135,12 @@ export default function SignupPage() {
           transition={{ duration: 0.6 }}
           className="max-w-lg"
         >
-          <div className="mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-pink-600 to-pink-400 flex items-center justify-center font-bold text-3xl shadow-lg shadow-pink-600/20 text-white mb-6">
+          <div className="flex flex-col items-center mb-8">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-primary to-primary/80 flex items-center justify-center font-bold text-3xl shadow-lg shadow-primary/20 text-white mb-6">
               Z
             </div>
-            <h1 className="text-5xl font-bold tracking-tight leading-tight mb-6">
-              Join <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-purple-600">Zamora</span>
+            <h1 className="text-4xl font-black text-slate-900 mb-2">
+              Join <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/80">Zamora</span>
             </h1>
             <p className="text-gray-400 text-lg leading-relaxed">
               Create your account to start booking the best hotels and experiences in Zambia.

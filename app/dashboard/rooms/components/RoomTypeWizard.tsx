@@ -148,18 +148,18 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
                             onClick={() => setSelectedPropertyId(prop.id)}
                             className={`relative flex items-center p-3 rounded-xl border-2 transition-all duration-200 group text-left ${
                                 isSelected
-                                ? 'border-zambia-green bg-green-50/50'
+                                ? 'border-primary bg-primary/5'
                                 : 'border-slate-100 bg-white hover:border-slate-300'
                             }`}
                         >
                             <div className={`w-5 h-5 rounded-full border flex items-center justify-center mr-3 transition-colors ${
                                 isSelected 
-                                ? 'bg-zambia-green border-zambia-green' 
+                                ? 'bg-primary border-primary' 
                                 : 'bg-white border-slate-300 group-hover:border-slate-400'
                             }`}>
                                 {isSelected && <div className="w-2 h-2 bg-white rounded-full" />}
                             </div>
-                            <span className={`font-bold text-sm ${isSelected ? 'text-zambia-green' : 'text-slate-700'}`}>
+                            <span className={`font-bold text-sm ${isSelected ? 'text-primary' : 'text-slate-700'}`}>
                                 {prop.name}
                             </span>
                         </button>
@@ -178,7 +178,7 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
           <label className="block text-sm font-medium text-gray-700 mb-1">Room Type Name <span className="text-red-500">*</span></label>
           <input
             required
-            className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 bg-white focus:ring-2 focus:ring-zambia-green focus:border-transparent"
+            className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 bg-white focus:ring-2 focus:ring-primary focus:border-transparent"
             placeholder="e.g., Deluxe Ocean View"
             value={formData.name}
             onChange={e => setFormData({ ...formData, name: e.target.value })}
@@ -188,7 +188,7 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
           <textarea
-            className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 bg-white focus:ring-2 focus:ring-zambia-green focus:border-transparent"
+            className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 bg-white focus:ring-2 focus:ring-primary focus:border-transparent"
             rows={6}
             placeholder="Describe the room features and view..."
             value={formData.description}
@@ -209,7 +209,7 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
             <input
               type="number"
               required
-              className="block w-full rounded-lg border border-gray-300 pl-8 pr-4 py-3 text-gray-900 bg-white focus:ring-2 focus:ring-zambia-green focus:border-transparent"
+              className="block w-full rounded-lg border border-gray-300 pl-8 pr-4 py-3 text-gray-900 bg-white focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder="0.00"
               value={formData.base_price}
               onChange={e => setFormData({ ...formData, base_price: e.target.value })}
@@ -223,7 +223,7 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
             type="number"
             required
             min={1}
-            className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 bg-white focus:ring-2 focus:ring-zambia-green focus:border-transparent"
+            className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 bg-white focus:ring-2 focus:ring-primary focus:border-transparent"
             value={formData.capacity}
             onChange={e => setFormData({ ...formData, capacity: Number(e.target.value) })}
           />
@@ -240,7 +240,7 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
                  className={`
                    p-3 rounded-xl border-2 text-sm font-medium transition-all
                    ${formData.bed_type === type
-                     ? 'border-zambia-green bg-green-50 text-zambia-green'
+                     ? 'border-primary bg-primary/5 text-primary'
                      : 'border-slate-100 bg-white text-slate-600 hover:border-slate-300'
                    }
                  `}
@@ -326,7 +326,7 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
           {/* Popular Amenities */}
           <div className="mb-8">
             <h4 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <CheckCircle size={16} className="text-zambia-green" /> Popular Amenities
+              <CheckCircle size={16} className="text-primary" /> Popular Amenities
             </h4>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {POPULAR_AMENITIES.map((amenity) => {
@@ -339,14 +339,14 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
                     className={`
                       relative flex items-center p-3 rounded-xl border-2 transition-all duration-200 text-left text-sm font-medium
                       ${isSelected 
-                        ? 'border-zambia-green bg-green-50 text-zambia-green' 
+                        ? 'border-primary bg-primary/5 text-primary' 
                         : 'border-slate-100 bg-white text-slate-600 hover:border-slate-300'
                       }
                     `}
                   >
                     <div className={`
                       w-4 h-4 rounded border flex items-center justify-center mr-2 transition-colors flex-shrink-0
-                      ${isSelected ? 'bg-zambia-green border-zambia-green' : 'bg-white border-slate-300'}
+                      ${isSelected ? 'bg-primary border-primary' : 'bg-white border-slate-300'}
                     `}>
                       {isSelected && <Check size={12} className="text-white" />}
                     </div>
@@ -364,7 +364,7 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
               <input
                 type="text"
                 placeholder="e.g. Jacuzzi, Butler Service..."
-                className="flex-1 rounded-xl border border-gray-300 px-4 py-3 text-gray-900 bg-white focus:ring-2 focus:ring-zambia-green focus:border-transparent"
+                className="flex-1 rounded-xl border border-gray-300 px-4 py-3 text-gray-900 bg-white focus:ring-2 focus:ring-primary focus:border-transparent"
                 value={customAmenity}
                 onChange={(e) => setCustomAmenity(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomAmenity())}
@@ -411,7 +411,7 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
       <div className="mb-8">
         <div className="relative flex justify-between">
           <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full" />
-          <div className="absolute top-1/2 left-0 h-1 bg-zambia-green -z-10 -translate-y-1/2 rounded-full transition-all duration-500" 
+          <div className="absolute top-1/2 left-0 h-1 bg-primary -z-10 -translate-y-1/2 rounded-full transition-all duration-500" 
                style={{ width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%` }} />
           
           {STEPS.map((step) => {
@@ -423,13 +423,13 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
                 <div 
                   className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors ${
                     isCompleted || isCurrent 
-                      ? 'bg-zambia-green border-zambia-green text-white' 
+                      ? 'bg-primary border-primary text-white' 
                       : 'bg-white border-gray-300 text-gray-400'
                   }`}
                 >
                   {isCompleted ? <Check size={20} /> : <step.icon size={20} />}
                 </div>
-                <span className={`text-xs font-medium ${isCurrent ? 'text-zambia-green' : 'text-gray-500'}`}>
+                <span className={`text-xs font-medium ${isCurrent ? 'text-primary' : 'text-gray-500'}`}>
                   {step.name}
                 </span>
               </div>
@@ -462,7 +462,7 @@ export default function RoomTypeWizard({ initialData }: RoomTypeWizardProps) {
               flex items-center gap-2 px-8 py-2.5 rounded-lg font-bold text-white shadow-lg transition-all
               ${loading 
                 ? 'bg-gray-400 cursor-not-allowed' 
-                : 'bg-zambia-green hover:bg-zambia-green/90 hover:shadow-xl active:scale-95'
+                : 'bg-primary hover:bg-primary-600 hover:shadow-xl active:scale-95'
               }
             `}
           >

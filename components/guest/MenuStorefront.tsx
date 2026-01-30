@@ -150,10 +150,10 @@ export default function MenuStorefront({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-pink-500 selection:text-white pb-20 md:pb-0 relative">
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-primary selection:text-white pb-20 md:pb-0 relative">
       
       {/* Subtle Theme Background Accent */}
-      <div className="absolute top-0 left-0 right-0 h-80 bg-gradient-to-b from-pink-100/60 to-transparent pointer-events-none" />
+      <div className="absolute top-0 left-0 right-0 h-80 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
 
       {/* 1. Navbar - Fixed Top */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-white/20 transition-all duration-300">
@@ -527,14 +527,19 @@ export default function MenuStorefront({
       {/* Floating Cart Summary */}
       {cart.length > 0 && (
         <div className="fixed bottom-24 md:bottom-8 left-4 right-4 md:left-auto md:right-8 md:w-96 z-40 animate-in slide-in-from-bottom duration-300">
-          <div className="bg-pink-500 text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between border border-pink-400 backdrop-blur-md bg-opacity-95 shadow-pink-200">
-             <div className="flex flex-col">
-                <span className="text-xs text-white/90 font-bold uppercase tracking-wider">{cart.reduce((a, b) => a + b.quantity, 0)} Items</span>
-                <span className="text-xl font-black">K{cartTotal.toFixed(2)}</span>
-             </div>
-             <button 
+          <div className="bg-primary text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between border border-primary/40 backdrop-blur-md bg-opacity-95 shadow-primary/20">
+            <div className="flex items-center gap-4">
+               <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md">
+                  <ShoppingBag className="text-white" size={24} />
+               </div>
+               <div>
+                  <p className="text-white/80 text-xs font-bold uppercase tracking-wider">Your Order</p>
+                  <p className="text-white font-black text-lg leading-none">{cart.reduce((a, b) => a + b.quantity, 0)} {cart.reduce((a, b) => a + b.quantity, 0) === 1 ? 'item' : 'items'} • K{cartTotal.toFixed(2)}</p>
+               </div>
+            </div>
+            <button 
                onClick={() => setIsCartOpen(true)}
-               className="bg-white text-pink-600 px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-white/90 transition-colors flex items-center gap-2 shadow-sm transform active:scale-95"
+               className="bg-white text-primary px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-white/90 transition-colors flex items-center gap-2 shadow-sm transform active:scale-95"
              >
                Continue <ArrowRight size={16} />
              </button>

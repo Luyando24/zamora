@@ -149,7 +149,7 @@ export default function BulkCreateTableModal({
         <div>
             <label className="block text-sm font-bold text-slate-700 mb-1">Table Type <span className="text-red-500">*</span></label>
             <select 
-                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900 text-slate-900"
+                className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary text-slate-900"
                 value={selectedTypeId}
                 onChange={e => setSelectedTypeId(e.target.value)}
             >
@@ -170,14 +170,14 @@ export default function BulkCreateTableModal({
                  <input 
                     type="text" 
                     placeholder="Prefix (opt)" 
-                    className="w-24 px-3 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900 text-slate-900"
+                    className="w-24 px-3 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary text-slate-900"
                     value={prefix}
                     onChange={e => handleInputChange(inputString, e.target.value)}
                  />
                  <input 
                     type="text" 
                     placeholder="Range or list (e.g. 1-20)" 
-                    className="flex-1 px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900 text-slate-900"
+                    className="flex-1 px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary text-slate-900"
                     value={inputString}
                     onChange={e => handleInputChange(e.target.value, prefix)}
                  />
@@ -221,7 +221,7 @@ export default function BulkCreateTableModal({
             <button 
                 onClick={handleSubmit}
                 disabled={loading || preview.length === 0 || !selectedTypeId}
-                className="px-6 py-2 bg-blue-900 text-white font-bold rounded-lg hover:bg-blue-800 disabled:opacity-50 flex items-center gap-2"
+                className="px-6 py-2 bg-primary text-white font-bold rounded-lg hover:bg-primary-600 disabled:opacity-50 flex items-center gap-2"
             >
                 {loading && <Loader2 size={16} className="animate-spin" />}
                 Create {preview.length} Tables

@@ -137,7 +137,7 @@ export default function ZraDashboard() {
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center justify-between pb-2">
             <p className="text-sm font-medium text-gray-500">Invoices Issued</p>
-            <CheckCircle2 className="h-4 w-4 text-zambia-green" />
+            <CheckCircle2 className="h-4 w-4 text-primary" />
           </div>
           <div className="text-2xl font-bold text-gray-900">{stats.fiscalizedCount}</div>
         </div>

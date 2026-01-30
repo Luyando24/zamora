@@ -62,7 +62,7 @@ export default function CategoryManager() {
             <button
               type="submit"
               disabled={submitting || !newCategory.trim()}
-              className="bg-zambia-green text-white px-4 py-2 rounded-md hover:bg-zambia-green/90 disabled:opacity-50"
+              className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 disabled:opacity-50"
             >
               {submitting ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} />}
             </button>

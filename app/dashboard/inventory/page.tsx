@@ -24,7 +24,7 @@ export default function InventoryPage() {
     return (
       <div className="flex items-center justify-center h-[60vh]">
          <div className="flex flex-col items-center gap-4">
-            <div className="w-8 h-8 border-2 border-slate-200 border-t-slate-900 rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-2 border-slate-200 border-t-primary rounded-full animate-spin"></div>
             <p className="text-slate-400 text-sm font-medium">Loading inventory...</p>
          </div>
       </div>
@@ -52,7 +52,7 @@ export default function InventoryPage() {
         <div className="flex flex-wrap items-center gap-2">
            <button
              onClick={() => setIsModalOpen(true)}
-             className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-all font-bold text-sm shadow-lg shadow-slate-900/10"
+             className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl hover:bg-primary-600 transition-all font-bold text-sm shadow-lg shadow-primary/10"
            >
              <Plus size={16} /> New Booking
            </button>
@@ -93,8 +93,8 @@ export default function InventoryPage() {
                 {dates.map(date => {
                   const isToday = isSameDay(date, new Date());
                   return (
-                    <th key={date.toISOString()} className={`px-2 py-3 text-center text-xs border-b border-slate-200 min-w-[100px] ${isToday ? 'bg-blue-50/50' : ''}`}>
-                      <div className={`font-black text-lg ${isToday ? 'text-blue-600' : 'text-slate-700'}`}>{format(date, 'd')}</div>
+                    <th key={date.toISOString()} className={`px-2 py-3 text-center text-xs border-b border-slate-200 min-w-[100px] ${isToday ? 'bg-primary/5' : ''}`}>
+                      <div className={`font-black text-lg ${isToday ? 'text-primary' : 'text-slate-700'}`}>{format(date, 'd')}</div>
                       <div className="flex items-center justify-center gap-1 text-[10px] uppercase tracking-wider font-semibold text-slate-400">
                         <span>{format(date, 'MMM')}</span>
                         <span>•</span>
@@ -116,7 +116,7 @@ export default function InventoryPage() {
                         room.status === 'clean' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
                         room.status === 'dirty' ? 'bg-rose-50 text-rose-700 border border-rose-100' :
                         room.status === 'maintenance' ? 'bg-amber-50 text-amber-700 border border-amber-100' :
-                        'bg-blue-50 text-blue-700 border border-blue-100'
+                        'bg-primary/10 text-primary border border-primary/20'
                       }`}>
                         {room.status}
                       </span>
@@ -129,7 +129,7 @@ export default function InventoryPage() {
                     const isToday = isSameDay(date, new Date());
                     
                     return (
-                      <td key={date.toISOString()} className={`px-1 py-2 whitespace-nowrap text-center relative h-24 border-r border-slate-50/50 ${isToday ? 'bg-blue-50/10' : ''}`}>
+                      <td key={date.toISOString()} className={`px-1 py-2 whitespace-nowrap text-center relative h-24 border-r border-slate-50/50 ${isToday ? 'bg-primary/5' : ''}`}>
                         {booking ? (
                           <div 
                             onClick={() => {
@@ -139,8 +139,8 @@ export default function InventoryPage() {
                             className={`
                               h-full rounded-lg text-xs flex flex-col items-center justify-center px-2 overflow-hidden cursor-pointer hover:brightness-95 transition-all shadow-sm
                               ${booking.status === 'confirmed' 
-                                ? 'bg-blue-100 text-blue-900 border border-blue-200' 
-                                : 'bg-emerald-100 text-emerald-900 border border-emerald-200'}
+                                ? 'bg-primary/10 text-primary border border-primary/20' 
+                                : 'bg-primary/5 text-primary/70 border border-primary/10'}
                               ${isStart ? 'ml-1' : '-ml-1'} 
                               ${isEnd ? 'mr-1' : '-mr-1'}
                             `}

@@ -32,7 +32,7 @@ export default function PromotionsPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Promo Card 1 */}
-            <div className="bg-gradient-to-br from-pink-500 to-rose-600 rounded-2xl p-8 text-white shadow-lg relative overflow-hidden">
+            <div className="bg-gradient-to-br from-primary to-primary/80 rounded-2xl p-8 text-white shadow-lg relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
                 <div className="relative z-10">
                     <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold mb-4">
@@ -40,7 +40,7 @@ export default function PromotionsPage() {
                     </div>
                     <h3 className="text-3xl font-black mb-2">20% OFF</h3>
                     <p className="text-white/90 font-medium mb-6">Get 20% off your first booking at any luxury lodge in Livingstone.</p>
-                    <button className="px-6 py-3 bg-white text-pink-600 rounded-xl font-bold text-sm hover:bg-pink-50 transition-colors">
+                    <button className="px-6 py-3 bg-white text-primary rounded-xl font-bold text-sm hover:bg-primary/5 transition-colors">
                         Claim Offer
                     </button>
                 </div>

@@ -78,10 +78,10 @@ export default function DashboardLayout({
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-50">
+      <div className="flex h-screen items-center justify-center bg-white">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-500">Loading workspace...</p>
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-slate-500 font-medium">Loading workspace...</p>
         </div>
       </div>
     );
@@ -90,11 +90,11 @@ export default function DashboardLayout({
   return (
     <PropertyProvider>
       <NotificationProvider>
-      <div className="flex flex-col h-screen bg-gray-50 overflow-hidden">
+      <div className="flex flex-col h-screen bg-white overflow-hidden">
         <SubscriptionOverlay />
         {!isSetupPage && <FloatingActionPanel />}
         {!isSetupPage && (
-          <header className="relative flex h-16 items-center justify-between bg-white/60 backdrop-blur-xl px-6 z-30 border-b border-slate-200 shrink-0">
+          <header className="relative flex h-16 items-center justify-between bg-white px-6 z-30 border-b border-slate-200 shrink-0">
           <div className="flex items-center gap-4 md:gap-12">
             {/* Mobile Hamburger */}
             <button
@@ -118,7 +118,7 @@ export default function DashboardLayout({
               </div>
               <input
                 type="text"
-                className="block w-full pl-10 pr-3 py-2 border border-transparent rounded-lg leading-5 bg-slate-100 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors shadow-sm"
+                className="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg leading-5 bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm transition-colors shadow-sm"
                 placeholder="Search..."
               />
             </div>
@@ -131,8 +131,8 @@ export default function DashboardLayout({
             </button>
             <div className="h-8 w-px bg-slate-200 mx-3"></div>
 
-            <button className="flex items-center gap-3 hover:bg-slate-100 rounded-lg p-2 transition-colors">
-              <div className="h-9 w-9 rounded-full bg-blue-900 flex items-center justify-center text-white font-bold shadow-sm uppercase">
+            <button className="flex items-center gap-3 hover:bg-slate-50 rounded-lg p-2 transition-colors">
+              <div className="h-9 w-9 rounded-full bg-primary flex items-center justify-center text-white font-bold shadow-sm uppercase">
                 {user?.email?.charAt(0) || 'U'}
               </div>
               <div className="text-right hidden sm:block">
@@ -181,7 +181,7 @@ export default function DashboardLayout({
         )}
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto p-6 bg-slate-100 pb-20 md:pb-6">
+        <main className="flex-1 overflow-y-auto p-6 bg-white pb-20 md:pb-6">
           <DashboardBreadcrumb />
           {!hasHotel && !isSetupPage && (
             <div className="bg-orange-50 border-l-4 border-orange-500 p-4 mb-6 shadow-sm rounded-r-lg">

@@ -37,14 +37,14 @@ export default function FolioPage({ params }: { params: { id: string } }) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/dashboard/inventory" className="p-2 hover:bg-gray-100 rounded-full">
+          <Link href="/dashboard/inventory" className="p-2 hover:bg-primary/5 hover:text-primary rounded-full transition-colors">
             <ArrowLeft size={20} />
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">Guest Folio</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Guest Folio</h1>
         </div>
         <button 
           onClick={() => window.print()}
-          className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+          className="flex items-center gap-2 px-4 py-2 text-slate-600 hover:bg-primary/5 hover:text-primary rounded-lg transition-colors font-medium"
         >
           <Printer size={18} /> Print
         </button>
@@ -52,44 +52,44 @@ export default function FolioPage({ params }: { params: { id: string } }) {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Invoice View */}
-        <div className="md:col-span-2 bg-white shadow rounded-lg overflow-hidden border border-gray-200">
-          <div className="p-6 border-b border-gray-200 bg-gray-50 flex justify-between">
+        <div className="md:col-span-2 bg-white shadow-sm rounded-xl overflow-hidden border border-slate-200">
+          <div className="p-6 border-b border-slate-200 bg-slate-50/50 flex justify-between items-center">
             <div>
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Invoice #</p>
-              <p className="font-mono text-lg">{folio.zra_invoice_number || 'DRAFT'}</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Invoice #</p>
+              <p className="font-mono text-lg text-slate-700">{folio.zra_invoice_number || 'DRAFT'}</p>
             </div>
             {folio.zra_mark_id && (
                <div className="text-right">
-                 <p className="text-xs font-bold text-zambia-green uppercase tracking-wider">ZRA Approved</p>
-                 <p className="font-mono text-sm">{folio.zra_mark_id}</p>
+                 <p className="text-[10px] font-bold text-primary uppercase tracking-widest">ZRA Approved</p>
+                 <p className="font-mono text-sm text-slate-600">{folio.zra_mark_id}</p>
                </div>
             )}
           </div>
 
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="min-w-full divide-y divide-slate-200">
             <thead>
               <tr className="bg-white">
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Amount (ZMW)</th>
+                <th className="px-6 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Description</th>
+                <th className="px-6 py-4 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">Amount (ZMW)</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-slate-100">
               {folio.folio_items.map((item) => (
-                <tr key={item.id}>
-                  <td className="px-6 py-4 text-sm text-gray-900">{item.description}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900 text-right">{item.total_price.toFixed(2)}</td>
+                <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
+                  <td className="px-6 py-4 text-sm text-slate-700">{item.description}</td>
+                  <td className="px-6 py-4 text-sm text-slate-900 text-right font-medium">{item.total_price.toFixed(2)}</td>
                 </tr>
               ))}
               {folio.folio_items.length === 0 && (
                 <tr>
-                  <td colSpan={2} className="px-6 py-12 text-center text-gray-400">No charges yet.</td>
+                  <td colSpan={2} className="px-6 py-12 text-center text-slate-400 italic">No charges yet.</td>
                 </tr>
               )}
             </tbody>
-            <tfoot className="bg-gray-50">
+            <tfoot className="bg-slate-50/80">
               <tr>
-                <td className="px-6 py-4 text-sm font-bold text-gray-900 text-right">Total</td>
-                <td className="px-6 py-4 text-sm font-bold text-gray-900 text-right">
+                <td className="px-6 py-4 text-sm font-bold text-slate-900 text-right uppercase tracking-wider">Total</td>
+                <td className="px-6 py-4 text-lg font-bold text-primary text-right">
                   K {folio.total_amount?.toFixed(2) || '0.00'}
                 </td>
               </tr>
@@ -97,13 +97,12 @@ export default function FolioPage({ params }: { params: { id: string } }) {
           </table>
 
           {folio.zra_qr_code && (
-            <div className="p-6 border-t border-gray-200 flex flex-col items-center justify-center text-center bg-gray-50/50">
-              <div className="h-32 w-32 bg-white p-2 border rounded-lg shadow-sm mb-2 flex items-center justify-center">
-                 {/* In real app, use a QRCode component. For now, a placeholder icon */}
-                 <QrCode size={64} className="text-gray-800" />
+            <div className="p-6 border-t border-slate-200 flex flex-col items-center justify-center text-center bg-slate-50/30">
+              <div className="h-32 w-32 bg-white p-2 border border-slate-200 rounded-xl shadow-sm mb-3 flex items-center justify-center">
+                 <QrCode size={64} className="text-slate-800" />
               </div>
-              <p className="text-xs text-gray-500 max-w-xs break-all">{folio.zra_qr_code}</p>
-              <p className="text-xs text-gray-400 mt-1">Scan to verify with ZRA</p>
+              <p className="text-[10px] text-slate-400 max-w-xs break-all font-mono mb-1">{folio.zra_qr_code}</p>
+              <p className="text-xs text-slate-500 font-medium">Scan to verify with ZRA</p>
             </div>
           )}
         </div>

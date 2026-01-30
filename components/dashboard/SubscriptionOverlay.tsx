@@ -207,7 +207,7 @@ export default function SubscriptionOverlay() {
                             value={licenseKey}
                             onChange={(e) => setLicenseKey(e.target.value.toUpperCase())}
                             placeholder="ZAM-XXXX-XXXX-XXXX"
-                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-11 pr-4 py-4 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-mono font-bold text-slate-800 placeholder:text-slate-300"
+                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-11 pr-4 py-4 focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all font-mono font-bold text-slate-800 placeholder:text-slate-300"
                           />
                         </div>
                         {error && <p className="text-xs text-red-600 font-bold mt-2 ml-1 flex items-center gap-1"><AlertCircle size={12}/> {error}</p>}
@@ -215,7 +215,7 @@ export default function SubscriptionOverlay() {
 
                       <button 
                         disabled={isSubmitting}
-                        className="w-full bg-blue-900 hover:bg-blue-800 text-white font-black py-5 rounded-2xl shadow-xl shadow-blue-900/20 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 text-lg"
+                        className="w-full bg-primary hover:bg-primary/90 text-white font-black py-5 rounded-2xl shadow-xl shadow-primary/20 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 text-lg"
                       >
                         {isSubmitting ? 'Verifying...' : 'Activate License'}
                       </button>
@@ -250,7 +250,7 @@ export default function SubscriptionOverlay() {
                       </p>
                       <button 
                         onClick={() => {/* Add navigation to settings or scroll to input */}}
-                        className="mt-4 text-sm font-black text-blue-900 hover:underline flex items-center gap-1"
+                        className="mt-4 text-sm font-black text-primary hover:underline flex items-center gap-1"
                       >
                         Enter License Key <Key size={14}/>
                       </button>
@@ -274,8 +274,8 @@ export default function SubscriptionOverlay() {
                 <ChevronLeft size={16} /> Back
               </button>
 
-              <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
-                <Send className="w-8 h-8 text-blue-600" />
+              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
+                <Send className="w-8 h-8 text-primary" />
               </div>
               <h2 className="text-2xl font-black text-slate-900 mb-2">Request License</h2>
               <p className="text-slate-500 mb-8 leading-relaxed font-medium">
@@ -294,7 +294,7 @@ export default function SubscriptionOverlay() {
                         onClick={() => setSelectedDuration(plan.duration_days)}
                         className={`px-4 py-4 rounded-2xl text-sm font-black transition-all flex flex-col items-start gap-1 ${
                           selectedDuration === plan.duration_days 
-                            ? 'bg-blue-900 text-white shadow-lg shadow-blue-900/20' 
+                            ? 'bg-primary text-white shadow-lg shadow-primary/20' 
                             : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-100'
                         }`}
                       >
@@ -302,7 +302,7 @@ export default function SubscriptionOverlay() {
                           <span>{plan.name}</span>
                           {selectedDuration === plan.duration_days && <Check size={16} />}
                         </div>
-                        <span className={`text-[10px] uppercase tracking-wider ${selectedDuration === plan.duration_days ? 'text-blue-200' : 'text-slate-400'}`}>
+                        <span className={`text-[10px] uppercase tracking-wider ${selectedDuration === plan.duration_days ? 'text-primary-100' : 'text-slate-400'}`}>
                           {plan.currency} {plan.price.toLocaleString()}
                         </span>
                       </button>
@@ -311,7 +311,7 @@ export default function SubscriptionOverlay() {
                       onClick={() => setSelectedDuration('custom')}
                       className={`px-4 py-4 rounded-2xl text-sm font-black transition-all flex items-center justify-between col-span-3 ${
                         selectedDuration === 'custom' 
-                          ? 'bg-blue-900 text-white shadow-lg shadow-blue-900/20' 
+                          ? 'bg-primary text-white shadow-lg shadow-primary/20' 
                           : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-100'
                       }`}
                     >
@@ -337,8 +337,8 @@ export default function SubscriptionOverlay() {
                         <div className="relative z-10">
                           <div className="flex items-center justify-between mb-4">
                             <span className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Pricing Summary</span>
-                            <div className="px-2 py-1 bg-blue-500/20 rounded-lg">
-                              <span className="text-[10px] font-black text-blue-400 uppercase tracking-wider">Estimated</span>
+                            <div className="px-2 py-1 bg-primary/20 rounded-lg">
+                              <span className="text-[10px] font-black text-primary uppercase tracking-wider">Estimated</span>
                             </div>
                           </div>
                           
@@ -363,9 +363,9 @@ export default function SubscriptionOverlay() {
                     <motion.div
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
-                      className="space-y-2 p-4 bg-blue-50 rounded-2xl border border-blue-100 mb-4"
+                      className="space-y-2 p-4 bg-primary/5 rounded-2xl border border-primary/10 mb-4"
                     >
-                      <label className="text-xs font-black text-blue-900 uppercase tracking-wider block ml-1">
+                      <label className="text-xs font-black text-primary uppercase tracking-wider block ml-1">
                         Target Expiration
                       </label>
                       <input
@@ -373,7 +373,7 @@ export default function SubscriptionOverlay() {
                         min={format(addDays(new Date(), 1), 'yyyy-MM-dd')}
                         value={customEndDate}
                         onChange={(e) => setCustomEndDate(e.target.value)}
-                        className="w-full bg-white border border-blue-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+                        className="w-full bg-white border border-primary/20 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:ring-4 focus:ring-primary/10"
                       />
                     </motion.div>
                   )}
@@ -388,7 +388,7 @@ export default function SubscriptionOverlay() {
                     onChange={(e) => setFeedback(e.target.value)}
                     placeholder="Tell us about your experience or special requirements..."
                     rows={3}
-                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all resize-none placeholder:text-slate-300"
+                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all resize-none placeholder:text-slate-300"
                   />
                 </div>
 

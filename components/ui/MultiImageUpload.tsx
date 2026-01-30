@@ -94,26 +94,30 @@ export default function MultiImageUpload({ values = [], onChange, bucket = 'menu
 
         <div 
           onClick={() => fileInputRef.current?.click()}
-          className="aspect-square flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-zambia-green hover:bg-green-50 transition-colors"
+          className="aspect-square flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-md cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors"
         >
           {uploading ? (
             <Loader2 className="h-8 w-8 text-gray-400 animate-spin" />
           ) : (
-            <ImagePlus className="h-8 w-8 text-gray-400" />
+            <>
+              <ImagePlus className="h-8 w-8 text-gray-400" />
+              <span className="mt-2 text-xs font-medium text-gray-500">Add More</span>
+            </>
           )}
-          <span className="text-xs text-gray-500 mt-2">Add Photos</span>
         </div>
       </div>
 
       <input
         type="file"
         ref={fileInputRef}
-        className="hidden"
-        accept="image/*"
-        multiple
         onChange={handleUpload}
+        multiple
+        accept="image/*"
+        className="hidden"
         disabled={uploading}
       />
+
+      <p className="text-xs text-gray-500">Upload multiple images. PNG, JPG up to 5MB each.</p>
     </div>
   );
 }

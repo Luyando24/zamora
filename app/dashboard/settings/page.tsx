@@ -321,7 +321,7 @@ export default function SettingsPage() {
 
   if (loading) return (
     <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zambia-green"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
     </div>
   );
 
@@ -342,7 +342,7 @@ export default function SettingsPage() {
             <select
                 value={hotel.id || 'new'}
                 onChange={(e) => handlePropertyChange(e.target.value)}
-                className="block w-full pl-10 pr-10 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-zambia-green/20 focus:border-zambia-green cursor-pointer hover:bg-slate-50 transition-all appearance-none"
+                className="block w-full pl-10 pr-10 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer hover:bg-slate-50 transition-all appearance-none"
             >
                 {properties.map(p => (
                     <option key={p.id} value={p.id}>{p.name}</option>
@@ -371,7 +371,7 @@ export default function SettingsPage() {
                             className={`
                                 w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200
                                 ${isActive 
-                                    ? 'bg-zambia-green text-white shadow-md shadow-zambia-green/20' 
+                                    ? 'bg-primary text-white shadow-md shadow-primary/20' 
                                     : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}
                             `}
                         >
@@ -384,15 +384,15 @@ export default function SettingsPage() {
 
             {/* Public Link Card */}
             {hotel.id && (
-                <div className="mt-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-5 border border-blue-100">
-                    <h3 className="text-sm font-bold text-blue-900 mb-2">Public Page</h3>
-                    <p className="text-xs text-blue-700 mb-4 leading-relaxed">
+                <div className="mt-6 bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl p-5 border border-slate-200">
+                    <h3 className="text-sm font-bold text-slate-900 mb-2">Public Page</h3>
+                    <p className="text-xs text-slate-600 mb-4 leading-relaxed">
                         Your property is live at:
                     </p>
                     <a 
                         href={`/book/${hotel.id}`} 
                         target="_blank" 
-                        className="flex items-center justify-center w-full px-4 py-2 bg-white text-blue-600 text-xs font-bold rounded-lg border border-blue-200 hover:bg-blue-50 transition-colors shadow-sm"
+                        className="flex items-center justify-center w-full px-4 py-2 bg-white text-primary text-xs font-bold rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors shadow-sm"
                     >
                         Visit Page <Globe size={14} className="ml-2" />
                     </a>
@@ -426,7 +426,7 @@ export default function SettingsPage() {
                                             <input
                                                 type="text"
                                                 required
-                                                className="block w-full rounded-xl border-slate-200 shadow-sm focus:border-zambia-green focus:ring-zambia-green/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
+                                                className="block w-full rounded-xl border-slate-200 shadow-sm focus:border-primary focus:ring-primary/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
                                                 value={hotel.name || ''}
                                                 onChange={e => setHotel({ ...hotel, name: e.target.value })}
                                                 placeholder="e.g. The Royal Hotel"
@@ -435,7 +435,7 @@ export default function SettingsPage() {
                                         <div>
                                             <label className="block text-sm font-semibold text-slate-700 mb-2">Property Type</label>
                                             <select
-                                                className="block w-full rounded-xl border-slate-200 shadow-sm focus:border-zambia-green focus:ring-zambia-green/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all appearance-none"
+                                                className="block w-full rounded-xl border-slate-200 shadow-sm focus:border-primary focus:ring-primary/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all appearance-none"
                                                 value={hotel.type || 'hotel'}
                                                 onChange={e => setHotel({ ...hotel, type: e.target.value })}
                                             >
@@ -454,7 +454,7 @@ export default function SettingsPage() {
                                         <div className="flex rounded-xl shadow-sm">
                                             <input
                                                 type="text"
-                                                className="block w-full rounded-l-xl border-slate-200 focus:border-zambia-green focus:ring-zambia-green/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
+                                                className="block w-full rounded-l-xl border-slate-200 focus:border-primary focus:ring-primary/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
                                                 value={hotel.slug || ''}
                                                 onChange={e => setHotel({ ...hotel, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') })}
                                                 placeholder="my-hotel"
@@ -469,7 +469,7 @@ export default function SettingsPage() {
                                         <label className="block text-sm font-semibold text-slate-700 mb-2">Physical Address</label>
                                         <textarea
                                             rows={3}
-                                            className="block w-full rounded-xl border-slate-200 shadow-sm focus:border-zambia-green focus:ring-zambia-green/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
+                                            className="block w-full rounded-xl border-slate-200 shadow-sm focus:border-primary focus:ring-primary/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
                                             value={hotel.address || ''}
                                             onChange={e => setHotel({ ...hotel, address: e.target.value })}
                                             placeholder="Enter full physical address"
@@ -481,7 +481,7 @@ export default function SettingsPage() {
                                             <label className="block text-sm font-semibold text-slate-700 mb-2">City</label>
                                             <input
                                                 type="text"
-                                                className="block w-full rounded-xl border-slate-200 shadow-sm focus:border-zambia-green focus:ring-zambia-green/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
+                                                className="block w-full rounded-xl border-slate-200 shadow-sm focus:border-primary focus:ring-primary/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
                                                 value={hotel.city || ''}
                                                 onChange={e => setHotel({ ...hotel, city: e.target.value })}
                                                 placeholder="e.g. Lusaka"
@@ -491,7 +491,7 @@ export default function SettingsPage() {
                                             <label className="block text-sm font-semibold text-slate-700 mb-2">Country</label>
                                             <input
                                                 type="text"
-                                                className="block w-full rounded-xl border-slate-200 shadow-sm focus:border-zambia-green focus:ring-zambia-green/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
+                                                className="block w-full rounded-xl border-slate-200 shadow-sm focus:border-primary focus:ring-primary/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
                                                 value={hotel.country || 'Zambia'}
                                                 onChange={e => setHotel({ ...hotel, country: e.target.value })}
                                                 placeholder="e.g. Zambia"
@@ -555,8 +555,8 @@ export default function SettingsPage() {
                                                             className={`
                                                                 px-3 py-1.5 rounded-lg text-sm font-medium border transition-all duration-200
                                                                 ${isSelected 
-                                                                    ? 'bg-zambia-green text-white border-zambia-green shadow-sm' 
-                                                                    : 'bg-white text-slate-600 border-slate-200 hover:border-zambia-green hover:text-zambia-green'}
+                                                                    ? 'bg-primary text-white border-primary shadow-sm' 
+                                                                    : 'bg-white text-slate-600 border-slate-200 hover:border-primary hover:text-primary'}
                                                             `}
                                                         >
                                                             {cuisine.label}
@@ -571,7 +571,7 @@ export default function SettingsPage() {
                                             <label className="block text-sm font-semibold text-slate-700 mb-2">Opening Hours</label>
                                             <input
                                                 type="text"
-                                                className="block w-full rounded-xl border-slate-200 shadow-sm focus:border-zambia-green focus:ring-zambia-green/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
+                                                className="block w-full rounded-xl border-slate-200 shadow-sm focus:border-primary focus:ring-primary/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
                                                 value={hotel.settings?.opening_hours || ''}
                                                 onChange={e => setHotel({ ...hotel, settings: { ...hotel.settings, opening_hours: e.target.value } })}
                                                 placeholder="e.g. 08:00 - 22:00"
@@ -582,7 +582,7 @@ export default function SettingsPage() {
                                             <label className="block text-sm font-semibold text-slate-700 mb-2">Delivery Radius (km)</label>
                                             <input
                                                 type="number"
-                                                className="block w-full rounded-xl border-slate-200 shadow-sm focus:border-zambia-green focus:ring-zambia-green/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
+                                                className="block w-full rounded-xl border-slate-200 shadow-sm focus:border-primary focus:ring-primary/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
                                                 value={hotel.settings?.delivery_radius || ''}
                                                 onChange={e => setHotel({ ...hotel, settings: { ...hotel.settings, delivery_radius: e.target.value } })}
                                                 placeholder="10"
@@ -593,7 +593,7 @@ export default function SettingsPage() {
                                             <label className="block text-sm font-semibold text-slate-700 mb-2">Delivery Contact</label>
                                             <input
                                                 type="text"
-                                                className="block w-full rounded-xl border-slate-200 shadow-sm focus:border-zambia-green focus:ring-zambia-green/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
+                                                className="block w-full rounded-xl border-slate-200 shadow-sm focus:border-primary focus:ring-primary/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
                                                 value={hotel.settings?.delivery_contact || ''}
                                                 onChange={e => setHotel({ ...hotel, settings: { ...hotel.settings, delivery_contact: e.target.value } })}
                                                 placeholder="+260..."
@@ -604,7 +604,7 @@ export default function SettingsPage() {
                                             <label className="block text-sm font-semibold text-slate-700 mb-2">Online Ordering Link</label>
                                             <input
                                                 type="url"
-                                                className="block w-full rounded-xl border-slate-200 shadow-sm focus:border-zambia-green focus:ring-zambia-green/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
+                                                className="block w-full rounded-xl border-slate-200 shadow-sm focus:border-primary focus:ring-primary/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
                                                 value={hotel.settings?.online_ordering_link || ''}
                                                 onChange={e => setHotel({ ...hotel, settings: { ...hotel.settings, online_ordering_link: e.target.value } })}
                                                 placeholder="https://..."
@@ -626,7 +626,7 @@ export default function SettingsPage() {
                                                       <input
                                                           type="text"
                                                           placeholder="XXXX-XXXX-XXXX-XXXX"
-                                                          className="block w-full rounded-lg border-slate-200 shadow-sm focus:border-zambia-green focus:ring-zambia-green/20 px-3 py-2 pl-9 border text-slate-900 bg-white font-mono"
+                                                          className="block w-full rounded-lg border-slate-200 shadow-sm focus:border-primary focus:ring-primary/20 px-3 py-2 pl-9 border text-slate-900 bg-white font-mono"
                                                           value={hotel.settings?.license_key || ''}
                                                           onChange={e => setHotel({ 
                                                               ...hotel, 
@@ -676,7 +676,7 @@ export default function SettingsPage() {
                                                     <label className="block text-xs font-semibold text-slate-500 mb-1">Network Name (SSID)</label>
                                                     <input
                                                         type="text"
-                                                        className="block w-full rounded-lg border-slate-200 shadow-sm focus:border-zambia-green focus:ring-zambia-green/20 px-3 py-2 border text-slate-900 bg-white"
+                                                        className="block w-full rounded-lg border-slate-200 shadow-sm focus:border-primary focus:ring-primary/20 px-3 py-2 border text-slate-900 bg-white"
                                                         value={hotel.wifi_ssid || ''}
                                                         onChange={e => setHotel({ ...hotel, wifi_ssid: e.target.value })}
                                                     />
@@ -685,7 +685,7 @@ export default function SettingsPage() {
                                                     <label className="block text-xs font-semibold text-slate-500 mb-1">Password</label>
                                                     <input
                                                         type="text"
-                                                        className="block w-full rounded-lg border-slate-200 shadow-sm focus:border-zambia-green focus:ring-zambia-green/20 px-3 py-2 border text-slate-900 bg-white"
+                                                        className="block w-full rounded-lg border-slate-200 shadow-sm focus:border-primary focus:ring-primary/20 px-3 py-2 border text-slate-900 bg-white"
                                                         value={hotel.wifi_password || ''}
                                                         onChange={e => setHotel({ ...hotel, wifi_password: e.target.value })}
                                                     />
@@ -696,7 +696,7 @@ export default function SettingsPage() {
                                                     <input
                                                         id="require_wifi_for_orders"
                                                         type="checkbox"
-                                                        className="h-4 w-4 rounded border-slate-300 text-zambia-green focus:ring-zambia-green"
+                                                        className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
                                                         checked={hotel.settings?.require_wifi_for_orders || false}
                                                         onChange={e => setHotel({ 
                                                             ...hotel, 
@@ -718,7 +718,7 @@ export default function SettingsPage() {
                                             <label className="block text-sm font-semibold text-slate-700 mb-2">Admin Notification Phone</label>
                                             <input
                                                 type="text"
-                                                className="block w-full rounded-xl border-slate-200 shadow-sm focus:border-zambia-green focus:ring-zambia-green/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
+                                                className="block w-full rounded-xl border-slate-200 shadow-sm focus:border-primary focus:ring-primary/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
                                                 value={hotel.admin_notification_phone || ''}
                                                 onChange={e => setHotel({ ...hotel, admin_notification_phone: e.target.value })}
                                                 placeholder="+260..."
@@ -753,7 +753,7 @@ export default function SettingsPage() {
                                             </div>
                                             <input
                                                 type="tel"
-                                                className="block w-full pl-10 rounded-xl border-slate-200 shadow-sm focus:border-zambia-green focus:ring-zambia-green/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
+                                                className="block w-full pl-10 rounded-xl border-slate-200 shadow-sm focus:border-primary focus:ring-primary/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
                                                 value={hotel.phone || ''}
                                                 onChange={e => setHotel({ ...hotel, phone: e.target.value })}
                                             />
@@ -768,7 +768,7 @@ export default function SettingsPage() {
                                             </div>
                                             <input
                                                 type="tel"
-                                                className="block w-full pl-10 rounded-xl border-slate-200 shadow-sm focus:border-zambia-green focus:ring-zambia-green/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
+                                                className="block w-full pl-10 rounded-xl border-slate-200 shadow-sm focus:border-primary focus:ring-primary/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
                                                 value={hotel.whatsapp_booking_phone || ''}
                                                 onChange={e => setHotel({ ...hotel, whatsapp_booking_phone: e.target.value })}
                                                 placeholder="+260..."
@@ -784,7 +784,7 @@ export default function SettingsPage() {
                                             </div>
                                             <input
                                                 type="email"
-                                                className="block w-full pl-10 rounded-xl border-slate-200 shadow-sm focus:border-zambia-green focus:ring-zambia-green/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
+                                                className="block w-full pl-10 rounded-xl border-slate-200 shadow-sm focus:border-primary focus:ring-primary/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
                                                 value={hotel.email || ''}
                                                 onChange={e => setHotel({ ...hotel, email: e.target.value })}
                                             />
@@ -799,7 +799,7 @@ export default function SettingsPage() {
                                             </div>
                                             <input
                                                 type="url"
-                                                className="block w-full pl-10 rounded-xl border-slate-200 shadow-sm focus:border-zambia-green focus:ring-zambia-green/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
+                                                className="block w-full pl-10 rounded-xl border-slate-200 shadow-sm focus:border-primary focus:ring-primary/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
                                                 value={hotel.website_url || ''}
                                                 onChange={e => setHotel({ ...hotel, website_url: e.target.value })}
                                                 placeholder="https://..."
@@ -838,7 +838,7 @@ export default function SettingsPage() {
                                                 </div>
                                                 <input
                                                     type="url"
-                                                    className="block w-full pl-10 rounded-xl border-slate-200 shadow-sm focus:border-zambia-green focus:ring-zambia-green/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
+                                                    className="block w-full pl-10 rounded-xl border-slate-200 shadow-sm focus:border-primary focus:ring-primary/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
                                                     value={hotel[social.key] || ''}
                                                     onChange={e => setHotel({ ...hotel, [social.key]: e.target.value })}
                                                     placeholder={`https://${social.placeholder}`}
@@ -868,7 +868,7 @@ export default function SettingsPage() {
                                     <label className="block text-sm font-semibold text-slate-700 mb-2">Tax Payer Identification Number (TPIN)</label>
                                     <input
                                         type="text"
-                                        className="block w-full rounded-xl border-slate-200 shadow-sm focus:border-zambia-green focus:ring-zambia-green/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
+                                        className="block w-full rounded-xl border-slate-200 shadow-sm focus:border-primary focus:ring-primary/20 px-4 py-3 border text-slate-900 bg-slate-50 focus:bg-white transition-all"
                                         value={hotel.zra_tpin || ''}
                                         onChange={e => setHotel({ ...hotel, zra_tpin: e.target.value })}
                                         placeholder="1000..."
@@ -887,7 +887,7 @@ export default function SettingsPage() {
                     <button
                         type="submit"
                         disabled={saving}
-                        className="flex items-center gap-2 bg-zambia-green text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-zambia-green/20 hover:bg-zambia-green/90 disabled:opacity-50 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
+                        className="flex items-center gap-2 bg-primary text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 disabled:opacity-50 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200"
                     >
                         <Save size={18} />
                         {saving ? 'Saving...' : 'Save Changes'}

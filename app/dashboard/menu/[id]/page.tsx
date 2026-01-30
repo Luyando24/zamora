@@ -30,7 +30,7 @@ export default function EditMenuItemPage({ params }: { params: { id: string } })
   if (loading) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-zambia-green" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -39,7 +39,7 @@ export default function EditMenuItemPage({ params }: { params: { id: string } })
     return (
       <div className="text-center py-12">
         <p className="text-gray-500">Item not found.</p>
-        <Link href="/dashboard/menu" className="text-zambia-green hover:underline mt-2 inline-block">
+        <Link href="/dashboard/menu" className="text-primary hover:underline mt-2 inline-block">
           Back to Menu
         </Link>
       </div>

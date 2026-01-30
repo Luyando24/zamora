@@ -93,12 +93,12 @@ const FOOD_STATUS_CONFIG = {
   pending: {
     label: 'New Orders',
     icon: AlertCircle,
-    color: 'text-blue-600',
-    bg: 'bg-blue-50',
-    border: 'border-blue-200',
-    accent: 'border-l-blue-500',
-    badge: 'bg-blue-100 text-blue-700',
-    button: 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200'
+    color: 'text-primary',
+    bg: 'bg-primary/10',
+    border: 'border-primary/20',
+    accent: 'border-l-primary',
+    badge: 'bg-primary/20 text-primary',
+    button: 'bg-primary hover:bg-primary/90 text-white shadow-primary/10'
   },
   preparing: {
     label: 'Preparing',
@@ -113,12 +113,12 @@ const FOOD_STATUS_CONFIG = {
   ready: {
     label: 'Ready for Pickup',
     icon: CheckCircle2,
-    color: 'text-emerald-600',
-    bg: 'bg-emerald-50',
-    border: 'border-emerald-200',
-    accent: 'border-l-emerald-500',
-    badge: 'bg-emerald-100 text-emerald-700',
-    button: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200'
+    color: 'text-primary',
+    bg: 'bg-primary/10',
+    border: 'border-primary/20',
+    accent: 'border-l-primary',
+    badge: 'bg-primary/20 text-primary',
+    button: 'bg-primary hover:bg-primary/90 text-white shadow-primary/10'
   },
   delivered: {
     label: 'Completed',
@@ -146,12 +146,12 @@ const BAR_STATUS_CONFIG = {
   pending: {
     label: 'New Orders',
     icon: AlertCircle,
-    color: 'text-purple-600',
-    bg: 'bg-purple-50',
-    border: 'border-purple-200',
-    accent: 'border-l-purple-500',
-    badge: 'bg-purple-100 text-purple-700',
-    button: 'bg-purple-600 hover:bg-purple-700 text-white shadow-purple-200'
+    color: 'text-primary',
+    bg: 'bg-primary/10',
+    border: 'border-primary/20',
+    accent: 'border-l-primary',
+    badge: 'bg-primary/20 text-primary',
+    button: 'bg-primary hover:bg-primary/90 text-white shadow-primary/10'
   },
   preparing: {
     label: 'Preparing',
@@ -166,12 +166,12 @@ const BAR_STATUS_CONFIG = {
   ready: {
     label: 'Ready for Pickup',
     icon: CheckCircle2,
-    color: 'text-emerald-600',
-    bg: 'bg-emerald-50',
-    border: 'border-emerald-200',
-    accent: 'border-l-emerald-500',
-    badge: 'bg-emerald-100 text-emerald-700',
-    button: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200'
+    color: 'text-primary',
+    bg: 'bg-primary/10',
+    border: 'border-primary/20',
+    accent: 'border-l-primary',
+    badge: 'bg-primary/20 text-primary',
+    button: 'bg-primary hover:bg-primary/90 text-white shadow-primary/10'
   },
   delivered: {
     label: 'Completed',
@@ -523,7 +523,7 @@ export default function OrdersPage() {
       <header className="bg-white/60 backdrop-blur-xl border-b border-slate-100 px-6 py-4 flex items-center justify-between shrink-0 z-20">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-4">
-            <div className={`p-3 rounded-lg text-white shadow-lg transition-colors ${activeTab === 'food' ? 'bg-slate-900 shadow-slate-900/10' : 'bg-purple-900 shadow-purple-900/10'}`}>
+            <div className={`p-3 rounded-lg text-white shadow-lg transition-colors ${activeTab === 'food' ? 'bg-primary shadow-primary/10' : 'bg-primary shadow-primary/10'}`}>
               {activeTab === 'food' ? <Utensils size={22} /> : <Wine size={22} />}
             </div>
             <div>
@@ -537,22 +537,22 @@ export default function OrdersPage() {
             <div className="bg-slate-100 p-1 rounded-lg flex items-center">
               <button
                 onClick={() => setActiveTab('food')}
-                className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'food' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'food' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
               >
                 Food Orders
                 {activeFoodCount > 0 && (
-                  <span className="flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[10px] font-bold rounded-full bg-red-500 text-white shadow-sm">
+                  <span className="flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[10px] font-bold rounded-full bg-primary text-white shadow-sm">
                     {activeFoodCount}
                   </span>
                 )}
               </button>
               <button
                 onClick={() => setActiveTab('bar')}
-                className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'bar' ? 'bg-white text-purple-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'bar' ? 'bg-white text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
               >
                 Bar Orders
                 {activeBarCount > 0 && (
-                  <span className="flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[10px] font-bold rounded-full bg-red-500 text-white shadow-sm">
+                  <span className="flex items-center justify-center min-w-[1.25rem] h-5 px-1.5 text-[10px] font-bold rounded-full bg-primary text-white shadow-sm">
                     {activeBarCount}
                   </span>
                 )}
@@ -569,7 +569,7 @@ export default function OrdersPage() {
             <select
               value={selectedPropertyId || ''}
               onChange={handlePropertyChange}
-              className="pl-9 pr-8 py-2 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 bg-white hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-800/10 focus:border-slate-800 transition-all appearance-none"
+              className="pl-9 pr-8 py-2 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 bg-white hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all appearance-none"
             >
               {properties.map(p => (
                 <option key={p.id} value={p.id}>
@@ -835,7 +835,7 @@ export default function OrdersPage() {
                   </button>
                   <button
                     onClick={() => setSelectedOrder(null)}
-                    className="px-5 py-2.5 bg-slate-800 border border-slate-800 text-white font-bold rounded-xl hover:bg-slate-700 transition-colors text-sm active:scale-95 shadow-lg shadow-slate-800/10"
+                    className="px-5 py-2.5 bg-primary border border-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-colors text-sm active:scale-95 shadow-lg shadow-primary/10"
                   >
                     Done
                   </button>
@@ -858,7 +858,7 @@ export default function OrdersPage() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="p-8 text-center">
-                <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <div className="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-6">
                   <CheckSquare size={32} />
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 mb-2">Confirm POS Registration</h3>
@@ -874,7 +874,7 @@ export default function OrdersPage() {
                   </button>
                   <button
                     onClick={() => updateStatus(orderToConfirmPOS.id, 'pos_completed', orderToConfirmPOS.type, true)}
-                    className="px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-emerald-600/20 active:scale-95 text-sm"
+                    className="px-4 py-3 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary/10 active:scale-95 text-sm"
                   >
                     Confirm
                   </button>
@@ -965,7 +965,7 @@ function OrderCard({ order, config, onStatusUpdate, onViewDetails, nextStatus, e
                 </>
               ) : order.guest_room_number.toString().startsWith('Table') ? (
                 <>
-                  <Armchair size={16} className="text-indigo-500" />
+                  <Armchair size={16} className="text-primary" />
                   <span>Table: {order.guest_room_number.replace('Table', '').trim()} (Indoor)</span>
                 </>
               ) : order.guest_room_number.toString().includes('Walk-in') || order.guest_room_number.toString().includes('Unknown') ? (

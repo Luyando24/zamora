@@ -49,8 +49,8 @@ export default function NotificationBell() {
         <Bell size={20} />
         {unreadCount > 0 && (
           <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-pink-500"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/40 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary"></span>
           </span>
         )}
       </button>
@@ -60,16 +60,16 @@ export default function NotificationBell() {
           <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
             <h3 className="font-bold text-slate-900">Notifications</h3>
             <div className="flex gap-2">
-               <button
+              <button
                 onClick={handlePushEnable}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/5 transition-colors"
                 title="Enable Push Notifications"
               >
                 <Radio size={16} />
               </button>
                <button 
                 onClick={toggleSound}
-                className={`p-1.5 rounded-lg transition-colors ${soundEnabled ? 'text-blue-600 bg-blue-50 hover:bg-blue-100' : 'text-slate-400 hover:bg-slate-100'}`}
+                className={`p-1.5 rounded-lg transition-colors ${soundEnabled ? 'text-primary bg-primary/10 hover:bg-primary/20' : 'text-slate-400 hover:bg-slate-100'}`}
                 title={soundEnabled ? "Mute sound" : "Enable sound"}
               >
                 {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
@@ -77,7 +77,7 @@ export default function NotificationBell() {
               {unreadCount > 0 && (
                 <button 
                   onClick={markAllAsRead}
-                  className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  className="p-1.5 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
                   title="Mark all as read"
                 >
                   <Check size={16} />
@@ -99,11 +99,11 @@ export default function NotificationBell() {
                     key={notification.id}
                     onClick={() => handleNotificationClick(notification)}
                     className={`w-full text-left p-4 hover:bg-slate-50 transition-colors flex gap-3 ${
-                      !notification.read ? 'bg-blue-50/30' : ''
+                      !notification.read ? 'bg-primary/5' : ''
                     }`}
                   >
                     <div className={`h-2 w-2 mt-2 rounded-full shrink-0 ${
-                      !notification.read ? 'bg-blue-500' : 'bg-slate-200'
+                      !notification.read ? 'bg-primary' : 'bg-slate-200'
                     }`} />
                     <div>
                       <p className={`text-sm ${!notification.read ? 'font-semibold text-slate-900' : 'text-slate-600'}`}>
