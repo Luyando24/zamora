@@ -168,7 +168,7 @@ export default function SubscriptionOverlay() {
       <motion.div 
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className={`bg-white rounded-[32px] shadow-2xl border border-slate-200 overflow-hidden max-w-lg w-full pointer-events-auto ${!isTrialExpired ? 'fixed bottom-24 right-6 w-80 shadow-xl' : ''}`}
+        className={`bg-white rounded-[32px] shadow-2xl border border-slate-200 overflow-hidden max-w-2xl w-full pointer-events-auto ${!isTrialExpired ? 'fixed bottom-24 right-6 w-80 shadow-xl' : ''}`}
       >
         <AnimatePresence mode="wait">
           {view === 'main' ? (
@@ -287,7 +287,7 @@ export default function SubscriptionOverlay() {
                   <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3 block ml-1">
                     Select Validity
                   </label>
-                  <div className="grid grid-cols-2 gap-2 mb-4">
+                  <div className="grid grid-cols-3 gap-2 mb-4">
                     {plans.map((plan) => (
                       <button
                         key={plan.id}
@@ -309,7 +309,7 @@ export default function SubscriptionOverlay() {
                     ))}
                     <button
                       onClick={() => setSelectedDuration('custom')}
-                      className={`px-4 py-4 rounded-2xl text-sm font-black transition-all flex items-center justify-between col-span-2 ${
+                      className={`px-4 py-4 rounded-2xl text-sm font-black transition-all flex items-center justify-between col-span-3 ${
                         selectedDuration === 'custom' 
                           ? 'bg-blue-900 text-white shadow-lg shadow-blue-900/20' 
                           : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-100'
