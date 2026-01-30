@@ -6,7 +6,7 @@ import {
   Plus, Key, Search, RefreshCw, 
   CheckCircle2, AlertCircle, Copy, ExternalLink,
   ShieldCheck, CreditCard, Calendar as CalendarIcon, Building2,
-  Clock, Check, Trash2, Ban, ArrowUpCircle
+  Clock, Check, Trash2, Ban, ArrowUpCircle, Link2Off
 } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
 import { format, addDays, differenceInDays, startOfDay } from 'date-fns';
@@ -51,6 +51,7 @@ export default function SubscriptionManagementPage() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [selectedLicense, setSelectedLicense] = useState<License | null>(null);
   const [editingPlan, setEditingPlan] = useState<LicensePlan | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
   
   const supabase = createClient();
   const router = useRouter();
@@ -70,6 +71,7 @@ export default function SubscriptionManagementPage() {
           router.push('/dashboard');
           return;
         }
+        setUserRole(profile?.role || null);
       }
 
       // Fetch Licenses
@@ -219,7 +221,8 @@ export default function SubscriptionManagementPage() {
         const { error: propError } = await supabase
           .from('properties')
           .update({ 
-            subscription_status: 'trial', // Revert to trial or some other status
+            subscription_status: 'trial',
+            subscription_plan: 'trial', // Reset plan too
             license_expires_at: new Date().toISOString() // Expire immediately
           })
           .eq('id', license.used_by_property_id);
@@ -248,6 +251,7 @@ export default function SubscriptionManagementPage() {
           .from('properties')
           .update({ 
             subscription_status: 'trial',
+            subscription_plan: 'trial',
             license_expires_at: new Date().toISOString()
           })
           .eq('id', license.used_by_property_id);
@@ -263,6 +267,43 @@ export default function SubscriptionManagementPage() {
     } catch (err) {
       console.error('Error deleting license:', err);
       alert('Failed to delete license.');
+    }
+  };
+
+  const unassignLicense = async (license: License) => {
+    if (!license.used_by_property_id) return;
+    if (!confirm(`Are you sure you want to unassign license ${license.key} from ${license.property?.name}? The license will become UNUSED and available again.`)) return;
+
+    try {
+      // 1. Update property
+      const { error: propError } = await supabase
+        .from('properties')
+        .update({ 
+          subscription_status: 'trial',
+          subscription_plan: 'trial',
+          license_expires_at: new Date().toISOString()
+        })
+        .eq('id', license.used_by_property_id);
+
+      if (propError) throw propError;
+
+      // 2. Update license
+      const { error: licenseError } = await supabase
+        .from('licenses')
+        .update({
+          status: 'unused',
+          used_by_property_id: null,
+          used_at: null,
+          expires_at: null
+        })
+        .eq('id', license.id);
+
+      if (licenseError) throw licenseError;
+
+      await fetchData();
+    } catch (err) {
+      console.error('Error unassigning license:', err);
+      alert('Failed to unassign license.');
     }
   };
 
@@ -581,6 +622,16 @@ export default function SubscriptionManagementPage() {
                               title="Deactivate/Revoke License"
                             >
                               <Ban size={18} />
+                            </button>
+                          )}
+
+                          {userRole === 'super_admin' && license.used_by_property_id && (
+                            <button
+                              onClick={() => unassignLicense(license)}
+                              className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                              title="Release/Unassign License from Property"
+                            >
+                              <Link2Off size={18} />
                             </button>
                           )}
 

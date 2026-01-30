@@ -11,7 +11,6 @@ CREATE TABLE IF NOT EXISTS public.licenses (
 );
 
 -- Enable RLS
-ALTER TABLE public.licenses ENABLE CONTROL; -- Error in syntax, should be ENABLE ROW LEVEL SECURITY
 ALTER TABLE public.licenses ENABLE ROW LEVEL SECURITY;
 
 -- Policies for licenses

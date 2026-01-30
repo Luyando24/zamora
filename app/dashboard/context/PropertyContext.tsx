@@ -64,14 +64,22 @@ export function PropertyProvider({ children }: { children: React.ReactNode }) {
           }
         }
 
-        // Check trial status
+        // Check trial/license status
         if (activeProperty) {
           const trialEndsAt = activeProperty.trial_ends_at;
+          const licenseExpiresAt = activeProperty.license_expires_at;
           const status = activeProperty.subscription_status;
           const plan = activeProperty.subscription_plan;
+          const now = new Date();
 
-          if (plan === 'trial' || !plan) {
-            const now = new Date();
+          if (status === 'active_licensed' && licenseExpiresAt) {
+            const expires = new Date(licenseExpiresAt);
+            const diffTime = expires.getTime() - now.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            setDaysRemaining(Math.max(0, diffDays));
+            setIsTrialExpired(diffDays <= 0 || status === 'suspended');
+          } else if (plan === 'trial' || !plan || status === 'trial') {
             const ends = trialEndsAt ? new Date(trialEndsAt) : new Date(new Date(activeProperty.created_at).getTime() + 14 * 24 * 60 * 60 * 1000);
             
             const diffTime = ends.getTime() - now.getTime();
@@ -81,7 +89,7 @@ export function PropertyProvider({ children }: { children: React.ReactNode }) {
             setIsTrialExpired(diffDays <= 0 && status !== 'active_licensed');
           } else {
             setIsTrialExpired(status === 'suspended');
-            setDaysRemaining(365); // Just a placeholder for active plans
+            setDaysRemaining(365);
           }
         }
       } else {
