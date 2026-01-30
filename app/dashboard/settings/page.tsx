@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { 
   Building2, Save, Globe, Mail, Phone, Facebook, Instagram, Twitter, 
-  Wifi, ChevronDown, Plus, Baby, Utensils, CreditCard, LayoutDashboard, Key 
+  Wifi, ChevronDown, Plus, Baby, Utensils, CreditCard, LayoutDashboard, Key, Trash2 
 } from 'lucide-react';
 import ImageUpload from '@/components/ui/ImageUpload';
 import Link from 'next/link';
@@ -42,6 +42,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('general');
+  const [userRole, setUserRole] = useState<string | null>(null);
   const supabase = createClient();
   const { properties, selectedPropertyId, setSelectedPropertyId, refreshProperties } = useProperty();
   
@@ -69,21 +70,34 @@ export default function SettingsPage() {
   });
 
   useEffect(() => {
-    if (selectedPropertyId && properties.length > 0) {
-      const selected = properties.find(p => p.id === selectedPropertyId);
-      if (selected) {
-        setHotel({
-            ...selected,
-            city: selected.city || '',
-            country: selected.country || 'Zambia',
-            settings: selected.settings || {}
-        });
+    async function init() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        setUserRole(profile?.role || 'user');
       }
-    } else if (properties.length > 0 && !selectedPropertyId) {
-       // If properties exist but none selected, select the first one
-       setSelectedPropertyId(properties[0].id);
+
+      if (selectedPropertyId && properties.length > 0) {
+        const selected = properties.find(p => p.id === selectedPropertyId);
+        if (selected) {
+          setHotel({
+              ...selected,
+              city: selected.city || '',
+              country: selected.country || 'Zambia',
+              settings: selected.settings || {}
+          });
+        }
+      } else if (properties.length > 0 && !selectedPropertyId) {
+         // If properties exist but none selected, select the first one
+         setSelectedPropertyId(properties[0].id);
+      }
+      setLoading(false);
     }
-    setLoading(false);
+    init();
   }, [selectedPropertyId, properties, setSelectedPropertyId]);
 
   const handlePropertyChange = (propertyId: string) => {
@@ -116,6 +130,75 @@ export default function SettingsPage() {
       } else {
           setSelectedPropertyId(propertyId);
       }
+  };
+
+  const handleDeleteLicense = async () => {
+    if (!hotel.id || !hotel.settings?.license_key) return;
+    
+    if (!confirm('Are you sure you want to delete this license from the property? This will revert the property to trial status.')) {
+      return;
+    }
+
+    try {
+      setSaving(true);
+      
+      // 1. Find the license
+      const { data: license, error: licenseError } = await supabase
+        .from('licenses')
+        .select('id')
+        .eq('used_by_property_id', hotel.id)
+        .eq('status', 'used')
+        .maybeSingle();
+
+      if (licenseError) throw licenseError;
+
+      if (license) {
+        // 2. Mark license as unused
+        const { error: updateLicenseError } = await supabase
+          .from('licenses')
+          .update({
+            status: 'unused',
+            used_by_property_id: null,
+            used_at: null
+          })
+          .eq('id', license.id);
+        
+        if (updateLicenseError) throw updateLicenseError;
+      }
+
+      // 3. Update property settings and status
+      const updatedSettings = { ...hotel.settings };
+      delete updatedSettings.license_key;
+
+      const { error: updatePropError } = await supabase
+        .from('properties')
+        .update({
+          subscription_status: 'trial',
+          subscription_plan: 'basic',
+          settings: updatedSettings,
+          license_expires_at: null
+        })
+        .eq('id', hotel.id);
+
+      if (updatePropError) throw updatePropError;
+
+      // 4. Refresh local state and properties context
+      setHotel({
+        ...hotel,
+        subscription_status: 'trial',
+        subscription_plan: 'basic',
+        settings: updatedSettings,
+        license_expires_at: null
+      });
+      
+      await refreshProperties();
+      alert('License removed successfully.');
+    } catch (err: any) {
+      console.error('Error deleting license:', err);
+      alert('Failed to delete license: ' + err.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -529,6 +612,16 @@ export default function SettingsPage() {
                                                     >
                                                       Verify
                                                     </button>
+                                                    {userRole === 'super_admin' && hotel.subscription_status === 'active_licensed' && (
+                                                      <button 
+                                                        type="button"
+                                                        className="px-4 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-bold hover:bg-red-100 transition-colors flex items-center gap-2 border border-red-100"
+                                                        onClick={handleDeleteLicense}
+                                                      >
+                                                        <Trash2 size={16} />
+                                                        Delete
+                                                      </button>
+                                                    )}
                                                   </div>
                                                   <p className="mt-2 text-[10px] text-slate-400 font-medium">
                                                     Status: <span className={hotel.subscription_status === 'active_licensed' ? 'text-emerald-600' : 'text-amber-600'}>
