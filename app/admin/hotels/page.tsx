@@ -3,10 +3,11 @@
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/client';
-import { Search, MoreVertical, Shield, Ban, CheckCircle, ExternalLink, Trash2, Edit2, Plus, X, Globe, MapPin, Mail, Phone, Building2 } from 'lucide-react';
+import { Search, MoreVertical, Shield, Ban, CheckCircle, ExternalLink, Trash2, Edit2, Plus, X, Globe, MapPin, Mail, Phone, Building2, Key, Clock, Check } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import { format, addDays } from 'date-fns';
 
 export default function AdminHotelsPage() {
   const [hotels, setHotels] = useState<any[]>([]);
@@ -15,9 +16,95 @@ export default function AdminHotelsPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedHotel, setSelectedHotel] = useState<any>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [availableLicenses, setAvailableLicenses] = useState<any[]>([]);
+  const [isFetchingLicenses, setIsFetchingLicenses] = useState(false);
+  const [licenseSearch, setLicenseSearch] = useState('');
   
   const supabase = createClient();
+
+  const fetchAvailableLicenses = async () => {
+    setIsFetchingLicenses(true);
+    try {
+      const { data, error } = await supabase
+        .from('licenses')
+        .select('*')
+        .eq('status', 'unused')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      setAvailableLicenses(data || []);
+    } catch (error) {
+      console.error('Error fetching licenses:', error);
+      toast.error('Failed to load available licenses');
+    } finally {
+      setIsFetchingLicenses(false);
+    }
+  };
+
+  const handleAssignLicense = async (license: any) => {
+    if (!selectedHotel || !license) return;
+    
+    setIsSaving(true);
+    try {
+      const expiresAt = addDays(new Date(), license.duration_days).toISOString();
+      const usedAt = new Date().toISOString();
+
+      // 1. Update License
+      const { error: licenseError } = await supabase
+        .from('licenses')
+        .update({
+          status: 'used',
+          used_by_property_id: selectedHotel.id,
+          used_at: usedAt,
+          expires_at: expiresAt
+        })
+        .eq('id', license.id);
+
+      if (licenseError) throw licenseError;
+
+      // 2. Update Property
+      const updatedSettings = { 
+        ...(selectedHotel.settings || {}), 
+        license_key: license.key 
+      };
+
+      const { error: propertyError } = await supabase
+        .from('properties')
+        .update({
+          subscription_status: 'active_licensed',
+          subscription_plan: 'pro', // Default to pro for licensed
+          settings: updatedSettings,
+          license_expires_at: expiresAt
+        })
+        .eq('id', selectedHotel.id);
+
+      if (propertyError) throw propertyError;
+
+      // Update local state
+      setHotels(prev => prev.map(h => 
+        h.id === selectedHotel.id 
+          ? { 
+              ...h, 
+              subscription_status: 'active_licensed', 
+              subscription_plan: 'pro',
+              settings: updatedSettings,
+              license_expires_at: expiresAt
+            } 
+          : h
+      ));
+
+      setIsAssignModalOpen(false);
+      setSelectedHotel(null);
+      toast.success(`License ${license.key} assigned successfully!`);
+    } catch (error: any) {
+      console.error('Error assigning license:', error);
+      toast.error('Failed to assign license: ' + error.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const fetchHotels = useCallback(async () => {
     setLoading(true);
@@ -218,6 +305,17 @@ export default function AdminHotelsPage() {
                         <button 
                           onClick={() => {
                             setSelectedHotel(hotel);
+                            fetchAvailableLicenses();
+                            setIsAssignModalOpen(true);
+                          }}
+                          className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                          title="Assign License"
+                        >
+                          <Key size={18} />
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setSelectedHotel(hotel);
                             setIsEditModalOpen(true);
                           }}
                           className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -396,6 +494,118 @@ export default function AdminHotelsPage() {
                   </button>
                 </div>
               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Assign License Modal */}
+      <AnimatePresence>
+        {isAssignModalOpen && selectedHotel && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsAssignModalOpen(false)}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="relative bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]"
+            >
+              <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-emerald-100 text-emerald-600 rounded-lg">
+                    <Key size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-900">Assign License</h3>
+                    <p className="text-sm text-slate-500">Assign an available license to <span className="font-bold text-slate-700">{selectedHotel.name}</span></p>
+                  </div>
+                </div>
+                <button onClick={() => setIsAssignModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="p-6 border-b border-slate-100 bg-white">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <input 
+                    placeholder="Search available licenses by key or plan..." 
+                    className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={licenseSearch}
+                    onChange={e => setLicenseSearch(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                {isFetchingLicenses ? (
+                  <div className="py-12 text-center text-slate-500">
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-5 h-5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
+                      Fetching available licenses...
+                    </div>
+                  </div>
+                ) : availableLicenses.length === 0 ? (
+                  <div className="py-12 text-center text-slate-500 border-2 border-dashed border-slate-100 rounded-xl">
+                    <p>No available (unused) licenses found.</p>
+                    <Link href="/admin/licenses" className="text-blue-600 font-bold hover:underline mt-2 inline-block">
+                      Generate new licenses here
+                    </Link>
+                  </div>
+                ) : (
+                  availableLicenses
+                    .filter(l => l.key.toLowerCase().includes(licenseSearch.toLowerCase()) || l.plan.toLowerCase().includes(licenseSearch.toLowerCase()))
+                    .map((license) => (
+                      <div 
+                        key={license.id}
+                        className="p-4 border border-slate-200 rounded-xl hover:border-emerald-500 hover:bg-emerald-50/30 transition-all group relative cursor-pointer"
+                        onClick={() => {
+                          if (confirm(`Assign license ${license.key} (${license.plan}) to ${selectedHotel.name}?`)) {
+                            handleAssignLicense(license);
+                          }
+                        }}
+                      >
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-mono font-bold text-slate-900">{license.key}</span>
+                              <span className="px-2 py-0.5 bg-blue-50 text-blue-700 text-[10px] font-bold rounded uppercase tracking-wider">
+                                {license.plan}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-3 text-xs text-slate-500">
+                              <span className="flex items-center gap-1">
+                                <Clock size={12} /> {license.duration_days} Days
+                              </span>
+                              <span>Created: {format(new Date(license.created_at), 'MMM dd, yyyy')}</span>
+                            </div>
+                          </div>
+                          <button 
+                            className="p-2 bg-emerald-600 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                            title="Select License"
+                          >
+                            <Check size={16} />
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                )}
+              </div>
+
+              <div className="p-6 border-t border-slate-100 bg-slate-50/50 flex justify-end">
+                <button 
+                  onClick={() => setIsAssignModalOpen(false)}
+                  className="px-6 py-2 border border-slate-200 rounded-lg text-slate-600 font-medium hover:bg-slate-50 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
             </motion.div>
           </div>
         )}

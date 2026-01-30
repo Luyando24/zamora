@@ -6,8 +6,14 @@ WHERE a.id < b.id
 
 -- 2. Add a unique constraint to prevent future duplicates
 -- We use duration_days as the unique key
-ALTER TABLE public.license_plans 
-ADD CONSTRAINT license_plans_duration_days_key UNIQUE (duration_days);
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'license_plans_duration_days_key') THEN
+        ALTER TABLE public.license_plans 
+        ADD CONSTRAINT license_plans_duration_days_key UNIQUE (duration_days);
+    END IF;
+END;
+$$;
 
 -- 3. Update the seed data to use the new constraint
 -- This ensures that running the migration multiple times won't create duplicates
