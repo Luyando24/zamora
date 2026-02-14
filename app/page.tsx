@@ -4,10 +4,35 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, CheckCircle2, BarChart3, ShieldCheck, Zap, Smartphone, Menu, X, Globe, WifiOff, MousePointerClick, Layout, Monitor, Download } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+interface Release {
+  version: string;
+  download_url: string;
+  platform: string;
+}
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [latestRelease, setLatestRelease] = useState<Release | null>(null);
+
+  useEffect(() => {
+    async function fetchLatestRelease() {
+      try {
+        const response = await fetch('/api/admin/software/release');
+        if (response.ok) {
+          const releases: Release[] = await response.json();
+          const latest = releases.find(r => r.platform === 'windows');
+          if (latest) {
+            setLatestRelease(latest);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch latest release:', error);
+      }
+    }
+    fetchLatestRelease();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#030712] text-white overflow-x-hidden selection:bg-emerald-600 selection:text-white">
@@ -407,7 +432,7 @@ export default function LandingPage() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <a 
-                    href="#" 
+                    href={latestRelease?.download_url || "#"} 
                     className="flex items-center justify-center gap-3 px-8 py-4 bg-white text-[#030712] rounded-2xl font-bold text-lg hover:bg-gray-100 transition-all shadow-xl shadow-white/5"
                   >
                     <Download className="w-6 h-6" />
@@ -415,7 +440,7 @@ export default function LandingPage() {
                   </a>
                 </motion.div>
                 <div className="flex items-center px-4 py-2 bg-white/5 border border-white/10 rounded-2xl text-xs text-gray-500 font-mono">
-                  v2.4.0 (Latest Stable)
+                  v{latestRelease?.version || "2.4.0"} (Latest Stable)
                 </div>
               </div>
               <p className="mt-4 text-sm text-gray-500 px-2 italic">
@@ -435,7 +460,7 @@ export default function LandingPage() {
                   <div className="w-3 h-3 rounded-full bg-red-500/50"></div>
                   <div className="w-3 h-3 rounded-full bg-yellow-500/50"></div>
                   <div className="w-3 h-3 rounded-full bg-emerald-500/50"></div>
-                  <div className="ml-4 px-3 py-1 bg-white/5 rounded-md text-[10px] text-gray-500 font-mono">Zamora POS v2.4.0</div>
+                  <div className="ml-4 px-3 py-1 bg-white/5 rounded-md text-[10px] text-gray-500 font-mono">Zamora POS v{latestRelease?.version || "2.4.0"}</div>
                 </div>
                 <div className="aspect-video relative overflow-hidden group">
                   <Image 

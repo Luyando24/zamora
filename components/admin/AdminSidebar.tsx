@@ -6,7 +6,8 @@ import { createClient } from '@/utils/supabase/client';
 import { toast } from 'react-hot-toast';
 import { 
   LayoutDashboard, Building2, Users, CreditCard, 
-  Settings, LogOut, BarChart3, ShieldCheck, Activity 
+  Settings, LogOut, BarChart3, ShieldCheck, Activity,
+  Monitor
 } from 'lucide-react';
 
 const navigation = [
@@ -14,6 +15,7 @@ const navigation = [
   { name: 'Analytics', href: '/admin/analytics', icon: Activity },
   { name: 'Properties', href: '/admin/hotels', icon: Building2 },
   { name: 'Licenses', href: '/admin/licenses', icon: ShieldCheck },
+  { name: 'Software', href: '/admin/software', icon: Monitor },
   { name: 'Users', href: '/admin/users', icon: Users },
   { name: 'Revenue', href: '/admin/revenue', icon: CreditCard },
   { name: 'System Health', href: '/admin/health', icon: BarChart3 },
