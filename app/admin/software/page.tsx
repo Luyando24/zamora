@@ -109,8 +109,12 @@ export default function SoftwareManagement() {
       if (uploadError) {
         console.error('Supabase Storage Error:', uploadError);
         // Special handling for common errors
-        if (uploadError.message.includes('Payload Too Large') || uploadError.message.includes('413')) {
-          throw new Error('File is too large for the current storage limit (typically 50MB).');
+        if (
+          uploadError.message.includes('Payload Too Large') || 
+          uploadError.message.includes('413') ||
+          uploadError.message.includes('exceeded the maximum allowed size')
+        ) {
+          throw new Error('The file is too large for the current Supabase storage limit (default is 50MB). Please increase the "Maximum File Size" in your Supabase bucket settings.');
         }
         throw uploadError;
       }
