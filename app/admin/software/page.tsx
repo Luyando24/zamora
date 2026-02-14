@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { 
   Monitor, Download, Plus, Trash2, CheckCircle2, 
@@ -31,13 +31,9 @@ export default function SoftwareManagement() {
   const [file, setFile] = useState<File | null>(null);
   const [platform, setPlatform] = useState('windows');
 
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
-  useEffect(() => {
-    fetchReleases();
-  }, []);
-
-  const fetchReleases = async () => {
+  const fetchReleases = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('app_releases')
@@ -52,7 +48,11 @@ export default function SoftwareManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase]);
+
+  useEffect(() => {
+    fetchReleases();
+  }, [fetchReleases]);
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -231,7 +231,7 @@ export default function SoftwareManagement() {
               ) : releases.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
-                    No releases found. Click "New Release" to upload your first software version.
+                    No releases found. Click &quot;New Release&quot; to upload your first software version.
                   </td>
                 </tr>
               ) : (

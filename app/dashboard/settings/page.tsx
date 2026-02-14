@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { 
   Building2, Save, Globe, Mail, Phone, Facebook, Instagram, Twitter, 
@@ -44,7 +44,7 @@ export default function SettingsPage() {
   const [verifying, setVerifying] = useState(false);
   const [activeTab, setActiveTab] = useState('general');
   const [userRole, setUserRole] = useState<string | null>(null);
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const { properties, selectedPropertyId, setSelectedPropertyId, refreshProperties } = useProperty();
   
   // Currently selected property for editing
@@ -99,7 +99,7 @@ export default function SettingsPage() {
       setLoading(false);
     }
     init();
-  }, [selectedPropertyId, properties, setSelectedPropertyId]);
+  }, [selectedPropertyId, properties, setSelectedPropertyId, supabase]);
 
   const handlePropertyChange = (propertyId: string) => {
       if (propertyId === 'new') {
