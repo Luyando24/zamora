@@ -235,13 +235,18 @@ export default function LandingPage() {
                   Book Demo
                 </Link>
 
-                <Link 
-                  href="#download"
+                <a 
+                  href={latestRelease?.download_url || "#download"}
                   className="w-full sm:w-auto px-8 py-4 text-gray-400 hover:text-white transition-all flex items-center justify-center gap-2 group"
+                  onClick={(e) => {
+                    if (!latestRelease?.download_url) return;
+                    // If we have a direct link, we can still scroll to section or just download
+                    // Let's stick to direct download if available for better UX
+                  }}
                 >
                   <Monitor className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                  Download Desktop
-                </Link>
+                  {latestRelease ? 'Download Now' : 'Download Desktop'}
+                </a>
             </motion.div>
           </div>
 
@@ -437,15 +442,25 @@ export default function LandingPage() {
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                   <a 
                     href={latestRelease?.download_url || "#"} 
-                    className="flex items-center justify-center gap-3 px-8 py-4 bg-white text-[#030712] rounded-2xl font-bold text-lg hover:bg-gray-100 transition-all shadow-xl shadow-white/5"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`flex items-center justify-center gap-3 px-8 py-4 bg-white text-[#030712] rounded-2xl font-bold text-lg hover:bg-gray-100 transition-all shadow-xl shadow-white/5 ${!latestRelease?.download_url ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    onClick={(e) => {
+                      if (!latestRelease?.download_url) {
+                        e.preventDefault();
+                        alert('Download will be available soon. Please check back later.');
+                      }
+                    }}
                   >
                     <Download className="w-6 h-6" />
-                    Download for Windows
+                    {latestRelease ? 'Download for Windows' : 'Coming Soon'}
                   </a>
                 </motion.div>
-                <div className="flex items-center px-4 py-2 bg-white/5 border border-white/10 rounded-2xl text-xs text-gray-500 font-mono">
-                  v{latestRelease?.version || "2.4.0"} (Latest Stable)
-                </div>
+                {latestRelease && (
+                  <div className="flex items-center px-4 py-2 bg-white/5 border border-white/10 rounded-2xl text-xs text-gray-500 font-mono">
+                    v{latestRelease.version} (Latest Stable)
+                  </div>
+                )}
               </div>
               <p className="mt-4 text-sm text-gray-500 px-2 italic">
                 * macOS and Linux versions coming soon.
@@ -464,7 +479,7 @@ export default function LandingPage() {
                   <div className="w-3 h-3 rounded-full bg-red-500/50"></div>
                   <div className="w-3 h-3 rounded-full bg-yellow-500/50"></div>
                   <div className="w-3 h-3 rounded-full bg-emerald-500/50"></div>
-                  <div className="ml-4 px-3 py-1 bg-white/5 rounded-md text-[10px] text-gray-500 font-mono">Zamora POS v{latestRelease?.version || "2.4.0"}</div>
+                  <div className="ml-4 px-3 py-1 bg-white/5 rounded-md text-[10px] text-gray-500 font-mono">Zamora POS v{latestRelease?.version || "1.0.0"}</div>
                 </div>
                 <div className="aspect-video relative overflow-hidden group">
                   <Image 
