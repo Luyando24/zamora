@@ -67,12 +67,6 @@ export async function GET(req: NextRequest) {
   try {
     const supabase = await createClient();
     
-    // Check if user is authenticated (optional, but good for admin routes)
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const { data, error } = await supabase
       .from('app_releases')
       .select('*')

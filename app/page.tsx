@@ -10,6 +10,7 @@ interface Release {
   version: string;
   download_url: string;
   platform: string;
+  is_latest: boolean;
 }
 
 export default function LandingPage() {
@@ -22,7 +23,10 @@ export default function LandingPage() {
         const response = await fetch('/api/admin/software/release');
         if (response.ok) {
           const releases: Release[] = await response.json();
-          const latest = releases.find(r => r.platform === 'windows');
+          // Find the latest windows release explicitly, or the most recent one if none marked as latest
+          const latest = releases.find(r => r.platform === 'windows' && r.is_latest) || 
+                         releases.find(r => r.platform === 'windows');
+          
           if (latest) {
             setLatestRelease(latest);
           }
