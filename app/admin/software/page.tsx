@@ -24,6 +24,7 @@ export default function SoftwareManagement() {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'processing' | 'finishing'>('idle');
   const [isModalOpen, setIsModalOpen] = useState(false);
   
   // Form state
@@ -64,16 +65,30 @@ export default function SoftwareManagement() {
 
     setUploading(true);
     setUploadProgress(0);
+    setUploadStatus('uploading');
 
     let progressInterval: NodeJS.Timeout;
 
-    // Simulate progress while uploading
+    // Improved simulation: starts fast, slows down as it approaches 99%
     progressInterval = setInterval(() => {
       setUploadProgress(prev => {
-        if (prev >= 95) return prev;
-        return prev + Math.random() * 5;
+        if (prev >= 99) return prev;
+        
+        let step = 0;
+        if (prev < 70) {
+          step = Math.random() * 10; // Faster initially
+        } else if (prev < 90) {
+          step = Math.random() * 2;  // Slow down
+        } else if (prev < 98) {
+          step = Math.random() * 0.5; // Very slow
+        } else {
+          step = 0.01; // Crawling at the end
+        }
+        
+        const next = prev + step;
+        return next > 99 ? 99 : next;
       });
-    }, 500);
+    }, 1000);
 
     try {
       // 1. Upload file to Supabase Storage
@@ -81,6 +96,9 @@ export default function SoftwareManagement() {
       const fileName = `zamora-pos-${version}-${Date.now()}.${fileExt}`;
       const filePath = `releases/${fileName}`;
 
+      // Log file size for debugging
+      console.log(`Starting upload: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
+      
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('software')
         .upload(filePath, file, {
@@ -88,8 +106,16 @@ export default function SoftwareManagement() {
           upsert: false
         });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Supabase Storage Error:', uploadError);
+        // Special handling for common errors
+        if (uploadError.message.includes('Payload Too Large') || uploadError.message.includes('413')) {
+          throw new Error('File is too large for the current storage limit (typically 50MB).');
+        }
+        throw uploadError;
+      }
 
+      setUploadStatus('processing');
       setUploadProgress(100);
       clearInterval(progressInterval);
 
@@ -97,6 +123,8 @@ export default function SoftwareManagement() {
       const { data: { publicUrl } } = supabase.storage
         .from('software')
         .getPublicUrl(filePath);
+
+      setUploadStatus('finishing');
 
       // 3. Create release record via API (to handle is_latest logic)
       const response = await fetch('/api/admin/software/release', {
@@ -127,6 +155,7 @@ export default function SoftwareManagement() {
     } finally {
       setUploading(false);
       setUploadProgress(0);
+      setUploadStatus('idle');
     }
   };
 
@@ -406,7 +435,11 @@ export default function SoftwareManagement() {
               {uploading && (
                 <div className="space-y-2 pt-2">
                   <div className="flex justify-between text-xs font-bold text-slate-500">
-                    <span>Uploading to storage...</span>
+                    <span>
+                      {uploadStatus === 'uploading' && 'Uploading to storage...'}
+                      {uploadStatus === 'processing' && 'Processing file...'}
+                      {uploadStatus === 'finishing' && 'Finalizing release...'}
+                    </span>
                     <span>{Math.round(uploadProgress)}%</span>
                   </div>
                   <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
@@ -415,6 +448,11 @@ export default function SoftwareManagement() {
                       style={{ width: `${uploadProgress}%` }}
                     />
                   </div>
+                  {file && file.size > 10 * 1024 * 1024 && uploadStatus === 'uploading' && (
+                    <p className="text-[10px] text-slate-400 animate-pulse">
+                      Large file detected. This may take several minutes depending on your internet speed.
+                    </p>
+                  )}
                 </div>
               )}
 
