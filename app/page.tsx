@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, CheckCircle2, BarChart3, ShieldCheck, Zap, Smartphone, Menu, X, Globe, WifiOff, MousePointerClick, Layout } from 'lucide-react';
+import { ArrowRight, CheckCircle2, BarChart3, ShieldCheck, Zap, Smartphone, Menu, X, Globe, WifiOff, MousePointerClick, Layout, Monitor, Download } from 'lucide-react';
 import { useState } from 'react';
 
 export default function LandingPage() {
@@ -30,6 +30,10 @@ export default function LandingPage() {
             </Link>
             <Link href="#compliance" className="hover:text-white transition-colors relative group">
               Compliance
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-600 transition-all group-hover:w-full"></span>
+            </Link>
+            <Link href="#download" className="hover:text-white transition-colors relative group">
+              Download
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-600 transition-all group-hover:w-full"></span>
             </Link>
             <Link href="#pricing" className="hover:text-white transition-colors relative group">
@@ -97,6 +101,13 @@ export default function LandingPage() {
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Compliance
+                </Link>
+                <Link 
+                  href="#download" 
+                  className="text-lg font-medium text-gray-300 hover:text-white"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Download
                 </Link>
                 <Link 
                   href="#pricing" 
@@ -193,6 +204,14 @@ export default function LandingPage() {
                   className="w-full sm:w-auto px-8 py-4 bg-white/5 text-white border border-white/10 rounded-full font-bold text-lg hover:bg-white/10 transition-all backdrop-blur-sm flex items-center justify-center"
                 >
                   Book Demo
+                </Link>
+
+                <Link 
+                  href="#download"
+                  className="w-full sm:w-auto px-8 py-4 text-gray-400 hover:text-white transition-all flex items-center justify-center gap-2 group"
+                >
+                  <Monitor className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                  Download Desktop
                 </Link>
             </motion.div>
           </div>
@@ -311,8 +330,8 @@ export default function LandingPage() {
             />
             <BenefitCard 
               icon={<WifiOff className="w-8 h-8 text-orange-400" />}
-              title="Offline-First POS"
-              description="Internet down? No problem. Our POS works perfectly offline and syncs automatically when you're back online. Your business never stops."
+              title="Offline-First Desktop App"
+              description="Internet down? No problem. Our dedicated Windows desktop app works perfectly offline and syncs automatically across your local network. Your business never stops."
             />
             <BenefitCard 
               icon={<MousePointerClick className="w-8 h-8 text-purple-400" />}
@@ -329,6 +348,118 @@ export default function LandingPage() {
               title="Built-in Compliance"
               description="ZRA Smart Invoice integration is standard. Generate tax-compliant receipts for every sale without extra hardware or complex setups."
             />
+          </div>
+        </div>
+      </section>
+
+      {/* Download Section */}
+      <section id="download" className="py-24 bg-gradient-to-b from-[#020617] to-[#030712] relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-7xl pointer-events-none opacity-20">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-600/20 rounded-full blur-[120px]"></div>
+          <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-600/20 rounded-full blur-[120px]"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              <h2 className="text-4xl lg:text-5xl font-bold mb-6 leading-tight">
+                Powerful Desktop App <br />
+                <span className="text-emerald-500 text-3xl lg:text-4xl">Offline-First. Always Syncing.</span>
+              </h2>
+              <p className="text-xl text-gray-400 mb-8 leading-relaxed">
+                Experience the full power of Zamora on your desktop. Our Windows application is built for maximum performance and reliability, ensuring your business keeps running even when the internet doesn&apos;t.
+              </p>
+              
+              <div className="space-y-6 mb-10">
+                <div className="flex gap-4 items-start">
+                  <div className="mt-1 p-2 bg-emerald-600/10 rounded-lg">
+                    <WifiOff className="w-5 h-5 text-emerald-500" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-white">Full Offline Mode</h4>
+                    <p className="text-gray-400 text-sm">Take orders and process payments without an internet connection.</p>
+                  </div>
+                </div>
+                <div className="flex gap-4 items-start">
+                  <div className="mt-1 p-2 bg-blue-600/10 rounded-lg">
+                    <Zap className="w-5 h-5 text-blue-500" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-white">Instant Local Sync</h4>
+                    <p className="text-gray-400 text-sm">Sync data across all devices on your local Wi-Fi instantly.</p>
+                  </div>
+                </div>
+                <div className="flex gap-4 items-start">
+                  <div className="mt-1 p-2 bg-purple-600/10 rounded-lg">
+                    <Monitor className="w-5 h-5 text-purple-500" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-white">Native Performance</h4>
+                    <p className="text-gray-400 text-sm">Optimized for Windows to ensure a smooth, lag-free experience.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <a 
+                    href="#" 
+                    className="flex items-center justify-center gap-3 px-8 py-4 bg-white text-[#030712] rounded-2xl font-bold text-lg hover:bg-gray-100 transition-all shadow-xl shadow-white/5"
+                  >
+                    <Download className="w-6 h-6" />
+                    Download for Windows
+                  </a>
+                </motion.div>
+                <div className="flex items-center px-4 py-2 bg-white/5 border border-white/10 rounded-2xl text-xs text-gray-500 font-mono">
+                  v2.4.0 (Latest Stable)
+                </div>
+              </div>
+              <p className="mt-4 text-sm text-gray-500 px-2 italic">
+                * macOS and Linux versions coming soon.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <div className="absolute -inset-4 bg-emerald-600/20 rounded-3xl blur-3xl opacity-30"></div>
+              <div className="relative bg-[#0f1623] border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
+                <div className="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-[#030712]">
+                  <div className="w-3 h-3 rounded-full bg-red-500/50"></div>
+                  <div className="w-3 h-3 rounded-full bg-yellow-500/50"></div>
+                  <div className="w-3 h-3 rounded-full bg-emerald-500/50"></div>
+                  <div className="ml-4 px-3 py-1 bg-white/5 rounded-md text-[10px] text-gray-500 font-mono">Zamora POS v2.4.0</div>
+                </div>
+                <div className="aspect-video relative overflow-hidden group">
+                  <Image 
+                    src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop" 
+                    alt="Desktop App Preview" 
+                    fill
+                    className="object-cover opacity-60 group-hover:scale-105 transition-transform duration-700"
+                    unoptimized
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0f1623] via-transparent to-transparent"></div>
+                  <div className="absolute bottom-8 left-8 right-8">
+                    <div className="flex items-center gap-4 p-4 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl">
+                      <div className="w-12 h-12 bg-emerald-600/20 rounded-xl flex items-center justify-center">
+                        <WifiOff className="w-6 h-6 text-emerald-500" />
+                      </div>
+                      <div>
+                        <p className="text-white font-bold">Offline Sync Active</p>
+                        <p className="text-gray-400 text-xs">Last local sync 2m ago</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/db/supabase-admin';
 import { notifyAdmin } from '@/lib/sms';
+import * as crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,7 +41,7 @@ export async function PATCH(
 
         const { orderId } = params;
         const body = await req.json();
-        const { status, type, waiter_name, formData, payment_method, payment_status } = body;
+        const { status, type, waiter_name, formData, payment_method, payment_status, total_amount, _newItems } = body;
 
         // Type is always required to know which table to query
         if (!type || (type !== 'food' && type !== 'bar')) {
@@ -48,11 +49,12 @@ export async function PATCH(
         }
 
         // Must provide at least one field to update
-        if (!status && !waiter_name && !payment_method && !payment_status) {
-             return NextResponse.json({ error: 'Status, waiter_name, payment_method, or payment_status is required' }, { status: 400 });
+        if (!status && !waiter_name && !payment_method && !payment_status && !total_amount && (!_newItems || _newItems.length === 0)) {
+             return NextResponse.json({ error: 'Status, waiter_name, payment_method, payment_status, total_amount, or items are required' }, { status: 400 });
         }
 
         const table = type === 'food' ? 'orders' : 'bar_orders';
+        const itemsTable = type === 'food' ? 'order_items' : 'bar_order_items';
         const supabaseAdmin = getSupabaseAdmin();
 
         // 1. Prepare updates
@@ -61,6 +63,7 @@ export async function PATCH(
         if (waiter_name) updates.waiter_name = waiter_name;
         if (payment_method) updates.payment_method = payment_method;
         if (payment_status) updates.payment_status = payment_status;
+        if (total_amount) updates.total_amount = total_amount;
         
         // Handle formData update if provided (shallow merge or replace?)
         // Ideally we fetch first, but for now let's assume if provided we might want to update it.
@@ -136,6 +139,34 @@ export async function PATCH(
         if (updateError) {
             console.error('Update Error:', updateError);
             return NextResponse.json({ error: updateError.message }, { status: 500 });
+        }
+
+        // 2.1 Handle New Items Sync (Running Bill Support)
+        if (_newItems && Array.isArray(_newItems) && _newItems.length > 0) {
+            console.log(`[API] Processing ${_newItems.length} new items for order ${orderId}`);
+            
+            const mappedItems = _newItems.map((item: any) => ({
+                id: item.id || crypto.randomUUID(),
+                order_id: orderId,
+                menu_item_id: item.menu_item_id || item.id,
+                quantity: item.quantity || 1,
+                unit_price: item.unit_price || item.price || 0,
+                total_price: item.total_price || (item.unit_price || item.price || 0) * (item.quantity || 1),
+                item_name: item.item_name || item.name || 'Unknown Item',
+                notes: item.notes || '',
+                status: item.status || 'pending',
+                created_at: item.created_at || new Date().toISOString()
+            }));
+
+            const { error: itemsError } = await supabaseAdmin
+                .from(itemsTable)
+                .upsert(mappedItems, { onConflict: 'id' });
+
+            if (itemsError) {
+                console.error('[API] Error syncing new items:', itemsError);
+                // We don't necessarily fail the whole request if order update succeeded, 
+                // but for sync reliability it's better to know.
+            }
         }
 
         if (!order) {
