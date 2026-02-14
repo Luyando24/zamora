@@ -23,6 +23,7 @@ export default function SoftwareManagement() {
   const [releases, setReleases] = useState<Release[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
   // Form state
@@ -62,6 +63,18 @@ export default function SoftwareManagement() {
     }
 
     setUploading(true);
+    setUploadProgress(0);
+
+    let progressInterval: NodeJS.Timeout;
+
+    // Simulate progress while uploading
+    progressInterval = setInterval(() => {
+      setUploadProgress(prev => {
+        if (prev >= 95) return prev;
+        return prev + Math.random() * 5;
+      });
+    }, 500);
+
     try {
       // 1. Upload file to Supabase Storage
       const fileExt = file.name.split('.').pop();
@@ -76,6 +89,9 @@ export default function SoftwareManagement() {
         });
 
       if (uploadError) throw uploadError;
+
+      setUploadProgress(100);
+      clearInterval(progressInterval);
 
       // 2. Get public URL
       const { data: { publicUrl } } = supabase.storage
@@ -105,10 +121,12 @@ export default function SoftwareManagement() {
       resetForm();
       fetchReleases();
     } catch (error: any) {
+      clearInterval(progressInterval!);
       console.error('Upload failed:', error);
       toast.error(error.message || 'Failed to upload software');
     } finally {
       setUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -384,6 +402,21 @@ export default function SoftwareManagement() {
                   className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none"
                 />
               </div>
+
+              {uploading && (
+                <div className="space-y-2 pt-2">
+                  <div className="flex justify-between text-xs font-bold text-slate-500">
+                    <span>Uploading to storage...</span>
+                    <span>{Math.round(uploadProgress)}%</span>
+                  </div>
+                  <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-primary transition-all duration-300 ease-out"
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
 
               <div className="pt-4 flex gap-3">
                 <button 
