@@ -519,53 +519,72 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Starter Plan */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {/* Monthly Plan */}
             <PricingCard 
-              title="Starter"
-              price="$49"
-              description="Perfect for small cafes or guest houses."
+              title="Monthly"
+              price="K599"
+              description="Flexible month-to-month subscription."
               features={[
-                "Up to 10 Rooms / 5 Tables",
-                "Basic POS & Inventory",
-                "ZRA Fiscalization",
-                "1 User Account",
-                "Email Support"
-              ]}
-              buttonText="Start with Starter"
-              isPopular={false}
-            />
-
-            {/* Pro Plan */}
-            <PricingCard 
-              title="Professional"
-              price="$99"
-              description="Ideal for growing hotels and restaurants."
-              features={[
+                "All Premium Features",
                 "Unlimited Rooms & Tables",
-                "Advanced Analytics",
-                "Multi-device Waiter App",
-                "QR Code Ordering",
-                "Priority 24/7 Support"
+                "ZRA Compliance",
+                "Cloud Sync & Backup",
+                "24/7 Priority Support"
               ]}
-              buttonText="Get Pro Now"
-              isPopular={true}
+              buttonText="Start Monthly"
+              isPopular={false}
             />
 
-            {/* Enterprise Plan */}
+            {/* 6 Months Plan */}
             <PricingCard 
-              title="Enterprise"
-              price="Custom"
-              description="For large-scale hospitality groups."
+              title="6 Months"
+              price="K3,485"
+              description="Save 3% on your subscription."
               features={[
-                "Multi-property Management",
-                "Custom API Integrations",
-                "Dedicated Account Manager",
-                "White-label Options",
-                "On-site Training"
+                "All Premium Features",
+                "Unlimited Rooms & Tables",
+                "ZRA Compliance",
+                "Cloud Sync & Backup",
+                "24/7 Priority Support"
               ]}
-              buttonText="Contact Sales"
+              buttonText="Save with 6 Months"
               isPopular={false}
+              badge="Save 3%"
+            />
+
+            {/* 1 Year Plan */}
+            <PricingCard 
+              title="1 Year"
+              price="K6,830"
+              description="Save 5% - Our most popular choice."
+              features={[
+                "All Premium Features",
+                "Unlimited Rooms & Tables",
+                "ZRA Compliance",
+                "Cloud Sync & Backup",
+                "24/7 Priority Support"
+              ]}
+              buttonText="Get 1 Year Pro"
+              isPopular={true}
+              badge="Save 5%"
+            />
+
+            {/* 2 Years Plan */}
+            <PricingCard 
+              title="2 Years"
+              price="K13,225"
+              description="Maximum value - Save 8%."
+              features={[
+                "All Premium Features",
+                "Unlimited Rooms & Tables",
+                "ZRA Compliance",
+                "Cloud Sync & Backup",
+                "24/7 Priority Support"
+              ]}
+              buttonText="Best Value: 2 Years"
+              isPopular={false}
+              badge="Save 8%"
             />
           </div>
         </div>
@@ -631,7 +650,7 @@ function BenefitCard({ icon, title, description }: { icon: React.ReactNode, titl
   );
 }
 
-function PricingCard({ title, price, description, features, buttonText, isPopular }: { title: string, price: string, description: string, features: string[], buttonText: string, isPopular: boolean }) {
+function PricingCard({ title, price, description, features, buttonText, isPopular, badge }: { title: string, price: string, description: string, features: string[], buttonText: string, isPopular: boolean, badge?: string }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -640,9 +659,9 @@ function PricingCard({ title, price, description, features, buttonText, isPopula
       whileHover={{ y: -10 }}
       className={`relative p-8 rounded-3xl border ${isPopular ? 'border-emerald-500 bg-emerald-500/5' : 'border-white/10 bg-white/5'} flex flex-col`}
     >
-      {isPopular && (
-        <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-emerald-500 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
-          Most Popular
+      {(isPopular || badge) && (
+        <div className={`absolute -top-4 left-1/2 -translate-x-1/2 ${isPopular ? 'bg-emerald-500' : 'bg-blue-600'} text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap`}>
+          {badge || (isPopular && "Most Popular")}
         </div>
       )}
       <div className="mb-8">
