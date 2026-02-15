@@ -58,10 +58,6 @@ export default function LandingPage() {
               Benefits
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-600 transition-all group-hover:w-full"></span>
             </Link>
-            <Link href="#compliance" className="hover:text-white transition-colors relative group">
-              Compliance
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-600 transition-all group-hover:w-full"></span>
-            </Link>
             <Link href="#download" className="hover:text-white transition-colors relative group">
               Download
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-600 transition-all group-hover:w-full"></span>
@@ -124,13 +120,6 @@ export default function LandingPage() {
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Benefits
-                </Link>
-                <Link 
-                  href="#compliance" 
-                  className="text-lg font-medium text-gray-300 hover:text-white"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Compliance
                 </Link>
                 <Link 
                   href="#download" 
@@ -210,7 +199,7 @@ export default function LandingPage() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-lg text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed"
             >
-              Zamora is the all-in-one Property Management & POS System built for speed, compliance, and growth. ZRA-integrated, cloud-native, and beautifully designed for hotels and restaurants.
+              Zamora is the all-in-one Property Management & POS System built for speed and growth. Cloud-native, and beautifully designed for hotels and restaurants.
             </motion.p>
 
             <motion.div
@@ -296,10 +285,10 @@ export default function LandingPage() {
               description="Track occupancy, restaurant sales, and revenue in real-time with beautiful, actionable charts."
             />
             <FeatureCard 
-              id="compliance"
+              id="security"
               icon={<ShieldCheck className="w-8 h-8 text-emerald-500" />}
-              title="ZRA Compliance"
-              description="Automated Smart Invoice fiscalization for both hotel bookings and restaurant orders."
+              title="Secure & Reliable"
+              description="Enterprise-grade security and automated backups for both hotel bookings and restaurant orders."
             />
             <FeatureCard 
               icon={<Zap className="w-8 h-8 text-yellow-400" />}
@@ -380,8 +369,8 @@ export default function LandingPage() {
             />
             <BenefitCard 
               icon={<ShieldCheck className="w-8 h-8 text-emerald-500" />}
-              title="Built-in Compliance"
-              description="ZRA Smart Invoice integration is standard. Generate tax-compliant receipts for every sale without extra hardware or complex setups."
+              title="Built-in Security"
+              description="Enterprise-grade data protection and encryption for every sale without extra hardware or complex setups."
             />
           </div>
         </div>
@@ -515,7 +504,7 @@ export default function LandingPage() {
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="text-4xl lg:text-5xl font-bold mb-6">Simple, Transparent Pricing</h2>
             <p className="text-xl text-gray-400">
-              Choose the plan that fits your business. All plans include ZRA compliance and cloud sync.
+              Choose the plan that fits your business. All plans include cloud sync and 24/7 support.
             </p>
           </div>
 
@@ -524,11 +513,12 @@ export default function LandingPage() {
             <PricingCard 
               title="Monthly"
               price="K599"
+              period="/mo"
               description="Flexible month-to-month subscription."
               features={[
                 "All Premium Features",
                 "Unlimited Rooms & Tables",
-                "ZRA Compliance",
+                "Dedicated Support",
                 "Cloud Sync & Backup",
                 "24/7 Priority Support"
               ]}
@@ -544,7 +534,7 @@ export default function LandingPage() {
               features={[
                 "All Premium Features",
                 "Unlimited Rooms & Tables",
-                "ZRA Compliance",
+                "Dedicated Support",
                 "Cloud Sync & Backup",
                 "24/7 Priority Support"
               ]}
@@ -561,7 +551,7 @@ export default function LandingPage() {
               features={[
                 "All Premium Features",
                 "Unlimited Rooms & Tables",
-                "ZRA Compliance",
+                "Dedicated Support",
                 "Cloud Sync & Backup",
                 "24/7 Priority Support"
               ]}
@@ -578,7 +568,7 @@ export default function LandingPage() {
               features={[
                 "All Premium Features",
                 "Unlimited Rooms & Tables",
-                "ZRA Compliance",
+                "Dedicated Support",
                 "Cloud Sync & Backup",
                 "24/7 Priority Support"
               ]}
@@ -650,7 +640,7 @@ function BenefitCard({ icon, title, description }: { icon: React.ReactNode, titl
   );
 }
 
-function PricingCard({ title, price, description, features, buttonText, isPopular, badge }: { title: string, price: string, description: string, features: string[], buttonText: string, isPopular: boolean, badge?: string }) {
+function PricingCard({ title, price, period, description, features, buttonText, isPopular, badge }: { title: string, price: string, period?: string, description: string, features: string[], buttonText: string, isPopular: boolean, badge?: string }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -668,7 +658,7 @@ function PricingCard({ title, price, description, features, buttonText, isPopula
         <h3 className="text-xl font-bold mb-2">{title}</h3>
         <div className="flex items-baseline gap-1 mb-4">
           <span className="text-4xl font-bold">{price}</span>
-          {price !== 'Custom' && <span className="text-gray-400">/mo</span>}
+          {period && <span className="text-gray-400">{period}</span>}
         </div>
         <p className="text-gray-400 text-sm">{description}</p>
       </div>
