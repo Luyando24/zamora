@@ -504,7 +504,7 @@ export default function LandingPage() {
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="text-4xl lg:text-5xl font-bold mb-6">Simple, Transparent Pricing</h2>
             <p className="text-xl text-gray-400">
-              Choose the plan that fits your business. All plans include cloud sync and 24/7 support.
+              Pricing is per property. Install on unlimited devices at no extra cost. All plans include cloud sync and 24/7 support.
             </p>
           </div>
 
@@ -516,11 +516,11 @@ export default function LandingPage() {
               period="/mo"
               description="Flexible month-to-month subscription."
               features={[
-                "All Premium Features",
+                "1 Property License",
+                "Unlimited Devices",
                 "Unlimited Rooms & Tables",
                 "Dedicated Support",
-                "Cloud Sync & Backup",
-                "24/7 Priority Support"
+                "Cloud Sync & Backup"
               ]}
               buttonText="Start Monthly"
               isPopular={false}
@@ -532,11 +532,11 @@ export default function LandingPage() {
               price="K3,485"
               description="Save 3% on your subscription."
               features={[
-                "All Premium Features",
+                "1 Property License",
+                "Unlimited Devices",
                 "Unlimited Rooms & Tables",
                 "Dedicated Support",
-                "Cloud Sync & Backup",
-                "24/7 Priority Support"
+                "Cloud Sync & Backup"
               ]}
               buttonText="Save with 6 Months"
               isPopular={false}
@@ -549,11 +549,11 @@ export default function LandingPage() {
               price="K6,830"
               description="Save 5% - Our most popular choice."
               features={[
-                "All Premium Features",
+                "1 Property License",
+                "Unlimited Devices",
                 "Unlimited Rooms & Tables",
                 "Dedicated Support",
-                "Cloud Sync & Backup",
-                "24/7 Priority Support"
+                "Cloud Sync & Backup"
               ]}
               buttonText="Get 1 Year Pro"
               isPopular={true}
@@ -566,11 +566,11 @@ export default function LandingPage() {
               price="K13,225"
               description="Maximum value - Save 8%."
               features={[
-                "All Premium Features",
+                "1 Property License",
+                "Unlimited Devices",
                 "Unlimited Rooms & Tables",
                 "Dedicated Support",
-                "Cloud Sync & Backup",
-                "24/7 Priority Support"
+                "Cloud Sync & Backup"
               ]}
               buttonText="Best Value: 2 Years"
               isPopular={false}
