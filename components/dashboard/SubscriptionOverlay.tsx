@@ -184,9 +184,9 @@ export default function SubscriptionOverlay() {
                   <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mb-6">
                     <AlertCircle className="w-8 h-8 text-red-600" />
                   </div>
-                  <h2 className="text-2xl font-black text-slate-900 mb-2">Trial Expired</h2>
+                  <h2 className="text-2xl font-black text-slate-900 mb-2">Subscription Expired</h2>
                   <p className="text-slate-500 mb-8 leading-relaxed font-medium">
-                    Your 14-day free trial for <span className="font-bold text-slate-900">{selectedProperty?.name}</span> has ended. Please enter a license key to continue using Zamora.
+                    Your current subscription for <span className="font-bold text-slate-900">{selectedProperty?.name}</span> has expired. Please enter a license key to continue using Zamora.
                   </p>
 
                   {success ? (
@@ -243,9 +243,9 @@ export default function SubscriptionOverlay() {
                       <AlertCircle size={24} />
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-lg font-black text-slate-900">Trial Ending Soon</h3>
+                      <h3 className="text-lg font-black text-slate-900">Subscription Expiring Soon</h3>
                       <p className="text-sm text-slate-500 mt-1 leading-relaxed font-medium">
-                        Your trial ends in <span className="font-black text-amber-600">{daysRemaining} days</span>. 
+                        Your subscription expires in <span className="font-black text-amber-600">{daysRemaining} days</span>. 
                         Get a license key now to avoid interruption.
                       </p>
                       <button 
