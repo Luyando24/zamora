@@ -11,6 +11,7 @@ interface Release {
   download_url: string;
   platform: string;
   is_latest: boolean;
+  storage_type?: 'supabase' | 'google_drive';
 }
 
 export default function LandingPage() {

@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { version, download_url, release_notes, platform, is_latest } = body;
+    const { version, download_url, release_notes, platform, is_latest, storage_type } = body;
 
     if (!version || !download_url || !platform) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -45,7 +45,8 @@ export async function POST(req: NextRequest) {
           download_url,
           release_notes,
           platform,
-          is_latest: is_latest ?? true
+          is_latest: is_latest ?? true,
+          storage_type: storage_type || 'supabase'
         }
       ])
       .select()

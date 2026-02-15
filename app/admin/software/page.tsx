@@ -16,6 +16,7 @@ interface Release {
   release_notes: string;
   platform: string;
   is_latest: boolean;
+  storage_type: 'supabase' | 'google_drive';
   created_at: string;
 }
 
@@ -31,6 +32,8 @@ export default function SoftwareManagement() {
   const [version, setVersion] = useState('');
   const [releaseNotes, setReleaseNotes] = useState('');
   const [file, setFile] = useState<File | null>(null);
+  const [googleDriveUrl, setGoogleDriveUrl] = useState('');
+  const [storageType, setStorageType] = useState<'supabase' | 'google_drive'>('supabase');
   const [platform, setPlatform] = useState('windows');
 
   const supabase = useMemo(() => createClient(), []);
@@ -58,8 +61,16 @@ export default function SoftwareManagement() {
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file || !version) {
-      toast.error('Please provide a file and version number');
+    if (storageType === 'supabase' && !file) {
+      toast.error('Please provide a file');
+      return;
+    }
+    if (storageType === 'google_drive' && !googleDriveUrl) {
+      toast.error('Please provide a Google Drive link');
+      return;
+    }
+    if (!version) {
+      toast.error('Please provide a version number');
       return;
     }
 
@@ -69,64 +80,74 @@ export default function SoftwareManagement() {
 
     let progressInterval: NodeJS.Timeout;
 
-    // Improved simulation: starts fast, slows down as it approaches 99%
-    progressInterval = setInterval(() => {
-      setUploadProgress(prev => {
-        if (prev >= 99) return prev;
-        
-        let step = 0;
-        if (prev < 70) {
-          step = Math.random() * 10; // Faster initially
-        } else if (prev < 90) {
-          step = Math.random() * 2;  // Slow down
-        } else if (prev < 98) {
-          step = Math.random() * 0.5; // Very slow
-        } else {
-          step = 0.01; // Crawling at the end
-        }
-        
-        const next = prev + step;
-        return next > 99 ? 99 : next;
-      });
-    }, 1000);
-
     try {
-      // 1. Upload file to Supabase Storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `zamora-pos-${version}-${Date.now()}.${fileExt}`;
-      const filePath = `releases/${fileName}`;
+      let finalDownloadUrl = '';
 
-      // Log file size for debugging
-      console.log(`Starting upload: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
-      
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('software')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
+      if (storageType === 'supabase' && file) {
+        // Improved simulation: starts fast, slows down as it approaches 99%
+        progressInterval = setInterval(() => {
+          setUploadProgress(prev => {
+            if (prev >= 99) return prev;
+            
+            let step = 0;
+            if (prev < 70) {
+              step = Math.random() * 10; // Faster initially
+            } else if (prev < 90) {
+              step = Math.random() * 2;  // Slow down
+            } else if (prev < 98) {
+              step = Math.random() * 0.5; // Very slow
+            } else {
+              step = 0.01; // Crawling at the end
+            }
+            
+            const next = prev + step;
+            return next > 99 ? 99 : next;
+          });
+        }, 1000);
 
-      if (uploadError) {
-        console.error('Supabase Storage Error:', uploadError);
-        // Special handling for common errors
-        if (
-          uploadError.message.includes('Payload Too Large') || 
-          uploadError.message.includes('413') ||
-          uploadError.message.includes('exceeded the maximum allowed size')
-        ) {
-          throw new Error('The file is too large for the current Supabase storage limit (default is 50MB). Please increase the "Maximum File Size" in your Supabase bucket settings.');
+        // 1. Upload file to Supabase Storage
+        const fileExt = file.name.split('.').pop();
+        const fileName = `zamora-pos-${version}-${Date.now()}.${fileExt}`;
+        const filePath = `releases/${fileName}`;
+
+        // Log file size for debugging
+        console.log(`Starting upload: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('software')
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (uploadError) {
+          console.error('Supabase Storage Error:', uploadError);
+          // Special handling for common errors
+          if (
+            uploadError.message.includes('Payload Too Large') || 
+            uploadError.message.includes('413') ||
+            uploadError.message.includes('exceeded the maximum allowed size')
+          ) {
+            throw new Error('The file is too large for the current Supabase storage limit (default is 50MB). Please use Google Drive link or increase the "Maximum File Size" in your Supabase bucket settings.');
+          }
+          throw uploadError;
         }
-        throw uploadError;
+
+        setUploadStatus('processing');
+        setUploadProgress(100);
+        clearInterval(progressInterval);
+
+        // 2. Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('software')
+          .getPublicUrl(filePath);
+        
+        finalDownloadUrl = publicUrl;
+      } else {
+        // Google Drive path
+        finalDownloadUrl = googleDriveUrl;
+        setUploadProgress(100);
       }
-
-      setUploadStatus('processing');
-      setUploadProgress(100);
-      clearInterval(progressInterval);
-
-      // 2. Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('software')
-        .getPublicUrl(filePath);
 
       setUploadStatus('finishing');
 
@@ -136,10 +157,11 @@ export default function SoftwareManagement() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           version,
-          download_url: publicUrl,
+          download_url: finalDownloadUrl,
           release_notes: releaseNotes,
           platform,
-          is_latest: true
+          is_latest: true,
+          storage_type: storageType
         })
       });
 
@@ -153,7 +175,7 @@ export default function SoftwareManagement() {
       resetForm();
       fetchReleases();
     } catch (error: any) {
-      clearInterval(progressInterval!);
+      if (progressInterval!) clearInterval(progressInterval);
       console.error('Upload failed:', error);
       toast.error(error.message || 'Failed to upload software');
     } finally {
@@ -167,10 +189,12 @@ export default function SoftwareManagement() {
     setVersion('');
     setReleaseNotes('');
     setFile(null);
+    setGoogleDriveUrl('');
+    setStorageType('supabase');
     setPlatform('windows');
   };
 
-  const deleteRelease = async (id: string, url: string) => {
+  const deleteRelease = async (id: string, url: string, storage_type?: string) => {
     if (!confirm('Are you sure you want to delete this release? This will also remove the file from storage.')) return;
 
     try {
@@ -182,12 +206,14 @@ export default function SoftwareManagement() {
 
       if (dbError) throw dbError;
 
-      // 2. Extract path from URL to delete from storage
-      // Example URL: https://xyz.supabase.co/storage/v1/object/public/software/releases/filename.exe
-      const urlParts = url.split('/software/');
-      if (urlParts.length > 1) {
-        const storagePath = urlParts[1];
-        await supabase.storage.from('software').remove([storagePath]);
+      // 2. If it's supabase, extract path from URL to delete from storage
+      if (storage_type === 'supabase' || !storage_type) {
+        // Example URL: https://xyz.supabase.co/storage/v1/object/public/software/releases/filename.exe
+        const urlParts = url.split('/software/');
+        if (urlParts.length > 1) {
+          const storagePath = urlParts[1];
+          await supabase.storage.from('software').remove([storagePath]);
+        }
       }
 
       toast.success('Release deleted');
@@ -318,6 +344,15 @@ export default function SoftwareManagement() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
+                        <div className="flex flex-col items-end mr-2">
+                          <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${
+                            release.storage_type === 'google_drive' 
+                              ? 'bg-amber-100 text-amber-700' 
+                              : 'bg-blue-100 text-blue-700'
+                          }`}>
+                            {release.storage_type || 'supabase'}
+                          </span>
+                        </div>
                         <a 
                           href={release.download_url} 
                           target="_blank" 
@@ -328,7 +363,7 @@ export default function SoftwareManagement() {
                           <Download size={18} />
                         </a>
                         <button 
-                          onClick={() => deleteRelease(release.id, release.download_url)}
+                          onClick={() => deleteRelease(release.id, release.download_url, release.storage_type)}
                           className="p-2 text-slate-400 hover:text-red-500 transition-colors"
                           title="Delete"
                         >
@@ -389,41 +424,96 @@ export default function SoftwareManagement() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-bold text-slate-700">Binary File (.exe, .msi, .zip)</label>
-                <div 
-                  className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
-                    file ? 'border-emerald-200 bg-emerald-50' : 'border-slate-200 hover:border-primary/50'
-                  }`}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    if (e.dataTransfer.files?.[0]) setFile(e.dataTransfer.files[0]);
-                  }}
-                >
-                  <input 
-                    type="file" 
-                    id="software-file"
-                    className="hidden"
-                    onChange={(e) => setFile(e.target.files?.[0] || null)}
-                    accept=".exe,.msi,.zip,.dmg"
-                  />
-                  <label htmlFor="software-file" className="cursor-pointer">
-                    {file ? (
-                      <div className="space-y-2">
-                        <CheckCircle2 size={32} className="mx-auto text-emerald-500" />
-                        <p className="text-sm font-bold text-emerald-700">{file.name}</p>
-                        <p className="text-xs text-emerald-600/70">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        <UploadCloud size={32} className="mx-auto text-slate-300" />
-                        <p className="text-sm text-slate-500">Click or drag file to upload</p>
-                        <p className="text-xs text-slate-400">Supported: .exe, .msi, .zip, .dmg</p>
-                      </div>
-                    )}
-                  </label>
+                <label className="text-sm font-bold text-slate-700">Storage Method</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setStorageType('supabase')}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg border transition-all flex items-center justify-center gap-2 ${
+                      storageType === 'supabase'
+                        ? 'bg-primary/5 border-primary text-primary shadow-sm'
+                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    <UploadCloud size={16} />
+                    Supabase Storage
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStorageType('google_drive')}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg border transition-all flex items-center justify-center gap-2 ${
+                      storageType === 'google_drive'
+                        ? 'bg-primary/5 border-primary text-primary shadow-sm'
+                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    <Globe size={16} />
+                    Google Drive Link
+                  </button>
                 </div>
+                <p className="text-[10px] text-slate-400">
+                  {storageType === 'supabase' 
+                    ? 'Recommended for files under 50MB. Uploaded directly to your database storage.' 
+                    : 'Required for files over 50MB. Upload to Drive and paste the share link here.'}
+                </p>
               </div>
+
+              {storageType === 'supabase' ? (
+                <div className="space-y-1.5">
+                  <label className="text-sm font-bold text-slate-700">Binary File (.exe, .msi, .zip)</label>
+                  <div 
+                    className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
+                      file ? 'border-emerald-200 bg-emerald-50' : 'border-slate-200 hover:border-primary/50'
+                    }`}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      if (e.dataTransfer.files?.[0]) setFile(e.dataTransfer.files[0]);
+                    }}
+                  >
+                    <input 
+                      type="file" 
+                      id="software-file"
+                      className="hidden"
+                      onChange={(e) => setFile(e.target.files?.[0] || null)}
+                      accept=".exe,.msi,.zip,.dmg"
+                    />
+                    <label htmlFor="software-file" className="cursor-pointer">
+                      {file ? (
+                        <div className="space-y-2">
+                          <CheckCircle2 size={32} className="mx-auto text-emerald-500" />
+                          <p className="text-sm font-bold text-emerald-700">{file.name}</p>
+                          <p className="text-xs text-emerald-600/70">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <UploadCloud size={32} className="mx-auto text-slate-300" />
+                          <p className="text-sm text-slate-500">Click or drag file to upload</p>
+                          <p className="text-xs text-slate-400">Supported: .exe, .msi, .zip, .dmg</p>
+                        </div>
+                      )}
+                    </label>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-1.5">
+                  <label className="text-sm font-bold text-slate-700">Google Drive Shared Link</label>
+                  <div className="relative">
+                    <input 
+                      type="url" 
+                      value={googleDriveUrl}
+                      onChange={(e) => setGoogleDriveUrl(e.target.value)}
+                      placeholder="https://drive.google.com/file/d/..."
+                      required={storageType === 'google_drive'}
+                      className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                    />
+                    <Globe className="absolute left-3 top-2.5 text-slate-400" size={18} />
+                  </div>
+                  <p className="text-[10px] text-slate-400">
+                    Make sure the link is set to &quot;Anyone with the link can view&quot;
+                  </p>
+                </div>
+              )}
 
               <div className="space-y-1.5">
                 <label className="text-sm font-bold text-slate-700">Release Notes (Optional)</label>
