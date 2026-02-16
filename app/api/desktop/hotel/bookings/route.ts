@@ -105,9 +105,10 @@ export async function POST(req: NextRequest) {
 
     // 3. Create or Update Guest
     let guestId: string;
+    let guestData: any;
     
     // Check if guest exists by email or phone
-    let query = supabase.from('guests').select('id').eq('property_id', propertyId);
+    let query = supabase.from('guests').select('*').eq('property_id', propertyId);
     if (guestDetails.email) query = query.eq('email', guestDetails.email);
     else if (guestDetails.phone) query = query.eq('phone', guestDetails.phone);
     else return NextResponse.json({ error: 'Guest email or phone required' }, { status: 400 });
@@ -116,6 +117,7 @@ export async function POST(req: NextRequest) {
 
     if (existingGuest) {
       guestId = existingGuest.id;
+      guestData = existingGuest;
       // Optionally update details
     } else {
       const { data: newGuest, error: createGuestError } = await supabase
@@ -133,22 +135,24 @@ export async function POST(req: NextRequest) {
       
       if (createGuestError) throw createGuestError;
       guestId = newGuest.id;
+      guestData = newGuest;
     }
 
     // 4. Create Booking
+    const bookingPayload = {
+      property_id: propertyId,
+      guest_id: guestId,
+      room_id: availableRoom.id,
+      check_in_date: checkIn,
+      check_out_date: checkOut,
+      status: 'confirmed',
+      created_by: user.id
+    };
+    console.log('[API] Inserting Booking:', JSON.stringify(bookingPayload, null, 2));
+
     const { data: booking, error: createBookingError } = await supabase
       .from('bookings')
-      .insert({
-        property_id: propertyId,
-        guest_id: guestId,
-        room_id: availableRoom.id,
-        room_type_id: roomTypeId,
-        check_in_date: checkIn,
-        check_out_date: checkOut,
-        status: 'confirmed',
-        source: 'desktop_app',
-        created_by: user.id
-      })
+      .insert(bookingPayload)
       .select()
       .single();
 
@@ -166,7 +170,7 @@ export async function POST(req: NextRequest) {
 
     if (folioError) console.error('Failed to create folio automatically:', folioError);
 
-    return NextResponse.json({ success: true, data: booking });
+    return NextResponse.json({ success: true, data: booking, guest: guestData });
 
   } catch (error: any) {
     console.error('Error creating booking:', error);
