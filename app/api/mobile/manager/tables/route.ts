@@ -74,22 +74,58 @@ export async function POST(req: NextRequest) {
         }
 
         const supabase = getSupabaseAdmin();
-        const { data: table, error } = await supabase
-            .from('rooms')
-            .insert({
-                property_id: propertyId,
-                room_number: finalRoomNumber || null,
-                room_type_id,
-                status: status || 'available',
-                notes,
-                qr_url
-            })
-            .select()
-            .single();
+        
+        // Check if table already exists to avoid duplicate constraint error
+        let existingTable = null;
+        if (finalRoomNumber) {
+            const { data } = await supabase
+                .from('rooms')
+                .select('id')
+                .eq('property_id', propertyId)
+                .eq('room_number', finalRoomNumber)
+                .single();
+            existingTable = data;
+        }
+
+        let data, error;
+
+        if (existingTable) {
+             // Update existing table instead of failing
+             const result = await supabase
+                .from('rooms')
+                .update({
+                    room_type_id,
+                    status: status || 'available',
+                    notes,
+                    qr_url,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', existingTable.id)
+                .select()
+                .single();
+             data = result.data;
+             error = result.error;
+        } else {
+            // Insert new table
+            const result = await supabase
+                .from('rooms')
+                .insert({
+                    property_id: propertyId,
+                    room_number: finalRoomNumber || null,
+                    room_type_id,
+                    status: status || 'available',
+                    notes,
+                    qr_url
+                })
+                .select()
+                .single();
+            data = result.data;
+            error = result.error;
+        }
 
         if (error) throw error;
 
-        return NextResponse.json(table);
+        return NextResponse.json(data);
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
