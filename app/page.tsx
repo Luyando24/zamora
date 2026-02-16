@@ -529,8 +529,8 @@ export default function LandingPage() {
             {/* 6 Months Plan */}
             <PricingCard 
               title="6 Months"
-              price="K3,485"
-              description="Save 3% on your subscription."
+              price="K3,415"
+              description="Save 5% on your subscription."
               features={[
                 "1 Property License",
                 "Unlimited Devices",
@@ -540,14 +540,14 @@ export default function LandingPage() {
               ]}
               buttonText="Save with 6 Months"
               isPopular={false}
-              badge="Save 3%"
+              badge="Save 5%"
             />
 
             {/* 1 Year Plan */}
             <PricingCard 
               title="1 Year"
-              price="K6,830"
-              description="Save 5% - Our most popular choice."
+              price="K6,470"
+              description="Save 10% - Our most popular choice."
               features={[
                 "1 Property License",
                 "Unlimited Devices",
@@ -557,14 +557,14 @@ export default function LandingPage() {
               ]}
               buttonText="Get 1 Year Pro"
               isPopular={true}
-              badge="Save 5%"
+              badge="Save 10%"
             />
 
             {/* 2 Years Plan */}
             <PricingCard 
               title="2 Years"
-              price="K13,225"
-              description="Maximum value - Save 8%."
+              price="K12,220"
+              description="Maximum value - Save 15%."
               features={[
                 "1 Property License",
                 "Unlimited Devices",
@@ -574,7 +574,7 @@ export default function LandingPage() {
               ]}
               buttonText="Best Value: 2 Years"
               isPopular={false}
-              badge="Save 8%"
+              badge="Save 15%"
             />
           </div>
         </div>
