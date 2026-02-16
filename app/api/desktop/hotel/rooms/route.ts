@@ -35,11 +35,12 @@ export async function POST(req: NextRequest) {
       propertyId, 
       roomNumber, 
       roomTypeId,
-      status = 'clean'
+      status = 'clean',
+      qr_url
     } = body;
 
-    if (!propertyId || !roomNumber || !roomTypeId) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    if (!propertyId || (!roomNumber && !qr_url) || !roomTypeId) {
+      return NextResponse.json({ error: 'Missing required fields: Room Number or QR URL' }, { status: 400 });
     }
 
     // 1. Verify property access
@@ -54,15 +55,17 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Check if room number already exists for this property
-    const { data: existingRoom } = await supabase
-        .from('rooms')
-        .select('id')
-        .eq('property_id', propertyId)
-        .eq('room_number', roomNumber)
-        .single();
+    if (roomNumber) {
+        const { data: existingRoom } = await supabase
+            .from('rooms')
+            .select('id')
+            .eq('property_id', propertyId)
+            .eq('room_number', roomNumber)
+            .single();
 
-    if (existingRoom) {
-        return NextResponse.json({ error: 'Room number already exists' }, { status: 409 });
+        if (existingRoom) {
+            return NextResponse.json({ error: 'Room number already exists' }, { status: 409 });
+        }
     }
 
     // 3. Create Room
@@ -70,9 +73,10 @@ export async function POST(req: NextRequest) {
       .from('rooms')
       .insert({
         property_id: propertyId,
-        room_number: roomNumber,
+        room_number: roomNumber || null,
         room_type_id: roomTypeId,
-        status
+        status,
+        qr_url
       })
       .select()
       .single();

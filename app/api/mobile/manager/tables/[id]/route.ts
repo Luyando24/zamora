@@ -60,11 +60,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         const { error } = await supabase
             .from('rooms')
             .update({
-                room_number,
+                room_number: room_number === '' ? null : room_number,
                 room_type_id,
                 status,
                 notes,
-                qr_url,
+                qr_url: qr_url === '' ? null : qr_url,
                 updated_at: new Date().toISOString()
             })
             .eq('id', params.id);

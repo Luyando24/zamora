@@ -59,8 +59,8 @@ export async function POST(req: NextRequest) {
         const access = await verifyManagerAccess(req, propertyId);
         if (access.error || !access.user) return NextResponse.json({ error: access.error || 'Unauthorized' }, { status: access.status || 401 });
 
-        if (!room_number || !room_type_id) {
-            return NextResponse.json({ error: 'Room number and type are required' }, { status: 400 });
+        if ((!room_number && !qr_url) || !room_type_id) {
+            return NextResponse.json({ error: 'Either Room number or QR URL is required, along with type' }, { status: 400 });
         }
 
         const supabase = getSupabaseAdmin();
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
             .from('rooms')
             .insert({
                 property_id: propertyId,
-                room_number,
+                room_number: room_number || null,
                 room_type_id,
                 status: status || 'available',
                 notes,
