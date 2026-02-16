@@ -42,6 +42,22 @@ export async function PATCH(
       return NextResponse.json({ error: 'Property ID required' }, { status: 400 });
     }
 
+    // Try to extract room number from QR URL if not provided
+    const qrUrl = updates.qr_url || updates.qrUrl;
+    const currentRoomNumber = updates.room_number || updates.roomNumber;
+
+    if ((currentRoomNumber === undefined || currentRoomNumber === null || currentRoomNumber === '') && qrUrl) {
+        try {
+            const urlObj = new URL(qrUrl);
+            const extracted = urlObj.searchParams.get('room') || urlObj.searchParams.get('table');
+            if (extracted) {
+                updates.room_number = extracted;
+            }
+        } catch (e) {
+            // ignore
+        }
+    }
+
     // 1. Verify property access
     const { data: profile } = await supabase
       .from('profiles')

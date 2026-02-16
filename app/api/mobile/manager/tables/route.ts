@@ -59,7 +59,17 @@ export async function POST(req: NextRequest) {
         const access = await verifyManagerAccess(req, propertyId);
         if (access.error || !access.user) return NextResponse.json({ error: access.error || 'Unauthorized' }, { status: access.status || 401 });
 
-        if ((!room_number && !qr_url) || !room_type_id) {
+        let finalRoomNumber = room_number;
+        if (!finalRoomNumber && qr_url) {
+             try {
+                 const urlObj = new URL(qr_url);
+                 finalRoomNumber = urlObj.searchParams.get('table') || urlObj.searchParams.get('room');
+             } catch (e) {
+                 // ignore
+             }
+        }
+
+        if ((!finalRoomNumber && !qr_url) || !room_type_id) {
             return NextResponse.json({ error: 'Either Room number or QR URL is required, along with type' }, { status: 400 });
         }
 
@@ -68,7 +78,7 @@ export async function POST(req: NextRequest) {
             .from('rooms')
             .insert({
                 property_id: propertyId,
-                room_number: room_number || null,
+                room_number: finalRoomNumber || null,
                 room_type_id,
                 status: status || 'available',
                 notes,

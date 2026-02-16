@@ -31,13 +31,23 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { 
+    let { 
       propertyId, 
       roomNumber, 
       roomTypeId,
       status = 'clean',
       qr_url
     } = body;
+
+    // Try to extract room number from QR URL if not provided
+    if (!roomNumber && qr_url) {
+        try {
+            const urlObj = new URL(qr_url);
+            roomNumber = urlObj.searchParams.get('room') || urlObj.searchParams.get('table');
+        } catch (e) {
+            // ignore
+        }
+    }
 
     if (!propertyId || (!roomNumber && !qr_url) || !roomTypeId) {
       return NextResponse.json({ error: 'Missing required fields: Room Number or QR URL' }, { status: 400 });
