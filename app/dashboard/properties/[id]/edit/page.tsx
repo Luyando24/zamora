@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import ImageUpload from '@/components/ui/ImageUpload';
 import MultiImageUpload from '@/components/ui/MultiImageUpload';
-import { 
-  Building2, MapPin, Phone, Mail, Globe, 
+import {
+  Building2, MapPin, Phone, Mail, Globe,
   CheckCircle, Home, BedDouble, Building, Sun, Car, Tent,
   ArrowLeft, Save, Loader2, X, Plus
 } from 'lucide-react';
@@ -78,13 +78,14 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
     amenities: [] as string[],
     check_in_time: '',
     check_out_time: '',
+    settings: {} as any,
   });
   const [newAmenity, setNewAmenity] = useState('');
   const supabase = createClient();
 
   const fetchProperty = useCallback(async () => {
     if (!id) return;
-    
+
     const { data, error } = await supabase
       .from('properties')
       .select('*')
@@ -105,11 +106,12 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
         website_url: data.website_url || '',
         cover_image_url: data.cover_image_url || '',
         gallery_urls: data.gallery_urls || [],
-        amenities: Array.isArray(data.amenities) 
+        amenities: Array.isArray(data.amenities)
           ? data.amenities.map((a: any) => typeof a === 'object' ? a.name : a)
           : [],
         check_in_time: data.check_in_time || '',
         check_out_time: data.check_out_time || '',
+        settings: data.settings || {},
       });
     }
     setLoading(false);
@@ -187,7 +189,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
           <p className="text-slate-500">Update your property information.</p>
         </div>
         <div className="flex gap-3">
-          <Link 
+          <Link
             href={`/dashboard/properties/${id}`}
             className="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 font-medium"
           >
@@ -205,7 +207,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        
+
         {/* Basic Information */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
           <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
@@ -223,7 +225,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-slate-900 bg-white"
               />
             </div>
-            
+
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-slate-700 mb-3">Property Type</label>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -235,11 +237,10 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
                       key={type.id}
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, type: type.id }))}
-                      className={`flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all ${
-                        isSelected
-                          ? 'border-primary bg-primary/5 text-primary'
-                          : 'border-slate-100 hover:border-slate-200 hover:bg-slate-50 text-slate-600'
-                      }`}
+                      className={`flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all ${isSelected
+                        ? 'border-primary bg-primary/5 text-primary'
+                        : 'border-slate-100 hover:border-slate-200 hover:bg-slate-50 text-slate-600'
+                        }`}
                     >
                       <Icon className={`h-6 w-6 ${isSelected ? 'text-primary' : 'text-slate-400'}`} />
                       <span className="text-sm font-medium">{type.label}</span>
@@ -283,7 +284,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
             <Sun size={20} className="text-primary" />
             Media
           </h3>
-          
+
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">Cover Image</label>
@@ -371,6 +372,23 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
                 />
               </div>
             </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-slate-700 mb-1">Google Maps Embed URL (Optional)</label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-2.5 text-slate-400" size={18} />
+                <input
+                  type="url"
+                  value={formData.settings?.google_maps_url || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, settings: { ...prev.settings, google_maps_url: e.target.value } }))}
+                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-slate-900 bg-white"
+                  placeholder="https://www.google.com/maps/embed?pb=..."
+                />
+              </div>
+              <p className="text-xs text-slate-500 mt-1">
+                Go to Google Maps &gt; Share &gt; Embed a map &gt; Copy HTML. Extract the `src` URL string and paste it here.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -380,7 +398,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
             <CheckCircle size={20} className="text-primary" />
             Amenities
           </h3>
-          
+
           <div className="mb-6">
             <h4 className="text-sm font-medium text-slate-700 mb-3">Popular Amenities</h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
@@ -435,7 +453,7 @@ export default function EditPropertyPage({ params }: { params: { id: string } })
         </div>
 
         <div className="flex justify-end gap-4 pt-4">
-          <Link 
+          <Link
             href={`/dashboard/properties/${id}`}
             className="px-6 py-3 bg-white border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 font-bold"
           >

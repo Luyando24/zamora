@@ -745,8 +745,8 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
                                                 <Link
                                                     href={`/book/${property.slug || property.id}/room/${room.id}${queryParams}`}
                                                     className={`px-4 py-2 rounded-lg font-bold text-sm transition-all transform active:scale-95 ${isAvailable
-                                                            ? 'bg-slate-900 text-white hover:bg-black shadow-md hover:shadow-lg'
-                                                            : 'bg-slate-100 text-slate-400 cursor-not-allowed pointer-events-none'
+                                                        ? 'bg-slate-900 text-white hover:bg-black shadow-md hover:shadow-lg'
+                                                        : 'bg-slate-100 text-slate-400 cursor-not-allowed pointer-events-none'
                                                         }`}
                                                 >
                                                     {isAvailable ? 'Book Now' : 'Unavailable'}
@@ -817,14 +817,29 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
                     {/* Location */}
                     <section id="location" ref={locationRef} className="space-y-6 scroll-mt-32 md:scroll-mt-40">
                         <h2 className="text-2xl font-bold text-slate-900">Location</h2>
-                        <div className="aspect-video bg-slate-100 rounded-3xl flex items-center justify-center relative overflow-hidden group">
-                            <MapPin size={48} className="text-slate-300 mb-2" />
-                            <div className="absolute inset-0 bg-slate-200/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">
-                                <button className="bg-white px-6 py-3 rounded-full font-bold shadow-lg text-slate-900">
-                                    View on Map
-                                </button>
+                        {property.settings?.google_maps_url ? (
+                            <div className="aspect-video w-full rounded-3xl overflow-hidden shadow-sm border border-slate-200 relative">
+                                <iframe
+                                    src={property.settings.google_maps_url}
+                                    width="100%"
+                                    height="100%"
+                                    style={{ border: 0 }}
+                                    allowFullScreen={true}
+                                    loading="lazy"
+                                    referrerPolicy="no-referrer-when-downgrade"
+                                    className="absolute inset-0"
+                                ></iframe>
                             </div>
-                        </div>
+                        ) : (
+                            <div className="aspect-video bg-slate-100 rounded-3xl flex items-center justify-center relative overflow-hidden group">
+                                <MapPin size={48} className="text-slate-300 mb-2" />
+                                <div className="absolute inset-0 bg-slate-200/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">
+                                    <button className="bg-white px-6 py-3 rounded-full font-bold shadow-lg text-slate-900">
+                                        View on Map
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                         <p className="text-slate-600">
                             {[property.address, property.city, property.country].filter(Boolean).join(', ')}
                         </p>
@@ -911,8 +926,8 @@ export default function ModernPropertyDetails({ property, roomTypes, menuItems, 
                                             <Star
                                                 size={32}
                                                 className={`${star <= newRating
-                                                        ? 'fill-yellow-400 text-yellow-400'
-                                                        : 'text-slate-300'
+                                                    ? 'fill-yellow-400 text-yellow-400'
+                                                    : 'text-slate-300'
                                                     } transition-colors`}
                                             />
                                         </button>
