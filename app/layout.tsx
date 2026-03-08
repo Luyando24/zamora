@@ -37,6 +37,14 @@ export const metadata: Metadata = {
     description: 'Discover and book top-rated hotels, lodges, safari camps, and guest houses in Zambia.',
   },
   manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Zamora',
+  },
+  verification: {
+    google: 'fRS8wtMg8Flx-XpTmv7ovgt6HSihTn7UD5MQXR11byU',
+  },
 };
 
 export const viewport = {
@@ -44,15 +52,6 @@ export const viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
-};
-appleWebApp: {
-  capable: true,
-    statusBarStyle: 'default',
-      title: 'Zamora',
-  },
-verification: {
-  google: 'fRS8wtMg8Flx-XpTmv7ovgt6HSihTn7UD5MQXR11byU',
-  },
 };
 
 export default function RootLayout({
