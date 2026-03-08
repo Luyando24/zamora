@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyManagerAccess } from '../../utils';
 import { getSupabaseAdmin } from '@/lib/db/supabase-admin';
 
-export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
     try {
-        const { id } = await params;
+        const { id } = params;
         const body = await req.json();
         const { propertyId, name, description, capacity, base_price, image_url } = body;
 
@@ -12,11 +12,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         if (access.error || !access.user) return NextResponse.json({ error: access.error || 'Unauthorized' }, { status: access.status || 401 });
 
         const supabase = getSupabaseAdmin();
-        
+
         // Verify ownership
         const { data: existing } = await supabase.from('room_types').select('property_id').eq('id', id).single();
         if (!existing || existing.property_id !== propertyId) {
-             return NextResponse.json({ error: 'Table Type not found or access denied' }, { status: 404 });
+            return NextResponse.json({ error: 'Table Type not found or access denied' }, { status: 404 });
         }
 
         const updates: any = {};
@@ -41,9 +41,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
     try {
-        const { id } = await params;
+        const { id } = params;
         const { searchParams } = new URL(req.url);
         const propertyId = searchParams.get('propertyId');
 
@@ -55,7 +55,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
         // Verify ownership
         const { data: existing } = await supabase.from('room_types').select('property_id').eq('id', id).single();
         if (!existing || existing.property_id !== propertyId) {
-             return NextResponse.json({ error: 'Table Type not found or access denied' }, { status: 404 });
+            return NextResponse.json({ error: 'Table Type not found or access denied' }, { status: 404 });
         }
 
         const { error } = await supabase

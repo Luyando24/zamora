@@ -4,8 +4,8 @@ import { useEffect, useState, use } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useProperty } from '../../context/PropertyContext';
-import { 
-  Building2, MapPin, Phone, Mail, Globe, 
+import {
+  Building2, MapPin, Phone, Mail, Globe,
   BedDouble, Home, Sun, Car, Tent, Building,
   ArrowLeft, Edit, ExternalLink, CalendarDays,
   Utensils, Users, CheckCircle, Clock
@@ -23,8 +23,8 @@ const PROPERTY_ICONS: Record<string, any> = {
   campsite: Tent,
 };
 
-export default function PropertyDetailsPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function PropertyDetailsPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const { properties, isLoading: contextLoading } = useProperty();
   const [property, setProperty] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -76,9 +76,8 @@ export default function PropertyDetailsPage({ params }: { params: Promise<{ id: 
               <div className="flex items-center gap-2 text-slate-500 text-sm">
                 <span className="capitalize">{property.type?.replace('_', ' ')}</span>
                 <span>•</span>
-                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                  property.subscription_status === 'active' ? 'bg-primary/10 text-primary' : 'bg-yellow-100 text-yellow-800'
-                }`}>
+                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold ${property.subscription_status === 'active' ? 'bg-primary/10 text-primary' : 'bg-yellow-100 text-yellow-800'
+                  }`}>
                   {property.subscription_status === 'active' ? <CheckCircle size={12} /> : <Clock size={12} />}
                   {property.subscription_status || 'Trial'}
                 </span>
@@ -88,38 +87,38 @@ export default function PropertyDetailsPage({ params }: { params: Promise<{ id: 
         </div>
 
         <div className="flex gap-3">
-           <Link 
-             href={`/book/${property.id}`} 
-             target="_blank"
-             className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 font-medium shadow-sm flex items-center gap-2 transition-all"
-           >
-             <ExternalLink size={18} /> Public Page
-           </Link>
-           <Link 
-             href={`/dashboard/properties/${property.id}/edit`}
-             className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 font-medium shadow-md shadow-primary/10 flex items-center gap-2 transition-all"
-           >
-             <Edit size={18} /> Edit Property
-           </Link>
+          <Link
+            href={`/book/${property.id}`}
+            target="_blank"
+            className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 font-medium shadow-sm flex items-center gap-2 transition-all"
+          >
+            <ExternalLink size={18} /> Public Page
+          </Link>
+          <Link
+            href={`/dashboard/properties/${property.id}/edit`}
+            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 font-medium shadow-md shadow-primary/10 flex items-center gap-2 transition-all"
+          >
+            <Edit size={18} /> Edit Property
+          </Link>
         </div>
       </div>
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
+
         {/* Left Column - Main Details */}
         <div className="lg:col-span-2 space-y-8">
-          
+
           {/* Cover Image */}
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="aspect-video relative bg-slate-50">
               {property.cover_image_url ? (
-                <Image 
-                  src={property.cover_image_url} 
-                  alt={property.name} 
-                  fill 
-                  className="object-cover" 
-                  unoptimized 
+                <Image
+                  src={property.cover_image_url}
+                  alt={property.name}
+                  fill
+                  className="object-cover"
+                  unoptimized
                 />
               ) : (
                 <div className="flex items-center justify-center h-full text-slate-200">
@@ -162,7 +161,7 @@ export default function PropertyDetailsPage({ params }: { params: Promise<{ id: 
 
         {/* Right Column - Sidebar Info */}
         <div className="space-y-6">
-          
+
           {/* Contact Info */}
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
             <h3 className="text-lg font-bold text-slate-900 mb-6">Contact Information</h3>
@@ -176,7 +175,7 @@ export default function PropertyDetailsPage({ params }: { params: Promise<{ id: 
                   <p className="text-sm text-slate-700 font-medium">{property.address || 'N/A'}</p>
                 </div>
               </div>
-              
+
               <div className="flex items-start gap-4">
                 <div className="p-2 bg-slate-50 rounded-lg text-slate-400">
                   <Phone size={20} />
@@ -219,26 +218,26 @@ export default function PropertyDetailsPage({ params }: { params: Promise<{ id: 
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
             <h3 className="text-lg font-bold text-slate-900 mb-6">Property Stats</h3>
             <div className="grid grid-cols-2 gap-4">
-               <div className="p-4 bg-slate-50 rounded-2xl text-center border border-slate-100 hover:border-primary/20 transition-colors group">
-                 <CalendarDays className="mx-auto text-primary mb-2 group-hover:scale-110 transition-transform" size={24} />
-                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Bookings</p>
-                 <p className="text-lg font-bold text-slate-900">-</p>
-               </div>
-               <div className="p-4 bg-slate-50 rounded-2xl text-center border border-slate-100 hover:border-primary/20 transition-colors group">
-                 <Users className="mx-auto text-primary mb-2 group-hover:scale-110 transition-transform" size={24} />
-                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Guests</p>
-                 <p className="text-lg font-bold text-slate-900">-</p>
-               </div>
-               <div className="p-4 bg-slate-50 rounded-2xl text-center border border-slate-100 hover:border-primary/20 transition-colors group">
-                 <Utensils className="mx-auto text-primary mb-2 group-hover:scale-110 transition-transform" size={24} />
-                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Orders</p>
-                 <p className="text-lg font-bold text-slate-900">-</p>
-               </div>
-               <div className="p-4 bg-slate-50 rounded-2xl text-center border border-slate-100 hover:border-primary/20 transition-colors group">
-                 <BedDouble className="mx-auto text-primary mb-2 group-hover:scale-110 transition-transform" size={24} />
-                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Rooms</p>
-                 <p className="text-lg font-bold text-slate-900">-</p>
-               </div>
+              <div className="p-4 bg-slate-50 rounded-2xl text-center border border-slate-100 hover:border-primary/20 transition-colors group">
+                <CalendarDays className="mx-auto text-primary mb-2 group-hover:scale-110 transition-transform" size={24} />
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Bookings</p>
+                <p className="text-lg font-bold text-slate-900">-</p>
+              </div>
+              <div className="p-4 bg-slate-50 rounded-2xl text-center border border-slate-100 hover:border-primary/20 transition-colors group">
+                <Users className="mx-auto text-primary mb-2 group-hover:scale-110 transition-transform" size={24} />
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Guests</p>
+                <p className="text-lg font-bold text-slate-900">-</p>
+              </div>
+              <div className="p-4 bg-slate-50 rounded-2xl text-center border border-slate-100 hover:border-primary/20 transition-colors group">
+                <Utensils className="mx-auto text-primary mb-2 group-hover:scale-110 transition-transform" size={24} />
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Orders</p>
+                <p className="text-lg font-bold text-slate-900">-</p>
+              </div>
+              <div className="p-4 bg-slate-50 rounded-2xl text-center border border-slate-100 hover:border-primary/20 transition-colors group">
+                <BedDouble className="mx-auto text-primary mb-2 group-hover:scale-110 transition-transform" size={24} />
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Rooms</p>
+                <p className="text-lg font-bold text-slate-900">-</p>
+              </div>
             </div>
           </div>
 
