@@ -14,7 +14,8 @@ export async function POST(req: NextRequest) {
         // The user will receive an email with a link to reset their password.
         // The link will redirect to the specified URL (e.g., a web page or deep link).
         // Ensure this URL is added to your Supabase project's Redirect URLs.
-        const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL || 'https://zamoraapp.com'}/auth/reset-password`;
+        const origin = process.env.NEXT_PUBLIC_APP_URL || 'https://zamoraapp.com';
+        const redirectTo = `${origin}/auth/callback?next=/reset-password`;
 
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
             redirectTo,

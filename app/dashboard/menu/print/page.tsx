@@ -123,7 +123,7 @@ export default function PrintMenuPage({ searchParams }: { searchParams: { proper
     return (
       <div className="flex h-screen items-center justify-center bg-white">
         <div className="flex flex-col items-center gap-4">
-            <Loader2 className="animate-spin text-pink-600" size={40} />
+            <Loader2 className="animate-spin text-primary" size={40} />
             <p className="text-slate-400 font-medium tracking-widest text-sm">DESIGNING MENU&hellip;</p>
         </div>
       </div>
@@ -131,7 +131,7 @@ export default function PrintMenuPage({ searchParams }: { searchParams: { proper
   }
 
   return (
-    <div className="bg-slate-950 min-h-screen text-slate-100 font-sans selection:bg-pink-500 selection:text-white print:p-0 relative">
+    <div className="bg-slate-950 min-h-screen text-slate-100 font-sans selection:bg-primary selection:text-white print:p-0 relative">
       
       {/* --- Screen-Only Controls --- */}
       <nav className="print:hidden sticky top-0 w-full bg-slate-950/80 backdrop-blur-md border-b border-slate-800 z-50 px-6 py-4 flex justify-between items-center">
@@ -149,7 +149,7 @@ export default function PrintMenuPage({ searchParams }: { searchParams: { proper
             </button>
             <button
             onClick={() => window.print()}
-            className="flex items-center gap-2 px-6 py-2.5 bg-pink-600 text-white rounded-full font-bold shadow-lg shadow-pink-900/20 hover:bg-pink-500 hover:scale-105 transition-all"
+            className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-full font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 hover:scale-105 transition-all"
             >
             <Printer size={18} /> Print Menu
             </button>
@@ -161,8 +161,8 @@ export default function PrintMenuPage({ searchParams }: { searchParams: { proper
       <div id="menu-preview-container" className="max-w-[210mm] mx-auto bg-slate-950 pt-12 pb-12 px-12 print:pt-0 print:px-0 print:max-w-none min-h-screen flex flex-col relative overflow-hidden">
         
         {/* Decorative Background Elements (Futuristic) */}
-        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-pink-900/10 to-transparent pointer-events-none print:hidden"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-pink-600/5 rounded-full blur-3xl pointer-events-none print:hidden"></div>
+        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none print:hidden"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none print:hidden"></div>
 
         {/* Header */}
         <header className="text-center mb-16 print:mb-12 print:mt-12 relative z-10">
@@ -179,7 +179,7 @@ export default function PrintMenuPage({ searchParams }: { searchParams: { proper
                     </div>
                 ) : (
                     <div className="h-20 w-20 bg-slate-900 rounded-full flex items-center justify-center mx-auto border border-slate-800 shadow-xl shadow-black/50">
-                        <ChefHat className="text-pink-500" size={32} />
+                        <ChefHat className="text-primary" size={32} />
                     </div>
                 )}
             </div>
@@ -187,9 +187,9 @@ export default function PrintMenuPage({ searchParams }: { searchParams: { proper
             <h1 className="text-5xl font-black uppercase tracking-[0.2em] text-white mb-2 drop-shadow-sm">
                 {property?.name || 'MENU'}
             </h1>
-            <div className="flex items-center justify-center gap-4 text-xs font-bold tracking-[0.3em] text-pink-500 uppercase">
+            <div className="flex items-center justify-center gap-4 text-xs font-bold tracking-[0.3em] text-primary uppercase">
                 <span>Est. 2024</span>
-                <span className="w-1 h-1 bg-pink-500 rounded-full shadow-[0_0_10px_rgba(236,72,153,0.8)]"></span>
+                <span className="w-1 h-1 bg-primary rounded-full shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span>
                 <span>Fine Dining</span>
             </div>
         </header>
@@ -199,7 +199,7 @@ export default function PrintMenuPage({ searchParams }: { searchParams: { proper
             {categories.map((cat) => (
                 <section key={cat} className="break-inside-avoid mb-8">
                     <div className="flex items-center gap-4 mb-8">
-                        <h2 className="text-xl font-black uppercase tracking-widest text-white shrink-0 border-b-2 border-pink-600 pb-1">
+                        <h2 className="text-xl font-black uppercase tracking-widest text-white shrink-0 border-b-2 border-primary pb-1">
                             {cat}
                         </h2>
                         <div className="h-[1px] bg-slate-800 flex-1"></div>
@@ -207,13 +207,13 @@ export default function PrintMenuPage({ searchParams }: { searchParams: { proper
 
                     <div className="space-y-8">
                         {grouped[cat].map((item: any) => (
-                            <div key={item.id} className="group relative pl-4 border-l border-slate-800 hover:border-pink-600 transition-colors duration-300">
+                            <div key={item.id} className="group relative pl-4 border-l border-slate-800 hover:border-primary transition-colors duration-300">
                                 <div className="flex justify-between items-baseline mb-1">
-                                    <h3 className="font-bold text-base text-slate-100 uppercase tracking-wide group-hover:text-pink-400 transition-colors print:text-slate-100">
+                                    <h3 className="font-bold text-base text-slate-100 uppercase tracking-wide group-hover:text-primary transition-colors print:text-slate-100">
                                         {item.name}
                                     </h3>
-                                    <span className="shrink-0 ml-4 font-bold text-pink-500 text-lg tabular-nums drop-shadow-[0_0_8px_rgba(236,72,153,0.5)]">
-                                        <span className="text-xs font-medium mr-0.5 text-pink-400/70">K</span>
+                                    <span className="shrink-0 ml-4 font-bold text-primary text-lg tabular-nums drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]">
+                                        <span className="text-xs font-medium mr-0.5 text-primary/70">K</span>
                                         {item.price}
                                     </span>
                                 </div>
@@ -229,7 +229,7 @@ export default function PrintMenuPage({ searchParams }: { searchParams: { proper
                                         </span>
                                     )}
                                     {item.dietary_info && (
-                                        <span className="text-[9px] font-bold text-pink-400 uppercase tracking-wider border border-pink-900/30 bg-pink-900/10 px-1.5 py-0.5 rounded-sm">
+                                        <span className="text-[9px] font-bold text-primary uppercase tracking-wider border border-primary/30 bg-primary/10 px-1.5 py-0.5 rounded-sm">
                                             {item.dietary_info}
                                         </span>
                                     )}
@@ -243,7 +243,7 @@ export default function PrintMenuPage({ searchParams }: { searchParams: { proper
 
         {/* Footer */}
         <footer className="mt-auto pt-20 text-center print:fixed print:bottom-8 print:left-0 print:right-0 relative z-10">
-            <div className="w-12 h-[2px] bg-pink-600 mx-auto mb-6"></div>
+            <div className="w-12 h-[2px] bg-primary mx-auto mb-6"></div>
             <p className="text-[10px] font-bold tracking-[0.2em] text-slate-600 uppercase">
                 {property?.name ? `${property.name} • ` : ''} Powered by Zamora
             </p>

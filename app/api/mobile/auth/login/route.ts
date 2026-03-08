@@ -43,18 +43,61 @@ export async function POST(req: NextRequest) {
         }
 
         let propertyData = null;
+        let subscriptionStatus = {
+            isTrialExpired: false,
+            daysRemaining: 14,
+            plan: 'trial',
+            status: 'trial',
+            licenseExpiresAt: null
+        };
+
         if (profile.property_id) {
             const { data: property, error: propertyError } = await adminClient
                 .from('properties')
-                .select('id, name, type, logo_url')
+                .select('id, name, type, logo_url, subscription_status, subscription_plan, trial_ends_at, license_expires_at, created_at')
                 .eq('id', profile.property_id)
                 .single();
             
             if (propertyError) {
                 console.error('Property fetch error:', propertyError);
-                // We don't fail login if property fetch fails, just return null property
             } else {
-                propertyData = property;
+                propertyData = {
+                    id: property.id,
+                    name: property.name,
+                    type: property.type,
+                    logo_url: property.logo_url
+                };
+
+                // Calculate subscription status
+                const now = new Date();
+                const trialEndsAt = property.trial_ends_at;
+                const licenseExpiresAt = property.license_expires_at;
+                const status = property.subscription_status;
+                const plan = property.subscription_plan;
+                
+                subscriptionStatus.plan = plan;
+                subscriptionStatus.status = status;
+                subscriptionStatus.licenseExpiresAt = licenseExpiresAt;
+
+                if (status === 'active_licensed' && licenseExpiresAt) {
+                    const expires = new Date(licenseExpiresAt);
+                    const diffTime = expires.getTime() - now.getTime();
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    
+                    subscriptionStatus.daysRemaining = Math.max(0, diffDays);
+                    subscriptionStatus.isTrialExpired = diffDays <= 0 || status === 'suspended';
+                } else if (plan === 'trial' || !plan || status === 'trial') {
+                    const ends = trialEndsAt ? new Date(trialEndsAt) : new Date(new Date(property.created_at).getTime() + 14 * 24 * 60 * 60 * 1000);
+                    
+                    const diffTime = ends.getTime() - now.getTime();
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    
+                    subscriptionStatus.daysRemaining = Math.max(0, diffDays);
+                    subscriptionStatus.isTrialExpired = diffDays <= 0 && status !== 'active_licensed';
+                } else {
+                    subscriptionStatus.isTrialExpired = status === 'suspended';
+                    subscriptionStatus.daysRemaining = 365;
+                }
             }
         }
 
@@ -67,7 +110,8 @@ export async function POST(req: NextRequest) {
                 firstName: profile.first_name,
                 lastName: profile.last_name,
                 propertyId: profile.property_id,
-                property: propertyData
+                property: propertyData,
+                subscription: subscriptionStatus
             },
             session: {
                 access_token: (await supabase.auth.getSession()).data.session?.access_token,

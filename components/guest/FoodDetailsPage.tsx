@@ -106,7 +106,7 @@ export default function FoodDetailsPage({ item, isOpen, onClose, onAddToCart, si
            {/* Badges */}
            <div className="absolute bottom-4 left-4 flex gap-2 z-10 flex-wrap">
               {item.discount_badge && (
-                <span className="bg-pink-500 text-white font-bold px-3 py-1 rounded-lg text-sm shadow-sm">
+                <span className="bg-primary text-white font-bold px-3 py-1 rounded-lg text-sm shadow-sm">
                   {item.discount_badge}
                 </span>
               )}
@@ -164,9 +164,9 @@ export default function FoodDetailsPage({ item, isOpen, onClose, onAddToCart, si
                            {options.map((option: any, idx: number) => {
                              const isSelected = selectedOptions.has(option.name);
                              return (
-                               <label key={idx} className={`flex items-center justify-between p-4 rounded-2xl border bg-white shadow-sm cursor-pointer transition-colors group ${isSelected ? 'border-pink-500 ring-1 ring-pink-500' : 'border-slate-100 hover:border-pink-300'}`}>
+                               <label key={idx} className={`flex items-center justify-between p-4 rounded-2xl border bg-white shadow-sm cursor-pointer transition-colors group ${isSelected ? 'border-primary ring-1 ring-primary' : 'border-slate-100 hover:border-primary/50'}`}>
                                   <div className="flex items-center gap-4">
-                                     <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors ${isSelected ? 'bg-pink-500 border-pink-500' : 'border-slate-300 group-hover:border-pink-300'}`}>
+                                     <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors ${isSelected ? 'bg-primary border-primary' : 'border-slate-300 group-hover:border-primary/50'}`}>
                                         {isSelected && <Check size={16} className="text-white" />}
                                      </div>
                                      <span className="font-bold text-slate-900">{option.name}</span>

@@ -128,7 +128,7 @@ export default function MenuPage() {
     return (
       <div className="p-6 max-w-7xl mx-auto flex items-center justify-center min-h-[400px]">
         <div className="flex flex-col items-center gap-4">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-pink-500" />
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
             <p className="text-slate-500 font-medium">Preparing your menu...</p>
         </div>
       </div>
@@ -151,11 +151,11 @@ export default function MenuPage() {
                         unoptimized
                     />
                 ) : (
-                    <div className="h-16 w-16 bg-pink-50 rounded-xl flex items-center justify-center border border-pink-100">
+                    <div className="h-16 w-16 bg-primary/5 rounded-xl flex items-center justify-center border border-primary/10">
                         {activeTab === 'food' ? (
-                             <ChefHat className="text-pink-600" size={32} />
+                             <ChefHat className="text-primary" size={32} />
                         ) : (
-                             <Wine className="text-pink-600" size={32} />
+                             <Wine className="text-primary" size={32} />
                         )}
                     </div>
                 )}
@@ -171,11 +171,11 @@ export default function MenuPage() {
                {/* Property Selector */}
                {properties.length > 1 && (
                    <div className="relative group">
-                       <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-pink-600 transition-colors" size={18} />
+                       <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-primary transition-colors" size={18} />
                        <select 
                            value={selectedPropertyId || ''}
                            onChange={handlePropertyChange}
-                           className="pl-10 pr-8 py-2.5 bg-slate-50 border border-slate-200 text-slate-700 rounded-xl hover:bg-white hover:border-pink-200 hover:ring-2 hover:ring-pink-50 font-bold transition-all appearance-none outline-none cursor-pointer w-full md:w-auto"
+                           className="pl-10 pr-8 py-2.5 bg-slate-50 border border-slate-200 text-slate-700 rounded-xl hover:bg-white hover:border-primary/20 hover:ring-2 hover:ring-primary/5 font-bold transition-all appearance-none outline-none cursor-pointer w-full md:w-auto"
                        >
                            <option value="all">All Locations</option>
                            {properties.map(p => (
@@ -251,7 +251,7 @@ export default function MenuPage() {
                     onClick={() => { setActiveTab('food'); setFilter('All'); }}
                     className={`pb-4 px-2 text-sm font-bold transition-all relative ${
                         activeTab === 'food'
-                            ? 'text-pink-600'
+                            ? 'text-primary'
                             : 'text-slate-500 hover:text-slate-700'
                     }`}
                 >
@@ -260,14 +260,14 @@ export default function MenuPage() {
                         Food Menu
                     </div>
                     {activeTab === 'food' && (
-                        <div className="absolute bottom-0 left-0 w-full h-0.5 bg-pink-600 rounded-t-full" />
+                        <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded-t-full" />
                     )}
                 </button>
                 <button
                     onClick={() => { setActiveTab('bar'); setFilter('All'); }}
                     className={`pb-4 px-2 text-sm font-bold transition-all relative ${
                         activeTab === 'bar'
-                            ? 'text-pink-600'
+                            ? 'text-primary'
                             : 'text-slate-500 hover:text-slate-700'
                     }`}
                 >
@@ -276,7 +276,7 @@ export default function MenuPage() {
                         Bar Menu
                     </div>
                     {activeTab === 'bar' && (
-                        <div className="absolute bottom-0 left-0 w-full h-0.5 bg-pink-600 rounded-t-full" />
+                        <div className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded-t-full" />
                     )}
                 </button>
             </div>
@@ -292,7 +292,7 @@ export default function MenuPage() {
                     onClick={() => setFilter(cat)}
                     className={`px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all ${
                     filter === cat 
-                        ? 'bg-pink-600 text-white shadow-md shadow-pink-200' 
+                        ? 'bg-primary text-white shadow-md shadow-primary/20' 
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                     }`}
                 >
@@ -309,7 +309,7 @@ export default function MenuPage() {
                     placeholder={`Search ${activeTab === 'food' ? 'dishes' : 'drinks'}...`}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-600 focus:border-transparent transition-all shadow-sm"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all shadow-sm"
                 />
             </div>
         </div>
@@ -323,7 +323,7 @@ export default function MenuPage() {
         </div>
       ) : categoriesLoading ? (
         <div className="text-center py-12 text-slate-500 flex flex-col items-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-600 mb-2"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-2"></div>
             Loading categories...
         </div>
       ) : (
@@ -339,7 +339,7 @@ export default function MenuPage() {
             <p className="text-slate-500 mb-6">Get started by creating your first {activeTab === 'food' ? 'dish' : 'drink'}.</p>
             <Link
               href={activeTab === 'food' ? "/dashboard/menu/new" : "/dashboard/bar-menu/new"}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-pink-600 text-white rounded-xl font-bold hover:bg-pink-700 transition-all shadow-lg hover:shadow-pink-200"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 transition-all shadow-lg hover:shadow-primary/20"
             >
               <Plus size={18} strokeWidth={3} /> Add Item
             </Link>
@@ -376,7 +376,7 @@ export default function MenuPage() {
                         </span>
                     )}
                     {item.discount_badge && (
-                        <span className="bg-pink-600/90 backdrop-blur-sm text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm flex items-center gap-1">
+                        <span className="bg-primary/90 backdrop-blur-sm text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-lg shadow-sm flex items-center gap-1">
                             <Sparkles className="w-3 h-3" /> {item.discount_badge}
                         </span>
                     )}
@@ -394,14 +394,14 @@ export default function MenuPage() {
             <div className="p-5 flex-1 flex flex-col">
                 <div className="mb-3">
                     <div className="flex justify-between items-start mb-1">
-                        <p className="text-xs font-bold text-pink-600 uppercase tracking-wider">{item.category}</p>
+                        <p className="text-xs font-bold text-primary uppercase tracking-wider">{item.category}</p>
                         {item.weight && (
                             <span className="text-xs font-medium text-slate-400 bg-slate-50 px-2 py-1 rounded-md">
                                 {item.weight}
                             </span>
                         )}
                     </div>
-                    <h3 className="text-lg font-bold text-slate-900 leading-tight group-hover:text-pink-600 transition-colors">
+                    <h3 className="text-lg font-bold text-slate-900 leading-tight group-hover:text-primary transition-colors">
                         {item.name}
                     </h3>
                     {item.dietary_info && activeTab === 'food' && (
@@ -423,7 +423,7 @@ export default function MenuPage() {
                     <div className="flex gap-2">
                         <Link 
                             href={activeTab === 'food' ? `/dashboard/menu/${item.id}` : `/dashboard/bar-menu/${item.id}`}
-                            className="p-2 text-slate-400 hover:text-pink-600 hover:bg-pink-50 rounded-lg transition-colors"
+                            className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
                             title="Edit"
                         >
                             <Edit size={18} />
@@ -448,7 +448,7 @@ export default function MenuPage() {
       {/* Floating Action Button (Mobile) */}
       <Link
         href={activeTab === 'food' ? "/dashboard/menu/new" : "/dashboard/bar-menu/new"}
-        className="md:hidden fixed bottom-8 right-8 bg-pink-600 text-white p-4 rounded-full shadow-xl hover:bg-pink-700 transition-all hover:scale-105 z-10"
+        className="md:hidden fixed bottom-8 right-8 bg-primary text-white p-4 rounded-full shadow-xl hover:bg-primary/90 transition-all hover:scale-105 z-10"
         title="Add New Item"
       >
         <Plus size={24} />

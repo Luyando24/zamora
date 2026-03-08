@@ -64,16 +64,16 @@ export default function ImageUpload({ value, onChange, bucket = 'menu-images', c
       {!value ? (
         <div 
           onClick={() => fileInputRef.current?.click()}
-          className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-zambia-green hover:bg-green-50 transition-colors group w-full h-full min-h-[12rem]"
+          className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors group w-full h-full min-h-[12rem]"
         >
           <div className="space-y-1 text-center self-center">
             {uploading ? (
               <Loader2 className="mx-auto h-12 w-12 text-gray-400 animate-spin" />
             ) : (
-              <Upload className="mx-auto h-12 w-12 text-gray-400 group-hover:text-zambia-green" />
+              <Upload className="mx-auto h-12 w-12 text-gray-400 group-hover:text-primary" />
             )}
             <div className="flex text-sm text-gray-600 justify-center">
-              <span className="relative font-medium text-zambia-green rounded-md focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-zambia-green">
+              <span className="relative font-medium text-primary rounded-md focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary">
                 Upload a file
               </span>
             </div>

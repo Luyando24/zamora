@@ -18,25 +18,33 @@ export async function GET(req: NextRequest) {
 
         const supabase = getSupabaseAdmin();
 
-        // Determine Date Range
+        // Determine Date Range - Use UTC consistently since DB stores timestamps in UTC
         const now = new Date();
         let startDate = new Date();
         
         switch (period) {
             case 'today':
-                startDate.setHours(0, 0, 0, 0);
+                // Exactly last 24 hours to ensure "Today" data is always visible regardless of midnight cross
+                startDate.setTime(now.getTime() - (24 * 60 * 60 * 1000));
                 break;
             case 'week':
-                startDate.setDate(now.getDate() - 7);
+                // Last 7 days in UTC
+                startDate.setUTCDate(now.getUTCDate() - 7);
+                startDate.setUTCHours(0, 0, 0, 0);
                 break;
             case 'month':
-                startDate.setMonth(now.getMonth() - 1);
+                // Last 30 days in UTC
+                startDate.setUTCDate(now.getUTCDate() - 30);
+                startDate.setUTCHours(0, 0, 0, 0);
                 break;
             case 'year':
-                startDate.setFullYear(now.getFullYear() - 1);
+                // Last 365 days in UTC
+                startDate.setUTCDate(now.getUTCDate() - 365);
+                startDate.setUTCHours(0, 0, 0, 0);
                 break;
             default:
-                startDate.setHours(0, 0, 0, 0); // Default to today
+                // Default to last 24 hours
+                startDate.setTime(now.getTime() - (24 * 60 * 60 * 1000));
         }
 
         const startDateStr = startDate.toISOString();
@@ -46,7 +54,9 @@ export async function GET(req: NextRequest) {
             .from('orders')
             .select('id, status, total_amount, created_at, order_items(item_name, quantity, unit_price)')
             .eq('property_id', propertyId)
-            .gte('created_at', startDateStr);
+            .gte('created_at', startDateStr)
+            .order('created_at', { ascending: false })
+            .limit(5000);
 
         if (foodError) throw foodError;
 
@@ -55,7 +65,9 @@ export async function GET(req: NextRequest) {
             .from('bar_orders')
             .select('id, status, total_amount, created_at, bar_order_items(item_name, quantity, unit_price)')
             .eq('property_id', propertyId)
-            .gte('created_at', startDateStr);
+            .gte('created_at', startDateStr)
+            .order('created_at', { ascending: false })
+            .limit(5000);
 
         if (barError) throw barError;
 
@@ -115,6 +127,9 @@ export async function GET(req: NextRequest) {
 
         return NextResponse.json({
             period,
+            totalOrders,
+            totalRevenue,
+            averageOrderValue,
             summary: {
                 totalOrders,
                 totalRevenue,

@@ -40,7 +40,7 @@ export default function PropertyDetailsPage({ params }: { params: Promise<{ id: 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-zambia-green"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -50,7 +50,7 @@ export default function PropertyDetailsPage({ params }: { params: Promise<{ id: 
       <div className="text-center py-12">
         <h2 className="text-2xl font-bold text-slate-900">Property Not Found</h2>
         <p className="text-slate-500 mt-2">The property you are looking for does not exist or you don&apos;t have access to it.</p>
-        <Link href="/dashboard/properties" className="mt-4 inline-flex items-center text-blue-600 hover:text-blue-700">
+        <Link href="/dashboard/properties" className="mt-4 inline-flex items-center text-primary hover:text-primary/90 transition-colors">
           <ArrowLeft size={16} className="mr-2" /> Back to Properties
         </Link>
       </div>
@@ -64,20 +64,20 @@ export default function PropertyDetailsPage({ params }: { params: Promise<{ id: 
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <Link href="/dashboard/properties" className="inline-flex items-center text-slate-500 hover:text-blue-600 mb-2 transition-colors text-sm">
+          <Link href="/dashboard/properties" className="inline-flex items-center text-slate-500 hover:text-primary mb-2 transition-colors text-sm font-medium">
             <ArrowLeft size={16} className="mr-1" /> Back to Properties
           </Link>
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-blue-100 text-blue-600 rounded-xl">
+            <div className="p-3 bg-primary/10 text-primary rounded-xl">
               <TypeIcon size={32} />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-slate-900">{property.name}</h1>
+              <h1 className="text-3xl font-bold text-slate-900 tracking-tight">{property.name}</h1>
               <div className="flex items-center gap-2 text-slate-500 text-sm">
                 <span className="capitalize">{property.type?.replace('_', ' ')}</span>
                 <span>•</span>
-                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                  property.subscription_status === 'active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                  property.subscription_status === 'active' ? 'bg-primary/10 text-primary' : 'bg-yellow-100 text-yellow-800'
                 }`}>
                   {property.subscription_status === 'active' ? <CheckCircle size={12} /> : <Clock size={12} />}
                   {property.subscription_status || 'Trial'}
@@ -91,13 +91,13 @@ export default function PropertyDetailsPage({ params }: { params: Promise<{ id: 
            <Link 
              href={`/book/${property.id}`} 
              target="_blank"
-             className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 font-medium shadow-sm flex items-center gap-2"
+             className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 font-medium shadow-sm flex items-center gap-2 transition-all"
            >
              <ExternalLink size={18} /> Public Page
            </Link>
            <Link 
              href={`/dashboard/properties/${property.id}/edit`}
-             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm flex items-center gap-2"
+             className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 font-medium shadow-md shadow-primary/10 flex items-center gap-2 transition-all"
            >
              <Edit size={18} /> Edit Property
            </Link>
@@ -111,8 +111,8 @@ export default function PropertyDetailsPage({ params }: { params: Promise<{ id: 
         <div className="lg:col-span-2 space-y-8">
           
           {/* Cover Image */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="aspect-video relative bg-slate-100">
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div className="aspect-video relative bg-slate-50">
               {property.cover_image_url ? (
                 <Image 
                   src={property.cover_image_url} 
@@ -122,17 +122,17 @@ export default function PropertyDetailsPage({ params }: { params: Promise<{ id: 
                   unoptimized 
                 />
               ) : (
-                <div className="flex items-center justify-center h-full text-slate-400">
-                  <Building2 size={64} className="opacity-20" />
+                <div className="flex items-center justify-center h-full text-slate-200">
+                  <Building2 size={64} />
                 </div>
               )}
             </div>
             {property.gallery_urls && property.gallery_urls.length > 0 && (
-              <div className="p-4 border-t border-slate-200">
-                <h3 className="text-sm font-medium text-slate-900 mb-3">Gallery</h3>
-                <div className="flex gap-2 overflow-x-auto pb-2">
+              <div className="p-4 border-t border-slate-100">
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Gallery</h3>
+                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
                   {property.gallery_urls.map((url: string, index: number) => (
-                    <div key={index} className="h-20 w-20 flex-shrink-0 rounded-lg overflow-hidden border border-slate-200 relative">
+                    <div key={index} className="h-20 w-20 flex-shrink-0 rounded-xl overflow-hidden border border-slate-200 relative shadow-sm hover:border-primary transition-colors cursor-pointer">
                       <Image src={url} alt={`Gallery ${index}`} fill className="object-cover" unoptimized />
                     </div>
                   ))}
@@ -142,19 +142,19 @@ export default function PropertyDetailsPage({ params }: { params: Promise<{ id: 
           </div>
 
           {/* Amenities */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-            <h3 className="text-lg font-bold text-slate-900 mb-4">Amenities & Features</h3>
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+            <h3 className="text-lg font-bold text-slate-900 mb-6">Amenities & Features</h3>
             {property.amenities && property.amenities.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {property.amenities.map((amenity: any, index: number) => (
-                  <div key={index} className="flex items-center gap-2 text-slate-700">
-                    <CheckCircle size={16} className="text-zambia-green flex-shrink-0" />
-                    <span className="text-sm">{typeof amenity === 'object' ? amenity.name : amenity}</span>
+                  <div key={index} className="flex items-center gap-3 text-slate-600 bg-slate-50/50 p-3 rounded-xl border border-slate-100">
+                    <CheckCircle size={18} className="text-primary flex-shrink-0" />
+                    <span className="text-sm font-medium">{typeof amenity === 'object' ? amenity.name : amenity}</span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-slate-500 italic">No amenities listed.</p>
+              <p className="text-slate-400 italic bg-slate-50 p-6 rounded-xl text-center border border-dashed border-slate-200">No amenities listed.</p>
             )}
           </div>
 
@@ -164,43 +164,51 @@ export default function PropertyDetailsPage({ params }: { params: Promise<{ id: 
         <div className="space-y-6">
           
           {/* Contact Info */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-            <h3 className="text-lg font-bold text-slate-900 mb-4">Contact Information</h3>
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <MapPin className="text-slate-400 mt-1" size={18} />
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+            <h3 className="text-lg font-bold text-slate-900 mb-6">Contact Information</h3>
+            <div className="space-y-6">
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-slate-50 rounded-lg text-slate-400">
+                  <MapPin size={20} />
+                </div>
                 <div>
-                  <p className="text-xs text-slate-500 font-medium uppercase">Address</p>
-                  <p className="text-slate-700">{property.address || 'N/A'}</p>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">Address</p>
+                  <p className="text-sm text-slate-700 font-medium">{property.address || 'N/A'}</p>
                 </div>
               </div>
               
-              <div className="flex items-start gap-3">
-                <Phone className="text-slate-400 mt-1" size={18} />
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-slate-50 rounded-lg text-slate-400">
+                  <Phone size={20} />
+                </div>
                 <div>
-                  <p className="text-xs text-slate-500 font-medium uppercase">Phone</p>
-                  <p className="text-slate-700">{property.phone || 'N/A'}</p>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">Phone</p>
+                  <p className="text-sm text-slate-700 font-medium">{property.phone || 'N/A'}</p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3">
-                <Mail className="text-slate-400 mt-1" size={18} />
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-slate-50 rounded-lg text-slate-400">
+                  <Mail size={20} />
+                </div>
                 <div>
-                  <p className="text-xs text-slate-500 font-medium uppercase">Email</p>
-                  <p className="text-slate-700 break-all">{property.email || 'N/A'}</p>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">Email</p>
+                  <p className="text-sm text-slate-700 font-medium break-all">{property.email || 'N/A'}</p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-3">
-                <Globe className="text-slate-400 mt-1" size={18} />
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-slate-50 rounded-lg text-slate-400">
+                  <Globe size={20} />
+                </div>
                 <div>
-                  <p className="text-xs text-slate-500 font-medium uppercase">Website</p>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-0.5">Website</p>
                   {property.website_url ? (
-                    <a href={property.website_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">
+                    <a href={property.website_url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline font-medium break-all">
                       {property.website_url}
                     </a>
                   ) : (
-                    <p className="text-slate-700">N/A</p>
+                    <p className="text-sm text-slate-700 font-medium">N/A</p>
                   )}
                 </div>
               </div>
@@ -208,28 +216,28 @@ export default function PropertyDetailsPage({ params }: { params: Promise<{ id: 
           </div>
 
           {/* Quick Stats */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-            <h3 className="text-lg font-bold text-slate-900 mb-4">Property Stats</h3>
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+            <h3 className="text-lg font-bold text-slate-900 mb-6">Property Stats</h3>
             <div className="grid grid-cols-2 gap-4">
-               <div className="p-3 bg-slate-50 rounded-lg text-center">
-                 <CalendarDays className="mx-auto text-blue-500 mb-1" size={20} />
-                 <p className="text-xs text-slate-500">Bookings</p>
-                 <p className="font-bold text-slate-900">-</p>
+               <div className="p-4 bg-slate-50 rounded-2xl text-center border border-slate-100 hover:border-primary/20 transition-colors group">
+                 <CalendarDays className="mx-auto text-primary mb-2 group-hover:scale-110 transition-transform" size={24} />
+                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Bookings</p>
+                 <p className="text-lg font-bold text-slate-900">-</p>
                </div>
-               <div className="p-3 bg-slate-50 rounded-lg text-center">
-                 <Users className="mx-auto text-green-500 mb-1" size={20} />
-                 <p className="text-xs text-slate-500">Guests</p>
-                 <p className="font-bold text-slate-900">-</p>
+               <div className="p-4 bg-slate-50 rounded-2xl text-center border border-slate-100 hover:border-primary/20 transition-colors group">
+                 <Users className="mx-auto text-primary mb-2 group-hover:scale-110 transition-transform" size={24} />
+                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Guests</p>
+                 <p className="text-lg font-bold text-slate-900">-</p>
                </div>
-               <div className="p-3 bg-slate-50 rounded-lg text-center">
-                 <Utensils className="mx-auto text-orange-500 mb-1" size={20} />
-                 <p className="text-xs text-slate-500">Orders</p>
-                 <p className="font-bold text-slate-900">-</p>
+               <div className="p-4 bg-slate-50 rounded-2xl text-center border border-slate-100 hover:border-primary/20 transition-colors group">
+                 <Utensils className="mx-auto text-primary mb-2 group-hover:scale-110 transition-transform" size={24} />
+                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Orders</p>
+                 <p className="text-lg font-bold text-slate-900">-</p>
                </div>
-               <div className="p-3 bg-slate-50 rounded-lg text-center">
-                 <BedDouble className="mx-auto text-purple-500 mb-1" size={20} />
-                 <p className="text-xs text-slate-500">Rooms</p>
-                 <p className="font-bold text-slate-900">-</p>
+               <div className="p-4 bg-slate-50 rounded-2xl text-center border border-slate-100 hover:border-primary/20 transition-colors group">
+                 <BedDouble className="mx-auto text-primary mb-2 group-hover:scale-110 transition-transform" size={24} />
+                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Rooms</p>
+                 <p className="text-lg font-bold text-slate-900">-</p>
                </div>
             </div>
           </div>

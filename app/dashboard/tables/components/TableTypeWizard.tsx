@@ -123,13 +123,13 @@ export default function TableTypeWizard({ initialData }: TableTypeWizardProps) {
                 <div 
                   className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-colors duration-300 ${
                     isCompleted || isCurrent 
-                      ? 'bg-blue-900 text-white shadow-md' 
+                      ? 'bg-primary text-white shadow-md' 
                       : 'bg-white border-2 border-slate-200 text-slate-400'
                   }`}
                 >
                   <step.icon size={18} />
                 </div>
-                <span className={`text-xs font-bold mt-2 ${isCurrent ? 'text-blue-900' : 'text-slate-400'}`}>
+                <span className={`text-xs font-bold mt-2 ${isCurrent ? 'text-primary' : 'text-slate-400'}`}>
                   {step.name}
                 </span>
               </div>
@@ -153,7 +153,7 @@ export default function TableTypeWizard({ initialData }: TableTypeWizardProps) {
                             onClick={() => setSelectedPropertyId(property.id)}
                             className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
                                 selectedPropertyId === property.id 
-                                ? 'border-blue-600 bg-blue-50 ring-1 ring-blue-600' 
+                                ? 'border-primary bg-primary/5 ring-1 ring-primary' 
                                 : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
                             }`}
                         >
@@ -180,7 +180,7 @@ export default function TableTypeWizard({ initialData }: TableTypeWizardProps) {
                 placeholder="e.g. Indoor, Outdoor, VIP Booth"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900 transition-all text-slate-900"
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all text-slate-900"
               />
               <datalist id="table-type-suggestions">
                 <option value="Indoor" />
@@ -195,7 +195,7 @@ export default function TableTypeWizard({ initialData }: TableTypeWizardProps) {
                 placeholder="e.g. Tables located in the main dining hall..."
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900 transition-all resize-none text-slate-900"
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all resize-none text-slate-900"
               />
             </div>
           </div>
@@ -222,7 +222,7 @@ export default function TableTypeWizard({ initialData }: TableTypeWizardProps) {
                   min="1"
                   value={formData.capacity}
                   onChange={(e) => setFormData({ ...formData, capacity: parseInt(e.target.value) || 0 })}
-                  className="w-24 text-center px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900 font-bold text-lg text-slate-900"
+                  className="w-24 text-center px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary font-bold text-lg text-slate-900"
                 />
                 <button 
                   onClick={() => setFormData(prev => ({ ...prev, capacity: prev.capacity + 1 }))}
@@ -255,7 +255,7 @@ export default function TableTypeWizard({ initialData }: TableTypeWizardProps) {
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="px-8 py-2.5 bg-blue-900 text-white rounded-xl font-bold text-sm hover:bg-blue-800 shadow-lg shadow-blue-900/20 transition-all transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-8 py-2.5 bg-primary text-white rounded-xl font-bold text-sm hover:bg-primary-600 shadow-lg shadow-primary/20 transition-all transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {loading && <Loader2 size={16} className="animate-spin" />}
             {initialData ? 'Update Type' : 'Create Type'}

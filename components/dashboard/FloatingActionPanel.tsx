@@ -36,7 +36,7 @@ export default function FloatingActionPanel() {
         onClick={() => setIsOpen(!isOpen)}
         className={`
           relative flex items-center justify-center w-14 h-14 rounded-full shadow-2xl transition-all duration-300
-          ${isOpen ? 'bg-slate-800 rotate-90' : 'bg-blue-600 hover:bg-blue-700 hover:scale-110'}
+          ${isOpen ? 'bg-slate-800 rotate-90' : 'bg-primary hover:bg-primary/90 hover:scale-110'}
           text-white
         `}
       >
@@ -93,7 +93,7 @@ export default function FloatingActionPanel() {
                     onClick={() => handleClick(n)}
                     className={`
                       w-full flex items-start gap-3 p-3 rounded-xl transition-colors text-left
-                      ${n.read ? 'bg-white hover:bg-slate-50' : 'bg-blue-50/50 hover:bg-blue-50 border border-blue-100'}
+                      ${n.read ? 'bg-white hover:bg-slate-50' : 'bg-primary/5 hover:bg-primary/10 border border-primary/10'}
                     `}
                   >
                     <div className={`

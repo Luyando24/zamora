@@ -183,7 +183,7 @@ export default function TablesPage() {
             </div>
             <button 
                 onClick={() => handleAddClick(activeTab === 'tables' ? 'unit' : 'type')}
-                className="bg-blue-900 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-800 transition-colors flex items-center gap-2 shadow-sm"
+                className="bg-primary text-white px-4 py-2 rounded-lg font-bold hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-sm"
             >
                 <Plus size={18} />
                 Add {activeTab === 'tables' ? 'Table' : 'Type'}
@@ -203,7 +203,7 @@ export default function TablesPage() {
                         <div key={table.id} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow group relative">
                             <div className="flex justify-between items-start mb-2">
                                 <div className="flex flex-col gap-1">
-                                    <div className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider w-fit">
+                                    <div className="bg-primary/10 text-primary px-2 py-1 rounded text-xs font-bold uppercase tracking-wider w-fit">
                                         {table.room_types?.name || 'Table'}
                                     </div>
                                     <div className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider w-fit ${
@@ -307,7 +307,7 @@ export default function TablesPage() {
                 <input 
                     type="text" 
                     placeholder="e.g. 1, 2, A1, B2"
-                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900 text-slate-900"
+                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary text-slate-900"
                     value={newTableNumber}
                     onChange={e => setNewTableNumber(e.target.value)}
                 />
@@ -315,7 +315,7 @@ export default function TablesPage() {
             <div>
                 <label className="block text-sm font-bold text-slate-700 mb-1">Table Type</label>
                 <select 
-                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-900/10 focus:border-blue-900 text-slate-900"
+                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary text-slate-900"
                     value={newTableTypeId}
                     onChange={e => setNewTableTypeId(e.target.value)}
                 >
@@ -337,7 +337,7 @@ export default function TablesPage() {
                 </button>
                 <button 
                     onClick={handleSaveTable}
-                    className="px-6 py-2 bg-blue-900 text-white font-bold rounded-lg hover:bg-blue-800"
+                    className="px-6 py-2 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-colors"
                 >
                     Save Table
                 </button>

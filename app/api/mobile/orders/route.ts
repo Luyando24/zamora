@@ -154,7 +154,27 @@ export async function POST(req: NextRequest) {
         const foodTotal = foodCart.reduce((sum: number, i: any) => sum + (i.price || i.base_price) * i.quantity, 0);
         const foodServiceCharge = foodTotal * 0.10;
         const foodGrandTotal = foodTotal + foodServiceCharge;
-        const foodOrderId = crypto.randomUUID();
+        
+        // Use client-provided ID if it's a valid UUID, otherwise generate new one
+        const clientId = payload.id || payload.clientId || payload.client_id;
+        const isUuid = clientId && typeof clientId === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(clientId);
+        const foodOrderId = isUuid ? clientId : crypto.randomUUID();
+
+        // Check if order already exists to prevent duplicates (idempotency)
+        if (isUuid) {
+            const { data: existingOrder } = await supabaseAdmin
+                .from('orders')
+                .select('id')
+                .eq('id', foodOrderId)
+                .single();
+            
+            if (existingOrder) {
+                console.log(`Order ${foodOrderId} already exists, skipping creation.`);
+                newOrderIds.push(foodOrderId);
+                // Skip to bar cart processing or end
+                throw { skip: true, orderId: foodOrderId };
+            }
+        }
 
         // Helper to get item name safely
         const getItemName = (i: any) => i.name || i.item_name || i.title || i.menuItem?.name || 'Unknown Item';
@@ -246,8 +266,13 @@ export async function POST(req: NextRequest) {
         ).catch(e => console.error('Push Error:', e));
 
       } catch (err: any) {
-        console.error('Food Order Failed:', err);
-        errors.push(`Food Order Failed: ${err.message}`);
+        if (err.skip) {
+          // This was an idempotency skip, not an actual error
+          console.log('Food order skip handled');
+        } else {
+          console.error('Food Order Failed:', err);
+          errors.push(`Food Order Failed: ${err.message}`);
+        }
       }
     }
 
@@ -257,7 +282,29 @@ export async function POST(req: NextRequest) {
         const barTotal = barCart.reduce((sum: number, i: any) => sum + (i.price || i.base_price) * i.quantity, 0);
         const barServiceCharge = barTotal * 0.10;
         const barGrandTotal = barTotal + barServiceCharge;
-        const barOrderId = crypto.randomUUID();
+        
+        // Use client-provided ID if it's a valid UUID, otherwise generate new one
+        // Note: For split orders (food + bar), we might want to generate a different ID for bar if food already used the provided ID
+        // However, if the client sends two IDs, we should use them.
+        // For now, let's check if the provided ID was already used by food in this same request.
+        const clientId = payload.barOrderId || payload.bar_order_id || (newOrderIds.includes(payload.id) ? crypto.randomUUID() : payload.id);
+        const isUuid = clientId && typeof clientId === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(clientId);
+        const barOrderId = isUuid ? clientId : crypto.randomUUID();
+
+        // Check if order already exists
+        if (isUuid) {
+            const { data: existingOrder } = await supabaseAdmin
+                .from('bar_orders')
+                .select('id')
+                .eq('id', barOrderId)
+                .single();
+            
+            if (existingOrder) {
+                console.log(`Bar order ${barOrderId} already exists, skipping creation.`);
+                newOrderIds.push(barOrderId);
+                throw { skip: true, orderId: barOrderId };
+            }
+        }
 
         // Helper to get item name safely
         const getItemName = (i: any) => i.name || i.item_name || i.title || i.menuItem?.name || 'Unknown Item';
@@ -343,8 +390,12 @@ export async function POST(req: NextRequest) {
         ).catch(e => console.error('Push Error:', e));
 
       } catch (err: any) {
-        console.error('Bar Order Failed:', err);
-        errors.push(`Bar Order Failed: ${err.message}`);
+        if (err.skip) {
+          console.log('Bar order skip handled');
+        } else {
+          console.error('Bar Order Failed:', err);
+          errors.push(`Bar Order Failed: ${err.message}`);
+        }
       }
     }
 

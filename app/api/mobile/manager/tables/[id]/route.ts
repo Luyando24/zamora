@@ -51,7 +51,17 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
     try {
         const body = await req.json();
-        const { propertyId, room_number, room_type_id, status, notes } = body;
+        const { propertyId, room_number, room_type_id, status, notes, qr_url } = body;
+
+        let finalRoomNumber = room_number;
+        if (!finalRoomNumber && qr_url) {
+             try {
+                 const urlObj = new URL(qr_url);
+                 finalRoomNumber = urlObj.searchParams.get('table') || urlObj.searchParams.get('room');
+             } catch (e) {
+                 // ignore
+             }
+        }
 
         const access = await verifyManagerAccess(req, propertyId);
         if (access.error || !access.user) return NextResponse.json({ error: access.error || 'Unauthorized' }, { status: access.status || 401 });
@@ -60,10 +70,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         const { error } = await supabase
             .from('rooms')
             .update({
-                room_number,
+                room_number: finalRoomNumber === '' ? null : finalRoomNumber,
                 room_type_id,
                 status,
                 notes,
+                qr_url: qr_url === '' ? null : qr_url,
                 updated_at: new Date().toISOString()
             })
             .eq('id', params.id);

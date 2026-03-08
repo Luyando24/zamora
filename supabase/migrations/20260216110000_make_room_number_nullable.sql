@@ -1,0 +1,1 @@
+ALTER TABLE rooms ALTER COLUMN room_number DROP NOT NULL;

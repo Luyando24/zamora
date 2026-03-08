@@ -126,7 +126,7 @@ export default function RoomsPage() {
           </button>
           <button
             onClick={() => handleAddClick('unit')}
-            className="flex items-center gap-2 px-4 py-2.5 bg-slate-900 text-white rounded-xl hover:bg-slate-800 font-bold text-sm shadow-lg shadow-slate-900/10 transition-all"
+            className="flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl hover:bg-primary/90 font-bold text-sm shadow-lg shadow-primary/10 transition-all"
           >
             <Plus size={16} /> Add Room
           </button>
@@ -139,7 +139,7 @@ export default function RoomsPage() {
              onClick={() => setActiveTab('types')}
              className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all ${
                activeTab === 'types'
-                 ? 'bg-white text-slate-900 shadow-sm'
+                 ? 'bg-white text-primary shadow-sm'
                  : 'text-slate-500 hover:text-slate-700'
              }`}
            >
@@ -150,7 +150,7 @@ export default function RoomsPage() {
              onClick={() => setActiveTab('rooms')}
              className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all ${
                activeTab === 'rooms'
-                 ? 'bg-white text-slate-900 shadow-sm'
+                 ? 'bg-white text-primary shadow-sm'
                  : 'text-slate-500 hover:text-slate-700'
              }`}
            >
@@ -193,13 +193,13 @@ export default function RoomsPage() {
                 <div className="mt-5 pt-4 border-t border-slate-50 flex justify-end gap-2">
                   <Link 
                     href={`/dashboard/rooms/types/${type.id}`}
-                    className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
                   >
                     <Edit size={18} />
                   </Link>
                   <button 
                     onClick={() => handleDelete(type.id, 'room_types')}
-                    className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                    className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                   >
                     <Trash2 size={18} />
                   </button>
@@ -258,7 +258,7 @@ export default function RoomsPage() {
              </button>
              <Link
                href="/dashboard/setup"
-               className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800 font-bold text-sm transition-colors"
+               className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 font-bold text-sm transition-colors"
              >
                Setup Property <ArrowRight size={16} />
              </Link>
@@ -282,7 +282,7 @@ function RoomsTable({ rooms, onEdit, onDelete }: RoomsTableProps) {
     switch (status?.toLowerCase()) {
       case 'clean': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
       case 'dirty': return 'bg-rose-50 text-rose-700 border-rose-200';
-      case 'occupied': return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'occupied': return 'bg-primary/10 text-primary border-primary/20';
       case 'maintenance': return 'bg-amber-50 text-amber-700 border-amber-200';
       default: return 'bg-slate-50 text-slate-700 border-slate-200';
     }
@@ -293,11 +293,11 @@ function RoomsTable({ rooms, onEdit, onDelete }: RoomsTableProps) {
       {rooms.map((room) => (
         <div 
           key={room.id} 
-          className="group bg-white rounded-2xl p-5 border border-slate-300 shadow-md flex flex-col justify-between transition-all hover:-translate-y-1 hover:shadow-xl hover:border-slate-400"
+          className="group bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between transition-all hover:shadow-md"
         >
           <div>
             <div className="flex justify-between items-start mb-4">
-              <div className="w-12 h-12 rounded-xl bg-slate-900 flex items-center justify-center text-white font-black text-lg border border-slate-900">
+              <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-white font-black text-lg">
                 {room.room_number}
               </div>
               <span className={`px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wide border ${getStatusColor(room.status)}`}>
@@ -324,14 +324,14 @@ function RoomsTable({ rooms, onEdit, onDelete }: RoomsTableProps) {
           <div className="flex justify-end gap-2 mt-5 pt-4 border-t border-slate-100">
             <button 
               onClick={() => onEdit(room)} 
-              className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
               title="Edit Room"
             >
               <Edit size={16} />
             </button>
             <button 
               onClick={() => onDelete(room.id)} 
-              className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+              className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
               title="Delete Room"
             >
               <Trash2 size={16} />
@@ -418,7 +418,7 @@ function RoomForm({ initialData, roomTypes, onSuccess }: RoomFormProps) {
             <input 
                 required
                 type="text" 
-                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 font-medium text-slate-900"
+                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary font-medium text-slate-900"
                 placeholder="e.g. 101"
                 value={formData.room_number}
                 onChange={e => setFormData({...formData, room_number: e.target.value})}
@@ -429,7 +429,7 @@ function RoomForm({ initialData, roomTypes, onSuccess }: RoomFormProps) {
             <label className="block text-sm font-bold text-slate-700 mb-1">Room Type</label>
             <select 
                 required
-                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 font-medium text-slate-900 bg-white"
+                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary font-medium text-slate-900 bg-white"
                 value={formData.room_type_id}
                 onChange={e => setFormData({...formData, room_type_id: e.target.value})}
             >
@@ -443,7 +443,7 @@ function RoomForm({ initialData, roomTypes, onSuccess }: RoomFormProps) {
         <div>
             <label className="block text-sm font-bold text-slate-700 mb-1">Status</label>
             <select 
-                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 font-medium text-slate-900 bg-white"
+                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary font-medium text-slate-900 bg-white"
                 value={formData.status}
                 onChange={e => setFormData({...formData, status: e.target.value})}
             >
@@ -457,7 +457,7 @@ function RoomForm({ initialData, roomTypes, onSuccess }: RoomFormProps) {
         <button 
             type="submit" 
             disabled={loading}
-            className="w-full py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-colors disabled:opacity-50 mt-4"
+            className="w-full py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 transition-colors disabled:opacity-50 mt-4 shadow-lg shadow-primary/10"
         >
             {loading ? 'Saving...' : 'Save Room'}
         </button>

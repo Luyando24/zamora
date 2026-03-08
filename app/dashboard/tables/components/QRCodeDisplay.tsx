@@ -110,9 +110,9 @@ export default function QRCodeDisplay({ isOpen, onClose, tableNumber, tableType,
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-    // Decorative Pink/Purple glow top
+    // Decorative Primary glow top
     const topGlow = ctx.createLinearGradient(0, 0, 0, 1000);
-    topGlow.addColorStop(0, 'rgba(236, 72, 153, 0.15)'); // Pink 500
+    topGlow.addColorStop(0, 'rgba(16, 185, 129, 0.15)'); // Primary 500
     topGlow.addColorStop(1, 'transparent');
     ctx.fillStyle = topGlow;
     ctx.fillRect(0, 0, WIDTH, 1000);
@@ -212,8 +212,8 @@ export default function QRCodeDisplay({ isOpen, onClose, tableNumber, tableType,
 
         // --- Gradient Glow Effect ---
         const glowGradient = ctx.createLinearGradient(cardX, cardY + cardHeight, cardX + cardWidth, cardY);
-        glowGradient.addColorStop(0, '#ec4899'); // Pink 500
-        glowGradient.addColorStop(0.5, '#a855f7'); // Purple 500
+        glowGradient.addColorStop(0, '#10b981'); // Primary 500
+        glowGradient.addColorStop(0.5, '#3b82f6'); // Blue 500
         glowGradient.addColorStop(1, '#6366f1'); // Indigo 500
 
         ctx.save();
@@ -344,7 +344,7 @@ export default function QRCodeDisplay({ isOpen, onClose, tableNumber, tableType,
         
         ctx.textAlign = 'left';
         ctx.font = 'bold 60px sans-serif';
-        ctx.fillStyle = '#ec4899'; // Pink 500
+        ctx.fillStyle = '#10b981'; // Primary 500
         ctx.fillText('GUEST WI-FI', contentX, contentY);
 
         // Network Row
@@ -412,8 +412,8 @@ export default function QRCodeDisplay({ isOpen, onClose, tableNumber, tableType,
             onClick={(e) => e.stopPropagation()}
         >
             {/* Futuristic Header Graphic */}
-            <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-pink-500/10 to-transparent pointer-events-none" />
-            <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-pink-500/50 to-transparent" />
+            <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
+            <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
             
             {/* Close Button */}
             <button 
@@ -425,7 +425,7 @@ export default function QRCodeDisplay({ isOpen, onClose, tableNumber, tableType,
 
             <div className="pt-12 pb-8 px-8 flex flex-col items-center w-full relative z-0">
                 {/* Badge */}
-                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-400 text-[10px] font-bold uppercase tracking-widest mb-6">
+                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-widest mb-6">
                     <Smartphone size={12} />
                     <span>Touchless Menu</span>
                 </div>
@@ -437,7 +437,7 @@ export default function QRCodeDisplay({ isOpen, onClose, tableNumber, tableType,
                 </div>
 
                 {/* QR Preview Card */}
-                <div className="bg-white p-4 rounded-3xl shadow-[0_0_40px_-10px_rgba(236,72,153,0.3)] relative group transition-transform hover:scale-[1.02] duration-300 mb-8">
+                <div className="bg-white p-4 rounded-3xl shadow-[0_0_40px_-10px_rgba(16,185,129,0.3)] relative group transition-transform hover:scale-[1.02] duration-300 mb-8">
                     <div className="relative">
                         {menuUrl ? (
                             <QRCodeSVG 
@@ -468,7 +468,7 @@ export default function QRCodeDisplay({ isOpen, onClose, tableNumber, tableType,
                     <button 
                         onClick={downloadQR}
                         disabled={isDownloading || !menuUrl}
-                        className="w-full flex items-center justify-center gap-2 bg-white text-black hover:bg-pink-50 disabled:bg-slate-200 px-6 py-3.5 rounded-xl font-bold transition-all transform active:scale-[0.98] shadow-lg shadow-pink-500/10"
+                        className="w-full flex items-center justify-center gap-2 bg-white text-black hover:bg-primary/5 disabled:bg-slate-200 px-6 py-3.5 rounded-xl font-bold transition-all transform active:scale-[0.98] shadow-lg shadow-primary/10"
                     >
                         {isDownloading ? <Loader2 size={18} className="animate-spin" /> : <Download size={18} />}
                         Download High-Res Flyer
@@ -479,7 +479,7 @@ export default function QRCodeDisplay({ isOpen, onClose, tableNumber, tableType,
                             onClick={handleCopy}
                             className="flex-1 py-3 bg-slate-900 border border-slate-800 text-slate-300 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-slate-800 hover:text-white transition-colors active:scale-[0.98] group"
                         >
-                            <Copy size={14} className="group-hover:text-pink-400 transition-colors" /> 
+                            <Copy size={14} className="group-hover:text-primary transition-colors" /> 
                             {copied ? 'Copied!' : 'Copy Link'}
                         </button>
                         <a 
@@ -489,7 +489,7 @@ export default function QRCodeDisplay({ isOpen, onClose, tableNumber, tableType,
                             onClick={(e) => !menuUrl && e.preventDefault()}
                             className={`flex-1 py-3 bg-slate-900 border border-slate-800 text-slate-300 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-slate-800 hover:text-white transition-colors active:scale-[0.98] group ${!menuUrl ? 'opacity-50 pointer-events-none' : ''}`}
                         >
-                            <ExternalLink size={14} className="group-hover:text-pink-400 transition-colors" /> Open Menu
+                            <ExternalLink size={14} className="group-hover:text-primary transition-colors" /> Open Menu
                         </a>
                     </div>
                 </div>

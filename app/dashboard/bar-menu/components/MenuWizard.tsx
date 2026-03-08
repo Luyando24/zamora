@@ -266,14 +266,14 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
     <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="col-span-2">
-          <label className="block text-sm font-bold text-slate-700 mb-2">Drink Name <span className="text-pink-500">*</span></label>
+          <label className="block text-sm font-bold text-slate-700 mb-2">Drink Name <span className="text-primary">*</span></label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Martini className="h-5 w-5 text-slate-400" />
             </div>
             <input
                 required
-                className="block w-full rounded-xl border border-slate-200 pl-10 pr-4 py-3.5 text-slate-900 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+                className="block w-full rounded-xl border border-slate-200 pl-10 pr-4 py-3.5 text-slate-900 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                 placeholder="e.g. Classic Mojito, Old Fashioned, Castle Lite"
                 value={formData.name}
                 onChange={e => setFormData({ ...formData, name: e.target.value })}
@@ -282,10 +282,10 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
         </div>
 
         <div className="col-span-2 md:col-span-1">
-          <label className="block text-sm font-bold text-slate-700 mb-2">Category <span className="text-pink-500">*</span></label>
+          <label className="block text-sm font-bold text-slate-700 mb-2">Category <span className="text-primary">*</span></label>
           <select
             required
-            className="block w-full rounded-xl border border-slate-200 px-4 py-3.5 text-slate-900 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+            className="block w-full rounded-xl border border-slate-200 px-4 py-3.5 text-slate-900 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
             value={formData.category}
             onChange={e => setFormData({ ...formData, category: e.target.value })}
           >
@@ -299,7 +299,7 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
         <div className="col-span-2 md:col-span-1">
            <label className="block text-sm font-bold text-slate-700 mb-2">Alcohol Content / Type</label>
            <input
-              className="block w-full rounded-xl border border-slate-200 px-4 py-3.5 text-slate-900 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+              className="block w-full rounded-xl border border-slate-200 px-4 py-3.5 text-slate-900 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
               placeholder="e.g. 12%, Non-Alcoholic, Single Malt"
               value={formData.dietary_info}
               onChange={e => setFormData({ ...formData, dietary_info: e.target.value })}
@@ -310,7 +310,7 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
           <label className="block text-sm font-bold text-slate-700 mb-2">Description / Tasting Notes</label>
           <textarea
             rows={4}
-            className="block w-full rounded-xl border border-slate-200 px-4 py-3 text-slate-900 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all resize-none"
+            className="block w-full rounded-xl border border-slate-200 px-4 py-3 text-slate-900 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all resize-none"
             placeholder="Describe the flavor profile, origin, or serving suggestion..."
             value={formData.description}
             onChange={e => setFormData({ ...formData, description: e.target.value })}
@@ -326,13 +326,13 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
         <div className="col-span-2 md:col-span-1">
-          <label className="block text-sm font-bold text-slate-700 mb-2">Selling Price (ZMW) <span className="text-pink-500">*</span></label>
+          <label className="block text-sm font-bold text-slate-700 mb-2">Selling Price (ZMW) <span className="text-primary">*</span></label>
           <div className="relative">
             <span className="absolute left-4 top-3.5 text-slate-500 font-bold">K</span>
             <input
               type="number"
               required
-              className="block w-full rounded-xl border border-slate-200 pl-8 pr-4 py-3.5 text-slate-900 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all text-lg font-medium"
+              className="block w-full rounded-xl border border-slate-200 pl-8 pr-4 py-3.5 text-slate-900 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-lg font-medium"
               placeholder="0.00"
               value={formData.price}
               onChange={e => setFormData({ ...formData, price: e.target.value })}
@@ -346,7 +346,7 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
             <span className="absolute left-4 top-3.5 text-slate-500 font-bold">K</span>
             <input
               type="number"
-              className="block w-full rounded-xl border border-slate-200 pl-8 pr-4 py-3.5 text-slate-900 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+              className="block w-full rounded-xl border border-slate-200 pl-8 pr-4 py-3.5 text-slate-900 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
               placeholder="e.g. 250"
               value={formData.original_price}
               onChange={e => setFormData({ ...formData, original_price: e.target.value })}
@@ -360,7 +360,7 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
            <div className="relative">
              <Beer className="absolute left-3 top-3.5 text-slate-400 w-5 h-5" />
              <input
-                className="block w-full rounded-xl border border-slate-200 pl-10 pr-4 py-3.5 text-slate-900 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+                className="block w-full rounded-xl border border-slate-200 pl-10 pr-4 py-3.5 text-slate-900 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                 placeholder="e.g. 330ml, 750ml, Double Shot"
                 value={formData.weight}
                 onChange={e => setFormData({ ...formData, weight: e.target.value })}
@@ -371,7 +371,7 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
         <div className="col-span-2 md:col-span-1">
            <label className="block text-sm font-bold text-slate-700 mb-2">Promotional Badge</label>
            <input
-              className="block w-full rounded-xl border border-slate-200 px-4 py-3.5 text-slate-900 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+              className="block w-full rounded-xl border border-slate-200 px-4 py-3.5 text-slate-900 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
               placeholder="e.g. Happy Hour, New, Bestseller"
               value={formData.discount_badge}
               onChange={e => setFormData({ ...formData, discount_badge: e.target.value })}
@@ -382,7 +382,7 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
            <label className="block text-sm font-bold text-slate-700 mb-2">Mixers / Ingredients</label>
            <textarea
               rows={2}
-              className="block w-full rounded-xl border border-slate-200 px-4 py-3 text-slate-900 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+              className="block w-full rounded-xl border border-slate-200 px-4 py-3 text-slate-900 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
               placeholder="List key ingredients (e.g. Rum, Mint, Lime, Soda Water)..."
               value={formData.ingredients}
               onChange={e => setFormData({ ...formData, ingredients: e.target.value })}
@@ -398,7 +398,7 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
       <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
         <label className="block text-base font-bold text-slate-900 mb-4">Main Drink Image</label>
         <div className="flex flex-col items-center justify-center">
-            <div className="w-full max-w-xs aspect-square bg-white rounded-xl shadow-sm border-2 border-dashed border-slate-300 overflow-hidden relative group hover:border-pink-400 transition-colors">
+            <div className="w-full max-w-xs aspect-square bg-white rounded-xl shadow-sm border-2 border-dashed border-slate-300 overflow-hidden relative group hover:border-primary/50 transition-colors">
                 <ImageUpload
                     value={formData.image_url}
                     onChange={(url) => setFormData({ ...formData, image_url: url })}
@@ -437,7 +437,7 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
                     <button 
                         type="button"
                         onClick={() => setSelectedPropertyIds(properties.map(p => p.id))}
-                        className="text-xs font-bold text-pink-600 hover:underline px-3 py-1.5 bg-pink-50 rounded-lg"
+                        className="text-xs font-bold text-primary hover:underline px-3 py-1.5 bg-primary/5 rounded-lg"
                     >
                         Select All
                     </button>
@@ -467,18 +467,18 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
                             onClick={() => toggleProperty(prop.id)}
                             className={`relative flex items-center p-4 rounded-xl border-2 transition-all duration-200 group text-left ${
                                 isSelected
-                                ? 'border-pink-500 bg-pink-50/30 shadow-sm'
+                                ? 'border-primary bg-primary/5 shadow-sm'
                                 : 'border-slate-100 bg-white hover:border-slate-300'
                             }`}
                         >
                             <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center mr-4 transition-colors ${
                                 isSelected 
-                                ? 'bg-pink-500 border-pink-500' 
+                                ? 'bg-primary border-primary' 
                                 : 'bg-white border-slate-300 group-hover:border-slate-400'
                             }`}>
                                 {isSelected && <Check size={14} className="text-white stroke-[3]" />}
                             </div>
-                            <span className={`font-bold text-base ${isSelected ? 'text-pink-900' : 'text-slate-700'}`}>
+                            <span className={`font-bold text-base ${isSelected ? 'text-primary' : 'text-slate-700'}`}>
                                 {prop.name}
                             </span>
                         </button>
@@ -557,7 +557,7 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
                 checked={formData.is_available}
                 onChange={e => setFormData({ ...formData, is_available: e.target.checked })}
             />
-            <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-pink-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-green-500"></div>
+            <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-green-500"></div>
          </label>
       </div>
     </div>
@@ -570,7 +570,7 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
         <div className="flex items-center justify-between relative">
             <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-100 -z-10 rounded-full"></div>
             <div 
-                className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-pink-500 -z-10 rounded-full transition-all duration-500"
+                className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-primary -z-10 rounded-full transition-all duration-500"
                 style={{ width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%` }}
             ></div>
             
@@ -584,16 +584,16 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
                         <div 
                             className={`w-12 h-12 rounded-full flex items-center justify-center border-4 transition-all duration-300 bg-white ${
                                 isActive 
-                                    ? 'border-pink-500 text-pink-500 shadow-lg shadow-pink-100 scale-110' 
+                                    ? 'border-primary text-primary shadow-lg shadow-primary/10 scale-110' 
                                     : isCompleted
-                                        ? 'border-pink-500 bg-pink-500 text-white'
+                                        ? 'border-primary bg-primary text-white'
                                         : 'border-slate-200 text-slate-300'
                             }`}
                         >
                             {isCompleted ? <Check size={20} strokeWidth={3} /> : <Icon size={20} />}
                         </div>
                         <div className={`mt-3 text-center transition-colors duration-300 ${isActive ? 'opacity-100' : 'opacity-60'}`}>
-                            <p className={`text-xs font-bold uppercase tracking-wider ${isActive ? 'text-pink-600' : 'text-slate-500'}`}>
+                            <p className={`text-xs font-bold uppercase tracking-wider ${isActive ? 'text-primary' : 'text-slate-500'}`}>
                                 Step {step.id}
                             </p>
                             <p className={`text-sm font-bold ${isActive ? 'text-slate-900' : 'text-slate-400'}`}>
@@ -647,7 +647,7 @@ export default function MenuWizard({ initialData }: MenuWizardProps) {
                 <button
                     onClick={handleSubmit}
                     disabled={loading}
-                    className="flex items-center px-8 py-3 bg-pink-600 text-white rounded-xl font-bold hover:bg-pink-500 transition-all shadow-lg shadow-pink-200 hover:shadow-xl hover:translate-y-[-1px] disabled:opacity-70 disabled:cursor-not-allowed"
+                    className="flex items-center px-8 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 hover:shadow-xl hover:translate-y-[-1px] disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                     {loading ? (
                         <>

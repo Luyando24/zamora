@@ -16,9 +16,26 @@ export async function GET(req: NextRequest) {
 
         const supabase = getSupabaseAdmin();
 
+        // 1. Fetch Defined Payment Methods for this property
+        const { data: definedMethods, error: methodsError } = await supabase
+            .from('payment_methods')
+            .select('name')
+            .eq('property_id', propertyId);
+
+        if (methodsError) console.error('Error fetching defined methods:', methodsError);
+
         // Prepare date filters
-        const start = startDate ? new Date(startDate).toISOString() : new Date(new Date().setDate(new Date().getDate() - 30)).toISOString(); // Default 30 days
-        const end = endDate ? new Date(endDate).toISOString() : new Date().toISOString();
+        const start = startDate ? new Date(startDate).toISOString() : new Date(new Date().setDate(new Date().getDate() - 90)).toISOString(); // Default 90 days for better usage pattern
+        
+        // If endDate is provided, make sure it includes the whole day
+        let end;
+        if (endDate) {
+            const date = new Date(endDate);
+            date.setHours(23, 59, 59, 999);
+            end = date.toISOString();
+        } else {
+            end = new Date().toISOString();
+        }
 
         // Fetch Food Orders
         const { data: foodOrders, error: foodError } = await supabase
@@ -44,25 +61,43 @@ export async function GET(req: NextRequest) {
 
         // Aggregate Data
         const stats: Record<string, { count: number; total: number }> = {};
+        
+        // Use a normalization map to handle case-insensitive matching
+        const normalize = (s: string) => s.toLowerCase().replace(/_/g, ' ').trim();
+        const normalizationMap: Record<string, string> = {};
+
+        // Initialize with defined methods (ensure they appear even with 0 orders)
+        definedMethods?.forEach(m => {
+            const normalized = normalize(m.name);
+            if (!stats[m.name]) {
+                stats[m.name] = { count: 0, total: 0 };
+            }
+            normalizationMap[normalized] = m.name;
+        });
 
         const processOrder = (order: any) => {
-            const method = order.payment_method || 'Unknown';
-            if (!stats[method]) {
-                stats[method] = { count: 0, total: 0 };
+            const rawMethod = order.payment_method || 'Unknown';
+            const normalized = normalize(rawMethod);
+            
+            // Check if this method maps to a defined method
+            const mappedMethod = normalizationMap[normalized] || rawMethod;
+
+            if (!stats[mappedMethod]) {
+                stats[mappedMethod] = { count: 0, total: 0 };
             }
-            stats[method].count += 1;
-            stats[method].total += (order.total_amount || 0);
+            stats[mappedMethod].count += 1;
+            stats[mappedMethod].total += (order.total_amount || 0);
         };
 
         foodOrders?.forEach(processOrder);
         barOrders?.forEach(processOrder);
 
-        // Format for response
+        // Format for response - sort by count (usage frequency) descending
         const breakdown = Object.entries(stats).map(([method, data]) => ({
             method,
             count: data.count,
             total_revenue: parseFloat(data.total.toFixed(2))
-        })).sort((a, b) => b.total_revenue - a.total_revenue);
+        })).sort((a, b) => b.count - a.count || b.total_revenue - a.total_revenue);
 
         return NextResponse.json({
             period: { start, end },

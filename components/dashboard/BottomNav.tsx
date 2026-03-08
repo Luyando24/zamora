@@ -54,15 +54,15 @@ export default function BottomNav() {
                     <Link
                         key={item.name}
                         href={item.href}
-                        className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${isActive ? 'text-blue-900' : 'text-slate-400 hover:text-blue-600'
+                        className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${isActive ? 'text-primary' : 'text-slate-400 hover:text-primary'
                             }`}
                     >
                         <item.icon
                             size={20}
                             strokeWidth={isActive ? 2.5 : 2}
-                            className={`transition-colors ${isActive ? 'text-blue-900' : 'text-slate-400'}`}
+                            className={`transition-colors ${isActive ? 'text-primary' : 'text-slate-400'}`}
                         />
-                        <span className={`text-[10px] font-medium ${isActive ? 'text-blue-900' : 'text-slate-400'}`}>
+                        <span className={`text-[10px] font-medium ${isActive ? 'text-primary' : 'text-slate-400'}`}>
                             {item.name}
                         </span>
                     </Link>

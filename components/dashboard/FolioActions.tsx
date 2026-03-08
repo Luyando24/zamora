@@ -58,35 +58,35 @@ export default function FolioActions({ folioId, status, onChargeAdded, onFiscali
   };
 
   if (status === 'paid') {
-    return <div className="p-4 bg-green-100 text-green-800 rounded-lg text-center font-bold">Invoice Closed & Fiscalized</div>;
+    return <div className="p-4 bg-primary/10 text-primary rounded-lg text-center font-bold border border-primary/20">Invoice Closed & Fiscalized</div>;
   }
 
   return (
     <div className="space-y-6">
       {/* Add Charge Form */}
-      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-        <h3 className="font-medium text-gray-900 mb-3">Add Charge</h3>
+      <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+        <h3 className="font-medium text-slate-900 mb-3">Add Charge</h3>
         <form onSubmit={handleAddCharge} className="flex gap-2">
           <input 
             type="text" 
             placeholder="Description (e.g. Coca Cola)" 
-            className="flex-1 rounded-md border-gray-300 shadow-sm px-3 py-2 border"
+            className="flex-1 rounded-md border-slate-200 shadow-sm px-3 py-2 border focus:ring-1 focus:ring-primary focus:border-primary outline-none"
             value={desc}
             onChange={e => setDesc(e.target.value)}
           />
           <input 
             type="number" 
             placeholder="Amount" 
-            className="w-24 rounded-md border-gray-300 shadow-sm px-3 py-2 border"
+            className="w-24 rounded-md border-slate-200 shadow-sm px-3 py-2 border focus:ring-1 focus:ring-primary focus:border-primary outline-none"
             value={amount}
             onChange={e => setAmount(e.target.value)}
           />
           <button 
             type="submit" 
             disabled={isCharging}
-            className="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-700 disabled:opacity-50"
+            className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 disabled:opacity-50 font-medium transition-colors"
           >
-            {isCharging ? '...' : 'Add'}
+            {isCharging ? <Loader2 className="animate-spin w-4 h-4" /> : 'Add'}
           </button>
         </form>
       </div>
@@ -95,7 +95,7 @@ export default function FolioActions({ folioId, status, onChargeAdded, onFiscali
       <button
         onClick={handleFiscalize}
         disabled={isFiscalizing}
-        className="w-full py-4 bg-zambia-green text-white text-lg font-bold rounded-lg shadow-lg hover:bg-zambia-green/90 flex justify-center items-center gap-2"
+        className="w-full py-4 bg-primary text-white text-lg font-bold rounded-lg shadow-md shadow-primary/10 hover:bg-primary/90 flex justify-center items-center gap-2 transition-all active:scale-[0.98]"
       >
         {isFiscalizing && <Loader2 className="animate-spin" />}
         {isFiscalizing ? 'Fiscalizing with ZRA...' : 'Finalize & Fiscalize Invoice'}
