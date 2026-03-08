@@ -37,19 +37,21 @@ export const metadata: Metadata = {
     description: 'Discover and book top-rated hotels, lodges, safari camps, and guest houses in Zambia.',
   },
   manifest: '/manifest.json',
+};
+
+export const viewport = {
   themeColor: '#198a00',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-  },
-  appleWebApp: {
-    capable: true,
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+};
+appleWebApp: {
+  capable: true,
     statusBarStyle: 'default',
-    title: 'Zamora',
+      title: 'Zamora',
   },
-  verification: {
-    google: 'fRS8wtMg8Flx-XpTmv7ovgt6HSihTn7UD5MQXR11byU',
+verification: {
+  google: 'fRS8wtMg8Flx-XpTmv7ovgt6HSihTn7UD5MQXR11byU',
   },
 };
 
